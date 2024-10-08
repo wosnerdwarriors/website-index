@@ -1,0 +1,82 @@
+/* Full-width layout */
+.container-fluid {
+    width: 100%;
+    padding: 0 30px;
+}
+
+/* Add styling for fixed-size scrollable lists */
+.select-list {
+    max-height: 150px; /* Equivalent to size=5 in height */
+    overflow-y: scroll;
+    border: 1px solid #ced4da;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+/* Table styling with fixed first column and scrollable date columns */
+.table-container {
+    overflow-x: auto;
+    position: relative;
+}
+
+.table {
+    min-width: 100%;
+    white-space: nowrap;
+}
+
+.table tbody tr th {
+    position: sticky;
+    left: 0;
+    background: #f8f9fa;
+    z-index: 1;
+}
+
+/* Highlighting for Yes/No */
+.highlight-yes {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.highlight-no {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Graph container */
+.chart-container {
+    margin-top: 20px;
+}
+
+/* Pagination controls */
+.pagination-controls {
+    margin-top: 20px;
+    text-align: center;
+}
+
+/* Scrollbar for dates */
+.scrollable-table {
+    overflow-x: scroll;
+    max-height: 600px;
+}
+
+.scrollable-table::-webkit-scrollbar {
+    height: 8px;
+}
+
+.scrollable-table::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.scrollable-table::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+.scrollable-table::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Hide rows/columns when toggling visibility */
+.hidden {
+    display: none;
+}
