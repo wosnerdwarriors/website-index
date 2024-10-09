@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function () {
     matchFilter.addEventListener('change', renderTable);
 
     // Fetch the JSON data and initialize
-    fetch('data/svs-history.json')
+    fetch('https://data.wosnerds.com/data/svs-history.json')
         .then(response => response.json())
         .then(data => {
             if (debug) console.log('JSON data loaded:', data);
