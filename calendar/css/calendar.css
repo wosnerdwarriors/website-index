@@ -1,0 +1,44 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    height: 100vh;
+}
+
+h1 {
+    text-align: center;
+    padding: 20px;
+}
+
+#layout {
+    display: flex;
+    justify-content: space-between;
+    height: calc(100vh - 80px);  /* Use full height, subtracting header space */
+}
+
+#filters {
+    width: 200px;
+    background-color: #fff;
+    padding: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+}
+
+#calendar {
+    flex: 1;
+    margin: 0 20px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+#event-details {
+    width: 300px;
+    background-color: #fff;
+    padding: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    height: 100%;
+}

@@ -1,0 +1,82 @@
+{
+	"events": {
+		"crazy-joe-day-1": {
+			"category": "crazy-joe",
+			"event-name": "Crazy Joe",
+			"repeat-every-days": 14,
+			"same-time-in-every-state": true,
+			"event-length-hours": 24, 
+			"global-start-time-anchor": "2024-10-08T00:00:00Z",
+			"available-after-age": "unknown"
+		},
+		"crazy-joe-day-2": {
+			"category": "crazy-joe",
+			"event-name": "Crazy Joe",
+			"repeat-every-days": 14,
+			"same-time-in-every-state": true,
+			"event-length-hours": 24,
+			"global-start-time-anchor": "2024-10-10T00:00:00Z",
+			"available-after-age": "unknown"
+		},
+		"svs-castle": {
+			"category": "svs",
+			"event-name": "SVS Castle Battle",
+			"repeat-every-days": 28,
+			"same-time-in-every-state": true,
+			"event-length-hours": 6,
+			"global-start-time-anchor": "2024-10-12T12:00:00Z",
+			"available-after-age": "unknown"
+		},
+		"hero-rally": {
+			"category": "Hero Rally",
+			"event-name": "Hero Rally",
+			"repeat-every-days": 14,
+			"same-time-in-every-state": true,
+			"event-length-hours": 336, 
+			"global-start-time-anchor": "2024-10-14T00:00:00Z",
+			"available-after-age": "unknown"
+		},
+		"lucky-wheel": {
+			"category": "lucky-wheel",
+			"event-name": "Lucky Wheel",
+			"repeat-every-days": 14,
+			"same-time-in-every-state": true,
+			"event-length-hours": 72, 
+			"global-start-time-anchor": "2024-10-08T00:00:00Z",
+			"available-after-age": "unknown"
+		}
+	},
+
+	"events-template": {
+		"template": {
+			"category": "template-category",
+			"event-name": "Event Name Template",
+			"repeat-every-days": 28,
+			"same-time-in-every-state": true,
+			"event-length-hours": 24, 
+			"global-start-time-anchor": "2024-10-12T12:00:00Z",
+			"available-after-age": "unknown"
+		}
+	},
+
+	"packs": {
+		"fire-crystal-value-pack": {
+			"category": "fire-crystal-value-pack",
+			"pack-name": "Fire Crystal Value Pack",
+			"repeat-every-days": 14,
+			"same-time-in-every-state": true,
+			"event-length-hours": 144, 
+			"global-start-time-anchor": "2024-10-07T00:00:00Z",
+			"available-after-age": "unknown"
+		},
+		"artisans-trove-charms": {
+			"category": "artisans-trove-charms",
+			"pack-name": "Artisan's Trove Charms",
+			"repeat-every-days": 14,
+			"same-time-in-every-state": true,
+			"event-length-hours": 48, 
+			"global-start-time-anchor": "2024-10-09T00:00:00Z",
+			"available-after-age": "unknown"
+		}
+	}
+}
