@@ -179,7 +179,7 @@ function populateTable(tableId, troopData) {
 }
 
 // Load the data and initialize the page
-$.getJSON("/data/troop-stats.json", function(data) {
+$.getJSON("https://data.wosnerds.com/data/troop-stats.json", function(data) {
     debugLog("Loaded JSON data:");
     debugLog(data);
 
