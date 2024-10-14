@@ -2,7 +2,7 @@
 	"events": {
 		"crazy-joe-day-1": {
 			"category": "crazy-joe",
-			"event-name": "Crazy Joe",
+			"entry-name": "Crazy Joe",
 			"repeat-every-days": 14,
 			"same-time-in-every-state": true,
 			"event-length-hours": 24, 
@@ -11,7 +11,7 @@
 		},
 		"crazy-joe-day-2": {
 			"category": "crazy-joe",
-			"event-name": "Crazy Joe",
+			"entry-name": "Crazy Joe",
 			"repeat-every-days": 14,
 			"same-time-in-every-state": true,
 			"event-length-hours": 24,
@@ -19,8 +19,8 @@
 			"available-after-age": "unknown"
 		},
 		"svs-castle": {
-			"category": "svs",
-			"event-name": "SVS Castle Battle",
+			"category": "svs-castle-battle",
+			"entry-name": "SVS Castle Battle",
 			"repeat-every-days": 28,
 			"same-time-in-every-state": true,
 			"event-length-hours": 6,
@@ -29,7 +29,7 @@
 		},
 		"hero-rally": {
 			"category": "Hero Rally",
-			"event-name": "Hero Rally",
+			"entry-name": "Hero Rally",
 			"repeat-every-days": 14,
 			"same-time-in-every-state": true,
 			"event-length-hours": 336, 
@@ -38,7 +38,7 @@
 		},
 		"lucky-wheel": {
 			"category": "lucky-wheel",
-			"event-name": "Lucky Wheel",
+			"entry-name": "Lucky Wheel",
 			"repeat-every-days": 14,
 			"same-time-in-every-state": true,
 			"event-length-hours": 72, 
@@ -50,7 +50,7 @@
 	"events-template": {
 		"template": {
 			"category": "template-category",
-			"event-name": "Event Name Template",
+			"entry-name": "Event Name Template",
 			"repeat-every-days": 28,
 			"same-time-in-every-state": true,
 			"event-length-hours": 24, 
@@ -62,7 +62,7 @@
 	"packs": {
 		"fire-crystal-value-pack": {
 			"category": "fire-crystal-value-pack",
-			"pack-name": "Fire Crystal Value Pack",
+			"entry-name": "Fire Crystal Value Pack",
 			"repeat-every-days": 14,
 			"same-time-in-every-state": true,
 			"event-length-hours": 144, 
@@ -71,7 +71,7 @@
 		},
 		"artisans-trove-charms": {
 			"category": "artisans-trove-charms",
-			"pack-name": "Artisan's Trove Charms",
+			"entry-name": "Artisan's Trove Charms",
 			"repeat-every-days": 14,
 			"same-time-in-every-state": true,
 			"event-length-hours": 48, 

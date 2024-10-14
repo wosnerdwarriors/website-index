@@ -3,7 +3,8 @@ body {
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
-    height: 100vh;
+    height: 100vh;  /* Ensure body takes full viewport height */
+    overflow: hidden;  /* Prevent scrolling */
 }
 
 h1 {
@@ -13,32 +14,39 @@ h1 {
 
 #layout {
     display: flex;
-    justify-content: space-between;
-    height: calc(100vh - 80px);  /* Use full height, subtracting header space */
+    height: calc(100vh - 80px);  /* Full height minus space for the header */
 }
 
 #filters {
-    width: 200px;
+    width: 250px;  /* Fixed width for sidebar */
     background-color: #fff;
+    border-right: 1px solid #ddd;
     padding: 10px;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
+    overflow: auto;
+}
+
+#event-filter-list, #pack-filter-list {
+    max-height: 200px;
+    overflow-y: auto;  /* Scrollable box for events and packs */
+    border: 1px solid #ddd;
+    padding: 5px;
 }
 
 #calendar {
-    flex: 1;
-    margin: 0 20px;
-    height: 100%;
-    overflow-y: auto;
+    flex-grow: 1;
+    overflow: auto;  /* Allow internal scrolling */
 }
 
 #event-details {
-    width: 300px;
+    width: 250px;
     background-color: #fff;
+    border-left: 1px solid #ddd;
     padding: 10px;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    height: 100%;
+    overflow-y: auto;  /* Scrollable details section */
+}
+
+.btn-group {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
 }
