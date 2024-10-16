@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formation builder WOS</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-group label {
+            margin-right: 10px;
+        }
+        .results-container {
+            margin-top: 20px;
+        }
+        .percentage-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .percentage-container div {
+            margin-right: 20px;
+        }
+        .row {
+            margin-bottom: 10px;
+        }
+        .message-bar {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            height: 40px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .character-management {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Wos Formation builder</h1>
+
+        <div class="message-bar" id="message-bar"></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Character Management Section -->
+                <div class="character-management">
+                    <div class="form-group">
+                        <select class="form-control" id="characters" style="width: auto; display: inline-block; min-width: 90%;" size="5"></select>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-primary" id="load-btn">Load</button>
+                        <button type="button" class="btn btn-secondary" id="save-btn">Save</button>
+                        <button type="button" class="btn btn-success" id="new-character-btn">New Character</button>
+                        <button type="button" class="btn btn-danger" id="delete-btn">Delete</button>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" class="btn btn-danger" id="delete-all-btn">Delete All Characters</button>
+                        <button type="button" class="btn btn-warning" id="clear-screen-btn">Clear Screen</button>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="file" id="file-upload" class="form-control-file" accept=".json">
+                        <button type="button" class="btn btn-info" id="upload-btn">Upload Data</button>
+                        <button type="button" class="btn btn-info" id="download-btn">Download Data</button>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" id="character-name-input" class="form-control" placeholder="Enter character name" style="display: none;">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" id="generate-btn">Generate Formations</button>
+
+                <!-- Form Section -->
+                <div class="form-group">
+                    <label for="num_marches">Number of Marches:</label>
+                    <input type="number" id="num_marches" class="form-control" value="7" min="1" max="10">
+                    <label for="max_march_size">Max March Size:</label>
+                    <input type="number" id="max_march_size" class="form-control" value="172000" min="1">
+                </div>
+
+                <div class="percentage-container">
+                    <div>
+                        <label>Infantry Min (%):</label>
+                        <input type="number" id="infantry_min" class="form-control" value="10" min="0" max="100">
+                        <label>Infantry Max (%):</label>
+                        <input type="number" id="infantry_max" class="form-control" value="100" min="0" max="100">
+                    </div>
+                    <div>
+                        <label>Lancer Min (%):</label>
+                        <input type="number" id="lancer_min" class="form-control" value="0" min="0" max="100">
+                        <label>Lancer Max (%):</label>
+                        <input type="number" id="lancer_max" class="form-control" value="30" min="0" max="100">
+                    </div>
+                    <div>
+                        <label>Marksman Min (%):</label>
+                        <input type="number" id="marksman_min" class="form-control" value="0" min="0" max="100">
+                        <label>Marksman Max (%):</label>
+                        <input type="number" id="marksman_max" class="form-control" value="60" min="0" max="100">
+                    </div>
+                </div>
+
+                <form>
+                    <div class="row">
+                        <div class="col">
+                            <h3>Infantry</h3>
+                            <!-- Troop entry fields for Infantry -->
+                            <div class="form-group">
+                                <label for="infantry_t11">T11 Infantry:</label>
+                                <input type="number" class="form-control" id="infantry_t11" name="infantry_t11">
+                            </div>
+                            <!-- Repeat similar blocks for T10 to T1 Infantry -->
+                        </div>
+                        <div class="col">
+                            <h3>Lancer</h3>
+                            <!-- Troop entry fields for Lancer -->
+                            <div class="form-group">
+                                <label for="lancer_t11">T11 Lancer:</label>
+                                <input type="number" class="form-control" id="lancer_t11" name="lancer_t11">
+                            </div>
+                            <!-- Repeat similar blocks for T10 to T1 Lancer -->
+                        </div>
+                        <div class="col">
+                            <h3>Marksman</h3>
+                            <!-- Troop entry fields for Marksman -->
+                            <div class="form-group">
+                                <label for="marksman_t11">T11 Marksman:</label>
+                                <input type="number" class="form-control" id="marksman_t11" name="marksman_t11">
+                            </div>
+                            <!-- Repeat similar blocks for T10 to T1 Marksman -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6">
+
+                <div id="results" class="results-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/formationbuilder/js/formationbuilder.js"></script>
+</body>
+</html>
+
