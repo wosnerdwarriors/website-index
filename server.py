@@ -8,7 +8,7 @@ from flask import Flask, send_from_directory, abort
 app = Flask(__name__)
 
 # Whitelisted extensions
-WHITELISTED_EXTENSIONS = {'html', 'json', 'js', 'png', 'css', 'md'}
+WHITELISTED_EXTENSIONS = {'html', 'json', 'js', 'png', 'css', 'md','ico'}
 
 # Root directory for serving files (subdirectories)
 ROOT_DIR = os.getcwd()
