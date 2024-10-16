@@ -1,0 +1,56 @@
+.sidebar {
+	background-color: #e8e8e8;
+	width: 250px;
+	height: 100vh;
+	position: fixed;
+	top: 0;
+	left: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-top: 0;
+	box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+	border-top-right-radius: 10px;
+	border-bottom-right-radius: 10px;
+	overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+	width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+	background-color: #505055;
+	border-radius: 10px;
+}
+
+.navbar-logo {
+	width: 80%;
+	height: auto;
+	border-bottom: 1px solid #444;
+	padding: 20px;
+	box-sizing: border-box;
+	display: block;
+	margin: 0 auto;
+}
+
+.nav-link {
+	color: #333 !important;
+	margin: 8px 0;
+	padding: 8px 15px;
+	border-radius: 5px;
+	background-color: #f0f0f0;
+	width: 90%;
+	text-align: center;
+}
+
+.nav-link:hover {
+	background-color: #d0d0d0;
+}
+
+.nav-item {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
