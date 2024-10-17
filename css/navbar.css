@@ -54,3 +54,27 @@
 	justify-content: center;
 }
 
+/* Responsive styling for smaller screens (phones) */
+@media (max-width: 768px) {
+	.sidebar {
+		width: 60%; /* Reduce sidebar width on mobile */
+		height: auto;
+		position: relative;
+		border-radius: 0;
+		flex-direction: row;
+		justify-content: space-around;
+	}
+
+	.nav-item {
+		display: inline-block;
+		margin: 0 5px; /* Adjust spacing for nav items */
+	}
+
+	.navbar-logo {
+		width: 100px; /* Increase logo size for mobile */
+		height: auto;
+		display: inline-block;
+		margin: 10px;
+	}
+}
+
