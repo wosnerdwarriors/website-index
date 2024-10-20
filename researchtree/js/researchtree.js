@@ -47,11 +47,6 @@ function renderResearchTree(treeData, treeType) {
 	// Clear existing table content
 	table.innerHTML = '';
 
-	// Track current row
-	let currentRowNumber = 1;
-	let rowElement = document.createElement('tr');
-	table.appendChild(rowElement);
-
 	// Sort research items by row
 	const rows = {};
 	Object.keys(treeData).forEach((key) => {
@@ -65,32 +60,58 @@ function renderResearchTree(treeData, treeType) {
 	// Iterate through rows to render them
 	Object.keys(rows).forEach(rowKey => {
 		const items = rows[rowKey];
-
-		// Ensure each row has 3 columns
 		const rowElement = document.createElement('tr');
 		const emptyCell = '<td></td>'; // Placeholder for empty cells
 
-		items.forEach(item => {
-			const currentLevel = userResearchState[treeType][item.key];
-
-			// Debugging: Log the key, the research item name, and its corresponding level
-			if (debugMode) {
-				console.log(`Rendering item "${item.key}" from ${treeType} with current level: ${currentLevel}`);
-				console.log('Reference in userResearchState:', userResearchState[treeType]);
-			}
-
-			const cell = document.createElement('td');
-			cell.innerHTML = `
-				<div class="research-square"></div>
-				<div>${item.name}</div>
-				<div>Level: <span id="level-${treeType}-${item.key}">${currentLevel}</span>/${Object.keys(item.levels).length}</div>
-				<div>
-					<button id="decrease-${treeType}-${item.key}" class="btn btn-primary">-</button>
-					<button id="increase-${treeType}-${item.key}" class="btn btn-primary">+</button>
-				</div>
-			`;
-			rowElement.appendChild(cell);
-		});
+		// Ensure the row has exactly 3 columns
+		if (items.length === 1) {
+			rowElement.innerHTML = `${emptyCell}
+				<td>
+					<div class="research-square"></div>
+					<div>${items[0].name}</div>
+					<div>Level: <span id="level-${treeType}-${items[0].key}">${userResearchState[treeType][items[0].key]}</span>/${Object.keys(items[0].levels).length}</div>
+					<div>
+						<button id="decrease-${treeType}-${items[0].key}" class="btn btn-primary">-</button>
+						<button id="increase-${treeType}-${items[0].key}" class="btn btn-primary">+</button>
+					</div>
+				</td>
+				${emptyCell}`;
+		} else if (items.length === 2) {
+			rowElement.innerHTML = `
+				<td>
+					<div class="research-square"></div>
+					<div>${items[0].name}</div>
+					<div>Level: <span id="level-${treeType}-${items[0].key}">${userResearchState[treeType][items[0].key]}</span>/${Object.keys(items[0].levels).length}</div>
+					<div>
+						<button id="decrease-${treeType}-${items[0].key}" class="btn btn-primary">-</button>
+						<button id="increase-${treeType}-${items[0].key}" class="btn btn-primary">+</button>
+					</div>
+				</td>
+				${emptyCell}
+				<td>
+					<div class="research-square"></div>
+					<div>${items[1].name}</div>
+					<div>Level: <span id="level-${treeType}-${items[1].key}">${userResearchState[treeType][items[1].key]}</span>/${Object.keys(items[1].levels).length}</div>
+					<div>
+						<button id="decrease-${treeType}-${items[1].key}" class="btn btn-primary">-</button>
+						<button id="increase-${treeType}-${items[1].key}" class="btn btn-primary">+</button>
+					</div>
+				</td>`;
+		} else {
+			items.forEach(item => {
+				const cell = document.createElement('td');
+				cell.innerHTML = `
+					<div class="research-square"></div>
+					<div>${item.name}</div>
+					<div>Level: <span id="level-${treeType}-${item.key}">${userResearchState[treeType][item.key]}</span>/${Object.keys(item.levels).length}</div>
+					<div>
+						<button id="decrease-${treeType}-${item.key}" class="btn btn-primary">-</button>
+						<button id="increase-${treeType}-${item.key}" class="btn btn-primary">+</button>
+					</div>
+				`;
+				rowElement.appendChild(cell);
+			});
+		}
 
 		table.appendChild(rowElement);
 
@@ -100,48 +121,38 @@ function renderResearchTree(treeData, treeType) {
 			const maxLevel = Object.keys(item.levels).length;
 
 			// Add event listener to increase button
-			const increaseButton = document.getElementById(`increase-${treeType}-${item.key}`);
-			if (increaseButton) {
-				increaseButton.addEventListener('click', () => {
-					if (currentLevel < maxLevel) {
-						userResearchState[treeType][item.key]++;
-						document.getElementById(`level-${treeType}-${item.key}`).textContent = userResearchState[treeType][item.key];
-						if (debugMode) {
-							console.log(`Increased level for ${item.key} to ${userResearchState[treeType][item.key]}`);
-						}
+			document.getElementById(`increase-${treeType}-${item.key}`).addEventListener('click', () => {
+				if (currentLevel < maxLevel) {
+					userResearchState[treeType][item.key]++;
+					document.getElementById(`level-${treeType}-${item.key}`).textContent = userResearchState[treeType][item.key];
+					if (debugMode) {
+						console.log(`Increased level for ${item.key} to ${userResearchState[treeType][item.key]}`);
 					}
-				});
-			} else {
-				console.error(`Increase button for ${item.key} not found`);
-			}
+				}
+			});
 
 			// Add event listener to decrease button
-			const decreaseButton = document.getElementById(`decrease-${treeType}-${item.key}`);
-			if (decreaseButton) {
-				decreaseButton.addEventListener('click', () => {
-					if (currentLevel > 0) {
-						userResearchState[treeType][item.key]--;
-						document.getElementById(`level-${treeType}-${item.key}`).textContent = userResearchState[treeType][item.key];
-						if (debugMode) {
-							console.log(`Decreased level for ${item.key} to ${userResearchState[treeType][item.key]}`);
-						}
+			document.getElementById(`decrease-${treeType}-${item.key}`).addEventListener('click', () => {
+				if (currentLevel > 0) {
+					userResearchState[treeType][item.key]--;
+					document.getElementById(`level-${treeType}-${item.key}`).textContent = userResearchState[treeType][item.key];
+					if (debugMode) {
+						console.log(`Decreased level for ${item.key} to ${userResearchState[treeType][item.key]}`);
 					}
-				});
-			} else {
-				console.error(`Decrease button for ${item.key} not found`);
-			}
+				}
+			});
 		});
 	});
 
-	// If in debug mode, show the table borders
+	// Toggle between bordered and borderless tables based on debug mode
 	if (debugMode) {
 		table.classList.add('table-bordered');
+		table.classList.remove('table-borderless');
 	} else {
+		table.classList.add('table-borderless');
 		table.classList.remove('table-bordered');
 	}
 }
-
-
 
 // Function to load research data from data.json (only done once on page load)
 function loadResearchData() {
@@ -202,6 +213,49 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			// Clear existing table content
 			document.getElementById('researchTable').innerHTML = '';
+
+			// Load the appropriate research tree based on the selected tab
+			if (selectedTabId === 'growth-tab') {
+				renderResearchTree(researchData.Growth, 'Growth');
+			} else if (selectedTabId === 'economy-tab') {
+				renderResearchTree(researchData.Economy, 'Economy');
+			} else if (selectedTabId === 'battle-tab') {
+				renderResearchTree(researchData.Battle, 'Battle');
+			}
+
+			// Debugging: Log the tab switching
+			if (debugMode) {
+				console.log(`Switched to ${selectedTabId}`);
+			}
+		});
+	});
+});
+
+// Handle tab switching and load the appropriate research tree
+document.addEventListener('DOMContentLoaded', function () {
+	if (isDebugMode()) {
+		console.log('DOMContentLoaded event triggered');
+	}
+
+	// Initial load of data.json
+	loadResearchData();
+
+	// Event listeners for tab switching
+	const researchTabs = document.querySelectorAll('.btn');
+	const researchTable = document.getElementById('researchTable');
+
+	researchTabs.forEach(tab => {
+		tab.addEventListener('click', function (event) {
+			// Remove active class from all tabs
+			researchTabs.forEach(btn => btn.classList.remove('active', 'btn-primary'));
+			// Set the clicked tab as active
+			this.classList.add('active', 'btn-primary');
+
+			// Get the ID of the selected tab
+			const selectedTabId = event.target.getAttribute('id');
+
+			// Clear existing table content
+			researchTable.innerHTML = '';
 
 			// Load the appropriate research tree based on the selected tab
 			if (selectedTabId === 'growth-tab') {

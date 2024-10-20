@@ -15,26 +15,21 @@
 
 		<!-- Main Content and Research Tree -->
 		<div class="d-flex flex-column main-content-container">
+			<h1 class="text-center">Whiteout Survival Research Simulator</h1>
 			<div class="container-fluid">
-				<h3>Whiteout Survival Research Simulator</h3>
 
 				<!-- Tab navigation -->
-				<ul class="nav nav-tabs" id="researchTabs">
-					<li class="nav-item">
-						<a class="nav-link active" id="growth-tab" data-bs-toggle="tab" href="#growth" role="tab">Growth</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" id="economy-tab" data-bs-toggle="tab" href="#economy" role="tab">Economy</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" id="battle-tab" data-bs-toggle="tab" href="#battle" role="tab">Battle</a>
-					</li>
-				</ul>
+				<div class="d-flex justify-content-center mb-3">
+				    <button id="growth-tab" class="btn btn-outline-primary active mx-2">Growth</button>
+				    <button id="economy-tab" class="btn btn-outline-primary mx-2">Economy</button>
+				    <button id="battle-tab" class="btn btn-outline-primary mx-2">Battle</button>
+				</div>
 
 				<!-- Single Research Tree Table -->
-				<table class="table table-bordered research-tree-table" id="researchTable">
-					<!-- This table will be dynamically populated based on the selected tab -->
+				<table id="researchTable" class="table table-borderless research-tree-table">
+				    <!-- This table will be populated dynamically -->
 				</table>
+
 			</div>
 		</div>
 

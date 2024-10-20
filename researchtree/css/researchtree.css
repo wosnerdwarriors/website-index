@@ -8,7 +8,6 @@
 	display: block;
 }
 
-
 /* General styling for the body and container */
 body, html {
 	height: 100%;
@@ -32,20 +31,11 @@ body, html {
 	max-width: calc(100% - 500px); /* Ensure room for right info bar */
 }
 
-/* Research Tree Table Styling */
-.research-tree-table {
-	width: 100%;
-	border-collapse: collapse;
-}
-
 .research-tree-table td {
 	padding: 30px;
 	text-align: center;
 	vertical-align: middle;
 }
-
-
-
 
 /* Info/Display Bar Styling */
 .info-bar {
@@ -73,6 +63,24 @@ body, html {
 .btn {
 	width: 40px;
 }
+/* Custom active button color */
+.btn.active {
+	background-color: #28a745; /* Green active color */
+	color: white;
+	border-color: #28a745;
+}
+
+/* Hover color for active button */
+.btn.active:hover {
+	background-color: #218838; /* Darker green shade for hover */
+}
+
+/* Ensures buttons have sufficient padding and text is readable */
+.btn {
+	min-width: 120px; /* Ensures the buttons are wide enough */
+	padding: 10px 20px; /* Adjust padding to give space inside buttons */
+}
+
 
 .research-card {
 	padding: 15px;
@@ -88,29 +96,27 @@ body, html {
 .research-card p {
 	font-size: 0.9rem;
 }
-
-/* Hide the table when not in debug mode */
-.d-none {
-	display: none !important;
+/* Add borders between columns */
+.research-tree-table td {
+    border-left: 1px solid rgba(0, 0, 0, 0.1); /* Light border between columns */
+    border-right: 1px solid rgba(0, 0, 0, 0.1); /* Light border on the right */
+    background-color: #fff; /* Ensure contrast with background */
 }
 
-/* Greyed out style for locked research */
-.research-square.locked {
-    background-color: grey;
+.research-tree-table tr:nth-child(even) td {
+    background-color: #f9f9f9; /* Alternate row background color */
+}
+
+/* Optional: Darken the outer table border */
+.research-tree-table {
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Light border around the entire table */
+}
+background-color: #e0e0e0; /* Slightly darker for alternating rows */
 }
 
 
-/* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
-	.main-content-container {
-		margin-left: 0;
-		max-width: 100%;
-	}
 
-	.info-bar {
-		width: 100%;
-		height: auto;
-		position: relative;
-	}
+/* Centering the H1 heading */
+.text-center {
+	text-align: center;
 }
-
