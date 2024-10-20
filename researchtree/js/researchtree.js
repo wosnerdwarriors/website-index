@@ -117,16 +117,17 @@ function renderResearchTree(treeData, treeType) {
 
 		// Attach event listeners after row has been added to the DOM
 		items.forEach(item => {
-			const currentLevel = userResearchState[treeType][item.key];
+			let currentLevel = userResearchState[treeType][item.key];
 			const maxLevel = Object.keys(item.levels).length;
 
 			// Add event listener to increase button
 			document.getElementById(`increase-${treeType}-${item.key}`).addEventListener('click', () => {
 				if (currentLevel < maxLevel) {
-					userResearchState[treeType][item.key]++;
-					document.getElementById(`level-${treeType}-${item.key}`).textContent = userResearchState[treeType][item.key];
+					currentLevel++; // Increment the level
+					userResearchState[treeType][item.key] = currentLevel; // Update the state
+					document.getElementById(`level-${treeType}-${item.key}`).textContent = currentLevel; // Update the UI
 					if (debugMode) {
-						console.log(`Increased level for ${item.key} to ${userResearchState[treeType][item.key]}`);
+						console.log(`Increased level for ${item.key} to ${currentLevel}`);
 					}
 				}
 			});
@@ -134,25 +135,27 @@ function renderResearchTree(treeData, treeType) {
 			// Add event listener to decrease button
 			document.getElementById(`decrease-${treeType}-${item.key}`).addEventListener('click', () => {
 				if (currentLevel > 0) {
-					userResearchState[treeType][item.key]--;
-					document.getElementById(`level-${treeType}-${item.key}`).textContent = userResearchState[treeType][item.key];
+					currentLevel--; // Decrement the level
+					userResearchState[treeType][item.key] = currentLevel; // Update the state
+					document.getElementById(`level-${treeType}-${item.key}`).textContent = currentLevel; // Update the UI
 					if (debugMode) {
-						console.log(`Decreased level for ${item.key} to ${userResearchState[treeType][item.key]}`);
+						console.log(`Decreased level for ${item.key} to ${currentLevel}`);
 					}
 				}
 			});
 		});
 	});
 
-	// Toggle between bordered and borderless tables based on debug mode
+	// Show/hide table borders based on debug mode
 	if (debugMode) {
-		table.classList.add('table-bordered');
-		table.classList.remove('table-borderless');
+	   table.classList.add('table-bordered');
+	   table.classList.remove('table-borderless');
 	} else {
-		table.classList.add('table-borderless');
-		table.classList.remove('table-bordered');
+       table.classList.add('table-borderless');
+       table.classList.remove('table-bordered');
 	}
 }
+
 
 // Function to load research data from data.json (only done once on page load)
 function loadResearchData() {
