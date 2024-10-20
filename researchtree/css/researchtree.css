@@ -1,0 +1,84 @@
+/* General styling for the body and container */
+body, html {
+	height: 100%;
+	margin: 0;
+	background-color: #e8e8e8;
+	overflow-x: hidden;
+}
+
+.d-flex {
+	display: flex;
+}
+
+/* Main content area, ensures the sidebar does not overlap */
+.main-content-container {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	padding: 40px;
+	margin-left: 250px;  /* Ensure the main content shifts after the sidebar */
+	max-width: calc(100% - 250px);
+}
+
+/* Research Tree Table Styling */
+table {
+	width: 100%;
+}
+
+table td {
+	vertical-align: top;
+	padding: 20px;
+}
+
+/* Research cards inside the table */
+.research-card {
+	background-color: white;
+	border-radius: 10px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	padding: 20px;
+	text-align: center;
+}
+
+.research-card h5 {
+	font-weight: bold;
+}
+
+.research-card p {
+	margin-bottom: 10px;
+}
+
+.btn {
+	width: 40px;
+}
+
+/* Info/Display Bar Styling */
+.info-bar {
+	width: 250px;
+	background-color: #f0f0f0;
+	padding: 20px;
+	box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+	position: fixed;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+.info-bar h4 {
+	margin-bottom: 20px;
+	color: #007bff;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+	.main-content-container {
+		margin-left: 0;
+		max-width: 100%;
+	}
+
+	.info-bar {
+		width: 100%;
+		height: auto;
+		position: relative;
+	}
+}
