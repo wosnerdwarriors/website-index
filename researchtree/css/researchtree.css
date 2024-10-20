@@ -1,3 +1,14 @@
+/* Research square (80x80px placeholder for images) */
+.research-square {
+	width: 80px;
+	height: 80px;
+	background-color: red !important; /* Change to red and ensure it's applied */
+	border-radius: 5px;
+	margin: 0 auto;
+	display: block;
+}
+
+
 /* General styling for the body and container */
 body, html {
 	height: 100%;
@@ -18,39 +29,23 @@ body, html {
 	min-height: 100vh;
 	padding: 40px;
 	margin-left: 250px;  /* Ensure the main content shifts after the sidebar */
-	max-width: calc(100% - 250px);
+	max-width: calc(100% - 500px); /* Ensure room for right info bar */
 }
 
 /* Research Tree Table Styling */
-table {
+.research-tree-table {
 	width: 100%;
+	border-collapse: collapse;
 }
 
-table td {
-	vertical-align: top;
-	padding: 20px;
-}
-
-/* Research cards inside the table */
-.research-card {
-	background-color: white;
-	border-radius: 10px;
-	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-	padding: 20px;
+.research-tree-table td {
+	padding: 30px;
 	text-align: center;
+	vertical-align: middle;
 }
 
-.research-card h5 {
-	font-weight: bold;
-}
 
-.research-card p {
-	margin-bottom: 10px;
-}
 
-.btn {
-	width: 40px;
-}
 
 /* Info/Display Bar Styling */
 .info-bar {
@@ -62,12 +57,48 @@ table td {
 	right: 0;
 	top: 0;
 	bottom: 0;
+	overflow-y: auto;
 }
 
 .info-bar h4 {
 	margin-bottom: 20px;
 	color: #007bff;
 }
+
+.info-bar p {
+	color: #333;
+}
+
+/* Styling for the upgrade/downgrade buttons */
+.btn {
+	width: 40px;
+}
+
+.research-card {
+	padding: 15px;
+	background-color: #fff;
+	border-radius: 10px;
+	box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.research-card h5 {
+	font-size: 1.1rem;
+}
+
+.research-card p {
+	font-size: 0.9rem;
+}
+
+/* Hide the table when not in debug mode */
+.d-none {
+	display: none !important;
+}
+
+/* Greyed out style for locked research */
+.research-square.locked {
+    background-color: grey;
+}
+
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
@@ -82,3 +113,4 @@ table td {
 		position: relative;
 	}
 }
+
