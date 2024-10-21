@@ -2,7 +2,7 @@
 	"Growth": {
 		"tooling-up-1-example": {
 			"row": 1,
-			"name": "Tooling Up I example",
+			"name": "row 1 item",
 			"stat": "construction-speed",
 			"levels": {
 				"0": {
@@ -33,7 +33,61 @@
 		},
 		"ward-expansion-1": {
 			"row": 2,
-			"name": "Ward Expansion I",
+			"name": "row 2 item 1",
+			"stat": "infirmary-capacity",
+			"levels": {
+				"1": {
+					"stat-addition": 1000,
+					"power": 500,
+					"cost": {
+						"meat": 1000,
+						"wood": 4000,
+						"coal": 1322,
+						"iron": 52151,
+						"steel": 1332
+					},
+					"research-time": 5021,
+					"requirements":
+					{
+						"research-items":
+						{
+							"tooling-up-1-example": 2
+						},
+						"buildings":
+						{
+							"research-centre": 27
+						}
+					}
+				},
+				"2": {
+					"stat-addition": 2000,
+					"power": 600,
+					"cost": {
+						"meat": 2000,
+						"wood": 5000,
+						"coal": 2322,
+						"iron": 62151,
+						"steel": 2332
+					},
+					"research-time": 7021
+				},
+				"3": {
+					"stat-addition": 3000,
+					"power": 600,
+					"cost": {
+						"meat": 2000,
+						"wood": 5000,
+						"coal": 2322,
+						"iron": 62151,
+						"steel": 2332
+					},
+					"research-time": 7021
+				}
+			}
+		},
+		"example-expansion-1": {
+			"row": 2,
+			"name": "row 2 item 2",
 			"stat": "infirmary-capacity",
 			"levels": {
 				"1": {
@@ -87,8 +141,51 @@
 		},
 		"camp-expansion-1": {
 			"row": 2,
-			"name": "Camp Expansion I",
+			"name": "row 2 item 3",
 			"stat": "training-capacity",
+			"levels": {
+				"1": {
+					"stat-addition": 1000,
+					"power": 500,
+					"cost": {
+						"meat": 1000,
+						"wood": 4000,
+						"coal": 1322,
+						"iron": 52151,
+						"steel": 1332
+					},
+					"research-time": 5021
+				},
+				"2": {
+					"stat-addition": 2000,
+					"power": 600,
+					"cost": {
+						"meat": 2000,
+						"wood": 5000,
+						"coal": 2322,
+						"iron": 62151,
+						"steel": 2332
+					},
+					"research-time": 7021
+				},
+				"3": {
+					"stat-addition": 3000,
+					"power": 600,
+					"cost": {
+						"meat": 2000,
+						"wood": 5000,
+						"coal": 2322,
+						"iron": 62151,
+						"steel": 2332
+					},
+					"research-time": 7021
+				}
+			}
+		},
+		"fdsfds-enhancement-1": {
+			"row": 3,
+			"name": "row 3 item 1",
+			"stat": "research-speed",
 			"levels": {
 				"1": {
 					"stat-addition": 1000,
@@ -130,7 +227,7 @@
 		},
 		"tool-enhancement-1": {
 			"row": 3,
-			"name": "Tool Enhancement I",
+			"name": "row 3 item 2",
 			"stat": "research-speed",
 			"levels": {
 				"1": {

@@ -86,100 +86,138 @@ function requirementsMet(researchIDToCheckIfWeCanUpgrade, researchTreeType, targ
 	return canUpgrade;
 }
 
+function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed) {
+	return `
+		<div class="resource-costs">
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/meat-ico.png" alt="Meat Icon"> Meat</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.meat || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/wood-ico.png" alt="Wood Icon"> Wood</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.wood || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/coal-ico.png" alt="Coal Icon"> Coal</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.coal || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/iron-ico.png" alt="Iron Icon"> Iron</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.iron || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/steel-ico.png" alt="Steel Icon"> Steel</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.steel || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/fc-ico.png" alt="FC Icon"> FC</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.fc || 0)}</div>
+			</div>
+		</div>
+		<div class="time-required">
+			<div class="resource-item">
+				<div class="resource-item-left">Research Time</div>
+				<div class="resource-item-right">${formatTime(researchTime)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left">Research Time (50%)</div>
+				<div class="resource-item-right">${formatTime(researchTime / 2)}</div>
+			</div>
+		</div>
+	`;
+}
 
 
+// Utility function to format resources with commas
+function formatResource(amount) {
+	return amount.toLocaleString();
+}
+
+// Function to format time for both regular and 50% times
+function formatTime(seconds) {
+	const timeUnits = [
+		{ label: 'year', value: 60 * 60 * 24 * 365 },
+		{ label: 'month', value: 60 * 60 * 24 * 30 },
+		{ label: 'week', value: 60 * 60 * 24 * 7 },
+		{ label: 'day', value: 60 * 60 * 24 },
+		{ label: 'hour', value: 60 * 60 },
+		{ label: 'minute', value: 60 },
+	];
+
+	let timeStr = '';
+	for (const unit of timeUnits) {
+		if (seconds >= unit.value) {
+			const count = Math.floor(seconds / unit.value);
+			timeStr += `${count} ${unit.label}${count > 1 ? 's' : ''} `;
+			seconds %= unit.value;
+		}
+	}
+
+	return timeStr.trim();
+}
 
 // Function to render the research tree dynamically
-function renderResearchTree(treeData, treeType) {
-	const table = document.getElementById('researchTable');
-	if (!table) {
+// Function to render the research tree dynamically
+function renderResearchTree(researchTreeData, researchTreeType) {
+	const researchTable = document.getElementById('researchTable');
+	if (!researchTable) {
 		console.error(`Table with ID "researchTable" not found!`);
 		return;
 	}
 
 	// Clear existing table content
-	table.innerHTML = '';
+	researchTable.innerHTML = '';
 
-	// Sort research items by row
-	const rows = {};
-	Object.keys(treeData).forEach((key) => {
-		const item = treeData[key];
-		if (!rows[item.row]) {
-			rows[item.row] = [];
+	// Organize research items by row
+	const researchRows = {};
+	Object.keys(researchTreeData).forEach((researchID) => {
+		const researchItem = researchTreeData[researchID];
+		if (!researchRows[researchItem.row]) {
+			researchRows[researchItem.row] = [];
 		}
-		rows[item.row].push({ key, ...item });
+		researchRows[researchItem.row].push({ researchID, ...researchItem });
 	});
 
 	// Iterate through rows to render them
-	Object.keys(rows).forEach(rowKey => {
-		const items = rows[rowKey];
+	Object.keys(researchRows).forEach(rowNumber => {
+		const researchItemsInRow = researchRows[rowNumber];
 		const rowElement = document.createElement('tr');
 		const emptyCell = '<td></td>'; // Placeholder for empty cells
 
-		// Ensure the row has exactly 3 columns
-		if (items.length === 1) {
+		// Handle cases based on the number of research items in a row
+		if (researchItemsInRow.length === 1) {
 			rowElement.innerHTML = `${emptyCell}
-				<td>
-					<div class="research-square"></div>
-					<div>${items[0].name}</div>
-					<div>Level: <span id="level-${treeType}-${items[0].key}">${userResearchState[treeType][items[0].key]}</span>/${Object.keys(items[0].levels).length}</div>
-					<div>
-						<button id="decrease-${treeType}-${items[0].key}" class="btn btn-primary">-</button>
-						<button id="increase-${treeType}-${items[0].key}" class="btn btn-primary">+</button>
-					</div>
-				</td>
+				${generateResearchItemCell(researchItemsInRow[0], researchTreeType)}
 				${emptyCell}`;
-		} else if (items.length === 2) {
+		} else if (researchItemsInRow.length === 2) {
 			rowElement.innerHTML = `
-				<td>
-					<div class="research-square"></div>
-					<div>${items[0].name}</div>
-					<div>Level: <span id="level-${treeType}-${items[0].key}">${userResearchState[treeType][items[0].key]}</span>/${Object.keys(items[0].levels).length}</div>
-					<div>
-						<button id="decrease-${treeType}-${items[0].key}" class="btn btn-primary">-</button>
-						<button id="increase-${treeType}-${items[0].key}" class="btn btn-primary">+</button>
-					</div>
-				</td>
+				${generateResearchItemCell(researchItemsInRow[0], researchTreeType)}
 				${emptyCell}
-				<td>
-					<div class="research-square"></div>
-					<div>${items[1].name}</div>
-					<div>Level: <span id="level-${treeType}-${items[1].key}">${userResearchState[treeType][items[1].key]}</span>/${Object.keys(items[1].levels).length}</div>
-					<div>
-						<button id="decrease-${treeType}-${items[1].key}" class="btn btn-primary">-</button>
-						<button id="increase-${treeType}-${items[1].key}" class="btn btn-primary">+</button>
-					</div>
-				</td>`;
-		} else {
-			items.forEach(item => {
-				const cell = document.createElement('td');
-				cell.innerHTML = `
-					<div class="research-square"></div>
-					<div>${item.name}</div>
-					<div>Level: <span id="level-${treeType}-${item.key}">${userResearchState[treeType][item.key]}</span>/${Object.keys(item.levels).length}</div>
-					<div>
-						<button id="decrease-${treeType}-${item.key}" class="btn btn-primary">-</button>
-						<button id="increase-${treeType}-${item.key}" class="btn btn-primary">+</button>
-					</div>
-				`;
-				rowElement.appendChild(cell);
-			});
+				${generateResearchItemCell(researchItemsInRow[1], researchTreeType)}
+			`;
+		} else if (researchItemsInRow.length === 3) {
+			rowElement.innerHTML = `
+				${generateResearchItemCell(researchItemsInRow[0], researchTreeType)}
+				${generateResearchItemCell(researchItemsInRow[1], researchTreeType)}
+				${generateResearchItemCell(researchItemsInRow[2], researchTreeType)}
+			`;
+		}else{
+			console.log("CRITICAL ERROR, a data row has more than 3 research items in a single row. we won't be displaying the row at all")
 		}
 
-		table.appendChild(rowElement);
+		researchTable.appendChild(rowElement);
 
 		// Attach event listeners after row has been added to the DOM
-		// Attach event listeners after row has been added to the DOM
-		items.forEach(item => {
-			let currentLevel = userResearchState[treeType][item.key];
-			const maxLevel = Object.keys(item.levels).length;
+		researchItemsInRow.forEach(researchItem => {
+			let currentResearchLevel = userResearchState[researchTreeType][researchItem.researchID];
+			const maxResearchLevel = Object.keys(researchItem.levels).length;
 
 			// Add event listener to increase button
-			const increaseButton = document.getElementById(`increase-${treeType}-${item.key}`);
+			const increaseButton = document.getElementById(`increase-${researchTreeType}-${researchItem.researchID}`);
 			if (increaseButton) {
-				// Check requirements for the next level (i.e., currentLevel + 1)
-				const nextLevel = currentLevel + 1;
-				const requirementsCheck = requirementsMet(item.key, treeType, nextLevel);
+				// Check requirements for the next level (i.e., currentResearchLevel + 1)
+				const nextLevel = currentResearchLevel + 1;
+				const requirementsCheck = requirementsMet(researchItem.researchID, researchTreeType, nextLevel);
 
 				if (!requirementsCheck) {
 					// Grey out the button if requirements aren't met
@@ -191,62 +229,84 @@ function renderResearchTree(treeData, treeType) {
 				// Add click event listener to handle upgrades
 				increaseButton.addEventListener('click', () => {
 					// Re-check if the requirements are met when trying to upgrade
-					const canUpgrade = requirementsMet(item.key, treeType, nextLevel);
+					const canUpgrade = requirementsMet(researchItem.researchID, researchTreeType, nextLevel);
 
-					if (currentLevel < maxLevel && (canUpgrade || godMode)) {
-						currentLevel++; // Increment the level
-						userResearchState[treeType][item.key] = currentLevel; // Update the state
-						document.getElementById(`level-${treeType}-${item.key}`).textContent = currentLevel; // Update the UI
+					if (currentResearchLevel < maxResearchLevel && (canUpgrade || godMode)) {
+						currentResearchLevel++; // Increment the level
+						userResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel; // Update the state
+						document.getElementById(`level-${researchTreeType}-${researchItem.researchID}`).textContent = currentResearchLevel; // Update the UI
 
 						// Debugging: log upgrade success
 						if (debugMode) {
-							console.log(`Increased level for ${item.key} to ${currentLevel}`);
+							console.log(`Increased level for ${researchItem.researchID} to ${currentResearchLevel}`);
 							if (!canUpgrade) {
-								console.log(`God mode bypassed requirements for ${item.key}`);
+								console.log(`God mode bypassed requirements for ${researchItem.researchID}`);
 							}
 						}
-
-						// Re-render the research tree after upgrading
-						renderResearchTree(researchData[treeType], treeType);
 					} else if (debugMode) {
-						console.log(`Cannot upgrade ${item.key} due to unmet requirements or max level reached.`);
+						console.log(`Cannot upgrade ${researchItem.researchID} due to unmet requirements or max level reached.`);
 					}
+					renderResearchTree(researchTreeData, researchTreeType); // Re-render tree after upgrading
 				});
 			}
 
 			// Add event listener to decrease button
-			const decreaseButton = document.getElementById(`decrease-${treeType}-${item.key}`);
+			const decreaseButton = document.getElementById(`decrease-${researchTreeType}-${researchItem.researchID}`);
 			if (decreaseButton) {
 				decreaseButton.addEventListener('click', () => {
-					if (currentLevel > 0) {
-						currentLevel--; // Decrement the level
-						userResearchState[treeType][item.key] = currentLevel; // Update the state
-						document.getElementById(`level-${treeType}-${item.key}`).textContent = currentLevel; // Update the UI
-
-						// Debugging: log downgrade success
+					if (currentResearchLevel > 0) {
+						currentResearchLevel--; // Decrement the level
+						userResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel; // Update the state
+						document.getElementById(`level-${researchTreeType}-${researchItem.researchID}`).textContent = currentResearchLevel; // Update the UI
 						if (debugMode) {
-							console.log(`Decreased level for ${item.key} to ${currentLevel}`);
+							console.log(`Decreased level for ${researchItem.researchID} to ${currentResearchLevel}`);
 						}
-
-						// Re-render the research tree after downgrading
-						renderResearchTree(researchData[treeType], treeType);
-					} else if (debugMode) {
-						console.log(`Cannot downgrade ${item.key} below level 0.`);
+						renderResearchTree(researchTreeData, researchTreeType); // Re-render tree after downgrading
 					}
 				});
 			}
 		});
-
-
 	});
 
 	// Show/hide table borders based on debug mode
 	if (debugMode) {
-		table.classList.add('table-bordered');  // Show table borders in debug mode
+		researchTable.classList.add('table-bordered');  // Show table borders in debug mode
 	} else {
-		table.classList.remove('table-bordered');  // Hide table borders in non-debug mode
+		researchTable.classList.remove('table-bordered');  // Hide table borders in non-debug mode
 	}
 }
+
+
+function generateResearchItemCell(researchItem, researchTreeType) {
+	const currentLevel = userResearchState[researchTreeType][researchItem.researchID];
+	const nextLevel = currentLevel + 1;
+	const nextLevelData = researchItem.levels[nextLevel] || {};  // Get next level data or an empty object
+
+	return `
+		<td>
+			<div class="d-flex justify-content-between" style="height: 100%;">
+				<!-- Left Side: Research Info -->
+				<div class="left-side" style="width: 50%; padding-right: 10px;">
+					<div class="research-square"></div>
+					<div class="research-item-name">${researchItem.name}</div>
+					<div class="research-item-level">Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${Object.keys(researchItem.levels).length}</div>
+					<div class="button-group">
+						<button id="decrease-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">-</button>
+						<button id="increase-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">+</button>
+					</div>
+				</div>
+
+				<!-- Right Side: Resource Costs and Time -->
+				<div class="right-side" style="width: 50%; padding-left: 10px;">
+					${getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time'] || 0, 0)}
+				</div>
+			</div>
+		</td>
+	`;
+}
+
+
+
 
 
 // Function to load research data from data.json (only done once on page load)

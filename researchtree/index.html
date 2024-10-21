@@ -20,11 +20,20 @@
 
 			<div class="container-fluid">
 
-				<!-- Tab navigation -->
-				<div class="d-flex justify-content-center mb-3">
-				    <button id="growth-tab" class="btn btn-outline-primary active mx-2">Growth</button>
-				    <button id="economy-tab" class="btn btn-outline-primary mx-2">Economy</button>
-				    <button id="battle-tab" class="btn btn-outline-primary mx-2">Battle</button>
+				<!-- Research Speed Input and Tab navigation -->
+				<div class="d-flex justify-content-between mb-3">
+					<!-- Research Speed Input -->
+					<div>
+						<label for="researchSpeed" class="form-label">Research Speed (%)</label>
+						<input type="number" id="researchSpeed" class="form-control" min="0" placeholder="Enter %">
+					</div>
+					
+					<!-- Tab navigation -->
+					<div class="d-flex">
+					    <button id="growth-tab" class="btn btn-outline-primary active mx-2">Growth</button>
+					    <button id="economy-tab" class="btn btn-outline-primary mx-2">Economy</button>
+					    <button id="battle-tab" class="btn btn-outline-primary mx-2">Battle</button>
+					</div>
 				</div>
 
 				<!-- Single Research Tree Table -->
