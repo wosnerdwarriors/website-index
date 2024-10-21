@@ -1,0 +1,122 @@
+/* Research square (80x80px placeholder for images) */
+.research-square {
+	width: 80px;
+	height: 80px;
+	background-color: red !important; /* Change to red and ensure it's applied */
+	border-radius: 5px;
+	margin: 0 auto;
+	display: block;
+}
+
+/* General styling for the body and container */
+body, html {
+	height: 100%;
+	margin: 0;
+	background-color: #e8e8e8;
+	overflow-x: hidden;
+}
+
+.d-flex {
+	display: flex;
+}
+
+/* Main content area, ensures the sidebar does not overlap */
+.main-content-container {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	padding: 40px;
+	margin-left: 250px;  /* Ensure the main content shifts after the sidebar */
+	max-width: calc(100% - 500px); /* Ensure room for right info bar */
+}
+
+.research-tree-table td {
+	padding: 30px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+/* Info/Display Bar Styling */
+.info-bar {
+	width: 250px;
+	background-color: #f0f0f0;
+	padding: 20px;
+	box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+	position: fixed;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	overflow-y: auto;
+}
+
+.info-bar h4 {
+	margin-bottom: 20px;
+	color: #007bff;
+}
+
+.info-bar p {
+	color: #333;
+}
+
+/* Styling for the upgrade/downgrade buttons */
+.btn {
+	width: 40px;
+}
+/* Custom active button color */
+.btn.active {
+	background-color: #28a745; /* Green active color */
+	color: white;
+	border-color: #28a745;
+}
+
+/* Hover color for active button */
+.btn.active:hover {
+	background-color: #218838; /* Darker green shade for hover */
+}
+
+/* Ensures buttons have sufficient padding and text is readable */
+.btn {
+	min-width: 120px; /* Ensures the buttons are wide enough */
+	padding: 10px 20px; /* Adjust padding to give space inside buttons */
+}
+
+
+.research-card {
+	padding: 15px;
+	background-color: #fff;
+	border-radius: 10px;
+	box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.research-card h5 {
+	font-size: 1.1rem;
+}
+
+.research-card p {
+	font-size: 0.9rem;
+}
+/* Add borders between columns */
+.research-tree-table td {
+    border-left: 1px solid rgba(0, 0, 0, 0.1); /* Light border between columns */
+    border-right: 1px solid rgba(0, 0, 0, 0.1); /* Light border on the right */
+    background-color: #fff; /* Ensure contrast with background */
+}
+
+.research-tree-table tr:nth-child(even) td {
+    background-color: #f9f9f9; /* Alternate row background color */
+}
+
+/* Optional: Darken the outer table border */
+.research-tree-table {
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Light border around the entire table */
+}
+background-color: #e0e0e0; /* Slightly darker for alternating rows */
+}
+
+
+
+/* Centering the H1 heading */
+.text-center {
+	text-align: center;
+}
