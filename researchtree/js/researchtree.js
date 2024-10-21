@@ -308,23 +308,36 @@ function generateResearchItemCell(researchItem, researchTreeType) {
 	// Get the current research speed dynamically
 	const researchSpeed = getResearchSpeed();
 
+	// Get the stat and stat addition data
+	const stat = researchItem.stat || "N/A";  // Default to "N/A" if no stat is defined
+	const statAddition = nextLevelData['stat-addition'] || 0;  // Default to 0 if no stat addition is defined
+
 	return `
 		<td>
 			<div class="d-flex justify-content-between" style="height: 100%;">
 				<!-- Left Side: Research Info -->
 				<div class="left-side" style="width: 50%; padding-right: 10px;">
 					<div class="research-square"></div>
-					<div>${researchItem.name}</div>
-					<div class="d-flex justify-content-between align-items-center">
-						<div>Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${Object.keys(researchItem.levels).length}</div>
-						<div class="button-group">
-							<button id="decrease-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">-</button>
-							<button id="increase-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">+</button>
+					<div class="research-item-name">${researchItem.name}</div>
+					<div class="research-item-level">Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${Object.keys(researchItem.levels).length}</div>
+					<div class="button-group">
+						<button id="decrease-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">-</button>
+						<button id="increase-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">+</button>
+					</div>
+
+					<!-- Stat Increase Info -->
+					<div class="stat-increase-info mt-3">
+						<div class="stat-item">
+							<div class="stat-label">${stat}</div>
+						</div>
+						<div class="stat-item">
+							<div class="stat-value">+${statAddition}%</div>
 						</div>
 					</div>
+
 				</div>
 
-				<!-- Right Side: Resource Costs and Time -->
+				<!-- Right Side: Resource Costs, Time -->
 				<div class="right-side" style="width: 50%; padding-left: 10px;">
 					${getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time'] || 0, researchSpeed)}
 				</div>
@@ -332,7 +345,6 @@ function generateResearchItemCell(researchItem, researchTreeType) {
 		</td>
 	`;
 }
-
 
 
 
