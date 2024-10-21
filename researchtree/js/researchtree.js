@@ -86,18 +86,44 @@ function requirementsMet(researchIDToCheckIfWeCanUpgrade, researchTreeType, targ
 	return canUpgrade;
 }
 
-function getResourceAndTimeHTML(resourceCosts, researchTime, constructionSpeed) {
+function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed) {
 	return `
 		<div class="resource-costs">
-			<div class="resource-item"><img src="https://data.wosnerds.com/images/items/meat-ico.png" alt="Meat Icon"> Meat: ${formatResource(resourceCosts.meat || 0)}</div>
-			<div class="resource-item"><img src="https://data.wosnerds.com/images/items/wood-ico.png" alt="Wood Icon"> Wood: ${formatResource(resourceCosts.wood || 0)}</div>
-			<div class="resource-item"><img src="https://data.wosnerds.com/images/items/coal-ico.png" alt="Coal Icon"> Coal: ${formatResource(resourceCosts.coal || 0)}</div>
-			<div class="resource-item"><img src="https://data.wosnerds.com/images/items/iron-ico.png" alt="Iron Icon"> Iron: ${formatResource(resourceCosts.iron || 0)}</div>
-			<div class="resource-item"><img src="https://data.wosnerds.com/images/items/steel-ico.png" alt="Steel Icon"> Steel: ${formatResource(resourceCosts.steel || 0)}</div>
-			<div class="resource-item"><img src="https://data.wosnerds.com/images/items/fc-ico.png" alt="FC Icon"> FC: ${formatResource(resourceCosts.fc || 0)}</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/meat-ico.png" alt="Meat Icon"> Meat</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.meat || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/wood-ico.png" alt="Wood Icon"> Wood</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.wood || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/coal-ico.png" alt="Coal Icon"> Coal</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.coal || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/iron-ico.png" alt="Iron Icon"> Iron</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.iron || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/steel-ico.png" alt="Steel Icon"> Steel</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.steel || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/fc-ico.png" alt="FC Icon"> FC</div>
+				<div class="resource-item-right">${formatResource(resourceCosts.fc || 0)}</div>
+			</div>
 		</div>
-		<div>Research Time: ${formatTime(researchTime)}</div>
-		<div>Research Time (50%): ${formatTime(researchTime / 2)}</div>
+		<div class="time-required">
+			<div class="resource-item">
+				<div class="resource-item-left">Research Time</div>
+				<div class="resource-item-right">${formatTime(researchTime)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left">Research Time (50%)</div>
+				<div class="resource-item-right">${formatTime(researchTime / 2)}</div>
+			</div>
+		</div>
 	`;
 }
 
@@ -131,6 +157,7 @@ function formatTime(seconds) {
 }
 
 // Function to render the research tree dynamically
+// Function to render the research tree dynamically
 function renderResearchTree(researchTreeData, researchTreeType) {
 	const researchTable = document.getElementById('researchTable');
 	if (!researchTable) {
@@ -157,97 +184,25 @@ function renderResearchTree(researchTreeData, researchTreeType) {
 		const rowElement = document.createElement('tr');
 		const emptyCell = '<td></td>'; // Placeholder for empty cells
 
-		// Ensure the row has exactly 3 columns
+		// Handle cases based on the number of research items in a row
 		if (researchItemsInRow.length === 1) {
-			// Render single item in the middle column
 			rowElement.innerHTML = `${emptyCell}
-				<td>
-					<div class="d-flex justify-content-between">
-						<!-- Left Side: Research Info -->
-						<div>
-							<div class="research-square"></div>
-							<div>${researchItemsInRow[0].name}</div>
-							<div>Level: <span id="level-${researchTreeType}-${researchItemsInRow[0].researchID}">${userResearchState[researchTreeType][researchItemsInRow[0].researchID]}</span>/${Object.keys(researchItemsInRow[0].levels).length}</div>
-							<div>
-								<button id="decrease-${researchTreeType}-${researchItemsInRow[0].researchID}" class="btn btn-primary">-</button>
-								<button id="increase-${researchTreeType}-${researchItemsInRow[0].researchID}" class="btn btn-primary">+</button>
-							</div>
-						</div>
-
-						<!-- Right Side: Resource Costs and Time -->
-						<div class="resource-costs">
-							${getResourceAndTimeHTML(researchItemsInRow[0], userResearchState[researchTreeType][researchItemsInRow[0].researchID] + 1)}
-						</div>
-					</div>
-				</td>
+				${generateResearchItemCell(researchItemsInRow[0], researchTreeType)}
 				${emptyCell}`;
 		} else if (researchItemsInRow.length === 2) {
-			// Render two items in left and right columns
 			rowElement.innerHTML = `
-				<td>
-					<div class="d-flex justify-content-between">
-						<!-- Left Side: Research Info -->
-						<div>
-							<div class="research-square"></div>
-							<div>${researchItemsInRow[0].name}</div>
-							<div>Level: <span id="level-${researchTreeType}-${researchItemsInRow[0].researchID}">${userResearchState[researchTreeType][researchItemsInRow[0].researchID]}</span>/${Object.keys(researchItemsInRow[0].levels).length}</div>
-							<div>
-								<button id="decrease-${researchTreeType}-${researchItemsInRow[0].researchID}" class="btn btn-primary">-</button>
-								<button id="increase-${researchTreeType}-${researchItemsInRow[0].researchID}" class="btn btn-primary">+</button>
-							</div>
-						</div>
-
-						<!-- Right Side: Resource Costs and Time -->
-						<div class="resource-costs">
-							${getResourceAndTimeHTML(researchItemsInRow[0], userResearchState[researchTreeType][researchItemsInRow[0].researchID] + 1)}
-						</div>
-					</div>
-				</td>
+				${generateResearchItemCell(researchItemsInRow[0], researchTreeType)}
 				${emptyCell}
-				<td>
-					<div class="d-flex justify-content-between">
-						<!-- Left Side: Research Info -->
-						<div>
-							<div class="research-square"></div>
-							<div>${researchItemsInRow[1].name}</div>
-							<div>Level: <span id="level-${researchTreeType}-${researchItemsInRow[1].researchID}">${userResearchState[researchTreeType][researchItemsInRow[1].researchID]}</span>/${Object.keys(researchItemsInRow[1].levels).length}</div>
-							<div>
-								<button id="decrease-${researchTreeType}-${researchItemsInRow[1].researchID}" class="btn btn-primary">-</button>
-								<button id="increase-${researchTreeType}-${researchItemsInRow[1].researchID}" class="btn btn-primary">+</button>
-							</div>
-						</div>
-
-						<!-- Right Side: Resource Costs and Time -->
-						<div class="resource-costs">
-							${getResourceAndTimeHTML(researchItemsInRow[1], userResearchState[researchTreeType][researchItemsInRow[1].researchID] + 1)}
-						</div>
-					</div>
-				</td>`;
-		} else {
-			// Render three items in three columns
-			researchItemsInRow.forEach(researchItem => {
-				const cell = document.createElement('td');
-				cell.innerHTML = `
-					<div class="d-flex justify-content-between">
-						<!-- Left Side: Research Info -->
-						<div>
-							<div class="research-square"></div>
-							<div>${researchItem.name}</div>
-							<div>Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${userResearchState[researchTreeType][researchItem.researchID]}</span>/${Object.keys(researchItem.levels).length}</div>
-							<div>
-								<button id="decrease-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary">-</button>
-								<button id="increase-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary">+</button>
-							</div>
-						</div>
-
-						<!-- Right Side: Resource Costs and Time -->
-						<div class="resource-costs">
-							${getResourceAndTimeHTML(researchItem, userResearchState[researchTreeType][researchItem.researchID] + 1)}
-						</div>
-					</div>
-				`;
-				rowElement.appendChild(cell);
-			});
+				${generateResearchItemCell(researchItemsInRow[1], researchTreeType)}
+			`;
+		} else if (researchItemsInRow.length === 3) {
+			rowElement.innerHTML = `
+				${generateResearchItemCell(researchItemsInRow[0], researchTreeType)}
+				${generateResearchItemCell(researchItemsInRow[1], researchTreeType)}
+				${generateResearchItemCell(researchItemsInRow[2], researchTreeType)}
+			`;
+		}else{
+			console.log("CRITICAL ERROR, a data row has more than 3 research items in a single row. we won't be displaying the row at all")
 		}
 
 		researchTable.appendChild(rowElement);
@@ -319,6 +274,35 @@ function renderResearchTree(researchTreeData, researchTreeType) {
 	} else {
 		researchTable.classList.remove('table-bordered');  // Hide table borders in non-debug mode
 	}
+}
+
+
+function generateResearchItemCell(researchItem, researchTreeType) {
+	const currentLevel = userResearchState[researchTreeType][researchItem.researchID];
+	const nextLevel = currentLevel + 1;
+	const nextLevelData = researchItem.levels[nextLevel] || {};  // Get next level data or an empty object
+
+	return `
+		<td>
+			<div class="d-flex justify-content-between" style="height: 100%;">
+				<!-- Left Side: Research Info -->
+				<div class="left-side" style="width: 50%; padding-right: 10px;">
+					<div class="research-square"></div>
+					<div class="research-item-name">${researchItem.name}</div>
+					<div class="research-item-level">Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${Object.keys(researchItem.levels).length}</div>
+					<div class="button-group">
+						<button id="decrease-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">-</button>
+						<button id="increase-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">+</button>
+					</div>
+				</div>
+
+				<!-- Right Side: Resource Costs and Time -->
+				<div class="right-side" style="width: 50%; padding-left: 10px;">
+					${getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time'] || 0, 0)}
+				</div>
+			</div>
+		</td>
+	`;
 }
 
 

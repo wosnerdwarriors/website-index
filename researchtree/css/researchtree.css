@@ -2,12 +2,37 @@
 .research-square {
 	width: 80px;
 	height: 80px;
-	background-color: red !important; /* Change to red and ensure it's applied */
+	background-color: red !important;
 	border-radius: 5px;
-	margin: 0 auto;
 	display: block;
 }
 
+/* Align the buttons side by side */
+.button-group {
+	display: flex;
+	gap: 5px;
+}
+
+.button-group .btn {
+	width: 35px;
+	height: 35px;
+	padding: 0;
+}
+
+/* Center align the content inside the left side of each research cell */
+.left-side {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%; /* Ensure it takes the full height */
+}
+
+/* Ensure the research square, name, and buttons are aligned vertically */
+.research-square, .research-item-name, .research-item-level, .button-group {
+	margin-bottom: 10px; /* Add space between elements */
+	text-align: center; /* Center text elements */
+}
 /* General styling for the body and container */
 body, html {
 	height: 100%;
@@ -59,10 +84,7 @@ body, html {
 	color: #333;
 }
 
-/* Styling for the upgrade/downgrade buttons */
-.btn {
-	width: 40px;
-}
+
 /* Custom active button color */
 .btn.active {
 	background-color: #28a745; /* Green active color */
@@ -77,11 +99,21 @@ body, html {
 
 /* Ensures buttons have sufficient padding and text is readable */
 .btn {
-	min-width: 120px; /* Ensures the buttons are wide enough */
+	min-width: 60px; /* Ensures the buttons are wide enough */
 	padding: 10px 20px; /* Adjust padding to give space inside buttons */
 }
 
+/* Adjust the +/- button to be smaller and square */
+.square-btn {
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	text-align: center;
+	line-height: 30px;
+	display: inline-block;
+}
 
+/* Research card style */
 .research-card {
 	padding: 15px;
 	background-color: #fff;
@@ -96,20 +128,21 @@ body, html {
 .research-card p {
 	font-size: 0.9rem;
 }
+
 /* Add borders between columns */
 .research-tree-table td {
-    border-left: 1px solid rgba(0, 0, 0, 0.1); /* Light border between columns */
-    border-right: 1px solid rgba(0, 0, 0, 0.1); /* Light border on the right */
-    background-color: #fff; /* Ensure contrast with background */
+	border-left: 1px solid rgba(0, 0, 0, 0.1); /* Light border between columns */
+	border-right: 1px solid rgba(0, 0, 0, 0.1); /* Light border on the right */
+	background-color: #fff; /* Ensure contrast with background */
 }
 
 .research-tree-table tr:nth-child(even) td {
-    background-color: #f9f9f9; /* Alternate row background color */
+	background-color: #f9f9f9; /* Alternate row background color */
 }
 
 /* Optional: Darken the outer table border */
 .research-tree-table {
-    border: 1px solid rgba(0, 0, 0, 0.1); /* Light border around the entire table */
+	border: 1px solid rgba(0, 0, 0, 0.1); /* Light border around the entire table */
 }
 
 /* Add container for left and right halves */
@@ -118,16 +151,27 @@ body, html {
 	justify-content: space-between;
 }
 
+.research-item-left,
 .research-item-right {
 	flex: 1;
 }
 
-.resource-icon {
-	width: 20px;
-	height: 20px;
-	margin-right: 5px;
+/* New section for Resources and Time */
+.research-item-right {
+	display: grid;
+	grid-template-columns: 50% 50%;
 }
 
+.research-item-right .resource-label {
+	text-align: left;
+	padding-right: 10px;
+}
+
+.research-item-right .resource-value {
+	text-align: right;
+}
+
+/* Icon, Title, and Value Layout */
 .resource-costs {
 	display: flex;
 	flex-direction: column;
@@ -136,29 +180,48 @@ body, html {
 
 .resource-item {
 	display: flex;
-	align-items: center;
+	justify-content: space-between;
+	width: 100%;
 	margin-bottom: 5px;
 }
 
+.resource-item-left {
+	display: flex;
+	align-items: center;
+}
+
+.resource-item-right {
+	display: flex;
+	justify-content: flex-end; /* Push the values to the right but not fully */
+	padding-right: 20px; /* Add some padding to prevent them from sticking to the edge */
+	text-align: right; /* Ensure the text is aligned to the right */
+}
 .resource-item img {
 	width: 20px;
 	height: 20px;
 	margin-right: 5px;
 }
-.resource-costs div {
-	text-align: center;
-}
 
+/* Time required styling */
 .time-required {
 	margin-top: 10px;
 	text-align: center;
 }
 
-
-
-
-
 /* Centering the H1 heading */
 .text-center {
 	text-align: center;
+}
+
+/* Ensure cells are always split evenly */
+.research-item-left,
+.research-item-right {
+	width: 50%;
+	padding: 5px;
+	box-sizing: border-box;
+}
+
+.research-item-container {
+	display: flex;
+	justify-content: space-between;
 }
