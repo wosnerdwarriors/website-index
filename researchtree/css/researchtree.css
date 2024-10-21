@@ -111,8 +111,50 @@ body, html {
 .research-tree-table {
     border: 1px solid rgba(0, 0, 0, 0.1); /* Light border around the entire table */
 }
-background-color: #e0e0e0; /* Slightly darker for alternating rows */
+
+/* Add container for left and right halves */
+.research-item-container {
+	display: flex;
+	justify-content: space-between;
 }
+
+.research-item-right {
+	flex: 1;
+}
+
+.resource-icon {
+	width: 20px;
+	height: 20px;
+	margin-right: 5px;
+}
+
+.resource-costs {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.resource-item {
+	display: flex;
+	align-items: center;
+	margin-bottom: 5px;
+}
+
+.resource-item img {
+	width: 20px;
+	height: 20px;
+	margin-right: 5px;
+}
+.resource-costs div {
+	text-align: center;
+}
+
+.time-required {
+	margin-top: 10px;
+	text-align: center;
+}
+
+
 
 
 
