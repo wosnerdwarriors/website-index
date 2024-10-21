@@ -2,6 +2,8 @@
 let debugMode = false;
 let godMode = false;
 
+let currentTreeType = 'Growth'; // Default to Growth on initial load
+
 // Store data.json content
 let researchData = {};
 
@@ -86,7 +88,28 @@ function requirementsMet(researchIDToCheckIfWeCanUpgrade, researchTreeType, targ
 	return canUpgrade;
 }
 
+// Get the research speed from the input field
+function getResearchSpeed() {
+	const researchSpeedInput = document.getElementById('researchSpeedInput');
+	const speedValue = parseFloat(researchSpeedInput.value);
+
+	// Ensure the speed is a valid number, default to 0 if NaN or negative
+	if (isNaN(speedValue) || speedValue < 0) {
+		return 0;
+	}
+	return speedValue / 100;  // Convert the percentage to decimal (e.g., 80% becomes 0.8)
+}
+
+
 function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed) {
+
+	reducedResearchTime =  researchTime  / (1 + researchSpeed);
+	if (debugMode) {
+		console.log(`researchTime: ${researchTime}`);
+		console.log(`researchSpeed: ${researchSpeed}`);
+		console.log(`reducedResearchTime: ${reducedResearchTime}`);
+	}
+
 	return `
 		<div class="resource-costs">
 			<div class="resource-item">
@@ -120,8 +143,8 @@ function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed) {
 				<div class="resource-item-right">${formatTime(researchTime)}</div>
 			</div>
 			<div class="resource-item">
-				<div class="resource-item-left">Research Time (50%)</div>
-				<div class="resource-item-right">${formatTime(researchTime / 2)}</div>
+				<div class="resource-item-left">Research Time (final)</div>
+				<div class="resource-item-right">${formatTime(reducedResearchTime)}</div>
 			</div>
 		</div>
 	`;
@@ -282,23 +305,28 @@ function generateResearchItemCell(researchItem, researchTreeType) {
 	const nextLevel = currentLevel + 1;
 	const nextLevelData = researchItem.levels[nextLevel] || {};  // Get next level data or an empty object
 
+	// Get the current research speed dynamically
+	const researchSpeed = getResearchSpeed();
+
 	return `
 		<td>
 			<div class="d-flex justify-content-between" style="height: 100%;">
 				<!-- Left Side: Research Info -->
 				<div class="left-side" style="width: 50%; padding-right: 10px;">
 					<div class="research-square"></div>
-					<div class="research-item-name">${researchItem.name}</div>
-					<div class="research-item-level">Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${Object.keys(researchItem.levels).length}</div>
-					<div class="button-group">
-						<button id="decrease-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">-</button>
-						<button id="increase-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">+</button>
+					<div>${researchItem.name}</div>
+					<div class="d-flex justify-content-between align-items-center">
+						<div>Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${Object.keys(researchItem.levels).length}</div>
+						<div class="button-group">
+							<button id="decrease-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">-</button>
+							<button id="increase-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">+</button>
+						</div>
 					</div>
 				</div>
 
 				<!-- Right Side: Resource Costs and Time -->
 				<div class="right-side" style="width: 50%; padding-left: 10px;">
-					${getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time'] || 0, 0)}
+					${getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time'] || 0, researchSpeed)}
 				</div>
 			</div>
 		</td>
@@ -396,19 +424,23 @@ function handleTabSwitch(selectedTabId) {
 	const selectedButton = document.getElementById(selectedTabId);
 	selectedButton.classList.add('active');
 
-	// Render the appropriate tree based on the selected tab
+	// Set the currentTreeType based on the selected tab
 	if (selectedTabId === 'growth-tab') {
-		renderResearchTree(researchData.Growth, 'Growth');
+		currentTreeType = 'Growth';
 	} else if (selectedTabId === 'economy-tab') {
-		renderResearchTree(researchData.Economy, 'Economy');
+		currentTreeType = 'Economy';
 	} else if (selectedTabId === 'battle-tab') {
-		renderResearchTree(researchData.Battle, 'Battle');
+		currentTreeType = 'Battle';
 	}
 
+	// Render the appropriate tree based on the selected tab
+	renderResearchTree(researchData[currentTreeType], currentTreeType);
+
 	if (debugMode) {
-		console.log(`Switched to ${selectedTabId}`);
+		console.log(`Switched to ${selectedTabId} (Type: ${currentTreeType})`);
 	}
 }
+
 
 // Attach event listeners for tab switching
 document.addEventListener('DOMContentLoaded', function () {
@@ -425,4 +457,9 @@ document.addEventListener('DOMContentLoaded', function () {
 			handleTabSwitch(selectedTabId);
 		});
 	});
+});
+
+// Add an event listener to the research speed input to trigger re-rendering when the value changes
+document.getElementById('researchSpeedInput').addEventListener('input', function () {
+	renderResearchTree(researchData[currentTreeType], currentTreeType);
 });
