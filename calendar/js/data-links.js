@@ -1,2 +1,2 @@
-const DATA_URL = "http://127.0.0.1:7500/calendar/test-data.json";
+const DATA_URL = "https://data.wosnerds.com/data/calendar-data.json";
 
