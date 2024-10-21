@@ -2,7 +2,7 @@
 	"Growth": {
 		"tooling-up-1-example": {
 			"row": 1,
-			"name": "Tooling Up I example",
+			"name": "row 1 item",
 			"stat": "construction-speed",
 			"levels": {
 				"0": {
@@ -33,7 +33,7 @@
 		},
 		"ward-expansion-1": {
 			"row": 2,
-			"name": "Ward Expansion I",
+			"name": "row 2 item 1",
 			"stat": "infirmary-capacity",
 			"levels": {
 				"1": {
@@ -87,7 +87,7 @@
 		},
 		"example-expansion-1": {
 			"row": 2,
-			"name": "Example Expansion I",
+			"name": "row 2 item 2",
 			"stat": "infirmary-capacity",
 			"levels": {
 				"1": {
@@ -141,7 +141,7 @@
 		},
 		"camp-expansion-1": {
 			"row": 2,
-			"name": "Camp Expansion I",
+			"name": "row 2 item 3",
 			"stat": "training-capacity",
 			"levels": {
 				"1": {
@@ -184,7 +184,7 @@
 		},
 		"fdsfds-enhancement-1": {
 			"row": 3,
-			"name": "fdsfds Enhancement I",
+			"name": "row 3 item 1",
 			"stat": "research-speed",
 			"levels": {
 				"1": {
@@ -227,7 +227,7 @@
 		},
 		"tool-enhancement-1": {
 			"row": 3,
-			"name": "Tool Enhancement I",
+			"name": "row 3 item 2",
 			"stat": "research-speed",
 			"levels": {
 				"1": {
