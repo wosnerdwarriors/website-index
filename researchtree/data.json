@@ -46,7 +46,18 @@
 						"iron": 52151,
 						"steel": 1332
 					},
-					"research-time": 5021
+					"research-time": 5021,
+					"requirements":
+					{
+						"research-items":
+						{
+							"tooling-up-1-example": 2
+						},
+						"buildings":
+						{
+							"research-centre": 27
+						}
+					}
 				},
 				"2": {
 					"stat-addition": 2000,
