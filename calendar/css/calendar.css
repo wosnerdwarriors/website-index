@@ -1,0 +1,56 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    height: 100vh;  /* Ensure body takes full viewport height */
+    overflow: hidden;  /* Prevent scrolling */
+}
+
+h1 {
+    text-align: center;
+    padding: 20px;
+}
+h2 {
+    text-align: center;
+}
+
+
+#layout {
+    display: flex;
+    height: calc(100vh - 80px);  /* Full height minus space for the header */
+}
+
+#filters {
+    width: 250px;  /* Fixed width for sidebar */
+    background-color: #fff;
+    border-right: 1px solid #ddd;
+    padding: 10px;
+    overflow: auto;
+}
+
+#event-filter-list, #pack-filter-list {
+    max-height: 200px;
+    overflow-y: auto;  /* Scrollable box for events and packs */
+    border: 1px solid #ddd;
+    padding: 5px;
+}
+
+#calendar {
+    flex-grow: 1;
+    overflow: auto;  /* Allow internal scrolling */
+}
+
+#event-details {
+    width: 250px;
+    background-color: #fff;
+    border-left: 1px solid #ddd;
+    padding: 10px;
+    overflow-y: auto;  /* Scrollable details section */
+}
+
+.btn-group {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}

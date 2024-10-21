@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-TCPXVFNK');</script>
+<!-- End Google Tag Manager -->
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Banner Calculation Tool</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2214%22>🪵</text></svg>">
+	<style>
+		#messages {
+			display: none;
+			margin-top: 20px;
+		}
+		#info {
+			margin-bottom: 20px;
+			padding: 15px;
+			border-radius: 5px;
+			background-color: #e9ecef;
+		}
+	</style>
+</head>
+<body class="p-5">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TCPXVFNK"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+	<div class="container">
+		<div id="info" class="alert alert-info">
+			<h4>Welcome to the Banner Calculation Tool for Whiteout Survival!</h4>
+			<p>
+				This tool helps you figure out how many extra farms of each resource you would need to build more banners per day.
+				Building more banners is important because you earn alliance tokens, which are very useful for purchasing items in the alliance shop.
+			</p>
+			<p>
+				All data is stored locally in your browser, so feel free to create, save, and load data as you like. Your actions won’t affect other users.
+			</p>
+			<p>
+				NOTE: rebuilding the bear trap is the most efficient use of resources for this purpose. I haven't gotten around to filling in that data here yet
+			</p>
+		</div>
+
+		<h1 class="mb-4">Banner Calculation Tool</h1>
+
+		<div class="mb-3">
+			<label for="alliance_select" class="form-label">Select Alliance:</label>
+			<select id="alliance_select" class="form-select" size="5">
+				<!-- Alliance options will be dynamically generated here -->
+			</select>
+		</div>
+
+		<div class="row mb-4">
+			<div class="col">
+				<label for="meat_rate" class="form-label">Meat Rate (per hour):</label>
+				<input type="number" id="meat_rate" class="form-control" placeholder="Enter meat rate" value="0">
+			</div>
+			<div class="col">
+				<label for="wood_rate" class="form-label">Wood Rate (per hour):</label>
+				<input type="number" id="wood_rate" class="form-control" placeholder="Enter wood rate" value="0">
+			</div>
+			<div class="col">
+				<label for="coal_rate" class="form-label">Coal Rate (per hour):</label>
+				<input type="number" id="coal_rate" class="form-control" placeholder="Enter coal rate" value="0">
+			</div>
+			<div class="col">
+				<label for="iron_rate" class="form-label">Iron Rate (per hour):</label>
+				<input type="number" id="iron_rate" class="form-control" placeholder="Enter iron rate" value="0">
+			</div>
+		</div>
+
+		<div id="admin_section">
+			<label for="new_alliance_name" class="form-label">New Alliance Name:</label>
+			<input type="text" id="new_alliance_name" class="form-control mb-3" placeholder="Enter new alliance name">
+
+			<button id="load_alliance" class="btn btn-info mb-3">Load Alliance</button>
+			<button id="save_alliance" class="btn btn-primary mb-3">Save Alliance</button>
+			<button id="create_alliance" class="btn btn-secondary mb-3">Create New Alliance</button>
+			<button id="delete_alliance" class="btn btn-danger mb-3">Delete Alliance</button>
+			<button id="clear_all" class="btn btn-warning mb-3">Clear All Alliances</button>
+			<button id="clear_resources" class="btn btn-dark mb-3">Clear Resources to 0</button>
+		</div>
+
+		<div id="messages" class="alert alert-info" role="alert">
+			<!-- Message will be dynamically generated here -->
+		</div>
+
+		<h2 class="mb-3">Current Farms</h2>
+		<div class="row mb-4">
+			<div class="col">
+				<p><strong>Meat Farms:</strong> <span id="meat_farms">0</span></p>
+			</div>
+			<div class="col">
+				<p><strong>Wood Farms:</strong> <span id="wood_farms">0</span></p>
+			</div>
+			<div class="col">
+				<p><strong>Coal Farms:</strong> <span id="coal_farms">0</span></p>
+			</div>
+			<div class="col">
+				<p><strong>Iron Farms:</strong> <span id="iron_farms">0</span></p>
+			</div>
+		</div>
+
+		<h2 class="mb-3">Banners Per Day</h2>
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Banners per Day</th>
+					<th>Extra Meat Farms</th>
+					<th>Extra Wood Farms</th>
+					<th>Extra Coal Farms</th>
+					<th>Extra Iron Farms</th>
+				</tr>
+			</thead>
+			<tbody id="banners_table">
+				<!-- Rows will be dynamically generated here -->
+			</tbody>
+		</table>
+	</div>
+
+	<script src="/alliancerss/js/alliancerss.js"></script>
+</body>
+</html>
+

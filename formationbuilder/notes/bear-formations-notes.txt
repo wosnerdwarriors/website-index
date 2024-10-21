@@ -1,0 +1,197 @@
+bear formation notes
+
+== method ==
+we fill troops in this order. the min and max are ideal. so if we don't have enough troops to fill the min or the max, just fill up what we can and keep on going. Filling "all" means all remaining troops
+
+infantry 			min
+lancer 				max
+marksman 			max
+marksman			all
+lancer				all
+infantry			all
+====================
+
+Example calculation with these numbers:
+
+max march: 172,000
+num march: 7
+
+infant: 	353,000
+lancer: 	255,000
+marksman: 	709,000
+
+example min/max for each troop type
+			min			max
+infant: 	10%
+lancer: 				30%
+marksman: 				60%
+
+verify when the user puts in these values that their min and two maxes add up to 100%
+
+
+== Infantry min ==
+infantry min = 10% of max march = 17,200
+7 marches of 17,200 = 120,400 used for minimum 10% for all marches
+
+we have 353,000 so we have enough infantry left now for all our minimum marches. so
+march 1 += 17,200 infantry
+march 2 += 17,200  infantry
+etc etc
+
+
+== lancer max ==
+lancer max = 30% of max march = 51,600
+7 marches of 51600 = 361,200 which we don't have enough lancers left for that. so let's add what we can add to get as near to 30% as we can (by using all our lancers)
+we have 255,000 lancers divided by 7 = 36,428.571428571. so let's take the rounded down number which is 36428. 
+
+36,428 * 7 = 25,4996; 25000- 25,4996  = 4 left over so
+march1 += 36,428 lancer
+march2 += 36,428 lancer
+march3 += 36,428 lancer
+march4 += 36,428 lancer
+march5 += 36,428 lancer
+march6 += 36,428 lancer
+march7 += 36,428 lancer
+now we go 1 by 1 and add the lancers
+march1 += 1 lancer
+march2 += 1 lancer
+march3 += 1 lancer
+march4 += 1 lancer
+
+
+
+
+== marksman max ==
+marks max = 60% of max march = 103,200. 
+7 marches of 103,200 is 722,400 marksman. we don't have enough left we only have 709,000. so 
+709,000 / 7 = 101285, remainder 5
+
+
+march1 += 101285 marksman
+march2 += 101285 marksman
+march3 += 101285 marksman
+march4 += 101285 marksman
+march5 += 101285 marksman
+march6 += 101285 marksman
+march7 += 101285 marksman
+now we go 1 by 1 and add the remaining marksman
+march1 += 1 marksman
+march2 += 1 marksman
+march3 += 1 marksman
+march4 += 1 marksman
+march5 += 1 marksman
+
+
+= ALL =
+Now that we've reached the ALL stage, we're going to be filling in what troops we have left so where we relied upon min/max troops before that have guaranteed space, we now don't and we must calculate the max size we can allocate to every single march
+
+
+now we get the max amount of troops in a march. in this case it would be march 1-4 with 154,915 troops each
+(because of the extra troops we added from remainers of lancer and marksman). 
+so from our max of 172,000 - 154,915 = 17,085 spots left for troops minimum in each march
+
+== marksman ALL ==
+we're out of marksman so we can move onto lancer but we would filled in marksman the same way we're about to fill in other troops.
+
+== Lancer ALL ==
+We're all out of lancers too so let's move onto infantry
+
+== Lancer ALL ==
+troops left minimum in each march. So let's see if we have enough infantry to fill that. 
+We have 232,600 infantry currently left over
+if we were to add all the spots left over with infantry, we would need 119,595 which is less than our current 232,600 infantry so we have enough. so let's add 17,085 infantry to each march
+
+march1 += 17,085 
+march2 += 17,085 
+march3 += 17,085 
+march4 += 17,085 
+march5 += 17,085 
+march6 += 17,085 
+march7 += 17,085 
+
+now that that's done, let's take a look at our marches with the lowest troop count and fill them up until we have no more troops left of infantry (or the marches are full)
+
+that would be march 6 + 7 to start with are missing 2
+then march 5 is missing 1
+so we do 
+march6 += 1 infantry
+march7 += 1 infantry
+march5 += 1 infantry
+march6 += 1 infantry
+march7 += 1 infantry
+
+in this case we ran out of room in the marches first. 
+if we were doing this on lancers and we ran out of lancers, we would have taken the new march empty size and moved on.
+if the minimum size in each march is 0 then we don't add anything to "every single march" and start immediately adding troops to the most empty march and keep going in a loop until we've run out of troops or the march is full 
+
+
+Your description of the troop allocation process is quite detailed and logically structured. However, there are a few areas where the process might face challenges or could be optimized further:
+
+1. Exact Distribution Matching Min/Max:
+Issue: The current process assumes that the min and max percentages will exactly distribute the troops among the marches. However, because you are dealing with integer troop counts and rounding down, there can be situations where this leads to uneven distributions, particularly when handling small remainders.
+Potential Improvement: Instead of rounding down and then dealing with remainders separately, you could consider using a more dynamic approach, such as distributing any remainder proportionally across the marches that have the smallest current count.
+2. Order of Troop Addition:
+Issue: The order in which you add troops (first filling the min for infantry, then max for lancer and marksman) works, but it assumes the troops are always available in those exact quantities. There may be scenarios where different orderings could lead to more optimal results (e.g., fewer remainders).
+Potential Improvement: Consider an adaptive approach where the order of troop type allocation might change depending on the availability of troops or based on which march has the most space left after each stage.
+3. Handling Leftovers:
+Issue: The method for handling leftover troops (when you have a few troops left after evenly distributing the majority) is clear, but this could sometimes lead to an imbalance in the marches, particularly if there are many troops left over after the primary distribution.
+Potential Improvement: After adding the leftovers one by one, you could consider a balancing step where you evaluate if redistributing some troops between marches would result in a more balanced formation overall.
+4. Progressive Adjustment:
+Issue: The method described for filling "all" stages (where all remaining troops are allocated) is straightforward. However, in scenarios where multiple troop types have leftovers, this method might lead to inefficient use of space in the marches.
+Potential Improvement: You could introduce a balancing algorithm that dynamically adjusts the allocation of each troop type based on the remaining capacity of each march. This could help in making sure that marches are as balanced as possible without over-complicating the logic.
+5. Verification of Min/Max Constraints:
+Issue: Your verification step ensures that the min and max constraints sum to 100%. However, this does not account for scenarios where, due to troop shortages, the actual percentages after distribution might not align with the min/max values.
+Potential Improvement: Along with the verification step, you might want to include a post-distribution validation to ensure that the actual troop distributions respect the min/max constraints as closely as possible, even if the exact values can't be met.
+6. Edge Cases and Error Handling:
+Issue: The plan should consider edge cases such as:
+What happens if a troop type is completely absent?
+What if the number of troops for a particular type is exactly equal to or slightly less than the required min/max?
+How should the system behave if the user inputs invalid min/max values (e.g., min > max)?
+Potential Improvement: Implement detailed error handling and validation to ensure that these edge cases are managed gracefully, with clear feedback to the user.
+7. Efficiency Considerations:
+Issue: The described method is sequential and might become inefficient as the number of troops and marches scales up.
+Potential Improvement: You could look into optimizing the algorithm using batch processing techniques or by parallelizing parts of the troop distribution process where possible, to improve performance for larger datasets.
+Overall, your approach is solid and should work well with proper error handling and optimizations for edge cases. By addressing the points above, you can ensure that the troop allocation process is not only correct but also efficient and robust in various scenarios.
+
+issue 1:
+no it doesn't .we aim to get as close as we can and each march will be a little different too which is the only option we have when your troops are uneven. 
+However, distribute troops to the marches that have the smallest current count is great. let's do this instead of starting with march 1 and going down.
+
+2. Order of Troop Addition:
+I think you've misunderstood. each time we allocate troops we're checking if we have enough troops and allocating what's there if not enough are available or allocating all that we want if they are. did you not understand this?
+
+3: that's fine, we're aware and there's no way around each march being a little different. 
+
+4. Progressive Adjustment:
+i'm already doing that. I'm always using the max batch size and then taking the march with the smallest count and round robbining onto each march
+
+5. Verification of Min/Max Constraints:
+Yes i'm aware. that's the whole point of the calculation instead of just taking straight % which would be a super easy calculation. 
+
+6. Edge Cases and Error Handling:
+can you tell me how i'm currently handling this because I believe I am already handling this am I not? What happens if we run out of troops to distribute?
+ChatGPT
+Let's go through each point in detail:
+
+1. Distribute Troops to the Smallest Current Count March:
+Clarification: Your approach of distributing troops to the marches with the smallest current count is an effective way to ensure a more balanced distribution. This method should help minimize disparities between marches as much as possible, given the constraints of troop availability.
+Implementation: This approach would involve continually checking which march has the smallest total count of troops after each allocation and prioritizing it for the next round of troop distribution. This ensures that the distribution is as even as possible, given the available troops.
+2. Order of Troop Addition:
+Clarification: You mentioned that the order of troop addition is based on checking whether you have enough troops and then allocating accordingly. This approach makes sense, and I understand now that you're dynamically adjusting the allocation based on the available troops.
+Implementation: The way you’re handling this seems logical. You’re essentially trying to hit the min/max thresholds for each troop type and then distributing whatever is left. This method should work well as long as you continue to check troop availability before each allocation and distribute to the march with the smallest count, as discussed.
+3. Handling Leftover Troops:
+Clarification: Since you’re aware of the possibility of minor differences between marches, this approach is valid. The minor differences are an inherent limitation when dealing with integer troop counts and varying troop availability.
+Implementation: Your current method of dealing with leftovers, by distributing them to the marches with the smallest troop counts, should minimize imbalances as much as possible.
+4. Progressive Adjustment:
+Clarification: If you’re already using the max batch size and distributing based on the smallest march count, then you’re effectively implementing a form of progressive adjustment. This method should help maintain balance across marches.
+Implementation: Continue with this approach. It seems robust given the constraints you’re working with.
+5. Verification of Min/Max Constraints:
+Clarification: Given that the purpose of the calculation is to handle cases where the exact percentages can’t be met, your current method makes sense. The calculations you’ve outlined will ensure that you get as close as possible to the desired distribution while accounting for the available troops.
+Implementation: No changes needed here as you’re already handling the constraints effectively.
+6. Edge Cases and Error Handling:
+Current Handling: If you run out of troops to distribute, based on your description, the process will simply stop allocating more of that troop type and move on to the next type. This is a reasonable approach, as it ensures that the distribution process continues smoothly even if a certain type of troop runs out.
+Verification:
+If a Troop Type is Absent: The process skips allocation for that type, which is a valid approach.
+If Troops are Insufficient for Min/Max: The process allocates whatever is available, which is the correct way to handle it given the constraints.
+Handling Invalid Inputs: If your UI or input validation ensures that min + max always equals 100%, you won’t run into issues with invalid min/max percentages. However, it’s important to validate these inputs to prevent any misconfigurations.
+Overall, you’ve already accounted for many of the challenges that could arise in this process. The method you’ve described should work effectively, especially with the adjustment of distributing to the smallest current count march first. This will ensure the most balanced formation possible given the constraints of troop availability.

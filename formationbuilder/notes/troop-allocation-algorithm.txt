@@ -1,0 +1,122 @@
+troop allocation algorithm
+total_infantry = entry from website
+total_lancers = entry from website
+total_marksman = entry from website
+
+number_of_marches = entry from website
+max_march_capacity = entry from website
+
+//============== start ==============
+marches = {}
+for i =1; i<= max_marches; i++:
+	marches[i] = new_dict_of_troop_types_and_counts
+
+
+starter dict
+march[0] {
+	"infantry":
+	{
+		t11: 0
+		t10: 0
+		T9: 0
+		T8: 0
+		... etc
+		t1: 0
+	},
+	"lancer":
+	{
+		t11: 0
+		t10: 0
+		T9: 0
+		t8: 0
+		... etc
+		t1: 0
+	}
+	"marksman":
+	{
+		t11: 0
+		t10: 0
+		T9: 0
+		t8: 0
+		... etc
+		t1: 0
+	}
+
+}
+
+march_troop_count(march, troop_type)
+{
+	total_troop_type_count = 0
+	foreach (troopCounts in march[troop_type])
+	{
+		total_troop_type_count += troopCounts
+	}
+	return total_troop_type_count
+}
+
+global current_infantry_left = total_infantry we entered in GUI
+global current_lancer_left = total_lancer we entered in GUI
+global current_marksman_left = total_marksman we entered in GUI
+
+
+
+
+
+
+
+function allocate_troops_from_t11_to_t1(troop_type,march, troop_count_to_allocate)
+{
+	
+}
+
+
+
+
+
+/*
+============== allocate min/max troops ==============
+* there could already a random amount of troops in each march. 
+* each march will have the same count
+* there should always be room for max troops %
+* 
+*/
+
+function allocate_min_max_troop_by_type(troop_type, percent_troop_to_add)
+{
+
+	// use the first march but confirm each march is the exact same troop composition. in the future they'll be different so keep each one as a separate march but for now they should be exactly the same
+
+	var current_TROOPTYPE_in_each_march = march_troop_count(marches[0],troop_type) 
+
+	var maximum_TROOPTYPE_per_march = percent_troop_to_add% * max_march_capacity
+	var TROOPTYPE_to_add_to_march_to_make_up_to_max = maximum_TROOPTYPE_per_march - current_TROOPTYPE_in_each_march
+
+
+	var TROOPTYPE_troops_needed_total = TROOPTYPE_to_add_to_march_to_make_up_to_max * number_marches
+
+	// we have enough TROOPTYPE
+	if (current_TROOPTYPE_left >= TROOPTYPE_troops_needed_total):
+		foreach targetMarch in marches:
+			targetMarch[troop_type][t11] += maximum_TROOPTYPE_per_march
+			current_TROOPTYPE_left -= maximum_TROOPTYPE_per_march
+
+	//we don't have enough TROOPTYPE, fill what we can (ignoring left over uneven counts of troops)
+	else:
+		TROOPTYPE_we_can_allocate_per_march_maximum = (int /*remove decimal*/)(current_TROOPTYPE_left / max_marches )
+
+		foreach targetMarch in marches:
+			targetMarch[troops_dict] += maximum_TROOPTYPE_per_march
+			targetMarch[TROOPTYPE_count] += maximum_TROOPTYPE_per_march
+
+			current_TROOPTYPE_left -= maximum_TROOPTYPE_per_march
+}
+//____________________________________________________________________
+
+
+
+//============== allocate all troops (rest of troops) ==============
+	function input vars:
+		- troop type
+
+	troop_count_we_could_add_to_march = max_march_capacity - march1[troop_count] 
+
