@@ -185,6 +185,12 @@ body, html {
 	text-align: center;
 }
 
+
+#info-bar {
+	position: relative;
+	height: 100%;
+}
+
 /* Info/Display Bar (Fixed in Place) */
 .info-bar {
 	width: 250px;
@@ -278,4 +284,17 @@ body, html {
 /* Ensure the buttons for mode and tabs are spaced out and styled properly */
 .mode-selector .btn, .tab-selector .btn {
 	margin-right: 10px;
+}
+
+
+
+
+.total-resource-time-box {
+	border-top: 1px solid #ccc;
+	background-color: #f9f9f9;
+	padding: 10px;
+}
+
+#researchSpeedInput {
+	width: 25%; /* Adjust this value as necessary */
 }
