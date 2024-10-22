@@ -1,3 +1,13 @@
+// Load the navbar from an external file
+$(function () {
+	$('#navbar').load('/navbar.html', function () {
+		if (debugMode) {
+			console.log('Navbar loaded from /navbar.html');
+		}
+	});
+});
+
+
 // Debugging flag and godmode flag
 let debugMode = false;
 let godMode = false;
@@ -5,17 +15,315 @@ let godMode = false;
 let currentTreeType = 'Growth'; // Default to Growth on initial load
 
 // Store data.json content
-let researchData = {};
+let researchConfigData = {};
 
-// Object to store the user's current research state (mirrors researchData)
-let userResearchState = {
+
+let currentMode = 'wanted'; // Default to 'wanted' research mode
+let existingResearchState = {
+	Growth: {},
+	Economy: {},
+	Battle: {}
+};
+let wantedResearchState = {
 	Growth: {},
 	Economy: {},
 	Battle: {}
 };
 
-// Function to check for ?debug=true or ?godmode=true in URL
-function checkFlags() {
+let currentWantedOrExistingResearchState = existingResearchState;
+
+// Function to attach event handlers to research items
+function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType) {
+	researchItemsInRow.forEach(researchItem => {
+		let currentResearchLevel = currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID];
+		const maxResearchLevel = researchItem.levels ? Object.keys(researchItem.levels).length : 0;
+
+		// Add event listener to increase button
+		const increaseButton = document.getElementById(`increase-${researchTreeType}-${researchItem.researchID}`);
+		if (increaseButton) {
+			const nextLevel = currentResearchLevel + 1;
+			const requirementsCheck = requirementsMet(researchItem.researchID, researchTreeType, nextLevel);
+
+			if (!requirementsCheck) {
+				increaseButton.disabled = true;
+				increaseButton.classList.add('btn-secondary');
+				increaseButton.classList.remove('btn-primary');
+			}
+
+			// Add click event listener to handle upgrades
+			increaseButton.addEventListener('click', () => {
+				if (currentMode === 'existing') {
+					recursiveUpgrade(researchItem.researchID, researchTreeType, nextLevel);
+				} else {
+					const canUpgrade = requirementsMet(researchItem.researchID, researchTreeType, nextLevel);
+
+					if (currentResearchLevel < maxResearchLevel && (canUpgrade || godMode)) {
+						currentResearchLevel++; 
+						currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel; 
+						document.getElementById(`level-${researchTreeType}-${researchItem.researchID}`).textContent = currentResearchLevel;
+
+						if (debugMode) {
+							console.log(`Increased level for ${researchItem.researchID} to ${currentResearchLevel}`);
+							if (!canUpgrade) {
+								console.log(`God mode bypassed requirements for ${researchItem.researchID}`);
+							}
+						}
+					} else if (debugMode) {
+						console.log(`Cannot upgrade ${researchItem.researchID} due to unmet requirements or max level reached.`);
+					}
+				}
+				renderResearchTree();
+			});
+		}
+
+		// Add event listener to decrease button
+		const decreaseButton = document.getElementById(`decrease-${researchTreeType}-${researchItem.researchID}`);
+		if (decreaseButton) {
+			decreaseButton.addEventListener('click', () => {
+				if (currentResearchLevel > 0) {
+					if (currentMode === 'existing') {
+						recursiveDowngrade(researchItem.researchID, researchTreeType, currentResearchLevel - 1);
+					} else {
+						if (!isBlockedFromDowngrade(researchItem.researchID, researchTreeType)) {
+							currentResearchLevel--; 
+							wantedResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel;
+							document.getElementById(`level-${researchTreeType}-${researchItem.researchID}`).textContent = currentResearchLevel;
+						}
+					}
+					renderResearchTree();
+				}
+			});
+		}
+	});
+}
+
+
+// Function to calculate and display total resources and time in the info bar
+// Function to update the research info bar with total resources and time
+function updateTotalResourcesAndTime() {
+	let totalResources = {
+		meat: 0,
+		wood: 0,
+		coal: 0,
+		iron: 0,
+		steel: 0,
+		fc: 0
+	};
+
+	let totalResearchTime = 0;
+	let reducedResearchTime = 0;
+	const researchSpeed = getResearchSpeed();  // Retrieve research speed as a decimal (e.g., 0.8 for 80%)
+
+	// Calculate total resources and total research time
+	Object.keys(currentWantedOrExistingResearchState[currentTreeType]).forEach(researchID => {
+		const researchLevel = currentWantedOrExistingResearchState[currentTreeType][researchID];
+		const researchItem = researchConfigData[currentTreeType][researchID];
+		if (researchItem.levels[researchLevel]) {
+			const cost = researchItem.levels[researchLevel].cost || {};
+			totalResources.meat += cost.meat || 0;
+			totalResources.wood += cost.wood || 0;
+			totalResources.coal += cost.coal || 0;
+			totalResources.iron += cost.iron || 0;
+			totalResources.steel += cost.steel || 0;
+			totalResources.fc += cost.fc || 0;
+
+			// Calculate research time
+			const researchTime = researchItem.levels[researchLevel]['research-time-seconds'] || 0;
+			totalResearchTime += researchTime;
+		}
+	});
+
+	// Apply research speed reduction
+	reducedResearchTime = totalResearchTime / (1 + researchSpeed);
+
+	// Generate HTML using the getResourceAndTimeHTML function
+	const htmlContent = getResourceAndTimeHTML(totalResources, totalResearchTime, researchSpeed);
+
+	// Inject the generated HTML into the info bar
+	const infoBar = document.getElementById('research-info-bar');
+	infoBar.innerHTML = `
+		<h4>Total Research Resources & Time</h4>
+		${htmlContent}
+	`;
+}
+
+// Updated renderResearchTree function
+function renderResearchTree() {
+	const researchTable = document.getElementById('researchTable');
+	if (!researchTable) {
+		console.error(`Table with ID "researchTable" not found!`);
+		return;
+	}
+
+	if (debugMode) {
+		console.log(`renderResearchTree for currentTreeType: `, currentTreeType);
+		updateDebugTable();
+	}
+	updateTotalResourcesAndTime();
+	researchTable.innerHTML = '';
+
+	const researchRows = {};
+	Object.keys(researchConfigData[currentTreeType]).forEach(researchID => {
+		const researchItem = researchConfigData[currentTreeType][researchID];
+		if (!researchRows[researchItem.row]) {
+			researchRows[researchItem.row] = [];
+		}
+		researchRows[researchItem.row].push({ researchID, ...researchItem });
+	});
+
+	Object.keys(researchRows).forEach(rowNumber => {
+		const researchItemsInRow = researchRows[rowNumber];
+		const rowElement = document.createElement('tr');
+		const emptyCell = '<td></td>';
+
+		if (researchItemsInRow.length === 1) {
+			rowElement.innerHTML = `${emptyCell}
+				${generateResearchItemCell(researchItemsInRow[0], currentTreeType)}
+				${emptyCell}`;
+		} else if (researchItemsInRow.length === 2) {
+			rowElement.innerHTML = `
+				${generateResearchItemCell(researchItemsInRow[0], currentTreeType)}
+				${emptyCell}
+				${generateResearchItemCell(researchItemsInRow[1], currentTreeType)}
+			`;
+		} else if (researchItemsInRow.length === 3) {
+			rowElement.innerHTML = `
+				${generateResearchItemCell(researchItemsInRow[0], currentTreeType)}
+				${generateResearchItemCell(researchItemsInRow[1], currentTreeType)}
+				${generateResearchItemCell(researchItemsInRow[2], currentTreeType)}
+			`;
+		} else {
+			console.log(`CRITICAL ERROR: A data row has more than 3 research items (${researchItemsInRow.length}). We won't be displaying the row at all.`);
+		}
+
+		researchTable.appendChild(rowElement);
+
+		// Attach event handlers for buttons
+		attachEventHandlersToResearchItems(researchItemsInRow, currentTreeType);
+	});
+
+	if (debugMode) {
+		researchTable.classList.add('table-bordered');
+	} else {
+		researchTable.classList.remove('table-bordered');
+	}
+}
+
+function generateResearchItemCell(researchItem, researchTreeType) {
+	const currentLevel = currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID];
+	const maxLevel = researchItem.levels ? Object.keys(researchItem.levels).length : 0;
+	const nextLevel = currentLevel + 1;
+
+	const nextLevelData = researchItem.levels && researchItem.levels[nextLevel] ? researchItem.levels[nextLevel] : {};
+	const isMaxed = nextLevel > maxLevel;
+
+	const researchSpeed = getResearchSpeed();
+	const stat = researchItem.stat || "N/A";
+	const statAddition = nextLevelData['stat-addition'] || 0;
+
+	return `
+		<td>
+			<div class="d-flex justify-content-between" style="height: 100%;">
+				<!-- Left Side: Research Info -->
+				<div class="left-side" style="width: 50%; padding-right: 10px;">
+					<div class="research-square"></div>
+					<div class="research-item-name">${researchItem.name}</div>
+					<div class="research-item-level">Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${maxLevel}</div>
+					<div class="button-group">
+						<button id="decrease-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">-</button>
+						<button id="increase-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">+</button>
+					</div>
+
+					<div class="stat-increase-info mt-3">
+						<div class="stat-item">
+							<div class="stat-label">${stat}</div>
+						</div>
+						<div class="stat-item">
+							<div class="stat-value">+${statAddition}%</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Right Side: Resource Costs, Time -->
+				<div class="right-side" style="width: 50%; padding-left: 10px;">
+					${getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time-seconds'] || 0, researchSpeed, isMaxed)}
+				</div>
+			</div>
+		</td>
+	`;
+}
+
+function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed, isMaxed=false) {
+	let formattedTime = '';
+	let reducedResearchTime = '';
+	if (!isMaxed) {
+		reducedResearchTime = researchTime / (1 + researchSpeed);
+		formattedTime = formatTime(researchTime);
+	} else {
+		formattedTime = 'MAXED';
+	}
+
+	return `
+		<div class="resource-costs">
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/meat-ico.png" alt="Meat Icon"> Meat</div>
+				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.meat || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/wood-ico.png" alt="Wood Icon"> Wood</div>
+				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.wood || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/coal-ico.png" alt="Coal Icon"> Coal</div>
+				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.coal || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/iron-ico.png" alt="Iron Icon"> Iron</div>
+				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.iron || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/steel-ico.png" alt="Steel Icon"> Steel</div>
+				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.steel || 0)}</div>
+			</div>
+			<div class="resource-item">
+				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/fc-ico.png" alt="FC Icon"> FC</div>
+				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.fc || 0)}</div>
+			</div>
+		</div>
+		<div class="time-required">
+			<div class="resource-item-left">Time: ${formattedTime}</div>
+			${!isMaxed ? `<div class="resource-item-left">Time (final): ${formatTime(reducedResearchTime)}</div>` : ''}
+		</div>
+	`;
+}
+
+function formatResource(amount) {
+	return amount.toLocaleString();
+}
+
+function formatTime(seconds) {
+	const timeUnits = [
+		{ label: 'year', value: 60 * 60 * 24 * 365 },
+		{ label: 'month', value: 60 * 60 * 24 * 30 },
+		{ label: 'week', value: 60 * 60 * 24 * 7 },
+		{ label: 'day', value: 60 * 60 * 24 },
+		{ label: 'hour', value: 60 * 60 },
+		{ label: 'minute', value: 60 },
+		{ label: 'second', value: 1 },
+	];
+
+	let timeStr = '';
+	for (const unit of timeUnits) {
+		if (seconds >= unit.value) {
+			const count = Math.floor(seconds / unit.value);
+			timeStr += `${count} ${unit.label}${count > 1 ? 's' : ''} `;
+			seconds %= unit.value;
+		}
+	}
+	return timeStr.trim();
+}
+
+function checkUrlGetParameters() {
 	const urlParams = new URLSearchParams(window.location.search);
 	debugMode = urlParams.has('debug') && urlParams.get('debug') === 'true';
 	godMode = urlParams.has('godmode') && urlParams.get('godmode') === 'true';
@@ -28,450 +336,189 @@ function checkFlags() {
 	}
 }
 
-// Initialize userResearchState based on researchData structure
-function initializeUserResearchState() {
+function initializeResearchStates() {
 	['Growth', 'Economy', 'Battle'].forEach(treeType => {
-		if (researchData[treeType]) {
-			Object.keys(researchData[treeType]).forEach(itemKey => {
-				// Set initial level to 0 for each research item
-				userResearchState[treeType][itemKey] = 0;
+		if (researchConfigData[treeType]) {
+			Object.keys(researchConfigData[treeType]).forEach(itemKey => {
+				existingResearchState[treeType][itemKey] = existingResearchState[treeType][itemKey] || 0;
+				wantedResearchState[treeType][itemKey] = wantedResearchState[treeType][itemKey] || 0;
 			});
 		}
 	});
 	if (debugMode) {
-		console.log('Initialized userResearchState:', userResearchState);
+		console.log('Initialized both research states:', { existingResearchState, wantedResearchState });
 	}
 }
 
-// Function to check if requirements for upgrading are met
-function requirementsMet(researchIDToCheckIfWeCanUpgrade, researchTreeType, targetLevelForUpgrade) {
-	let canUpgrade = true; // Assume we can upgrade unless proven otherwise
-	const researchItemToUpgrade = researchData[researchTreeType][researchIDToCheckIfWeCanUpgrade];
-	const requirementsForNextLevel = researchItemToUpgrade.levels[targetLevelForUpgrade]?.requirements?.['research-items'];
+function requirementsMet(researchID, researchTreeType, targetLevel) {
+	if (currentMode === 'existing') return true;
 
-	// Log the research ID and level we're checking for upgrade
-	if (debugMode) {
-		console.log(`Checking if we can upgrade research ID: ${researchIDToCheckIfWeCanUpgrade} to level ${targetLevelForUpgrade}`);
-	}
+	const researchItem = researchConfigData[researchTreeType][researchID];
+	const requirements = researchItem.levels[targetLevel]?.requirements?.['research-items'];
 
-	if (requirementsForNextLevel) {
-		// Loop through each required research and check if the level is met
-		for (const [requiredResearchID, requiredResearchLevel] of Object.entries(requirementsForNextLevel)) {
-			const currentLevelOfRequiredResearch = userResearchState[researchTreeType][requiredResearchID] || 0;
-			
-			// Log requirement status: current level vs required level
-			if (debugMode) {
-				console.log(`${researchIDToCheckIfWeCanUpgrade} to level ${targetLevelForUpgrade} Requirement: ${requiredResearchID} has level ${currentLevelOfRequiredResearch}/${requiredResearchLevel}`);
-			}
-
-			// If the actual level is less than the required level, mark as unmet
-			if (currentLevelOfRequiredResearch < requiredResearchLevel) {
-				canUpgrade = false;
+	if (requirements) {
+		for (const [reqID, reqLevel] of Object.entries(requirements)) {
+			const currentLevel = currentWantedOrExistingResearchState[researchTreeType][reqID] || 0;
+			if (currentLevel < reqLevel) {
 				if (debugMode) {
-					console.log(`${researchIDToCheckIfWeCanUpgrade} to level ${targetLevelForUpgrade} Requirement NOT met: ${requiredResearchID} requires level ${requiredResearchLevel}, but it is level ${currentLevelOfRequiredResearch}`);
+					console.log(`Cannot upgrade ${researchID} to level ${targetLevel}. Requirement not met: ${reqID} (needs ${reqLevel}, current ${currentLevel})`);
 				}
-			} else if (debugMode) {
-				console.log(`${researchIDToCheckIfWeCanUpgrade} to level ${targetLevelForUpgrade} Requirement met: ${requiredResearchID} requires level ${requiredResearchLevel}, and it is level ${currentLevelOfRequiredResearch}`);
+				return false;
 			}
 		}
 	}
-
-	// At the end, if godMode is enabled, bypass the requirements
-	if (godMode) {
-		if (debugMode) {
-			console.log(`God mode enabled, ignoring requirements for research ID: ${researchIDToCheckIfWeCanUpgrade}`);
-		}
-		return true;
-	}
-
-	// Return whether the upgrade is allowed based on requirements
-	return canUpgrade;
+	return godMode || true;
 }
 
-// Get the research speed from the input field
 function getResearchSpeed() {
 	const researchSpeedInput = document.getElementById('researchSpeedInput');
 	const speedValue = parseFloat(researchSpeedInput.value);
-
-	// Ensure the speed is a valid number, default to 0 if NaN or negative
-	if (isNaN(speedValue) || speedValue < 0) {
-		return 0;
-	}
-	return speedValue / 100;  // Convert the percentage to decimal (e.g., 80% becomes 0.8)
+	return isNaN(speedValue) || speedValue < 0 ? 0 : speedValue / 100;
 }
 
-
-function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed) {
-
-	reducedResearchTime =  researchTime  / (1 + researchSpeed);
-	if (debugMode) {
-		console.log(`researchTime: ${researchTime}`);
-		console.log(`researchSpeed: ${researchSpeed}`);
-		console.log(`reducedResearchTime: ${reducedResearchTime}`);
-	}
-
-	return `
-		<div class="resource-costs">
-			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/meat-ico.png" alt="Meat Icon"> Meat</div>
-				<div class="resource-item-right">${formatResource(resourceCosts.meat || 0)}</div>
-			</div>
-			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/wood-ico.png" alt="Wood Icon"> Wood</div>
-				<div class="resource-item-right">${formatResource(resourceCosts.wood || 0)}</div>
-			</div>
-			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/coal-ico.png" alt="Coal Icon"> Coal</div>
-				<div class="resource-item-right">${formatResource(resourceCosts.coal || 0)}</div>
-			</div>
-			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/iron-ico.png" alt="Iron Icon"> Iron</div>
-				<div class="resource-item-right">${formatResource(resourceCosts.iron || 0)}</div>
-			</div>
-			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/steel-ico.png" alt="Steel Icon"> Steel</div>
-				<div class="resource-item-right">${formatResource(resourceCosts.steel || 0)}</div>
-			</div>
-			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/fc-ico.png" alt="FC Icon"> FC</div>
-				<div class="resource-item-right">${formatResource(resourceCosts.fc || 0)}</div>
-			</div>
-		</div>
-		<div class="time-required">
-			<div class="resource-item">
-				<div class="resource-item-left">Research Time</div>
-				<div class="resource-item-right">${formatTime(researchTime)}</div>
-			</div>
-			<div class="resource-item">
-				<div class="resource-item-left">Research Time (final)</div>
-				<div class="resource-item-right">${formatTime(reducedResearchTime)}</div>
-			</div>
-		</div>
-	`;
-}
-
-
-// Utility function to format resources with commas
-function formatResource(amount) {
-	return amount.toLocaleString();
-}
-
-// Function to format time for both regular and 50% times
-function formatTime(seconds) {
-	const timeUnits = [
-		{ label: 'year', value: 60 * 60 * 24 * 365 },
-		{ label: 'month', value: 60 * 60 * 24 * 30 },
-		{ label: 'week', value: 60 * 60 * 24 * 7 },
-		{ label: 'day', value: 60 * 60 * 24 },
-		{ label: 'hour', value: 60 * 60 },
-		{ label: 'minute', value: 60 },
-	];
-
-	let timeStr = '';
-	for (const unit of timeUnits) {
-		if (seconds >= unit.value) {
-			const count = Math.floor(seconds / unit.value);
-			timeStr += `${count} ${unit.label}${count > 1 ? 's' : ''} `;
-			seconds %= unit.value;
-		}
-	}
-
-	return timeStr.trim();
-}
-
-// Function to render the research tree dynamically
-// Function to render the research tree dynamically
-function renderResearchTree(researchTreeData, researchTreeType) {
-	const researchTable = document.getElementById('researchTable');
-	if (!researchTable) {
-		console.error(`Table with ID "researchTable" not found!`);
-		return;
-	}
-
-	// Clear existing table content
-	researchTable.innerHTML = '';
-
-	// Organize research items by row
-	const researchRows = {};
-	Object.keys(researchTreeData).forEach((researchID) => {
-		const researchItem = researchTreeData[researchID];
-		if (!researchRows[researchItem.row]) {
-			researchRows[researchItem.row] = [];
-		}
-		researchRows[researchItem.row].push({ researchID, ...researchItem });
-	});
-
-	// Iterate through rows to render them
-	Object.keys(researchRows).forEach(rowNumber => {
-		const researchItemsInRow = researchRows[rowNumber];
-		const rowElement = document.createElement('tr');
-		const emptyCell = '<td></td>'; // Placeholder for empty cells
-
-		// Handle cases based on the number of research items in a row
-		if (researchItemsInRow.length === 1) {
-			rowElement.innerHTML = `${emptyCell}
-				${generateResearchItemCell(researchItemsInRow[0], researchTreeType)}
-				${emptyCell}`;
-		} else if (researchItemsInRow.length === 2) {
-			rowElement.innerHTML = `
-				${generateResearchItemCell(researchItemsInRow[0], researchTreeType)}
-				${emptyCell}
-				${generateResearchItemCell(researchItemsInRow[1], researchTreeType)}
-			`;
-		} else if (researchItemsInRow.length === 3) {
-			rowElement.innerHTML = `
-				${generateResearchItemCell(researchItemsInRow[0], researchTreeType)}
-				${generateResearchItemCell(researchItemsInRow[1], researchTreeType)}
-				${generateResearchItemCell(researchItemsInRow[2], researchTreeType)}
-			`;
-		}else{
-			console.log("CRITICAL ERROR, a data row has more than 3 research items in a single row. we won't be displaying the row at all")
-		}
-
-		researchTable.appendChild(rowElement);
-
-		// Attach event listeners after row has been added to the DOM
-		researchItemsInRow.forEach(researchItem => {
-			let currentResearchLevel = userResearchState[researchTreeType][researchItem.researchID];
-			const maxResearchLevel = Object.keys(researchItem.levels).length;
-
-			// Add event listener to increase button
-			const increaseButton = document.getElementById(`increase-${researchTreeType}-${researchItem.researchID}`);
-			if (increaseButton) {
-				// Check requirements for the next level (i.e., currentResearchLevel + 1)
-				const nextLevel = currentResearchLevel + 1;
-				const requirementsCheck = requirementsMet(researchItem.researchID, researchTreeType, nextLevel);
-
-				if (!requirementsCheck) {
-					// Grey out the button if requirements aren't met
-					increaseButton.disabled = true;
-					increaseButton.classList.add('btn-secondary');
-					increaseButton.classList.remove('btn-primary');
-				}
-
-				// Add click event listener to handle upgrades
-				increaseButton.addEventListener('click', () => {
-					// Re-check if the requirements are met when trying to upgrade
-					const canUpgrade = requirementsMet(researchItem.researchID, researchTreeType, nextLevel);
-
-					if (currentResearchLevel < maxResearchLevel && (canUpgrade || godMode)) {
-						currentResearchLevel++; // Increment the level
-						userResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel; // Update the state
-						document.getElementById(`level-${researchTreeType}-${researchItem.researchID}`).textContent = currentResearchLevel; // Update the UI
-
-						// Debugging: log upgrade success
-						if (debugMode) {
-							console.log(`Increased level for ${researchItem.researchID} to ${currentResearchLevel}`);
-							if (!canUpgrade) {
-								console.log(`God mode bypassed requirements for ${researchItem.researchID}`);
-							}
-						}
-					} else if (debugMode) {
-						console.log(`Cannot upgrade ${researchItem.researchID} due to unmet requirements or max level reached.`);
-					}
-					renderResearchTree(researchTreeData, researchTreeType); // Re-render tree after upgrading
-				});
-			}
-
-			// Add event listener to decrease button
-			const decreaseButton = document.getElementById(`decrease-${researchTreeType}-${researchItem.researchID}`);
-			if (decreaseButton) {
-				decreaseButton.addEventListener('click', () => {
-					if (currentResearchLevel > 0) {
-						currentResearchLevel--; // Decrement the level
-						userResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel; // Update the state
-						document.getElementById(`level-${researchTreeType}-${researchItem.researchID}`).textContent = currentResearchLevel; // Update the UI
-						if (debugMode) {
-							console.log(`Decreased level for ${researchItem.researchID} to ${currentResearchLevel}`);
-						}
-						renderResearchTree(researchTreeData, researchTreeType); // Re-render tree after downgrading
-					}
-				});
-			}
-		});
-	});
-
-	// Show/hide table borders based on debug mode
-	if (debugMode) {
-		researchTable.classList.add('table-bordered');  // Show table borders in debug mode
-	} else {
-		researchTable.classList.remove('table-bordered');  // Hide table borders in non-debug mode
-	}
-}
-
-
-function generateResearchItemCell(researchItem, researchTreeType) {
-	const currentLevel = userResearchState[researchTreeType][researchItem.researchID];
-	const nextLevel = currentLevel + 1;
-	const nextLevelData = researchItem.levels[nextLevel] || {};  // Get next level data or an empty object
-
-	// Get the current research speed dynamically
-	const researchSpeed = getResearchSpeed();
-
-	// Get the stat and stat addition data
-	const stat = researchItem.stat || "N/A";  // Default to "N/A" if no stat is defined
-	const statAddition = nextLevelData['stat-addition'] || 0;  // Default to 0 if no stat addition is defined
-
-	return `
-		<td>
-			<div class="d-flex justify-content-between" style="height: 100%;">
-				<!-- Left Side: Research Info -->
-				<div class="left-side" style="width: 50%; padding-right: 10px;">
-					<div class="research-square"></div>
-					<div class="research-item-name">${researchItem.name}</div>
-					<div class="research-item-level">Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${Object.keys(researchItem.levels).length}</div>
-					<div class="button-group">
-						<button id="decrease-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">-</button>
-						<button id="increase-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">+</button>
-					</div>
-
-					<!-- Stat Increase Info -->
-					<div class="stat-increase-info mt-3">
-						<div class="stat-item">
-							<div class="stat-label">${stat}</div>
-						</div>
-						<div class="stat-item">
-							<div class="stat-value">+${statAddition}%</div>
-						</div>
-					</div>
-
-				</div>
-
-				<!-- Right Side: Resource Costs, Time -->
-				<div class="right-side" style="width: 50%; padding-left: 10px;">
-					${getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time'] || 0, researchSpeed)}
-				</div>
-			</div>
-		</td>
-	`;
-}
-
-
-
-
-// Function to load research data from data.json (only done once on page load)
-function loadResearchData() {
-	if (debugMode) {
-		console.log('Attempting to load research data from /researchtree/data.json');
-	}
+function loadresearchConfigData() {
+	if (debugMode) console.log('Attempting to load research data from /researchtree/data.json');
 
 	fetch('/researchtree/data.json')
-		.then(response => {
-			if (!response.ok) {
-				console.error(`Failed to load JSON data. Status: ${response.status}`);
-				throw new Error(`HTTP status code: ${response.status}`);
-			}
-			if (debugMode) {
-				console.log('Successfully fetched JSON data');
-			}
-			return response.json();
-		})
+		.then(response => response.ok ? response.json() : Promise.reject(`Failed with status ${response.status}`))
 		.then(data => {
-			researchData = data; // Store the loaded data
-			initializeUserResearchState(); // Initialize user research state based on the data
-			if (debugMode) {
-				console.log('Research data loaded:', researchData);
-			}
-			// Render the Growth tree by default
-			renderResearchTree(researchData.Growth, 'Growth');
+			researchConfigData = data;
+			initializeResearchStates();
+			if (debugMode) console.log('Research data loaded:', researchConfigData);
+			renderResearchTree();
 		})
-		.catch(error => {
-			console.error('Error loading research data:', error);
-		});
+		.catch(error => console.error('Error loading research data:', error));
 }
 
-// Load the navbar from an external file
-$(function () {
-	$('#navbar').load('/navbar.html', function () {
-		if (debugMode) {
-			console.log('Navbar loaded from /navbar.html');
+function updateDebugTable() {
+	const debugTable = document.getElementById('debug-research-table');
+	if (debugMode) {
+		debugTable.style.display = 'block';
+		const debugTableBody = document.getElementById('debug-table-body');
+		debugTableBody.innerHTML = '';
+		Object.keys(researchConfigData[currentTreeType]).forEach(itemKey => {
+			const existingLevel = existingResearchState[currentTreeType][itemKey];
+			const wantedLevel = wantedResearchState[currentTreeType][itemKey];
+			const row = document.createElement('tr');
+			row.innerHTML = `<td>${itemKey}</td><td>${existingLevel}</td><td>${wantedLevel}</td>`;
+			debugTableBody.appendChild(row);
+		});
+	} else {
+		debugTable.style.display = 'none';
+	}
+}
+
+function syncWantedResearchState() {
+	Object.keys(existingResearchState).forEach(treeType => {
+		Object.keys(existingResearchState[treeType]).forEach(itemKey => {
+			if (wantedResearchState[treeType][itemKey] < existingResearchState[treeType][itemKey]) {
+				wantedResearchState[treeType][itemKey] = existingResearchState[treeType][itemKey];
+			}
+		});
+	});
+}
+
+function updateResearchMode_ExistingOrWanted(mode) {
+	if (debugMode) console.log("updateResearchMode_ExistingOrWanted called on mode:", mode);
+
+	currentMode = mode;
+	currentWantedOrExistingResearchState = mode === 'wanted' ? wantedResearchState : existingResearchState;
+	syncWantedResearchState();
+	renderResearchTree();
+}
+
+function recursiveUpgrade(researchItemID, researchTreeType, targetLevel) {
+	const item = researchConfigData[researchTreeType][researchItemID];
+	const prerequisites = item.levels[targetLevel]?.requirements?.['research-items'];
+	if (prerequisites) {
+		Object.entries(prerequisites).forEach(([prereqID, prereqLevel]) => {
+			if (existingResearchState[researchTreeType][prereqID] < prereqLevel) {
+				recursiveUpgrade(prereqID, researchTreeType, prereqLevel);
+			}
+		});
+	}
+	existingResearchState[researchTreeType][researchItemID] = targetLevel;
+}
+
+function recursiveDowngrade(researchItemID, researchTreeType, newLevel) {
+	currentWantedOrExistingResearchState[researchItemID] = newLevel;
+	Object.keys(researchConfigData[researchTreeType]).forEach(otherResearchID => {
+		const otherResearch = researchConfigData[researchTreeType][otherResearchID];
+		if (otherResearch.row > researchConfigData[researchTreeType][researchItemID].row) {
+			const requirementsForNextLevel = otherResearch.levels[currentWantedOrExistingResearchState[otherResearchID] + 1]?.requirements?.['research-items'];
+			if (requirementsForNextLevel && requirementsForNextLevel[researchItemID] > newLevel) {
+				recursiveDowngrade(otherResearchID, researchTreeType, requirementsForNextLevel[researchItemID] - 1);
+			}
 		}
 	});
-});
-
-// Handle tab switching and load the appropriate research tree
-document.addEventListener('DOMContentLoaded', function () {
-	checkFlags(); // Check if debug or god mode is enabled
-
-	// Initial load of data.json
-	loadResearchData();
-
-	// Event listeners for tab switching
-	const researchTabs = document.querySelectorAll('#researchTabs .nav-link');
-
-	researchTabs.forEach(tab => {
-		tab.addEventListener('click', function (event) {
-			// Get the ID of the selected tab
-			const selectedTabId = event.target.getAttribute('id');
-
-			// Clear existing table content
-			document.getElementById('researchTable').innerHTML = '';
-
-			// Load the appropriate research tree based on the selected tab
-			if (selectedTabId === 'growth-tab') {
-				renderResearchTree(researchData.Growth, 'Growth');
-			} else if (selectedTabId === 'economy-tab') {
-				renderResearchTree(researchData.Economy, 'Economy');
-			} else if (selectedTabId === 'battle-tab') {
-				renderResearchTree(researchData.Battle, 'Battle');
-			}
-
-			// Debugging: Log the tab switching
-			if (debugMode) {
-				console.log(`Switched to ${selectedTabId}`);
-			}
-		});
-	});
-});
-// Function to handle tab switching
-function handleTabSwitch(selectedTabId) {
-	const researchTabs = document.querySelectorAll('.btn-outline-primary');
-	
-	// Remove 'active' class from all buttons
-	researchTabs.forEach(tab => {
-		tab.classList.remove('active');
-	});
-
-	// Add 'active' class to the clicked button
-	const selectedButton = document.getElementById(selectedTabId);
-	selectedButton.classList.add('active');
-
-	// Set the currentTreeType based on the selected tab
-	if (selectedTabId === 'growth-tab') {
-		currentTreeType = 'Growth';
-	} else if (selectedTabId === 'economy-tab') {
-		currentTreeType = 'Economy';
-	} else if (selectedTabId === 'battle-tab') {
-		currentTreeType = 'Battle';
-	}
-
-	// Render the appropriate tree based on the selected tab
-	renderResearchTree(researchData[currentTreeType], currentTreeType);
-
-	if (debugMode) {
-		console.log(`Switched to ${selectedTabId} (Type: ${currentTreeType})`);
-	}
 }
 
+function isBlockedFromDowngrade(researchItemID, researchTreeType) {
+	const currentResearchLevel = wantedResearchState[researchTreeType][researchItemID];
+	for (const otherResearchID of Object.keys(researchConfigData[researchTreeType])) {
+		const otherResearch = researchConfigData[researchTreeType][otherResearchID];
+		const nextLevel = wantedResearchState[researchTreeType][otherResearchID] - 1;
+		const requirementsForNextLevel = otherResearch.levels[nextLevel]?.requirements?.['research-items'];
+		if (requirementsForNextLevel && requirementsForNextLevel[researchItemID] > currentResearchLevel) {
+			if (debugMode) console.log(`Blocked downgrade for ${researchItemID} because ${otherResearchID} requires it at a higher level.`);
+			return true;
+		}
+	}
+	return false;
+}
+
+// Function to handle tab switching
+function handleModeAndTreeSelectorButtons(selectedTabId) {
+	if (debugMode) console.log(`handleModeAndTreeSelectorButtons being called with selectedTabId:${selectedTabId} `);
+
+	if (selectedTabId === 'growth-tree-btn') {
+		currentTreeType = 'Growth';
+		document.getElementById('growth-tree-btn').classList.add('active');
+		document.getElementById('economy-tree-btn').classList.remove('active');
+		document.getElementById('battle-tree-btn').classList.remove('active');
+	} else if (selectedTabId === 'economy-tree-btn') {
+		currentTreeType = 'Economy';
+		document.getElementById('growth-tree-btn').classList.remove('active');
+		document.getElementById('economy-tree-btn').classList.add('active');
+		document.getElementById('battle-tree-btn').classList.remove('active');
+	} else if (selectedTabId === 'battle-tree-btn') {
+		currentTreeType = 'Battle';
+		document.getElementById('growth-tree-btn').classList.remove('active');
+		document.getElementById('economy-tree-btn').classList.remove('active');
+		document.getElementById('battle-tree-btn').classList.add('active');
+	}
+
+	if (selectedTabId === 'wanted-research-btn') {
+		updateResearchMode_ExistingOrWanted('wanted');
+		document.getElementById('wanted-research-btn').classList.add('active');
+		document.getElementById('existing-research-btn').classList.remove('active');
+	} else if (selectedTabId === 'existing-research-btn') {
+		updateResearchMode_ExistingOrWanted('existing');
+		document.getElementById('wanted-research-btn').classList.remove('active');
+		document.getElementById('existing-research-btn').classList.add('active');
+	}
+
+	document.getElementById('researchTable').innerHTML = '';
+	renderResearchTree();
+
+	if (debugMode) console.log(`Switched to ${selectedTabId} (Type: ${currentTreeType})`);
+}
 
 // Attach event listeners for tab switching
 document.addEventListener('DOMContentLoaded', function () {
-	checkFlags(); // Check if debug or god mode is enabled
+	checkUrlGetParameters(); 
+	loadresearchConfigData();
 
-	// Initial load of data.json
-	loadResearchData();
-
-	// Event listeners for tab switching
-	const researchTabs = document.querySelectorAll('.btn-outline-primary');
-	researchTabs.forEach(tab => {
+	const modeAndTreeSelectorButtons = document.querySelectorAll('.mode-selector-btn, .tree-selector-btn');
+	modeAndTreeSelectorButtons.forEach(tab => {
 		tab.addEventListener('click', function (event) {
 			const selectedTabId = event.target.getAttribute('id');
-			handleTabSwitch(selectedTabId);
+			handleModeAndTreeSelectorButtons(selectedTabId);
 		});
 	});
 });
 
-// Add an event listener to the research speed input to trigger re-rendering when the value changes
+// Event listener for research speed input
 document.getElementById('researchSpeedInput').addEventListener('input', function () {
-	renderResearchTree(researchData[currentTreeType], currentTreeType);
+	renderResearchTree();
 });

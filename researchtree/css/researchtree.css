@@ -14,6 +14,28 @@ body, html {
 	text-align: center;
 }
 
+/* Sidebar stays in place */
+.sidebar {
+	width: 250px;
+	height: 100vh;
+	position: fixed;
+	top: 0;
+	left: 0;
+	background-color: #f8f9fa;
+	overflow-y: auto;
+}
+
+/* Research Section Scrollability */
+.research-section {
+	flex-grow: 1;
+	overflow-y: auto; /* Make the research tree scrollable */
+	padding: 20px;
+	margin-left: 250px; /* Room for the sidebar */
+	margin-right: 250px; /* Room for the info bar */
+	box-sizing: border-box;
+	height: 100vh; /* Ensure full height for the scrollable section */
+}
+
 /* Main Content */
 .main-content-container {
 	flex: 1;
@@ -21,8 +43,7 @@ body, html {
 	flex-direction: column;
 	min-height: 100vh;
 	padding: 40px;
-	margin-left: 250px;
-	max-width: calc(100% - 500px); /* Room for right info bar */
+	max-width: calc(100% - 500px); /* Room for both sidebar and right info bar */
 }
 
 /* Research Table */
@@ -164,7 +185,7 @@ body, html {
 	text-align: center;
 }
 
-/* Info/Display Bar */
+/* Info/Display Bar (Fixed in Place) */
 .info-bar {
 	width: 250px;
 	background-color: #f0f0f0;
@@ -174,7 +195,7 @@ body, html {
 	right: 0;
 	top: 0;
 	bottom: 0;
-	overflow-y: auto;
+	overflow-y: auto; /* Add scroll if content overflows */
 }
 
 .info-bar h4 {
@@ -224,4 +245,37 @@ body, html {
 	flex: 1;
 	text-align: right; /* Ensure the stat value is aligned to the right */
 	color: green; /* Optional: color to distinguish positive stat addition */
+}
+
+/* Ensure the debug table is visible and placed at the bottom of the page */
+#debug-table {
+    width: 100%;            /* Make sure the table takes up full width */
+    margin-top: 20px;       /* Add some spacing above the table */
+    background-color: #fff; /* Background color for visibility */
+    border-collapse: collapse; /* Collapse borders for table */
+    text-align: center;     /* Center the text */
+}
+
+/* Ensure proper padding and border visibility */
+#debug-table td, #debug-table th {
+    padding: 10px;
+    border: 1px solid #ddd; /* Add light border around the cells */
+}
+
+/* Add a fixed position at the bottom of the page */
+#debug-table {
+    position: relative; /* or use position: absolute/fixed depending on your layout */
+    bottom: 0;
+    z-index: 1000;      /* Ensure it is not overlapped by other elements */
+}
+
+/* Optional: Adjust table header background and styling */
+#debug-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Ensure the buttons for mode and tabs are spaced out and styled properly */
+.mode-selector .btn, .tab-selector .btn {
+	margin-right: 10px;
 }
