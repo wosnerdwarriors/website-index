@@ -11,8 +11,10 @@ $(function () {
 // Debugging flag and godmode flag
 let debugMode = false;
 let godMode = false;
+let allowRecursiveUpgradeWanted = false; // Default: allow recursive upgrades in 'wanted' mode
 
-let currentTreeType = 'Growth'; // Default to Growth on initial load
+
+let currentTreeType = 'Battle'; // Default to Growth on initial load
 
 // Store data.json content
 let researchConfigData = {};
@@ -44,7 +46,12 @@ function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType
 			const nextLevel = currentResearchLevel + 1;
 			const requirementsCheck = requirementsMet(researchItem.researchID, researchTreeType, nextLevel);
 
-			if (!requirementsCheck) {
+			// Enable/Disable button based on the recursive upgrade toggle and max level check
+			if (allowRecursiveUpgradeWanted || (requirementsCheck && currentResearchLevel < maxResearchLevel)) {
+				increaseButton.disabled = false;
+				increaseButton.classList.remove('btn-secondary');
+				increaseButton.classList.add('btn-primary');
+			} else {
 				increaseButton.disabled = true;
 				increaseButton.classList.add('btn-secondary');
 				increaseButton.classList.remove('btn-primary');
@@ -52,27 +59,22 @@ function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType
 
 			// Add click event listener to handle upgrades
 			increaseButton.addEventListener('click', () => {
-				if (currentMode === 'existing') {
-					recursiveUpgrade(researchItem.researchID, researchTreeType, nextLevel);
-				} else {
-					const canUpgrade = requirementsMet(researchItem.researchID, researchTreeType, nextLevel);
-
-					if (currentResearchLevel < maxResearchLevel && (canUpgrade || godMode)) {
-						currentResearchLevel++; 
-						currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel; 
-						document.getElementById(`level-${researchTreeType}-${researchItem.researchID}`).textContent = currentResearchLevel;
-
-						if (debugMode) {
-							console.log(`Increased level for ${researchItem.researchID} to ${currentResearchLevel}`);
-							if (!canUpgrade) {
-								console.log(`God mode bypassed requirements for ${researchItem.researchID}`);
-							}
+				if (currentResearchLevel < maxResearchLevel) {
+					// Apply recursive upgrade logic if the toggle is enabled
+					if (allowRecursiveUpgradeWanted) {
+						recursiveUpgrade(researchItem.researchID, researchTreeType, nextLevel);
+					} else {
+						// Regular upgrade logic
+						if (requirementsMet(researchItem.researchID, researchTreeType, nextLevel)) {
+							currentResearchLevel++;
+							currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel;
+							document.getElementById(`level-${researchTreeType}-${researchItem.researchID}`).textContent = currentResearchLevel;
 						}
-					} else if (debugMode) {
-						console.log(`Cannot upgrade ${researchItem.researchID} due to unmet requirements or max level reached.`);
 					}
+
+					// Re-render the research tree after the upgrade
+					renderResearchTree();
 				}
-				renderResearchTree();
 			});
 		}
 
@@ -81,14 +83,10 @@ function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType
 		if (decreaseButton) {
 			decreaseButton.addEventListener('click', () => {
 				if (currentResearchLevel > 0) {
-					if (currentMode === 'existing') {
-						recursiveDowngrade(researchItem.researchID, researchTreeType, currentResearchLevel - 1);
-					} else {
-						if (!isBlockedFromDowngrade(researchItem.researchID, researchTreeType)) {
-							currentResearchLevel--; 
-							wantedResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel;
-							document.getElementById(`level-${researchTreeType}-${researchItem.researchID}`).textContent = currentResearchLevel;
-						}
+					if (!isBlockedFromDowngrade(researchItem.researchID, researchTreeType)) {
+						currentResearchLevel--;
+						currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel;
+						document.getElementById(`level-${researchTreeType}-${researchItem.researchID}`).textContent = currentResearchLevel;
 					}
 					renderResearchTree();
 				}
@@ -96,6 +94,7 @@ function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType
 		}
 	});
 }
+
 
 
 // Function to calculate and display total resources and time in the info bar
@@ -285,10 +284,12 @@ function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed, isMa
 				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/steel-ico.png" alt="Steel Icon"> Steel</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.steel || 0)}</div>
 			</div>
+			<!--
 			<div class="resource-item">
 				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/fc-ico.png" alt="FC Icon"> FC</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.fc || 0)}</div>
 			</div>
+			-->
 		</div>
 		<div class="time-required">
 			<div class="resource-item-left">Time: ${formattedTime}</div>
@@ -377,7 +378,7 @@ function getResearchSpeed() {
 }
 
 function loadresearchConfigData() {
-	if (debugMode) console.log('Attempting to load research data from /researchtree/data.json');
+	if (debugMode) console.log('Attempting to load research data json');
 
 	fetch('/researchtree/data.json')
 		.then(response => response.ok ? response.json() : Promise.reject(`Failed with status ${response.status}`))
@@ -427,18 +428,55 @@ function updateResearchMode_ExistingOrWanted(mode) {
 	renderResearchTree();
 }
 
-function recursiveUpgrade(researchItemID, researchTreeType, targetLevel) {
-	const item = researchConfigData[researchTreeType][researchItemID];
-	const prerequisites = item.levels[targetLevel]?.requirements?.['research-items'];
-	if (prerequisites) {
-		Object.entries(prerequisites).forEach(([prereqID, prereqLevel]) => {
-			if (existingResearchState[researchTreeType][prereqID] < prereqLevel) {
-				recursiveUpgrade(prereqID, researchTreeType, prereqLevel);
-			}
-		});
-	}
-	existingResearchState[researchTreeType][researchItemID] = targetLevel;
+// Adjust the behavior of upgrades in wanted research
+function handleUpgrade(researchItemID, researchTreeType, currentLevel, maxLevel) {
+    // In wanted mode, check if recursive upgrade is allowed
+    if (currentMode === 'wanted' && !allowRecursiveUpgradeWanted) {
+        if (currentLevel < maxLevel) {
+            currentWantedOrExistingResearchState[researchTreeType][researchItemID]++;
+        } else {
+            if (debugMode) {
+                console.log(`Max level reached for ${researchItemID}`);
+            }
+        }
+    } else {
+        // Allow recursive upgrades in 'existing' mode or if allowed in 'wanted' mode
+        recursiveUpgrade(researchItemID, researchTreeType, currentLevel + 1);
+    }
+
+    // Re-render the research tree to reflect upgrades
+    renderResearchTree();
 }
+
+
+// Adjusted upgrade logic to enforce max level in existing research
+function recursiveUpgrade(researchItemID, researchTreeType, targetLevel) {
+    const item = researchConfigData[researchTreeType][researchItemID];
+    const maxLevel = Object.keys(item.levels).length;
+
+    // Ensure we don't exceed the max level
+    if (targetLevel > maxLevel) {
+        if (debugMode) {
+            console.log(`Cannot upgrade ${researchItemID} beyond max level of ${maxLevel}.`);
+        }
+        return;
+    }
+
+    // Check prerequisites for the current item
+    const prerequisites = item.levels[targetLevel]?.requirements?.['research-items'];
+    if (prerequisites) {
+        // Recursively upgrade prerequisites
+        Object.entries(prerequisites).forEach(([prereqID, prereqLevel]) => {
+            if (existingResearchState[researchTreeType][prereqID] < prereqLevel) {
+                recursiveUpgrade(prereqID, researchTreeType, prereqLevel);
+            }
+        });
+    }
+
+    // Upgrade the current item
+    existingResearchState[researchTreeType][researchItemID] = targetLevel;
+}
+
 
 function recursiveDowngrade(researchItemID, researchTreeType, newLevel) {
 	currentWantedOrExistingResearchState[researchItemID] = newLevel;
@@ -521,4 +559,13 @@ document.addEventListener('DOMContentLoaded', function () {
 // Event listener for research speed input
 document.getElementById('researchSpeedInput').addEventListener('input', function () {
 	renderResearchTree();
+});
+
+// Function to handle the global recursive upgrade toggle
+document.getElementById('recursiveUpgradeToggle').addEventListener('change', function () {
+    allowRecursiveUpgradeWanted = this.checked;
+    if (debugMode) {
+        console.log(`Recursive upgrade enabled: ${allowRecursiveUpgradeWanted}`);
+    }
+    renderResearchTree(); // Re-render the research tree to apply the toggle change
 });
