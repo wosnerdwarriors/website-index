@@ -14,41 +14,72 @@
 		<div id="navbar" class="sidebar"></div>
 
 		<!-- Main Content and Research Tree -->
-		<div class="d-flex flex-column main-content-container">
+		<div class="research-section">
 			<h1 class="text-center">Whiteout Survival Research Simulator</h1>
-			<h4 class="text-center">Currently under development. All data is test/example data</h4>
+			<h4 class="text-center">Currently under development. Don't trust this until this message is removed</h4>
 
 			<div class="container-fluid">
 
+
 				<!-- Research Speed Input and Tab navigation -->
 				<div class="d-flex justify-content-between mb-3">
-					<!-- Research Speed Input -->
-					<div>
-						<label for="researchSpeed" class="form-label">Research Speed (%)</label>
-						<input type="number" id="researchSpeedInput" class="form-control" min="0" value="0" placeholder="Enter %">
+				
+			        <!-- Research Speed Input Box -->
+			      	<div class="form-inline">
+			            <label for="researchSpeedInput" class="mr-2">Research Speed:</label>
+			            <input type="text" id="researchSpeedInput" class="form-control" maxlength="5" value="0" />
+			        </div>
+
+			        <!-- Bootstrap Toggle Switch for Recursive Upgrade -->
+			        <div class="form-check form-switch mt-3">
+			            <input class="form-check-input" type="checkbox" id="recursiveUpgradeToggle">
+			            <label class="form-check-label" for="recursiveUpgradeToggle">Recursive upgrades</label>
+			        </div>
+
+					<!-- Mode selector buttons -->
+					<div class="mode-selector d-flex justify-content-center mb-3">
+						<button id="wanted-research-btn" class="btn btn-outline-primary active mx-2 mode-selector-btn">Wanted Research</button>
+						<button id="existing-research-btn" class="btn btn-outline-primary mx-2 mode-selector-btn">Existing Research</button>
 					</div>
-					
+
 					<!-- Tab navigation -->
-					<div class="d-flex">
-					    <button id="growth-tab" class="btn btn-outline-primary active mx-2">Growth</button>
-					    <button id="economy-tab" class="btn btn-outline-primary mx-2">Economy</button>
-					    <button id="battle-tab" class="btn btn-outline-primary mx-2">Battle</button>
+					<div class="tab-selector d-flex">
+						<button id="growth-tree-btn" class="btn btn-outline-primary tree-selector-btn active mx-2" disabled>Growth</button>
+						<button id="economy-tree-btn" class="btn btn-outline-primary tree-selector-btn mx-2" disabled>Economy</button>
+						<button id="battle-tree-btn" class="btn btn-outline-primary tree-selector-btn mx-2">Battle</button>
 					</div>
 				</div>
 
-				<!-- Single Research Tree Table -->
-				<table id="researchTable" class="table table-borderless research-tree-table">
-				    <!-- This table will be populated dynamically -->
-				</table>
+				<!-- Single Research Tree Table (Scrollable) -->
+				<div class="research-table-container">
+					<table id="researchTable" class="table table-borderless research-tree-table">
+					    <!-- This table will be populated dynamically -->
+					</table>
+				</div>
 
+				<!-- Table for Debugging Research States (Hidden by Default) -->
+				<div id="debug-research-table" class="container-fluid" style="display: none;">
+					<h4>Debug Mode - Research States</h4>
+					<table id="debug-table" class="table table-bordered table-striped">
+					    <thead>
+					        <tr>
+					            <th>Research Item</th>
+					            <th>Existing Level</th>
+					            <th>Wanted Level</th>
+					        </tr>
+					    </thead>
+					    <tbody id="debug-table-body">
+					        <!-- Rows will be populated here -->
+					    </tbody>
+					</table>
+				</div>
 			</div>
 		</div>
+    <!-- Info/Display Bar on the Right Side (Empty for now) -->
+    <div class="info-bar" id="research-info-bar">
+        <!-- Research info will be dynamically inserted here -->
+    </div>
 
-		<!-- Info/Display Bar on the Right Side -->
-		<div class="info-bar">
-			<h4>Research Info</h4>
-			<p>Select a research item to see details here.</p>
-		</div>
 	</div>
 
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
