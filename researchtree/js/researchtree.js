@@ -380,7 +380,7 @@ function getResearchSpeed() {
 function loadresearchConfigData() {
 	if (debugMode) console.log('Attempting to load research data json');
 
-	fetch('/researchtree/data.json')
+	fetch('https://data.wosnerds.com/data/research-upgrades.json')
 		.then(response => response.ok ? response.json() : Promise.reject(`Failed with status ${response.status}`))
 		.then(data => {
 			researchConfigData = data;
