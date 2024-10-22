@@ -19,13 +19,22 @@
 			<h4 class="text-center">Currently under development. All data is test/example data</h4>
 
 			<div class="container-fluid">
+
+
 				<!-- Research Speed Input and Tab navigation -->
 				<div class="d-flex justify-content-between mb-3">
-					<!-- Research Speed Input -->
-					<div>
-						<label for="researchSpeed" class="form-label">Research Speed (%)</label>
-						<input type="number" id="researchSpeedInput" class="form-control" min="0" value="0" placeholder="Enter %">
-					</div>
+				
+			        <!-- Research Speed Input Box -->
+			      	<div class="form-inline">
+			            <label for="researchSpeedInput" class="mr-2">Research Speed:</label>
+			            <input type="text" id="researchSpeedInput" class="form-control" maxlength="5" value="0" />
+			        </div>
+
+			        <!-- Bootstrap Toggle Switch for Recursive Upgrade -->
+			        <div class="form-check form-switch mt-3">
+			            <input class="form-check-input" type="checkbox" id="recursiveUpgradeToggle">
+			            <label class="form-check-label" for="recursiveUpgradeToggle">Recursive upgrades</label>
+			        </div>
 
 					<!-- Mode selector buttons -->
 					<div class="mode-selector d-flex justify-content-center mb-3">
@@ -35,8 +44,8 @@
 
 					<!-- Tab navigation -->
 					<div class="tab-selector d-flex">
-						<button id="growth-tree-btn" class="btn btn-outline-primary tree-selector-btn active mx-2">Growth</button>
-						<button id="economy-tree-btn" class="btn btn-outline-primary tree-selector-btn mx-2">Economy</button>
+						<button id="growth-tree-btn" class="btn btn-outline-primary tree-selector-btn active mx-2" disabled>Growth</button>
+						<button id="economy-tree-btn" class="btn btn-outline-primary tree-selector-btn mx-2" disabled>Economy</button>
 						<button id="battle-tree-btn" class="btn btn-outline-primary tree-selector-btn mx-2">Battle</button>
 					</div>
 				</div>
