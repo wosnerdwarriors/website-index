@@ -97,8 +97,7 @@ function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType
 
 
 
-// Function to calculate and display total resources and time in the info bar
-// Function to update the research info bar with total resources and time
+// Function to update the research info bar with total resources and time for all trees
 function updateTotalResourcesAndTime() {
 	let totalResources = {
 		meat: 0,
@@ -113,23 +112,32 @@ function updateTotalResourcesAndTime() {
 	let reducedResearchTime = 0;
 	const researchSpeed = getResearchSpeed();  // Retrieve research speed as a decimal (e.g., 0.8 for 80%)
 
-	// Calculate total resources and total research time
-	Object.keys(currentWantedOrExistingResearchState[currentTreeType]).forEach(researchID => {
-		const researchLevel = currentWantedOrExistingResearchState[currentTreeType][researchID];
-		const researchItem = researchConfigData[currentTreeType][researchID];
-		if (researchItem.levels[researchLevel]) {
-			const cost = researchItem.levels[researchLevel].cost || {};
-			totalResources.meat += cost.meat || 0;
-			totalResources.wood += cost.wood || 0;
-			totalResources.coal += cost.coal || 0;
-			totalResources.iron += cost.iron || 0;
-			totalResources.steel += cost.steel || 0;
-			totalResources.fc += cost.fc || 0;
+	// Calculate total resources and total research time for all research trees
+	['Growth', 'Economy', 'Battle'].forEach(treeType => {
+		Object.keys(wantedResearchState[treeType]).forEach(researchID => {
+			const wantedLevel = wantedResearchState[treeType][researchID];
+			const existingLevel = existingResearchState[treeType][researchID] || 0;
+			const researchItem = researchConfigData[treeType][researchID];
 
-			// Calculate research time
-			const researchTime = researchItem.levels[researchLevel]['research-time-seconds'] || 0;
-			totalResearchTime += researchTime;
-		}
+			// Only calculate the difference between wanted and existing levels
+			for (let level = existingLevel + 1; level <= wantedLevel; level++) {
+				const levelData = researchItem.levels[level];
+
+				if (levelData) {
+					const cost = levelData.cost || {};
+					totalResources.meat += cost.meat || 0;
+					totalResources.wood += cost.wood || 0;
+					totalResources.coal += cost.coal || 0;
+					totalResources.iron += cost.iron || 0;
+					totalResources.steel += cost.steel || 0;
+					totalResources.fc += cost.fc || 0;
+
+					// Calculate research time for this level
+					const researchTime = levelData['research-time-seconds'] || 0;
+					totalResearchTime += researchTime;
+				}
+			}
+		});
 	});
 
 	// Apply research speed reduction
@@ -145,6 +153,7 @@ function updateTotalResourcesAndTime() {
 		${htmlContent}
 	`;
 }
+
 
 // Updated renderResearchTree function
 function renderResearchTree() {
