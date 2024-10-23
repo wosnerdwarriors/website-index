@@ -14,7 +14,7 @@ let godMode = false;
 let allowRecursiveUpgradeWanted = false; // Default: allow recursive upgrades in 'wanted' mode
 
 
-let currentTreeType = 'Battle'; // Default to Growth on initial load
+let currentTreeType = 'Growth'; // Default to Growth on initial load
 
 // Store data.json content
 let researchConfigData = {};
