@@ -1,12 +1,3 @@
-// Load the navbar from an external file
-$(function () {
-	$('#navbar').load('/navbar.html', function () {
-		if (debugMode) {
-			console.log('Navbar loaded from /navbar.html');
-		}
-	});
-});
-
 
 // Debugging flag and godmode flag
 let debugMode = false;
