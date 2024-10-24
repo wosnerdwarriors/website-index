@@ -1,4 +1,4 @@
-.sidebar {
+.wosnerds-navbar-container {
 	background-color: #e8e8e8;
 	width: 250px;
 	height: 100vh;
@@ -15,16 +15,16 @@
 	overflow-y: auto;
 }
 
-.sidebar::-webkit-scrollbar {
+.wosnerds-navbar-container::-webkit-scrollbar {
 	width: 8px;
 }
 
-.sidebar::-webkit-scrollbar-thumb {
+.wosnerds-navbar-container::-webkit-scrollbar-thumb {
 	background-color: #505055;
 	border-radius: 10px;
 }
 
-.navbar-logo {
+.wosnerds-navbar-logo {
 	width: 80%;
 	height: auto;
 	border-bottom: 1px solid #444;
@@ -34,7 +34,7 @@
 	margin: 0 auto;
 }
 
-.nav-link {
+.wosnerds-navbar-link {
 	color: #333 !important;
 	margin: 8px 0;
 	padding: 8px 15px;
@@ -44,11 +44,11 @@
 	text-align: center;
 }
 
-.nav-link:hover {
+.wosnerds-navbar-link:hover {
 	background-color: #d0d0d0;
 }
 
-.nav-item {
+.wosnerds-navbar-item {
 	width: 100%;
 	display: flex;
 	justify-content: center;
@@ -56,8 +56,8 @@
 
 /* Responsive styling for smaller screens (phones) */
 @media (max-width: 768px) {
-	.sidebar {
-		width: 60%; /* Reduce sidebar width on mobile */
+	.wosnerds-navbar-container {
+		width: 60%;
 		height: auto;
 		position: relative;
 		border-radius: 0;
@@ -65,16 +65,15 @@
 		justify-content: space-around;
 	}
 
-	.nav-item {
+	.wosnerds-navbar-item {
 		display: inline-block;
-		margin: 0 5px; /* Adjust spacing for nav items */
+		margin: 0 5px;
 	}
 
-	.navbar-logo {
-		width: 100px; /* Increase logo size for mobile */
+	.wosnerds-navbar-logo {
+		width: 100px;
 		height: auto;
 		display: inline-block;
 		margin: 10px;
 	}
 }
-
