@@ -23,13 +23,14 @@ let wantedResearchState = {
 	Battle: {}
 };
 
-let currentWantedOrExistingResearchState = existingResearchState;
+let currentWantedOrExistingResearchState = wantedResearchState;
 
 // Function to attach event handlers to research items
 function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType) {
 	researchItemsInRow.forEach(researchItem => {
 		let currentResearchLevel = currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID];
 		const maxResearchLevel = researchItem.levels ? Object.keys(researchItem.levels).length : 0;
+		const existingResearchLevel = existingResearchState[researchTreeType][researchItem.researchID] || 0;
 
 		// Add event listener to increase button
 		const increaseButton = document.getElementById(`increase-${researchTreeType}-${researchItem.researchID}`);
@@ -72,8 +73,20 @@ function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType
 		// Add event listener to decrease button
 		const decreaseButton = document.getElementById(`decrease-${researchTreeType}-${researchItem.researchID}`);
 		if (decreaseButton) {
+			// Disable the button if the current level is <= existing level
+			if (currentResearchLevel <= existingResearchLevel) {
+				decreaseButton.disabled = true;
+				decreaseButton.classList.add('btn-secondary');
+				decreaseButton.classList.remove('btn-primary');
+			} else {
+				decreaseButton.disabled = false;
+				decreaseButton.classList.remove('btn-secondary');
+				decreaseButton.classList.add('btn-primary');
+			}
+
+			// Add click event listener to handle downgrades
 			decreaseButton.addEventListener('click', () => {
-				if (currentResearchLevel > 0) {
+				if (currentResearchLevel > 0 && currentResearchLevel > existingResearchLevel) {
 					if (!isBlockedFromDowngrade(researchItem.researchID, researchTreeType)) {
 						currentResearchLevel--;
 						currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel;
@@ -87,9 +100,26 @@ function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType
 }
 
 
+function getWhichWantedOrExistingModeIsActive()
+{
+	if (currentWantedOrExistingResearchState === existingResearchState) {
+	    return "existingResearchState";
+	} else if (currentWantedOrExistingResearchState === wantedResearchState) {
+	    return "wantedResearchState";
+	} else {
+	    return "unknown";
+	}
+}
 
 // Function to update the research info bar with total resources and time for all trees
 function updateTotalResourcesAndTime() {
+	if (debugMode) {
+		console.log("running updateTotalResourcesAndTime");
+		console.log("wantedResearchState is:", wantedResearchState);
+		console.log("current mode is:", getWhichWantedOrExistingModeIsActive());
+	}
+
+let currentWantedOrExistingResearchState = existingResearchState;
 	let totalResources = {
 		meat: 0,
 		wood: 0,
@@ -102,6 +132,7 @@ function updateTotalResourcesAndTime() {
 	let totalResearchTime = 0;
 	let reducedResearchTime = 0;
 	const researchSpeed = getResearchSpeed();  // Retrieve research speed as a decimal (e.g., 0.8 for 80%)
+
 
 	// Calculate total resources and total research time for all research trees
 	['Growth', 'Economy', 'Battle'].forEach(treeType => {
