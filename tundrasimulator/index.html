@@ -264,7 +264,7 @@
         };
 
         async function loadTiles() {
-            const response = await fetch('tiles.json');
+            const response = await fetch('/tundrasimulator/tiles.json');
             path = await response.json();
             trackerPosition = path[currentStep];
             createGrid();
