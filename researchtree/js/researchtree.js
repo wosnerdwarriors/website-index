@@ -178,7 +178,7 @@ let currentWantedOrExistingResearchState = existingResearchState;
 }
 // Function to generate HTML for total stats
 function generateTotalStatsHTML(stats, title) {
-	let htmlContent = `<h4>${title}</h4><div class="stat-section">`;
+	let htmlContent = `<h4>${title} (unfinished)</h4><div class="stat-section">`;
 	Object.keys(stats).forEach(statName => {
 		htmlContent += `
 			<div class="stat-item">
@@ -256,54 +256,64 @@ function renderResearchTree() {
 }
 
 function generateResearchItemCell(researchItem, researchTreeType) {
-    const currentLevel = currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID];
-    const maxLevel = researchItem.levels ? Object.keys(researchItem.levels).length : 0;
-    const nextLevel = currentLevel + 1;
+	const currentLevel = currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID];
+	const maxLevel = researchItem.levels ? Object.keys(researchItem.levels).length : 0;
+	const nextLevel = currentLevel + 1;
 
-    const nextLevelData = researchItem.levels && researchItem.levels[nextLevel] ? researchItem.levels[nextLevel] : {};
-    const isMaxed = nextLevel > maxLevel;
+	const nextLevelData = researchItem.levels && researchItem.levels[nextLevel] ? researchItem.levels[nextLevel] : {};
+	const isMaxed = nextLevel > maxLevel;
 
-    const researchSpeed = getResearchSpeed();
-    const stat = researchItem.stat || "N/A";
-    const statAddition = nextLevelData['stat-addition'] || 0;
+	const researchSpeed = getResearchSpeed();
+	const stat = researchItem.stat || "N/A";
+	const statAddition = nextLevelData['stat-addition'] || 0;
 
-    // Check which type of requirement to show
-    const showResearchRequirements = document.getElementById('requirementsToggle').checked;
-    const requirementsHTML = showResearchRequirements ? 
-        getResearchRequirementsHTML(researchItem, researchTreeType, nextLevel) : 
-        getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time-seconds'] || 0, researchSpeed, isMaxed);
+	// Strip the suffix (dash and Roman numeral) from the research ID for the image URL
+	const strippedName = researchItem.researchID.replace(/-\w+$/, '');
 
-    return `
-        <td>
-            <div class="d-flex justify-content-between" style="height: 100%;">
-                <!-- Left Side: Research Info -->
-                <div class="left-side" style="width: 50%; padding-right: 10px;">
-                    <div class="research-square"></div>
-                    <div class="research-item-name">${researchItem.name}</div>
-                    <div class="research-item-level">Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${maxLevel}</div>
-                    <div class="button-group">
-                        <button id="decrease-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">-</button>
-                        <button id="increase-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">+</button>
-                    </div>
+	// Construct the image URL
+	const imageURL = `https://data.wosnerds.com/images/research/${strippedName}.png`;
 
-                    <div class="stat-increase-info mt-3">
-                        <div class="stat-item">
-                            <div class="stat-label">${stat}</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">+${statAddition}%</div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Right Side: Resource or Research/Building Requirements -->
-                <div class="right-side" style="width: 50%; padding-left: 10px;">
-                    ${requirementsHTML}
-                </div>
-            </div>
-        </td>
-    `;
+	// Check which type of requirement to show (research/building or resource costs)
+	const showResearchRequirements = document.getElementById('requirementsToggle').checked;
+	const requirementsHTML = showResearchRequirements ? 
+		getResearchRequirementsHTML(researchItem, researchTreeType, nextLevel) : 
+		getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time-seconds'] || 0, researchSpeed, isMaxed);
+
+	return `
+		<td>
+			<div class="d-flex justify-content-between" style="height: 100%;">
+				<!-- Left Side: Research Info -->
+				<div class="left-side" style="width: 50%; padding-right: 10px;">
+					<div class="research-square">
+						<img src="${imageURL}" alt="${researchItem.name} image" onerror="this.style.display='none'; this.parentElement.style.backgroundColor='red';" style="width: 100%; height: 100%; object-fit: contain;" />
+					</div>
+					<div class="research-item-name">${researchItem.name}</div>
+					<div class="research-item-level">Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${maxLevel}</div>
+					<div class="button-group">
+						<button id="decrease-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">-</button>
+						<button id="increase-${researchTreeType}-${researchItem.researchID}" class="btn btn-primary btn-sm square-btn">+</button>
+					</div>
+
+					<div class="stat-increase-info mt-3">
+						<div class="stat-item">
+							<div class="stat-label">${stat}</div>
+						</div>
+						<div class="stat-item">
+							<div class="stat-value">+${statAddition}%</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Right Side: Resource or Research/Building Requirements -->
+				<div class="right-side" style="width: 50%; padding-left: 10px;">
+					${requirementsHTML}
+				</div>
+			</div>
+		</td>
+	`;
 }
+
 
 
 
