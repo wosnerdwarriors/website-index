@@ -298,3 +298,26 @@ body, html {
 #researchSpeedInput {
 	width: 25%; /* Adjust this value as necessary */
 }
+
+
+.requirement-met {
+    color: green;
+}
+.requirement-not-met {
+    color: red;
+}
+.requirements-section {
+	text-align: center; /* Center the entire section */
+	margin-bottom: 10px; /* Add some spacing between sections */
+}
+
+.requirements-section b {
+	display: block; /* Ensure the title (Research/Building) is on its own line */
+	margin-bottom: 5px; /* Add some space between the title and items */
+}
+
+.requirement-item {
+	display: block; /* Make each item appear on its own line */
+	margin-bottom: 5px; /* Add some spacing between items */
+	text-align: center; /* Center the text within each item */
+}
