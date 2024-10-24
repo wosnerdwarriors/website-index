@@ -84,7 +84,6 @@ body, html {
 .research-square {
 	width: 80px;
 	height: 80px;
-	background-color: red !important;
 	border-radius: 5px;
 	display: block;
 }
