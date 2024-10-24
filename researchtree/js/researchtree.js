@@ -147,11 +147,25 @@ function updateTotalResourcesAndTime() {
 	const htmlContent = getResourceAndTimeHTML(totalResources, totalResearchTime, researchSpeed);
 
 	// Inject the generated HTML into the info bar
-	const infoBar = document.getElementById('research-info-bar');
-	infoBar.innerHTML = `
+	const costBlock = document.getElementById('research-total-cost-block');
+
+	costBlock.innerHTML = `
 		<h4>Total Research Resources & Time</h4>
 		${htmlContent}
 	`;
+}
+// Function to generate HTML for total stats
+function generateTotalStatsHTML(stats, title) {
+	let htmlContent = `<h4>${title}</h4><div class="stat-section">`;
+	Object.keys(stats).forEach(statName => {
+		htmlContent += `
+			<div class="stat-item">
+				<div class="stat-label">${statName}</div>
+				<div class="stat-value">+${stats[statName].toFixed(2)}%</div>
+			</div>`;
+	});
+	htmlContent += '</div>';
+	return htmlContent;
 }
 
 
@@ -167,7 +181,9 @@ function renderResearchTree() {
 		console.log(`renderResearchTree for currentTreeType: `, currentTreeType);
 		updateDebugTable();
 	}
+
 	updateTotalResourcesAndTime();
+	updateTotalStats();
 	researchTable.innerHTML = '';
 
 	const researchRows = {};
@@ -359,6 +375,57 @@ function initializeResearchStates() {
 		console.log('Initialized both research states:', { existingResearchState, wantedResearchState });
 	}
 }
+
+// Function to update the total stats and display two blocks
+// Function to update the total stats and display two blocks
+function updateTotalStats() {
+	let existingTotalStats = {};
+	let wantedMinusExistingStats = {};
+
+	// Loop through all trees (Growth, Economy, Battle)
+	['Growth', 'Economy', 'Battle'].forEach(treeType => {
+		Object.keys(wantedResearchState[treeType]).forEach(researchID => {
+			const wantedLevel = wantedResearchState[treeType][researchID];
+			const existingLevel = existingResearchState[treeType][researchID] || 0;
+			const researchItem = researchConfigData[treeType][researchID];
+
+			// Calculate total stats from existing research
+			for (let level = 1; level <= existingLevel; level++) {
+				const levelData = researchItem.levels[level];
+				if (levelData && levelData['stat-addition']) {
+					Object.keys(levelData['stat-addition']).forEach(stat => {
+						existingTotalStats[stat] = (existingTotalStats[stat] || 0) + levelData['stat-addition'][stat];
+					});
+				}
+			}
+
+			// Calculate the difference between wanted and existing research
+			for (let level = existingLevel + 1; level <= wantedLevel; level++) {
+				const levelData = researchItem.levels[level];
+				if (levelData && levelData['stat-addition']) {
+					Object.keys(levelData['stat-addition']).forEach(stat => {
+						wantedMinusExistingStats[stat] = (wantedMinusExistingStats[stat] || 0) + levelData['stat-addition'][stat];
+					});
+				}
+			}
+		});
+	});
+
+	// Generate HTML for both blocks
+	const existingStatsHTML = generateTotalStatsHTML(existingTotalStats, "Total Stats from Existing Research");
+	const wantedMinusExistingStatsHTML = generateTotalStatsHTML(wantedMinusExistingStats, "Total Stats (Wanted - Existing)");
+
+	// Inject the HTML into the research-total-stats-block
+	const statsBlock = document.getElementById('research-total-stats-block');
+	statsBlock.innerHTML = `
+		<div class="total-stats">
+			${existingStatsHTML}
+			${wantedMinusExistingStatsHTML}
+		</div>
+	`;
+}
+
+
 
 function requirementsMet(researchID, researchTreeType, targetLevel) {
 	if (currentMode === 'existing') return true;
