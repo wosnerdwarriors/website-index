@@ -178,7 +178,7 @@ let currentWantedOrExistingResearchState = existingResearchState;
 }
 // Function to generate HTML for total stats
 function generateTotalStatsHTML(stats, title) {
-	let htmlContent = `<h4>${title}</h4><div class="stat-section">`;
+	let htmlContent = `<h4>${title} (unfinished)</h4><div class="stat-section">`;
 	Object.keys(stats).forEach(statName => {
 		htmlContent += `
 			<div class="stat-item">
@@ -267,12 +267,27 @@ function generateResearchItemCell(researchItem, researchTreeType) {
 	const stat = researchItem.stat || "N/A";
 	const statAddition = nextLevelData['stat-addition'] || 0;
 
+	// Strip the suffix (dash and Roman numeral) from the research ID for the image URL
+	const strippedName = researchItem.researchID.replace(/-\w+$/, '');
+
+	// Construct the image URL
+	const imageURL = `https://data.wosnerds.com/images/research/${strippedName}.png`;
+
+
+	// Check which type of requirement to show (research/building or resource costs)
+	const showResearchRequirements = document.getElementById('requirementsToggle').checked;
+	const requirementsHTML = showResearchRequirements ? 
+		getResearchRequirementsHTML(researchItem, researchTreeType, nextLevel) : 
+		getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time-seconds'] || 0, researchSpeed, isMaxed);
+
 	return `
 		<td>
 			<div class="d-flex justify-content-between" style="height: 100%;">
 				<!-- Left Side: Research Info -->
 				<div class="left-side" style="width: 50%; padding-right: 10px;">
-					<div class="research-square"></div>
+					<div class="research-square">
+						<img src="${imageURL}" alt="${researchItem.name} image" onerror="this.style.display='none'; this.parentElement.style.backgroundColor='red';" style="width: 100%; height: 100%; object-fit: contain;" />
+					</div>
 					<div class="research-item-name">${researchItem.name}</div>
 					<div class="research-item-level">Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${maxLevel}</div>
 					<div class="button-group">
@@ -290,14 +305,58 @@ function generateResearchItemCell(researchItem, researchTreeType) {
 					</div>
 				</div>
 
-				<!-- Right Side: Resource Costs, Time -->
+				<!-- Right Side: Resource or Research/Building Requirements -->
 				<div class="right-side" style="width: 50%; padding-left: 10px;">
-					${getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time-seconds'] || 0, researchSpeed, isMaxed)}
+					${requirementsHTML}
 				</div>
 			</div>
 		</td>
 	`;
 }
+
+
+
+
+function getResearchRequirementsHTML(researchItem, researchTreeType, targetLevel) {
+    let htmlContent = '';
+
+    // Retrieve research requirements for the specified level
+    const researchRequirements = researchItem.levels[targetLevel]?.requirements?.['research-items'];
+    const buildingRequirements = researchItem.levels[targetLevel]?.requirements?.['buildings'];
+
+    if (researchRequirements) {
+        htmlContent += '<div class="requirements-section"><b>Research:</b>';
+        Object.entries(researchRequirements).forEach(([requiredResearchID, requiredLevel]) => {
+            const currentLevel = currentWantedOrExistingResearchState[researchTreeType][requiredResearchID] || 0;
+            const requirementMet = currentLevel >= requiredLevel;
+            const requirementClass = requirementMet ? 'requirement-met' : 'requirement-not-met';
+
+            const researchName = researchConfigData[researchTreeType][requiredResearchID].name || requiredResearchID;
+            htmlContent += `
+                <div class="requirement-item ${requirementClass}">
+                    <span>${researchName}	lvl ${requiredLevel} </span>
+                </div>`;
+        });
+        htmlContent += '</div>';
+    }
+
+    if (buildingRequirements) {
+        htmlContent += '<div class="requirements-section"><b>Buildings:</b>';
+        Object.entries(buildingRequirements).forEach(([requiredBuilding, requiredLevel]) => {
+            //const requirementMet = currentBuildingLevel >= requiredLevel;
+            //const requirementClass = requirementMet ? 'requirement-met' : 'requirement-not-met';
+        	const requirementClass = 'requirement-met';
+            
+            htmlContent += `
+                <div class="requirement-item ${requirementClass}">
+                    <span>${requiredBuilding}	 lvl ${requiredLevel}</span>
+                </div>`;
+        });
+        htmlContent += '</div>';
+    }
+    return htmlContent;
+}
+
 
 function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed, isMaxed=false) {
 	let formattedTime = '';
@@ -665,5 +724,9 @@ document.getElementById('recursiveUpgradeToggle').addEventListener('change', fun
     if (debugMode) {
         console.log(`Recursive upgrade enabled: ${allowRecursiveUpgradeWanted}`);
     }
+    renderResearchTree(); // Re-render the research tree to apply the toggle change
+});
+
+document.getElementById('requirementsToggle').addEventListener('change', function () {
     renderResearchTree(); // Re-render the research tree to apply the toggle change
 });
