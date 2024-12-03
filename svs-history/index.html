@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <!-- Custom CSS -->
     <link href="/svs-history/css/svs-history.css" rel="stylesheet">
 </head>
+
 <body>
     <div class="container-fluid mt-5">
         <h1 class="text-center mb-4">SVS History</h1>
@@ -66,7 +68,8 @@
             </select>
 
             <!-- Filter Message -->
-            <span id="filterMessage">Filters are disabled when multiple dates are selected. Please select a single date to enable filters.</span>
+            <span id="filterMessage">Filters are disabled when multiple dates are selected. Please select a single date
+                to enable filters.</span>
         </div>
 
         <!-- Table Container -->
@@ -84,13 +87,14 @@
         </div>
 
         <!-- Pagination Controls -->
-        <div class="pagination-controls">
+        <div class="pagination-controls d-flex align-items-center">
             <button id="firstPageBtn" class="btn btn-outline-primary">First</button>
             <button id="prevPageBtn" class="btn btn-outline-primary">Previous</button>
-            <span id="currentPage" class="mx-2">1</span>
+            <span id="currentPage" class="mx-2 px-3 py-2 bg-primary text-white rounded">1</span>
             <button id="nextPageBtn" class="btn btn-outline-primary">Next</button>
             <button id="lastPageBtn" class="btn btn-outline-primary">Last</button>
         </div>
+
 
         <!-- Chart Placeholder -->
         <div id="charts" class="chart-container" style="display: none;">
@@ -100,6 +104,7 @@
         <!-- JavaScript -->
         <script src="/svs-history/js/svs-history.js"></script>
     </div>
-<script src="/js/google-analytics.js"></script>
+    <script src="/js/google-analytics.js"></script>
 </body>
+
 </html>

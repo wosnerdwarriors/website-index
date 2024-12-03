@@ -1,141 +1,139 @@
 /* Full-width layout */
 .container-fluid {
-    width: 100%;
+  width: 100%;
 }
 
 /* Add styling for fixed-size scrollable lists */
 .select-list {
-    max-height: 150px; /* Equivalent to size=5 in height */
-    overflow-y: scroll;
-    border: 1px solid #ced4da;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 5px;
+  max-height: 150px; /* Equivalent to size=5 in height */
+  overflow-y: scroll;
+  border: 1px solid #ced4da;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
 }
 
 /* Table styling with fixed first column and scrollable date columns */
 .table-container {
-    overflow-x: auto;
-    position: relative;
+  overflow-x: auto;
+  position: relative;
 }
 
 .table {
-    min-width: 100%;
-    white-space: nowrap;
+  min-width: 100%;
+  white-space: nowrap;
 }
 
 .table tbody tr th {
-    position: sticky;
-    left: 0;
-    background: #f8f9fa;
-    z-index: 1;
+  position: sticky;
+  left: 0;
+  background: #f8f9fa;
+  z-index: 1;
 }
 
 /* Highlighting for Yes/No */
 .highlight-yes {
-    background-color: #d4edda;
-    color: #155724;
+  background-color: #d4edda;
+  color: #155724;
 }
 
 .highlight-no {
-    background-color: #f8d7da;
-    color: #721c24;
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 /* Graph container */
 .chart-container {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 /* Pagination controls */
 .pagination-controls {
-    margin-top: 20px;
-    text-align: center;
+  text-align: center;
 }
 
 /* Scrollbar for dates */
 .scrollable-table {
-    overflow-x: scroll;
-    max-height: 600px;
+  overflow-x: scroll;
+  max-height: 600px;
+  padding-bottom: 6px;
 }
 
 .scrollable-table::-webkit-scrollbar {
-    height: 8px;
+  height: 8px;
 }
 
 .scrollable-table::-webkit-scrollbar-track {
-    background: #f1f1f1;
+  background: #f1f1f1;
 }
 
 .scrollable-table::-webkit-scrollbar-thumb {
-    background: #888;
+  background: #888;
 }
 
 .scrollable-table::-webkit-scrollbar-thumb:hover {
-    background: #555;
+  background: #555;
 }
 
 /* Hide rows/columns when toggling visibility */
 .hidden {
-    display: none;
+  display: none;
 }
 
-                .filter-container {
-                    margin-bottom: 20px;
-                    display: flex;
-                    gap: 15px;
-                    align-items: center;
-                }
+.filter-container {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
 
+@media screen and (max-width: 768px) {
+  .filter-container {
+    flex-direction: column;
+  }
+}
 
-                @media screen and (max-width: 768px) {
-                    .filter-container {
-                        flex-direction: column;
-                    }
+.filter-container label {
+  margin-right: 5px;
+}
 
-                }
+.filter-container select {
+  width: 150px;
+}
 
-                .filter-container label {
-                    margin-right: 5px;
-                }
+.scrollable-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
 
-                .filter-container select {
-                    width: 150px;
-                }
+.table-container {
+  overflow-x: auto;
+}
 
-                .scrollable-list {
-                    max-height: 200px;
-                    overflow-y: auto;
-                    margin-top: 10px;
-                }
+.pagination-controls {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  z-index: 1000;
+  justify-content: center;
+  background-color: #f8f9fa;
+  padding: 10px;
+}
 
-                .table-container {
-                    overflow-x: auto;
-                }
+.pagination-controls button {
+  margin: 0 5px;
+}
 
-                .pagination-controls {
-                    position: fixed;
-                    bottom: 0;
-                    width: 100%;
-                    display: flex;
-                    z-index: 1000;
-                    justify-content: center;
-                    background-color: #f8f9fa;
-                    padding: 10px;
-                }
+.chart-container {
+  margin-top: 20px;
+}
 
-                .pagination-controls button {
-                    margin: 0 5px;
-                }
-
-                .chart-container {
-                    margin-top: 20px;
-                }
-
-                #filterMessage {
-                    color: red;
-                    margin-left: 15px;
-                    font-size: 0.9rem;
-                    display: none;
-                    /* Initially hidden */
-                }
+#filterMessage {
+  color: red;
+  margin-left: 15px;
+  font-size: 0.9rem;
+  display: none;
+  /* Initially hidden */
+}
