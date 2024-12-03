@@ -1,7 +1,6 @@
 /* Full-width layout */
 .container-fluid {
     width: 100%;
-    padding: 0 30px;
 }
 
 /* Add styling for fixed-size scrollable lists */
@@ -80,3 +79,63 @@
 .hidden {
     display: none;
 }
+
+                .filter-container {
+                    margin-bottom: 20px;
+                    display: flex;
+                    gap: 15px;
+                    align-items: center;
+                }
+
+
+                @media screen and (max-width: 768px) {
+                    .filter-container {
+                        flex-direction: column;
+                    }
+
+                }
+
+                .filter-container label {
+                    margin-right: 5px;
+                }
+
+                .filter-container select {
+                    width: 150px;
+                }
+
+                .scrollable-list {
+                    max-height: 200px;
+                    overflow-y: auto;
+                    margin-top: 10px;
+                }
+
+                .table-container {
+                    overflow-x: auto;
+                }
+
+                .pagination-controls {
+                    position: fixed;
+                    bottom: 0;
+                    width: 100%;
+                    display: flex;
+                    z-index: 1000;
+                    justify-content: center;
+                    background-color: #f8f9fa;
+                    padding: 10px;
+                }
+
+                .pagination-controls button {
+                    margin: 0 5px;
+                }
+
+                .chart-container {
+                    margin-top: 20px;
+                }
+
+                #filterMessage {
+                    color: red;
+                    margin-left: 15px;
+                    font-size: 0.9rem;
+                    display: none;
+                    /* Initially hidden */
+                }
