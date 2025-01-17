@@ -1,0 +1,50 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#toolbar {
+    margin: 20px;
+}
+
+button.selected {
+    background-color: #007BFF;
+    color: white;
+}
+
+#counters {
+    margin: 10px;
+    font-size: 16px;
+}
+
+#controls {
+    margin: 10px;
+}
+
+button {
+    padding: 10px 15px;
+    font-size: 16px;
+}
+
+#controls {
+    margin: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: middle;
+    gap: 10px;
+}
+
+textarea {
+    width: 400px;
+    height: 50px;
+    font-size: 14px;
+}
+
+canvas {
+    border: 2px solid black;
+    background-color: #f0f0f0;
+}
