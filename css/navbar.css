@@ -1,3 +1,4 @@
+/* Ensure the navbar stays fixed on the left */
 .wosnerds-navbar-container {
 	background-color: #e8e8e8;
 	width: 250px;
@@ -8,20 +9,17 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	padding-top: 0;
+        padding-top: 0;
 	box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 	border-top-right-radius: 10px;
 	border-bottom-right-radius: 10px;
-	overflow-y: auto;
+	overflow-y: auto; /* Only vertical scrolling */
+	overflow-x: hidden; /* Prevents horizontal scrollbar */
+	z-index: 1000;
+	padding-top: 0;
 }
-
 .wosnerds-navbar-container::-webkit-scrollbar {
-	width: 8px;
-}
-
-.wosnerds-navbar-container::-webkit-scrollbar-thumb {
-	background-color: #505055;
-	border-radius: 10px;
+       width: 8px;
 }
 
 .wosnerds-navbar-logo {
@@ -34,6 +32,7 @@
 	margin: 0 auto;
 }
 
+/* Restore navbar link styling */
 .wosnerds-navbar-link {
 	color: #333 !important;
 	margin: 8px 0;
@@ -42,38 +41,53 @@
 	background-color: #f0f0f0;
 	width: 90%;
 	text-align: center;
+	text-decoration: none;
+	display: block;
 }
 
 .wosnerds-navbar-link:hover {
 	background-color: #d0d0d0;
 }
 
+/* Restore navbar item styling */
 .wosnerds-navbar-item {
 	width: 100%;
 	display: flex;
 	justify-content: center;
 }
 
-/* Responsive styling for smaller screens (phones) */
+/* Shift ALL content right to avoid overlap */
+body {
+	margin-left: 260px; /* Push all content over */
+	padding: 20px;
+	box-sizing: border-box;
+	overflow-x: hidden; /* Prevents horizontal scrolling of body */
+}
+
+/* Responsive fix for smaller screens */
 @media (max-width: 768px) {
 	.wosnerds-navbar-container {
-		width: 60%;
+		width: 100%;
 		height: auto;
 		position: relative;
 		border-radius: 0;
 		flex-direction: row;
 		justify-content: space-around;
 	}
+       .wosnerds-navbar-item {
+               display: inline-block;
+               margin: 0 5px;
+       }
 
-	.wosnerds-navbar-item {
-		display: inline-block;
-		margin: 0 5px;
-	}
+       .wosnerds-navbar-logo {
+               width: 100px;
+               height: auto;
+               display: inline-block;
+               margin: 10px;
 
-	.wosnerds-navbar-logo {
-		width: 100px;
-		height: auto;
-		display: inline-block;
-		margin: 10px;
+	body {
+		margin-left: 0;
+		width: 100%;
 	}
 }
+
