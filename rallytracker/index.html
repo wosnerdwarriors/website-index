@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rally Tracker</title>
+    <link href="/rallytracker/css/style.css" rel="stylesheet">
+    <script defer src="/rallytracker/js/script.js"></script>
+    <link rel="icon" href="favicon.ico">
+</head>
+<body>
+    <div class="dashboard">
+        <header>
+            <h1>Rally Tracker</h1>
+        </header>
+        <main>
+            <section class="march-times-section">
+                <h2>March Times</h2>
+                <div class="march-times-list" id="march-times"></div>
+                <div class="input-group">
+                    <input type="text" id="new-player-name" placeholder="Player Name">
+                    <input type="number" id="new-player-time" placeholder="March Time (seconds)">
+                    <button onclick="addMarchTime()">Add</button>
+                </div>
+            </section>
+
+            <section class="rallies-section">
+                <h2>Rallies</h2>
+                <div class="rallies-list" id="rallies"></div>
+
+                <label for="rally-starter">Select Rally Starter:</label>
+                <select id="rally-starter"></select>
+
+                <label for="new-rally-minutes">Launch Time:</label>
+                <div id="time-mode-min-sec">
+                    <label for="new-rally-minutes">Minutes:</label>
+                    <input type="number" id="new-rally-minutes" value="5">
+                    <label for="new-rally-seconds">Seconds:</label>
+                    <input type="number" id="new-rally-seconds" value="0">
+                </div>
+                
+                <div id="time-mode-seconds" style="display: none;">
+                    <label for="new-rally-total-seconds">Total Seconds:</label>
+                    <input type="number" id="new-rally-total-seconds" value="300">
+                </div>
+
+                <button onclick="addRally()">Start Rally</button>
+                <button onclick="toggleRallyTimeMode()">Switch Time Mode</button>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
+
