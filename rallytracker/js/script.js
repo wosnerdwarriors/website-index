@@ -151,9 +151,24 @@ function addRally() {
     }
 }
 
+
 function renderRallies() {
     let container = document.getElementById("rallies");
     container.innerHTML = "";
+
+    if (rallies.length === 0) return;
+
+    let soonestRallyIndex = -1;
+    let soonestTime = Infinity;
+
+    // Find the rally that will land next (ignoring landed ones)
+    rallies.forEach((rally, index) => {
+        let remainingLandTime = rally.launchTime + rally.marchTime * 1000 - Date.now();
+        if (remainingLandTime > 0 && remainingLandTime < soonestTime) {
+            soonestRallyIndex = index;
+            soonestTime = remainingLandTime;
+        }
+    });
 
     rallies.forEach((rally, index) => {
         let remainingLaunchTime = Math.max(0, Math.floor((rally.launchTime - Date.now()) / 1000));
@@ -166,16 +181,38 @@ function renderRallies() {
 
         let div = document.createElement("div");
         div.className = "rally-entry";
-        div.innerHTML = `<span>${rally.name}</span>
-            <div>Launch: ${launchMinutes}m ${launchSeconds}s (${remainingLaunchTime}s total)</div>
-            <div>Land: ${landMinutes}m ${landSeconds}s (${remainingLandTime}s total)</div>
-            <button onclick="adjustLaunch(${index}, 1)">+1s</button>
-            <button onclick="adjustLaunch(${index}, -1)">-1s</button>
-            <button onclick="deleteRally(${index})">Delete</button>`;
+
+        // Highlight logic
+        if (remainingLandTime <= 0) {
+            div.style.backgroundColor = "#ffcccc"; // Red for landed rallies
+        } else if (index === soonestRallyIndex) {
+            div.style.backgroundColor = "#ccffcc"; // Green for next rally to land
+        }
+
+        div.innerHTML = `
+            <div><strong>${rally.name}</strong></div> <!-- Show rally starter name -->
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+                <div>
+                    <strong>Launch:</strong> ${launchMinutes}m ${launchSeconds}s (${remainingLaunchTime}s)
+                </div>
+                <div>
+                    <strong>Land:</strong> ${landMinutes}m ${landSeconds}s (${remainingLandTime}s)
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 5px; align-items: center;">
+                <div>
+                    <button onclick="adjustLaunch(${index}, -1)" style="margin-right: 2px;">-1s</button>
+                    <button onclick="adjustLaunch(${index}, 1)">+1s</button>
+                </div>
+                <button onclick="deleteRally(${index})">Delete</button>
+            </div>
+        `;
 
         container.appendChild(div);
     });
 }
+
+
 
 function adjustLaunch(index, amount) {
     rallies[index].launchTime += amount * 1000;
