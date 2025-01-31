@@ -69,11 +69,14 @@ function renderMarchTimes() {
             <button onclick="editMarchTime(${index})" class="edit-btn">Edit</button>
             <button onclick="adjustMarchTime(${index}, 1)">+1s</button>
             <button onclick="adjustMarchTime(${index}, -1)">-1s</button>
-            ${isInRally ? "" : `<button onclick="deleteMarchTime(${index})" class="delete-btn">Delete</button>`}`;
+            ${isInRally 
+                ? `<button disabled class="delete-btn disabled-btn" title="Cannot delete: Used in a rally">Delete</button>`
+                : `<button onclick="deleteMarchTime(${index})" class="delete-btn">Delete</button>`}`;
 
         container.appendChild(div);
     });
 }
+
 
 function editMarchTime(index) {
     let marchTimeSpan = document.getElementById(`march-time-${index}`);
@@ -143,6 +146,7 @@ function addRally() {
         });
 
         renderRallies();
+        renderMarchTimes(); // <-- Immediately update delete button state
         saveToCache();
     }
 }
@@ -180,7 +184,14 @@ function adjustLaunch(index, amount) {
 }
 
 function deleteRally(index) {
+    let rallyName = rallies[index].name;
     rallies.splice(index, 1);
+
+    // Check if this was the last rally using that march time
+    if (!rallies.some(rally => rally.name === rallyName)) {
+        renderMarchTimes(); // <-- Re-enable delete button if march is no longer used
+    }
+
     renderRallies();
     saveToCache();
 }
@@ -205,4 +216,14 @@ function deleteMarchTime(index) {
     renderRallies();
     updatePlayerDropdown();
     saveToCache();
+}
+function clearAllData() {
+    if (confirm("Are you sure you want to delete all data? This cannot be undone.")) {
+        marchTimes = [];
+        rallies = [];
+        localStorage.clear();
+        renderMarchTimes();
+        renderRallies();
+        updatePlayerDropdown();
+    }
 }

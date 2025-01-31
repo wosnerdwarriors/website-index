@@ -43,6 +43,10 @@ h2 {
     margin-bottom: 15px;
 }
 
+.disabled-btn {
+    background: #ccc;
+    cursor: not-allowed;
+}
 .march-times-list, .rallies-list {
     max-height: 300px;
     overflow-y: auto;
@@ -77,4 +81,5 @@ button {
 button:hover {
     background: #0056b3;
 }
+
 
