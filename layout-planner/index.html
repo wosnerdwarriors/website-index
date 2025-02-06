@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/researchtree/css/researchtree.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/layout-planner/css/style.css">
+    <title>Alliance Layout Planner</title>
+</head>
+
+<body>
+    <div id="toolbar">
+        <button data-type="flag">Flag (1x1)</button>
+        <button data-type="city">City (2x2)</button>
+        <button data-type="building">Bear Trap (3x3)</button>
+        <button data-type="select">Select</button>
+        <button id="deleteButton" style="background-color: #ff4d4d; color: white;">Delete</button>
+    </div>
+    <div id="counters">
+        <span>Flags: <span id="flagCounter">0</span></span> |
+        <span>Cities: <span id="cityCounter">0</span></span> |
+        <span>Bear Traps: <span id="buildingCounter">0</span></span>
+    </div>
+    <canvas id="layoutCanvas" width="1000" height="1000"></canvas>
+    <div id="info">
+        <span id="copyMessage" style="display:none; color: green; margin-top: 5px;">Copied to Clipboard!</span>
+    </div>
+    <div id="controls">
+        <button id="downloadButton">Save as PNG</button>
+        <button id="saveButton">Generate Code</button>
+        <textarea id="mapData" rows="5" cols="50" placeholder="Map code will appear here..."></textarea>
+        <button id="loadButton">Load</button>
+    </div>
+
+    <script src="/layout-planner/js/script.js"></script>
+    <script src="/js/navbar.js"></script>
+</body>
+</html>
