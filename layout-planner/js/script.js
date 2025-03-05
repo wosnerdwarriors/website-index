@@ -118,7 +118,7 @@ function calculateMarchTimes(city) {
 }
 
 function markFlagArea(flagEntity, flagAreas) {
-    const radiusSize = 7;
+    const radiusSize = 3;
     const startX = flagEntity.x - radiusSize;
     const startY = flagEntity.y - radiusSize;
     const endX = flagEntity.x + radiusSize;
