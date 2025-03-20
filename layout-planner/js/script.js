@@ -8,7 +8,7 @@ const saveButton = document.getElementById('saveButton');
 const loadButton = document.getElementById('loadButton');
 const mapData = document.getElementById('mapData');
 
-const gridSize = 40;
+const gridSize = 30;
 const canvasSize = 1000;
 const gridCount = canvasSize / gridSize;
 
@@ -87,10 +87,18 @@ function drawCityDetails(city) {
     ctx.fillText(city.id, (city.x + 1) * gridSize, (city.y + 0.6) * gridSize);
 
     const marchTimes = calculateMarchTimes(city);
-    marchTimes.forEach((time, index) => {
-        ctx.fillText(`BT${index + 1}: ${time}s`, (city.x + 1) * gridSize, (city.y + 1.2 + 0.3 * index) * gridSize);
-    });
+    if (marchTimes.length > 0) {
+        const minTime = Math.min(...marchTimes);
+        const indices = marchTimes
+            .map((time, index) => (time === minTime ? index + 1 : null))
+            .filter(index => index !== null);
+
+        const label = indices.length > 1 ? "Both" : `BT${indices[0]}`;
+
+        ctx.fillText(`${label}: ${minTime}s`, (city.x + 1) * gridSize, (city.y + 1.2) * gridSize);
+    }
 }
+
 
 function drawBearTrapDetails(trap) {
     ctx.fillStyle = 'black';
@@ -111,7 +119,7 @@ function calculateMarchTimes(city) {
             Math.pow((trap.x + 1.5) - (city.x + 1), 2) +
             Math.pow((trap.y + 1.5) - (city.y + 1), 2)
         );
-        const time = Math.round((distance / 10) * 32,5);
+        const time = Math.round((distance / 10) * 38);
         times.push(time);
     });
     return times;
