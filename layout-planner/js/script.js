@@ -8,7 +8,7 @@ const saveButton = document.getElementById('saveButton');
 const loadButton = document.getElementById('loadButton');
 const mapData = document.getElementById('mapData');
 
-const gridSize = 30;
+const gridSize = 35;
 const canvasSize = 1000;
 const gridCount = canvasSize / gridSize;
 
