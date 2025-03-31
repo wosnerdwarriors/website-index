@@ -6,59 +6,65 @@
 </button>
 
 <!-- Sidebar Navigation - Hidden on Mobile by Default -->
-<div id="wosnerds-navbar-container" class="bg-white w-full md:w-64 h-screen fixed top-0 left-0 md:flex flex-col items-center py-4 shadow-md rounded-r-lg overflow-y-auto z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+<div id="wosnerds-navbar-container" class="bg-gray-100 w-full md:w-64 h-screen fixed top-0 left-0 md:flex flex-col items-center py-4 shadow-md rounded-r-lg overflow-y-auto z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
   <a href="/" class="block w-[80%] md:w-4/5 mx-auto">
-    <img src="/greg.png" alt="WOS Nerds Logo" class="w-full h-auto pb-4 border-b border-gray-500">
+    <img src="/greg.png" alt="WOS Nerds Logo" class="w-full h-auto pb-4 border-b-2 border-gray-500">
   </a>
   
   <nav class="w-full px-4 mt-4 overflow-y-auto">
-    <ul class="space-y-1 w-full">
+    <ul class="space-y-3 w-full">
+      <!-- Tools Section -->
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="/rallytracker">Rally Tracker</a>
+        <a class="bg-blue-500 text-white hover:bg-blue-600 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="/rallytracker">Rally Tracker</a>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="/researchtree">Research Calc</a>
+        <a class="bg-green-500 text-white hover:bg-green-600 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="/researchtree">Research Calc</a>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="/troop-stats">Troop Stats</a>
+        <a class="bg-yellow-500 text-white hover:bg-yellow-600 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="/troop-stats">Troop Stats</a>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="/calendar">Calendar</a>
+        <a class="bg-purple-500 text-white hover:bg-purple-600 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="/calendar">Calendar</a>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="/svs-history">SVS History</a>
+        <a class="bg-red-500 text-white hover:bg-red-600 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="/svs-history">SVS History</a>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="/alliancerss">Alliance RSS Calculator</a>
+        <a class="bg-indigo-500 text-white hover:bg-indigo-600 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="/alliancerss">Alliance RSS Calc</a>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="/formationbuilder">Formation Builder</a>
+        <a class="bg-pink-500 text-white hover:bg-pink-600 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="/formationbuilder">Formation Builder</a>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="/layout-planner">Layout Planner</a>
+        <a class="bg-teal-500 text-white hover:bg-teal-600 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="/layout-planner">Layout Planner</a>
+      </li>
+      
+      <!-- External Links (gray background) -->
+      <li class="mt-6 mb-2">
+        <h5 class="text-center font-semibold text-gray-700 bg-gray-200 py-1 rounded">External Links</h5>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="https://drive.google.com/drive/folders/1rTwI6mXDYvFZHo8MhWQciCcNPprTmfFe?usp=sharing" target="_blank">Google Drive</a>
+        <a class="bg-gray-600 text-white hover:bg-gray-700 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="https://drive.google.com/drive/folders/1rTwI6mXDYvFZHo8MhWQciCcNPprTmfFe?usp=sharing" target="_blank">Google Drive</a>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="https://www.youtube.com/@WosNerds" target="_blank">YouTube</a>
+        <a class="bg-gray-600 text-white hover:bg-gray-700 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="https://www.youtube.com/@WosNerds" target="_blank">YouTube</a>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="https://discord.gg/dMYY8bcPXp" target="_blank">Discord</a>
+        <a class="bg-gray-600 text-white hover:bg-gray-700 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="https://discord.gg/dMYY8bcPXp" target="_blank">Discord</a>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="https://github.com/wosnerdwarriors" target="_blank">Github Source Code</a>
+        <a class="bg-gray-600 text-white hover:bg-gray-700 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="https://github.com/wosnerdwarriors" target="_blank">Github Source Code</a>
       </li>
 
       <!-- Data Collection Section -->
       <li class="mt-6 mb-2">
-        <h5 class="text-center font-semibold text-gray-700">Data Collection</h5>
+        <h5 class="text-center font-semibold text-gray-700 bg-gray-200 py-1 rounded">Data Collection</h5>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="https://forms.gle/BBnuL5V8LJ12mB9S7" target="_blank">SvS Match Results</a>
+        <a class="bg-cyan-500 text-white hover:bg-cyan-600 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="https://forms.gle/BBnuL5V8LJ12mB9S7" target="_blank">SvS Match Results</a>
       </li>
       <li class="flex justify-center">
-        <a class="wos-navbar-link" href="https://forms.gle/zeZJY8PBRHWsem2u7" target="_blank">State Age</a>
+        <a class="bg-cyan-500 text-white hover:bg-cyan-600 my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md" href="https://forms.gle/zeZJY8PBRHWsem2u7" target="_blank">State Age</a>
       </li>
     </ul>
   </nav>

@@ -66,16 +66,16 @@ function renderMarchTimes() {
         let div = document.createElement("div");
         div.className = "march-entry";
         
-        // Improved mobile-friendly layout
+        // Improved mobile-friendly layout with more prominent buttons
         div.innerHTML = `
-            <span><strong>${entry.name}:</strong> <span id="march-time-${index}">${entry.time}s</span></span>
-            <div class="button-group">
-                <button onclick="editMarchTime(${index})" class="edit-btn">Edit</button>
-                <button onclick="adjustMarchTime(${index}, 1)" class="bg-blue-500 hover:bg-blue-600">+1s</button>
-                <button onclick="adjustMarchTime(${index}, -1)" class="bg-blue-500 hover:bg-blue-600">-1s</button>
+            <span class="font-medium text-base">${entry.name}: <span id="march-time-${index}" class="font-bold">${entry.time}s</span></span>
+            <div class="button-group flex flex-wrap gap-1 justify-end">
+                <button onclick="editMarchTime(${index})" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs px-3 py-1 rounded shadow-sm">Edit</button>
+                <button onclick="adjustMarchTime(${index}, 1)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded shadow-sm">+1s</button>
+                <button onclick="adjustMarchTime(${index}, -1)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded shadow-sm">-1s</button>
                 ${isInRally 
-                    ? `<button disabled class="delete-btn disabled-btn" title="Cannot delete: Used in a rally">Delete</button>`
-                    : `<button onclick="deleteMarchTime(${index})" class="delete-btn">Delete</button>`}
+                    ? `<button disabled class="bg-gray-400 cursor-not-allowed text-white text-xs px-3 py-1 rounded shadow-sm" title="Cannot delete: Used in a rally">Delete</button>`
+                    : `<button onclick="deleteMarchTime(${index})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded shadow-sm">Delete</button>`}
             </div>`;
 
         container.appendChild(div);
@@ -194,16 +194,16 @@ function renderRallies() {
             div.classList.add("bg-green-100"); // Next to land
         }
 
-        // More mobile-friendly layout
+        // More mobile-friendly layout with launch and land on same line
         div.innerHTML = `
             <div class="font-semibold text-center mb-2">${rally.name}</div>
-            <div class="flex flex-col sm:flex-row justify-between gap-2 mobile-compact">
+            <div class="flex justify-between gap-2">
                 <div class="text-sm">
-                    <span class="font-medium">Launch:</span> ${launchMinutes}m ${launchSeconds}s<br>
+                    <span class="font-medium">Launch:</span> ${launchMinutes}m ${launchSeconds}s
                     <span class="text-xs text-gray-500">(${remainingLaunchTime}s)</span>
                 </div>
                 <div class="text-sm">
-                    <span class="font-medium">Land:</span> ${landMinutes}m ${landSeconds}s<br>
+                    <span class="font-medium">Land:</span> ${landMinutes}m ${landSeconds}s
                     <span class="text-xs text-gray-500">(${remainingLandTime}s)</span>
                 </div>
             </div>

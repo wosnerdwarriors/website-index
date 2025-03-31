@@ -15,7 +15,7 @@
     <main class="flex-grow container mx-auto px-4 py-8">
       <h1 class="text-3xl md:text-4xl font-bold text-center mb-8">WOS Nerds - Whiteout Survival</h1>
 
-      <div class="mt-5 max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <div class="mt-5 max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <h2 class="text-2xl font-semibold mb-4 text-center">About</h2>
         <div class="space-y-4 text-gray-700">
           <p>
@@ -27,6 +27,81 @@
           <p>
             Think our Website is very... unpolished/unfinished? It is. Everything is mostly in draft mode at the moment. Come contribute and help us though!
           </p>
+        </div>
+      </div>
+      
+      <!-- Tool Cards Grid -->
+      <div class="mt-8 max-w-5xl mx-auto">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Available Tools</h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <!-- Rally Tracker -->
+          <a href="/rallytracker" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-blue-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-blue-800">Rally Tracker</h3>
+            <p class="text-gray-600 text-sm">Coordinate rally timings and manage march times for optimal coordination.</p>
+          </a>
+          
+          <!-- Research Calculator -->
+          <a href="/researchtree" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-green-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-green-800">Research Calculator</h3>
+            <p class="text-gray-600 text-sm">Plan your research strategy and calculate efficiency.</p>
+          </a>
+          
+          <!-- Troop Stats -->
+          <a href="/troop-stats" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-yellow-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-yellow-800">Troop Stats</h3>
+            <p class="text-gray-600 text-sm">Compare troop types and their effectiveness in battle.</p>
+          </a>
+          
+          <!-- Calendar -->
+          <a href="/calendar" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-purple-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-purple-800">Event Calendar</h3>
+            <p class="text-gray-600 text-sm">Keep track of upcoming events and packs in the game.</p>
+          </a>
+          
+          <!-- SVS History -->
+          <a href="/svs-history" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-red-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-red-800">SVS History</h3>
+            <p class="text-gray-600 text-sm">Historical data and analysis for State vs State events.</p>
+          </a>
+          
+          <!-- Alliance RSS Calculator -->
+          <a href="/alliancerss" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-indigo-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-indigo-800">Alliance RSS Calculator</h3>
+            <p class="text-gray-600 text-sm">Calculate resource distribution and needs for your alliance.</p>
+          </a>
+          
+          <!-- Formation Builder -->
+          <a href="/formationbuilder" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-pink-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-pink-800">Formation Builder</h3>
+            <p class="text-gray-600 text-sm">Create and optimize troop formations for battle.</p>
+          </a>
+          
+          <!-- Layout Planner -->
+          <a href="/layout-planner" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-teal-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-teal-800">Layout Planner</h3>
+            <p class="text-gray-600 text-sm">Plan your base layout for optimal defense and resource production.</p>
+          </a>
+          
+          <!-- GitHub -->
+          <a href="https://github.com/wosnerdwarriors" target="_blank" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-gray-800 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+              </svg>
+              GitHub Repository
+            </h3>
+            <p class="text-gray-600 text-sm">Contribute to the development of these tools on GitHub.</p>
+          </a>
         </div>
       </div>
     </main>

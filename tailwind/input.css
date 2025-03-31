@@ -3,28 +3,34 @@
 @tailwind utilities;
 
 @layer components {
-  .wos-navbar-link {
-    @apply text-gray-800 my-2 py-2 px-4 rounded bg-gray-100 w-[90%] text-center no-underline block hover:bg-gray-200 transition-colors;
-  }
+  /* Navbar Links are now directly in the HTML with unique colors */
   
   .wos-btn {
-    @apply px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm md:text-base;
+    @apply px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 
+           transition-all duration-200 text-sm md:text-base shadow-sm 
+           hover:shadow-md border-0 font-medium transform hover:scale-105;
   }
   
   .wos-btn-sm {
-    @apply px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-xs;
+    @apply px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 
+           transition-all duration-200 text-xs shadow-sm hover:shadow
+           border-0 font-medium;
   }
   
   .wos-btn-secondary {
-    @apply px-3 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors text-sm md:text-base;
+    @apply px-3 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 
+           transition-all duration-200 text-sm md:text-base shadow-sm
+           hover:shadow border-0 font-medium;
   }
   
   .wos-card {
-    @apply bg-white rounded-lg shadow-md p-4;
+    @apply bg-white rounded-lg shadow-md p-4 border border-gray-100;
   }
   
   .wos-input {
-    @apply border border-gray-300 rounded px-3 py-2 w-full;
+    @apply border-2 border-gray-300 rounded-md px-3 py-2 w-full bg-white
+           focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+           focus:outline-none transition-all;
   }
   
   .wos-table {
@@ -32,7 +38,7 @@
   }
   
   .wos-table th {
-    @apply bg-gray-100 p-2 text-left border border-gray-300;
+    @apply bg-gray-100 p-2 text-left border border-gray-300 font-semibold;
   }
   
   .wos-table td {
@@ -41,5 +47,15 @@
   
   .wos-container {
     @apply container mx-auto px-4 py-6;
+  }
+  
+  /* New component classes */
+  .wos-section-title {
+    @apply text-xl font-semibold text-center border-b border-gray-200 pb-2 mb-4;
+  }
+  
+  .wos-scroll-container {
+    @apply max-h-[300px] overflow-y-auto border border-gray-200 rounded-lg 
+           p-3 bg-gray-50 mb-4 shadow-inner;
   }
 }
