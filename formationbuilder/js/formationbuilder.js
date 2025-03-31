@@ -287,6 +287,97 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 		console.log(`DEBUG - Step 3: Marksman allocation complete. Marches: ${JSON.stringify(marches)}`);
 		console.log(`DEBUG - Step 3: Remaining troops: ${JSON.stringify(totalTroops)}`);
+		// Step 4: Allocate Remaining Marksman
+		console.log("\n=== STEP 4: DISTRIBUTING REMAINING MARKSMEN ===");
+		let marksmanRemaining = totalTroops.marksman;
+		console.log(`Remaining marksmen to distribute: ${marksmanRemaining}`);
+
+		while (marksmanRemaining > 0) {
+		    let distributed = false;
+		    
+		    for (let i = 0; i < numMarches; i++) {
+		        if (marksmanRemaining <= 0) break;
+		        
+		        // Calculate remaining capacity in this march
+		        const remainingCapacity = maxMarchSize - marches[i].total;
+		        if (remainingCapacity <= 0) continue;
+		        
+		        // Calculate fair share of remaining troops for this march
+		        const fairShare = Math.ceil(marksmanRemaining / (numMarches - i));
+		        const allocate = Math.min(remainingCapacity, fairShare, marksmanRemaining);
+		        
+		        if (allocate > 0) {
+		            console.log(`March ${i+1}: Adding ${allocate} marksmen (fair share: ${fairShare}, capacity: ${remainingCapacity})`);
+		            
+		            marches[i].marksman += allocate;
+		            marches[i].total += allocate;
+		            marksmanRemaining -= allocate;
+		            distributed = true;
+		        }
+		    }
+		    
+		    if (!distributed) break; // No more capacity in any march
+		}
+
+		// Step 5: Allocate Remaining Lancer
+		console.log("\n=== STEP 5: DISTRIBUTING REMAINING LANCERS ===");
+		let lancerRemaining = totalTroops.lancer;
+		console.log(`Remaining lancers to distribute: ${lancerRemaining}`);
+
+		while (lancerRemaining > 0) {
+		    let distributed = false;
+		    
+		    for (let i = 0; i < numMarches; i++) {
+		        if (lancerRemaining <= 0) break;
+		        
+		        const remainingCapacity = maxMarchSize - marches[i].total;
+		        if (remainingCapacity <= 0) continue;
+		        
+		        const fairShare = Math.ceil(lancerRemaining / (numMarches - i));
+		        const allocate = Math.min(remainingCapacity, fairShare, lancerRemaining);
+		        
+		        if (allocate > 0) {
+		            console.log(`March ${i+1}: Adding ${allocate} lancers (fair share: ${fairShare}, capacity: ${remainingCapacity})`);
+		            
+		            marches[i].lancer += allocate;
+		            marches[i].total += allocate;
+		            lancerRemaining -= allocate;
+		            distributed = true;
+		        }
+		    }
+		    
+		    if (!distributed) break;
+		}
+
+		// Step 6: Allocate Remaining Infantry
+		console.log("\n=== STEP 6: DISTRIBUTING REMAINING INFANTRY ===");
+		let infantryRemaining = totalTroops.infantry;
+		console.log(`Remaining infantry to distribute: ${infantryRemaining}`);
+
+		while (infantryRemaining > 0) {
+		    let distributed = false;
+		    
+		    for (let i = 0; i < numMarches; i++) {
+		        if (infantryRemaining <= 0) break;
+		        
+		        const remainingCapacity = maxMarchSize - marches[i].total;
+		        if (remainingCapacity <= 0) continue;
+		        
+		        const fairShare = Math.ceil(infantryRemaining / (numMarches - i));
+		        const allocate = Math.min(remainingCapacity, fairShare, infantryRemaining);
+		        
+		        if (allocate > 0) {
+		            console.log(`March ${i+1}: Adding ${allocate} infantry (fair share: ${fairShare}, capacity: ${remainingCapacity})`);
+		            
+		            marches[i].infantry += allocate;
+		            marches[i].total += allocate;
+		            infantryRemaining -= allocate;
+		            distributed = true;
+		        }
+		    }
+		    
+		    if (!distributed) break;
+		}
 
 		console.log(`DEBUG - FINAL MARCH CONFIGURATIONS: ${JSON.stringify(marches, null, 2)}`);
 		console.log("==================== TROOP ALLOCATION AND MARCH GENERATION COMPLETE ====================");
