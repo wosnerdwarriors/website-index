@@ -347,29 +347,31 @@ document.addEventListener('DOMContentLoaded', function() {
 			
 			card.innerHTML = `
 				<h3 class="font-bold text-lg mb-2">March #${index + 1}</h3>
-				<div class="grid grid-cols-2 gap-2 mb-3">
-					<div class="bg-white p-2 rounded border border-gray-200">
-						<span class="font-medium text-blue-800">Infantry:</span> ${march.infantry}
+				<div class="flex flex-col space-y-2 mb-3">
+					<div class="bg-white p-2 rounded border border-gray-200 flex justify-between items-center">
+						<span class="font-medium">Total:</span>
+						<span class="font-bold">${march.total}</span>
 					</div>
-					<div class="bg-white p-2 rounded border border-gray-200">
-						<span class="font-medium text-green-800">Lancer:</span> ${march.lancer}
+					<div class="bg-blue-50 p-2 rounded border border-blue-200 flex justify-between items-center">
+						<span class="font-medium text-blue-800">Infantry:</span>
+						<span>
+							<span class="font-bold">${march.infantry}</span>
+							<span class="text-sm text-gray-600 ml-2">(${infantryPercent}%)</span>
+						</span>
 					</div>
-					<div class="bg-white p-2 rounded border border-gray-200">
-						<span class="font-medium text-red-800">Marksman:</span> ${march.marksman}
+					<div class="bg-green-50 p-2 rounded border border-green-200 flex justify-between items-center">
+						<span class="font-medium text-green-800">Lancer:</span>
+						<span>
+							<span class="font-bold">${march.lancer}</span>
+							<span class="text-sm text-gray-600 ml-2">(${lancerPercent}%)</span>
+						</span>
 					</div>
-					<div class="bg-white p-2 rounded border border-gray-200">
-						<span class="font-medium">Total:</span> ${march.total}
-					</div>
-				</div>
-				<div class="grid grid-cols-3 gap-2">
-					<div class="bg-blue-50 p-2 rounded border border-blue-200 text-center">
-						<span class="font-medium text-blue-800">${infantryPercent}%</span>
-					</div>
-					<div class="bg-green-50 p-2 rounded border border-green-200 text-center">
-						<span class="font-medium text-green-800">${lancerPercent}%</span>
-					</div>
-					<div class="bg-red-50 p-2 rounded border border-red-200 text-center">
-						<span class="font-medium text-red-800">${marksmanPercent}%</span>
+					<div class="bg-red-50 p-2 rounded border border-red-200 flex justify-between items-center">
+						<span class="font-medium text-red-800">Marksman:</span>
+						<span>
+							<span class="font-bold">${march.marksman}</span>
+							<span class="text-sm text-gray-600 ml-2">(${marksmanPercent}%)</span>
+						</span>
 					</div>
 				</div>
 			`;
