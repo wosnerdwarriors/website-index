@@ -3,152 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formation builder WOS</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Formation Builder - WOS Nerds</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        .form-group label {
-            margin-right: 10px;
-        }
-        .results-container {
-            margin-top: 20px;
-        }
-        .percentage-container {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .percentage-container div {
-            margin-right: 20px;
-        }
-        .row {
-            margin-bottom: 10px;
-        }
         .message-bar {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            border-radius: 5px;
             height: 40px;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
         }
-        .character-management {
-            margin-top: 20px;
+        /* Formation results styles */
+        .formation-container {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f9fafb;
         }
+        .formation-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .troop-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .troop-item {
+            background-color: #f3f4f6;
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        .infantry-item { color: #1e40af; }
+        .lancer-item { color: #047857; }
+        .marksman-item { color: #b91c1c; }
     </style>
 </head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center">Wos Formation builder (draft)</h1>
-	<p>This doesn't currently work as intended. it's supposed to split all your troops evenly between each march but I haven't got around to fix it. now it fills every march up 100% before it moves onto the next one</p>
+<body class="bg-gray-100 min-h-screen">
+    <div id="navbar-container"></div>
 
-        <div class="message-bar" id="message-bar"></div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <!-- Character Management Section -->
-                <div class="character-management">
-                    <div class="form-group">
-                        <select class="form-control" id="characters" style="width: auto; display: inline-block; min-width: 90%;" size="5"></select>
-                    </div>
-                    <div>
-                        <button type="button" class="btn btn-primary" id="load-btn">Load</button>
-                        <button type="button" class="btn btn-secondary" id="save-btn">Save</button>
-                        <button type="button" class="btn btn-success" id="new-character-btn">New Character</button>
-                        <button type="button" class="btn btn-danger" id="delete-btn">Delete</button>
-                    </div>
-
-                    <div class="form-group">
-                        <button type="button" class="btn btn-danger" id="delete-all-btn">Delete All Characters</button>
-                        <button type="button" class="btn btn-warning" id="clear-screen-btn">Clear Screen</button>
-                    </div>
-
-                    <div class="form-group">
-                        <input type="file" id="file-upload" class="form-control-file" accept=".json">
-                        <button type="button" class="btn btn-info" id="upload-btn">Upload Data</button>
-                        <button type="button" class="btn btn-info" id="download-btn">Download Data</button>
-                    </div>
-
-                    <div class="form-group">
-                        <input type="text" id="character-name-input" class="form-control" placeholder="Enter character name" style="display: none;">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-primary" id="generate-btn">Generate Formations</button>
-
-                <!-- Form Section -->
-                <div class="form-group">
-                    <label for="num_marches">Number of Marches:</label>
-                    <input type="number" id="num_marches" class="form-control" value="7" min="1" max="10">
-                    <label for="max_march_size">Max March Size:</label>
-                    <input type="number" id="max_march_size" class="form-control" value="172000" min="1">
-                </div>
-
-                <div class="percentage-container">
-                    <div>
-                        <label>Infantry Min (%):</label>
-                        <input type="number" id="infantry_min" class="form-control" value="10" min="0" max="100">
-                        <label>Infantry Max (%):</label>
-                        <input type="number" id="infantry_max" class="form-control" value="100" min="0" max="100">
-                    </div>
-                    <div>
-                        <label>Lancer Min (%):</label>
-                        <input type="number" id="lancer_min" class="form-control" value="0" min="0" max="100">
-                        <label>Lancer Max (%):</label>
-                        <input type="number" id="lancer_max" class="form-control" value="30" min="0" max="100">
-                    </div>
-                    <div>
-                        <label>Marksman Min (%):</label>
-                        <input type="number" id="marksman_min" class="form-control" value="0" min="0" max="100">
-                        <label>Marksman Max (%):</label>
-                        <input type="number" id="marksman_max" class="form-control" value="60" min="0" max="100">
-                    </div>
-                </div>
-
-                <form>
-                    <div class="row">
-                        <div class="col">
-                            <h3>Infantry</h3>
-                            <!-- Troop entry fields for Infantry -->
-                            <div class="form-group">
-                                <label for="infantry_t11">T11 Infantry:</label>
-                                <input type="number" class="form-control" id="infantry_t11" name="infantry_t11">
-                            </div>
-                            <!-- Repeat similar blocks for T10 to T1 Infantry -->
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-6 mt-16 md:ml-64">
+        <h1 class="text-3xl font-bold text-center mb-3">WOS Formation Builder (draft)</h1>
+        <p class="text-center text-red-600 mb-6">This doesn't currently work as intended. It's supposed to split all your troops evenly between each march but I haven't got around to fix it. Now it fills every march up 100% before it moves onto the next one</p>
+        
+        <div class="message-bar bg-red-100 text-red-800 p-3 rounded-md border border-red-200 mb-6" id="message-bar"></div>
+        
+        <div class="flex flex-col gap-6">
+            <!-- Main content sections (first on mobile and desktop) -->
+            <div class="w-full">
+                <!-- March Settings -->
+                <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+                    <h2 class="text-lg font-semibold mb-3">March Settings</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <label for="num_marches" class="block text-sm font-medium text-gray-700 mb-1">Number of Marches:</label>
+                            <input type="number" id="num_marches" class="w-full border border-gray-300 rounded-md px-3 py-2" value="7" min="1" max="10">
                         </div>
-                        <div class="col">
-                            <h3>Lancer</h3>
-                            <!-- Troop entry fields for Lancer -->
-                            <div class="form-group">
-                                <label for="lancer_t11">T11 Lancer:</label>
-                                <input type="number" class="form-control" id="lancer_t11" name="lancer_t11">
-                            </div>
-                            <!-- Repeat similar blocks for T10 to T1 Lancer -->
-                        </div>
-                        <div class="col">
-                            <h3>Marksman</h3>
-                            <!-- Troop entry fields for Marksman -->
-                            <div class="form-group">
-                                <label for="marksman_t11">T11 Marksman:</label>
-                                <input type="number" class="form-control" id="marksman_t11" name="marksman_t11">
-                            </div>
-                            <!-- Repeat similar blocks for T10 to T1 Marksman -->
+                        <div>
+                            <label for="max_march_size" class="block text-sm font-medium text-gray-700 mb-1">Max March Size:</label>
+                            <input type="number" id="max_march_size" class="w-full border border-gray-300 rounded-md px-3 py-2" value="172000" min="1">
                         </div>
                     </div>
-                </form>
+                </div>
+                
+                <!-- Generate Button -->
+                <button type="button" class="w-full bg-blue-600 text-white py-3 rounded-md font-semibold mb-6 hover:bg-blue-700 shadow-sm text-lg" id="generate-btn">
+                    Generate Formations
+                </button>
+                
+                <!-- Troop Percentage Settings -->
+                <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+                    <h2 class="text-lg font-semibold mb-3">Troop Percentages</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Infantry -->
+                        <div>
+                            <h3 class="font-medium mb-2 text-blue-800">Infantry</h3>
+                            <div class="mb-2">
+                                <label class="block text-sm text-gray-600">Min (%):</label>
+                                <input type="number" id="infantry_min" class="w-full border border-gray-300 rounded-md px-3 py-1" value="10" min="0" max="100">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600">Max (%):</label>
+                                <input type="number" id="infantry_max" class="w-full border border-gray-300 rounded-md px-3 py-1" value="100" min="0" max="100">
+                            </div>
+                        </div>
+                        
+                        <!-- Lancer -->
+                        <div>
+                            <h3 class="font-medium mb-2 text-green-800">Lancer</h3>
+                            <div class="mb-2">
+                                <label class="block text-sm text-gray-600">Min (%):</label>
+                                <input type="number" id="lancer_min" class="w-full border border-gray-300 rounded-md px-3 py-1" value="0" min="0" max="100">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600">Max (%):</label>
+                                <input type="number" id="lancer_max" class="w-full border border-gray-300 rounded-md px-3 py-1" value="30" min="0" max="100">
+                            </div>
+                        </div>
+                        
+                        <!-- Marksman -->
+                        <div>
+                            <h3 class="font-medium mb-2 text-red-800">Marksman</h3>
+                            <div class="mb-2">
+                                <label class="block text-sm text-gray-600">Min (%):</label>
+                                <input type="number" id="marksman_min" class="w-full border border-gray-300 rounded-md px-3 py-1" value="0" min="0" max="100">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600">Max (%):</label>
+                                <input type="number" id="marksman_max" class="w-full border border-gray-300 rounded-md px-3 py-1" value="60" min="0" max="100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Troop Counts Form -->
+                <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+                    <h2 class="text-lg font-semibold mb-3">Troop Counts</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Infantry Column -->
+                        <div>
+                            <h3 class="font-medium mb-2 text-blue-800">Infantry</h3>
+                            <div class="space-y-2">
+                                <div>
+                                    <label for="infantry_t11" class="block text-sm text-gray-600">T11 Infantry:</label>
+                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="infantry_t11" name="infantry_t11">
+                                </div>
+                                <div>
+                                    <label for="infantry_t10" class="block text-sm text-gray-600">T10 Infantry:</label>
+                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="infantry_t10" name="infantry_t10">
+                                </div>
+                                <!-- Add more infantry levels as needed -->
+                            </div>
+                        </div>
+                        
+                        <!-- Lancer Column -->
+                        <div>
+                            <h3 class="font-medium mb-2 text-green-800">Lancer</h3>
+                            <div class="space-y-2">
+                                <div>
+                                    <label for="lancer_t11" class="block text-sm text-gray-600">T11 Lancer:</label>
+                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="lancer_t11" name="lancer_t11">
+                                </div>
+                                <div>
+                                    <label for="lancer_t10" class="block text-sm text-gray-600">T10 Lancer:</label>
+                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="lancer_t10" name="lancer_t10">
+                                </div>
+                                <!-- Add more lancer levels as needed -->
+                            </div>
+                        </div>
+                        
+                        <!-- Marksman Column -->
+                        <div>
+                            <h3 class="font-medium mb-2 text-red-800">Marksman</h3>
+                            <div class="space-y-2">
+                                <div>
+                                    <label for="marksman_t11" class="block text-sm text-gray-600">T11 Marksman:</label>
+                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="marksman_t11" name="marksman_t11">
+                                </div>
+                                <div>
+                                    <label for="marksman_t10" class="block text-sm text-gray-600">T10 Marksman:</label>
+                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="marksman_t10" name="marksman_t10">
+                                </div>
+                                <!-- Add more marksman levels as needed -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results -->
+                <div id="results" class="bg-white p-4 rounded-lg shadow-md mb-6">
+                    <h2 class="text-lg font-semibold mb-3">Formation Results</h2>
+                    <!-- Results will be dynamically populated here -->
+                </div>
             </div>
-            <div class="col-md-6">
-
-                <div id="results" class="results-container"></div>
+            
+            <!-- Character Management (last on mobile, but visible on side for desktop) -->
+            <div class="w-full md:fixed md:right-4 md:top-24 md:w-1/4 md:max-w-xs">
+                <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+                    <h2 class="text-lg font-semibold mb-3">Character Management</h2>
+                    <div class="mb-3">
+                        <select class="w-full border border-gray-300 rounded-md py-2" id="characters" size="5"></select>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <button type="button" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm" id="load-btn">Load</button>
+                        <button type="button" class="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 text-sm" id="save-btn">Save</button>
+                        <button type="button" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm" id="new-character-btn">New Character</button>
+                        <button type="button" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm" id="delete-btn">Delete</button>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <button type="button" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm" id="delete-all-btn">Delete All Characters</button>
+                        <button type="button" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 text-sm" id="clear-screen-btn">Clear Screen</button>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <input type="file" id="file-upload" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-2" accept=".json">
+                        <div class="flex gap-2">
+                            <button type="button" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm" id="upload-btn">Upload Data</button>
+                            <button type="button" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm" id="download-btn">Download Data</button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <input type="text" id="character-name-input" class="w-full border border-gray-300 rounded-md px-3 py-2 hidden" placeholder="Enter character name">
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="mt-auto py-4 text-center text-gray-600 border-t">
+            <p>All data is free to copy and use. See <a href="https://github.com/wosnerdwarriors" target="_blank" class="text-blue-600 hover:underline">https://github.com/wosnerdwarriors</a> for source code</p>
+        </footer>
     </div>
 
     <script src="/formationbuilder/js/formationbuilder.js"></script>
-<script src="/js/navbar.js"></script>
-
+    <script src="/js/navbar.js"></script>
 </body>
 </html>
-

@@ -1,131 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-TCPXVFNK');</script>
-<!-- End Google Tag Manager -->
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Banner Calculation Tool</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2214%22>🪵</text></svg>">
-	<style>
-		#messages {
-			display: none;
-			margin-top: 20px;
-		}
-		#info {
-			margin-bottom: 20px;
-			padding: 15px;
-			border-radius: 5px;
-			background-color: #e9ecef;
-		}
-	</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner Calculation Tool - WOS Nerds</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2214%22 font-size=%2214%22>🪵</text></svg>">
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TCPXVFNK');</script>
+    <!-- End Google Tag Manager -->
 </head>
-<body class="p-5">
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TCPXVFNK"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-	<div class="container">
-		<div id="info" class="alert alert-info">
-			<h4>Welcome to the Banner Calculation Tool for Whiteout Survival!</h4>
-			<p>
-				This tool helps you figure out how many extra farms of each resource you would need to build more banners per day.
-				Building more banners is important because you earn alliance tokens, which are very useful for purchasing items in the alliance shop.
-			</p>
-			<p>
-				All data is stored locally in your browser, so feel free to create, save, and load data as you like. Your actions won’t affect other users.
-			</p>
-			<p>
-				NOTE: rebuilding the bear trap is the most efficient use of resources for this purpose. I haven't gotten around to filling in that data here yet
-			</p>
-		</div>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TCPXVFNK"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
-		<h1 class="mb-4">Banner Calculation Tool</h1>
+    <div id="navbar-container"></div>
 
-		<div class="mb-3">
-			<label for="alliance_select" class="form-label">Select Alliance:</label>
-			<select id="alliance_select" class="form-select" size="5">
-				<!-- Alliance options will be dynamically generated here -->
-			</select>
-		</div>
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-6 mt-16 md:ml-64">
+        <h1 class="text-3xl font-bold mb-6 text-center">Banner Calculation Tool</h1>
+        
+        <div class="bg-blue-50 p-4 rounded-lg shadow-md mb-6 border border-blue-100">
+            <h4 class="text-xl font-bold text-blue-800 mb-3">Welcome to the Banner Calculation Tool for Whiteout Survival!</h4>
+            <div class="space-y-3 text-blue-900">
+                <p>
+                    This tool helps you figure out how many extra farms of each resource you would need to build more banners per day.
+                    Building more banners is important because you earn alliance tokens, which are very useful for purchasing items in the alliance shop.
+                </p>
+                <p>
+                    All data is stored locally in your browser, so feel free to create, save, and load data as you like. Your actions won't affect other users.
+                </p>
+                <p class="font-medium">
+                    NOTE: rebuilding the bear trap is the most efficient use of resources for this purpose. I haven't gotten around to filling in that data here yet
+                </p>
+            </div>
+        </div>
 
-		<div class="row mb-4">
-			<div class="col">
-				<label for="meat_rate" class="form-label">Meat Rate (per hour):</label>
-				<input type="number" id="meat_rate" class="form-control" placeholder="Enter meat rate" value="0">
-			</div>
-			<div class="col">
-				<label for="wood_rate" class="form-label">Wood Rate (per hour):</label>
-				<input type="number" id="wood_rate" class="form-control" placeholder="Enter wood rate" value="0">
-			</div>
-			<div class="col">
-				<label for="coal_rate" class="form-label">Coal Rate (per hour):</label>
-				<input type="number" id="coal_rate" class="form-control" placeholder="Enter coal rate" value="0">
-			</div>
-			<div class="col">
-				<label for="iron_rate" class="form-label">Iron Rate (per hour):</label>
-				<input type="number" id="iron_rate" class="form-control" placeholder="Enter iron rate" value="0">
-			</div>
-		</div>
+        <div class="flex flex-col gap-6">
+            <!-- Main content (top section) -->
+            <div class="bg-white p-4 rounded-lg shadow-md order-1">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label for="meat_rate" class="block text-sm font-medium text-gray-700 mb-1">Meat Rate (per hour):</label>
+                        <input type="number" id="meat_rate" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter meat rate" value="0">
+                    </div>
+                    <div>
+                        <label for="wood_rate" class="block text-sm font-medium text-gray-700 mb-1">Wood Rate (per hour):</label>
+                        <input type="number" id="wood_rate" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter wood rate" value="0">
+                    </div>
+                    <div>
+                        <label for="coal_rate" class="block text-sm font-medium text-gray-700 mb-1">Coal Rate (per hour):</label>
+                        <input type="number" id="coal_rate" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter coal rate" value="0">
+                    </div>
+                    <div>
+                        <label for="iron_rate" class="block text-sm font-medium text-gray-700 mb-1">Iron Rate (per hour):</label>
+                        <input type="number" id="iron_rate" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter iron rate" value="0">
+                    </div>
+                </div>
 
-		<div id="admin_section">
-			<label for="new_alliance_name" class="form-label">New Alliance Name:</label>
-			<input type="text" id="new_alliance_name" class="form-control mb-3" placeholder="Enter new alliance name">
+                <div id="messages" class="hidden bg-blue-100 p-4 rounded border border-blue-200 text-blue-800 mb-5"></div>
 
-			<button id="load_alliance" class="btn btn-info mb-3">Load Alliance</button>
-			<button id="save_alliance" class="btn btn-primary mb-3">Save Alliance</button>
-			<button id="create_alliance" class="btn btn-secondary mb-3">Create New Alliance</button>
-			<button id="delete_alliance" class="btn btn-danger mb-3">Delete Alliance</button>
-			<button id="clear_all" class="btn btn-warning mb-3">Clear All Alliances</button>
-			<button id="clear_resources" class="btn btn-dark mb-3">Clear Resources to 0</button>
-		</div>
+                <div class="mb-5">
+                    <h2 class="text-xl font-semibold mb-3">Current Farms</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                            <p><span class="font-medium">Meat Farms:</span> <span id="meat_farms" class="font-bold">0</span></p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                            <p><span class="font-medium">Wood Farms:</span> <span id="wood_farms" class="font-bold">0</span></p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                            <p><span class="font-medium">Coal Farms:</span> <span id="coal_farms" class="font-bold">0</span></p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                            <p><span class="font-medium">Iron Farms:</span> <span id="iron_farms" class="font-bold">0</span></p>
+                        </div>
+                    </div>
+                </div>
 
-		<div id="messages" class="alert alert-info" role="alert">
-			<!-- Message will be dynamically generated here -->
-		</div>
+                <div>
+                    <h2 class="text-xl font-semibold mb-3">Banners Per Day</h2>
+                    <div class="overflow-x-auto bg-gray-50 rounded border border-gray-200 p-2">
+                        <table class="min-w-full bg-white border border-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-2 px-3 text-left border-b border-gray-200 font-medium text-gray-700">Banners per Day</th>
+                                    <th class="py-2 px-3 text-left border-b border-gray-200 font-medium text-gray-700">Extra Meat Farms</th>
+                                    <th class="py-2 px-3 text-left border-b border-gray-200 font-medium text-gray-700">Extra Wood Farms</th>
+                                    <th class="py-2 px-3 text-left border-b border-gray-200 font-medium text-gray-700">Extra Coal Farms</th>
+                                    <th class="py-2 px-3 text-left border-b border-gray-200 font-medium text-gray-700">Extra Iron Farms</th>
+                                </tr>
+                            </thead>
+                            <tbody id="banners_table" class="divide-y divide-gray-200">
+                                <!-- Rows will be dynamically generated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-		<h2 class="mb-3">Current Farms</h2>
-		<div class="row mb-4">
-			<div class="col">
-				<p><strong>Meat Farms:</strong> <span id="meat_farms">0</span></p>
-			</div>
-			<div class="col">
-				<p><strong>Wood Farms:</strong> <span id="wood_farms">0</span></p>
-			</div>
-			<div class="col">
-				<p><strong>Coal Farms:</strong> <span id="coal_farms">0</span></p>
-			</div>
-			<div class="col">
-				<p><strong>Iron Farms:</strong> <span id="iron_farms">0</span></p>
-			</div>
-		</div>
+            <!-- Alliance management (bottom on mobile) -->
+            <div class="bg-white p-4 rounded-lg shadow-md order-2">
+                <h2 class="text-xl font-semibold mb-3">Alliance Management</h2>
+                
+                <div class="mb-5">
+                    <label for="alliance_select" class="block text-sm font-medium text-gray-700 mb-2">Select Alliance:</label>
+                    <select id="alliance_select" class="w-full border border-gray-300 rounded-md py-2" size="4">
+                        <!-- Alliance options will be dynamically generated here -->
+                    </select>
+                </div>
 
-		<h2 class="mb-3">Banners Per Day</h2>
-		<table class="table table-striped">
-			<thead>
-				<tr>
-					<th>Banners per Day</th>
-					<th>Extra Meat Farms</th>
-					<th>Extra Wood Farms</th>
-					<th>Extra Coal Farms</th>
-					<th>Extra Iron Farms</th>
-				</tr>
-			</thead>
-			<tbody id="banners_table">
-				<!-- Rows will be dynamically generated here -->
-			</tbody>
-		</table>
-	</div>
+                <div class="mb-5">
+                    <label for="new_alliance_name" class="block text-sm font-medium text-gray-700 mb-1">New Alliance Name:</label>
+                    <input type="text" id="new_alliance_name" class="w-full border border-gray-300 rounded-md px-3 py-2 mb-3" placeholder="Enter new alliance name">
 
-	<script src="/alliancerss/js/alliancerss.js"></script>
-	<script src="/js/navbar.js"></script>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+                        <button id="load_alliance" class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors shadow-sm">Load Alliance</button>
+                        <button id="save_alliance" class="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors shadow-sm">Save Alliance</button>
+                        <button id="create_alliance" class="bg-indigo-500 text-white px-3 py-2 rounded hover:bg-indigo-600 transition-colors shadow-sm">Create New Alliance</button>
+                        <button id="delete_alliance" class="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition-colors shadow-sm">Delete Alliance</button>
+                        <button id="clear_all" class="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 transition-colors shadow-sm">Clear All Alliances</button>
+                        <button id="clear_resources" class="bg-gray-700 text-white px-3 py-2 rounded hover:bg-gray-800 transition-colors shadow-sm">Clear Resources to 0</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Footer -->
+        <footer class="mt-8 py-4 text-center text-gray-600 border-t">
+            <p>All data is free to copy and use. See <a href="https://github.com/wosnerdwarriors" target="_blank" class="text-blue-600 hover:underline">https://github.com/wosnerdwarriors</a> for source code</p>
+        </footer>
+    </div>
+
+    <script src="/alliancerss/js/alliancerss.js"></script>
+    <script src="/js/navbar.js"></script>
 </body>
 </html>
-
