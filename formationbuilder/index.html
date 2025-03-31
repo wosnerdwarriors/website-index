@@ -71,11 +71,6 @@
                     </div>
                 </div>
                 
-                <!-- Generate Button -->
-                <button type="button" class="w-full bg-blue-600 text-white py-3 rounded-md font-semibold mb-6 hover:bg-blue-700 shadow-sm text-lg" id="generate-btn">
-                    Generate Formations
-                </button>
-                
                 <!-- Troop Percentage Settings -->
                 <div class="bg-white p-4 rounded-lg shadow-md mb-6">
                     <h2 class="text-lg font-semibold mb-3">Troop Percentages</h2>
@@ -131,11 +126,11 @@
                             <div class="space-y-2">
                                 <div>
                                     <label for="infantry_t11" class="block text-sm text-gray-600">T11 Infantry:</label>
-                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="infantry_t11" name="infantry_t11">
+                                    <input value=999999999999 type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="infantry_t11" name="infantry_t11">
                                 </div>
                                 <div>
                                     <label for="infantry_t10" class="block text-sm text-gray-600">T10 Infantry:</label>
-                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="infantry_t10" name="infantry_t10">
+                                    <input value=999999999999 type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="infantry_t10" name="infantry_t10">
                                 </div>
                                 <!-- Add more infantry levels as needed -->
                             </div>
@@ -147,11 +142,11 @@
                             <div class="space-y-2">
                                 <div>
                                     <label for="lancer_t11" class="block text-sm text-gray-600">T11 Lancer:</label>
-                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="lancer_t11" name="lancer_t11">
+                                    <input value=999999999999 type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="lancer_t11" name="lancer_t11">
                                 </div>
                                 <div>
                                     <label for="lancer_t10" class="block text-sm text-gray-600">T10 Lancer:</label>
-                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="lancer_t10" name="lancer_t10">
+                                    <input value=999999999999 type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="lancer_t10" name="lancer_t10">
                                 </div>
                                 <!-- Add more lancer levels as needed -->
                             </div>
@@ -163,11 +158,11 @@
                             <div class="space-y-2">
                                 <div>
                                     <label for="marksman_t11" class="block text-sm text-gray-600">T11 Marksman:</label>
-                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="marksman_t11" name="marksman_t11">
+                                    <input value=999999999999 type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="marksman_t11" name="marksman_t11">
                                 </div>
                                 <div>
                                     <label for="marksman_t10" class="block text-sm text-gray-600">T10 Marksman:</label>
-                                    <input type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="marksman_t10" name="marksman_t10">
+                                    <input value=999999999999 type="number" class="w-full border border-gray-300 rounded-md px-3 py-1" id="marksman_t10" name="marksman_t10">
                                 </div>
                                 <!-- Add more marksman levels as needed -->
                             </div>
@@ -175,6 +170,12 @@
                     </div>
                 </div>
                 
+                
+                <!-- Generate Button -->
+                <button type="button" class="w-full bg-blue-600 text-white py-3 rounded-md font-semibold mb-6 hover:bg-blue-700 shadow-sm text-lg" id="generate-btn">
+                    Generate Formations
+                </button>
+
                 <!-- Results -->
                 <div id="results" class="bg-white p-4 rounded-lg shadow-md mb-6">
                     <h2 class="text-lg font-semibold mb-3">Formation Results</h2>
@@ -182,8 +183,8 @@
                 </div>
             </div>
             
-            <!-- Character Management (last on mobile, but visible on side for desktop) -->
-            <div class="w-full md:fixed md:right-4 md:top-24 md:w-1/4 md:max-w-xs">
+            <!-- Character Management (at the bottom of the page) -->
+            <div class="w-full">
                 <div class="bg-white p-4 rounded-lg shadow-md mb-6">
                     <h2 class="text-lg font-semibold mb-3">Character Management</h2>
                     <div class="mb-3">

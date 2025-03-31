@@ -2,24 +2,24 @@
   // Navigation menu data structure
   const navMenuData = {
     tools: [
-      { name: "Rally Tracker", url: "/rallytracker", color: "blue" },
-      { name: "Research Calc", url: "/researchtree", color: "green" },
-      { name: "Troop Stats", url: "/troop-stats", color: "yellow" },
-      { name: "Calendar", url: "/calendar", color: "purple" },
-      { name: "SVS History", url: "/svs-history", color: "red" },
-      { name: "Alliance RSS Calc", url: "/alliancerss", color: "indigo" },
-      { name: "Formation Builder", url: "/formationbuilder", color: "pink" },
-      { name: "Layout Planner", url: "/layout-planner", color: "teal" }
+      { name: "Rally Tracker", url: "/rallytracker", color: "slate" },
+      { name: "Research Calc", url: "/researchtree", color: "emerald" },
+      { name: "Troop Stats", url: "/troop-stats", color: "amber" },
+      { name: "Calendar", url: "/calendar", color: "indigo" },
+      { name: "SVS History", url: "/svs-history", color: "rose" },
+      { name: "Alliance RSS Calc", url: "/alliancerss", color: "teal" },
+      { name: "Formation Builder", url: "/formationbuilder", color: "zinc" },
+      { name: "Layout Planner", url: "/layout-planner", color: "slate" }
     ],
     external: [
-      { name: "Google Drive", url: "https://drive.google.com/drive/folders/1rTwI6mXDYvFZHo8MhWQciCcNPprTmfFe?usp=sharing", color: "gray" },
-      { name: "YouTube", url: "https://www.youtube.com/@WosNerds", color: "gray" },
-      { name: "Discord", url: "https://discord.gg/dMYY8bcPXp", color: "gray" },
-      { name: "Github Source Code", url: "https://github.com/wosnerdwarriors", color: "gray" }
+      { name: "Google Drive", url: "https://drive.google.com/drive/folders/1rTwI6mXDYvFZHo8MhWQciCcNPprTmfFe?usp=sharing", color: "zinc" },
+      { name: "YouTube", url: "https://www.youtube.com/@WosNerds", color: "zinc" },
+      { name: "Discord", url: "https://discord.gg/dMYY8bcPXp", color: "zinc" },
+      { name: "Github Source Code", url: "https://github.com/wosnerdwarriors", color: "zinc" }
     ],
     dataCollection: [
-      { name: "SvS Match Results", url: "https://forms.gle/BBnuL5V8LJ12mB9S7", color: "cyan" },
-      { name: "State Age", url: "https://forms.gle/zeZJY8PBRHWsem2u7", color: "cyan" }
+      { name: "SvS Match Results", url: "https://forms.gle/BBnuL5V8LJ12mB9S7", color: "teal" },
+      { name: "State Age", url: "https://forms.gle/zeZJY8PBRHWsem2u7", color: "teal" }
     ]
   };
 
@@ -103,18 +103,15 @@
     
     // Color mapping for background
     const colorClasses = {
-      blue: "bg-blue-500 hover:bg-blue-600",
-      green: "bg-green-500 hover:bg-green-600",
-      yellow: "bg-yellow-500 hover:bg-yellow-600", 
-      purple: "bg-purple-500 hover:bg-purple-600",
-      red: "bg-red-500 hover:bg-red-600",
-      indigo: "bg-indigo-500 hover:bg-indigo-600",
-      pink: "bg-pink-500 hover:bg-pink-600",
-      teal: "bg-teal-600 hover:bg-teal-700", // Using darker teal for better contrast
-      cyan: "bg-cyan-600 hover:bg-cyan-700", // Darker cyan for better contrast
-      gray: "bg-gray-600 hover:bg-gray-700"
+      slate: "bg-slate-600 hover:bg-slate-700",
+      emerald: "bg-emerald-600 hover:bg-emerald-700",
+      amber: "bg-amber-600 hover:bg-amber-700",
+      indigo: "bg-indigo-600 hover:bg-indigo-700",
+      rose: "bg-rose-600 hover:bg-rose-700",
+      teal: "bg-teal-700 hover:bg-teal-800",
+      zinc: "bg-zinc-700 hover:bg-zinc-800"
     };
-    
+        
     // Combine classes safely, with fallback to blue if color not found
     a.className = `${baseClasses} ${colorClasses[color] || 'bg-blue-500 hover:bg-blue-600'}`;
     a.textContent = name;

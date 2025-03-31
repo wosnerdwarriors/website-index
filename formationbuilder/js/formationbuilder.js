@@ -261,32 +261,55 @@ document.addEventListener('DOMContentLoaded', function() {
 			}
 		}
 
-		// Display the results in a table format
+		// Display the results in a more mobile-friendly format
 		const resultsDiv = document.getElementById('results');
-		resultsDiv.innerHTML = '';
+		resultsDiv.innerHTML = '<h2 class="text-lg font-semibold mb-4">Formation Results</h2>';
+		
+		// Add toggle button for desktop/mobile view
+		const viewToggle = document.createElement('div');
+		viewToggle.className = 'mb-4';
+		viewToggle.innerHTML = `
+			<div class="flex flex-wrap gap-2 mb-4">
+				<button id="table-view-btn" class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600">Table View</button>
+				<button id="card-view-btn" class="bg-gray-200 text-gray-800 px-3 py-2 rounded hover:bg-gray-300">Card View</button>
+			</div>
+		`;
+		resultsDiv.appendChild(viewToggle);
+		
+		// Container for both views
+		const viewsContainer = document.createElement('div');
+		viewsContainer.className = 'views-container';
+		resultsDiv.appendChild(viewsContainer);
 
+		// Create the table view (desktop-friendly)
+		const tableView = document.createElement('div');
+		tableView.id = 'table-view';
+		tableView.className = 'overflow-x-auto';
+		
 		// Create the table element
 		const table = document.createElement('table');
-		table.className = 'table table-bordered table-striped';
+		table.className = 'min-w-full bg-white border border-gray-200';
 
 		// Create the table header
 		const thead = document.createElement('thead');
+		thead.className = 'bg-gray-100';
 		thead.innerHTML = `
 			<tr>
-				<th>March #</th>
-				<th>Infantry</th>
-				<th>Lancer</th>
-				<th>Marksman</th>
-				<th>Total</th>
-				<th>% Infantry</th>
-				<th>% Lancer</th>
-				<th>% Marksman</th>
+				<th class="border px-4 py-2">March #</th>
+				<th class="border px-4 py-2">Infantry</th>
+				<th class="border px-4 py-2">Lancer</th>
+				<th class="border px-4 py-2">Marksman</th>
+				<th class="border px-4 py-2">Total</th>
+				<th class="border px-4 py-2">% Infantry</th>
+				<th class="border px-4 py-2">% Lancer</th>
+				<th class="border px-4 py-2">% Marksman</th>
 			</tr>
 		`;
 		table.appendChild(thead);
 
 		// Create the table body
 		const tbody = document.createElement('tbody');
+		tbody.className = 'divide-y divide-gray-200';
 		marches.forEach((march, index) => {
 			const infantryPercent = ((march.infantry / march.total) * 100).toFixed(1);
 			const lancerPercent = ((march.lancer / march.total) * 100).toFixed(1);
@@ -294,18 +317,89 @@ document.addEventListener('DOMContentLoaded', function() {
 
 			const row = document.createElement('tr');
 			row.innerHTML = `
-				<td>${index + 1}</td>
-				<td>${march.infantry}</td>
-				<td>${march.lancer}</td>
-				<td>${march.marksman}</td>
-				<td>${march.total}</td>
-				<td>${infantryPercent}%</td>
-				<td>${lancerPercent}%</td>
-				<td>${marksmanPercent}%</td>
+				<td class="border px-4 py-2">${index + 1}</td>
+				<td class="border px-4 py-2">${march.infantry}</td>
+				<td class="border px-4 py-2">${march.lancer}</td>
+				<td class="border px-4 py-2">${march.marksman}</td>
+				<td class="border px-4 py-2">${march.total}</td>
+				<td class="border px-4 py-2">${infantryPercent}%</td>
+				<td class="border px-4 py-2">${lancerPercent}%</td>
+				<td class="border px-4 py-2">${marksmanPercent}%</td>
 			`;
 			tbody.appendChild(row);
 		});
 		table.appendChild(tbody);
-		resultsDiv.appendChild(table);
+		tableView.appendChild(table);
+		viewsContainer.appendChild(tableView);
+		
+		// Create card view (mobile-friendly)
+		const cardView = document.createElement('div');
+		cardView.id = 'card-view';
+		cardView.className = 'hidden';
+		
+		marches.forEach((march, index) => {
+			const infantryPercent = ((march.infantry / march.total) * 100).toFixed(1);
+			const lancerPercent = ((march.lancer / march.total) * 100).toFixed(1);
+			const marksmanPercent = ((march.marksman / march.total) * 100).toFixed(1);
+			
+			const card = document.createElement('div');
+			card.className = 'bg-gray-50 p-4 rounded border border-gray-200 mb-4';
+			
+			card.innerHTML = `
+				<h3 class="font-bold text-lg mb-2">March #${index + 1}</h3>
+				<div class="grid grid-cols-2 gap-2 mb-3">
+					<div class="bg-white p-2 rounded border border-gray-200">
+						<span class="font-medium text-blue-800">Infantry:</span> ${march.infantry}
+					</div>
+					<div class="bg-white p-2 rounded border border-gray-200">
+						<span class="font-medium text-green-800">Lancer:</span> ${march.lancer}
+					</div>
+					<div class="bg-white p-2 rounded border border-gray-200">
+						<span class="font-medium text-red-800">Marksman:</span> ${march.marksman}
+					</div>
+					<div class="bg-white p-2 rounded border border-gray-200">
+						<span class="font-medium">Total:</span> ${march.total}
+					</div>
+				</div>
+				<div class="grid grid-cols-3 gap-2">
+					<div class="bg-blue-50 p-2 rounded border border-blue-200 text-center">
+						<span class="font-medium text-blue-800">${infantryPercent}%</span>
+					</div>
+					<div class="bg-green-50 p-2 rounded border border-green-200 text-center">
+						<span class="font-medium text-green-800">${lancerPercent}%</span>
+					</div>
+					<div class="bg-red-50 p-2 rounded border border-red-200 text-center">
+						<span class="font-medium text-red-800">${marksmanPercent}%</span>
+					</div>
+				</div>
+			`;
+			
+			cardView.appendChild(card);
+		});
+		viewsContainer.appendChild(cardView);
+		
+		// Add event listeners for toggle buttons
+		document.getElementById('table-view-btn').addEventListener('click', function() {
+			document.getElementById('table-view').classList.remove('hidden');
+			document.getElementById('card-view').classList.add('hidden');
+			this.classList.remove('bg-gray-200', 'text-gray-800');
+			this.classList.add('bg-blue-500', 'text-white');
+			document.getElementById('card-view-btn').classList.remove('bg-blue-500', 'text-white');
+			document.getElementById('card-view-btn').classList.add('bg-gray-200', 'text-gray-800');
+		});
+		
+		document.getElementById('card-view-btn').addEventListener('click', function() {
+			document.getElementById('card-view').classList.remove('hidden');
+			document.getElementById('table-view').classList.add('hidden');
+			this.classList.remove('bg-gray-200', 'text-gray-800');
+			this.classList.add('bg-blue-500', 'text-white');
+			document.getElementById('table-view-btn').classList.remove('bg-blue-500', 'text-white');
+			document.getElementById('table-view-btn').classList.add('bg-gray-200', 'text-gray-800');
+		});
+		
+		// Auto-select card view on mobile, table view on desktop
+		if (window.innerWidth < 768) {
+			document.getElementById('card-view-btn').click();
+		}
 	});
 });
