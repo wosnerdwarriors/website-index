@@ -65,13 +65,18 @@ function renderMarchTimes() {
 
         let div = document.createElement("div");
         div.className = "march-entry";
-        div.innerHTML = `<span>${entry.name}: <span id="march-time-${index}">${entry.time}s</span></span>
-            <button onclick="editMarchTime(${index})" class="edit-btn">Edit</button>
-            <button onclick="adjustMarchTime(${index}, 1)">+1s</button>
-            <button onclick="adjustMarchTime(${index}, -1)">-1s</button>
-            ${isInRally 
-                ? `<button disabled class="delete-btn disabled-btn" title="Cannot delete: Used in a rally">Delete</button>`
-                : `<button onclick="deleteMarchTime(${index})" class="delete-btn">Delete</button>`}`;
+        
+        // Improved mobile-friendly layout
+        div.innerHTML = `
+            <span><strong>${entry.name}:</strong> <span id="march-time-${index}">${entry.time}s</span></span>
+            <div class="button-group">
+                <button onclick="editMarchTime(${index})" class="edit-btn">Edit</button>
+                <button onclick="adjustMarchTime(${index}, 1)" class="bg-blue-500 hover:bg-blue-600">+1s</button>
+                <button onclick="adjustMarchTime(${index}, -1)" class="bg-blue-500 hover:bg-blue-600">-1s</button>
+                ${isInRally 
+                    ? `<button disabled class="delete-btn disabled-btn" title="Cannot delete: Used in a rally">Delete</button>`
+                    : `<button onclick="deleteMarchTime(${index})" class="delete-btn">Delete</button>`}
+            </div>`;
 
         container.appendChild(div);
     });
@@ -84,8 +89,8 @@ function editMarchTime(index) {
     if (!marchTimeSpan) return;
 
     marchTimeSpan.innerHTML = `
-        <input type="number" id="march-input-${index}" value="${marchTimes[index].time}" class="march-edit-input">
-        <button onclick="saveMarchTime(${index})" class="save-btn">Save</button>
+        <input type="number" id="march-input-${index}" value="${marchTimes[index].time}" class="w-16 border border-gray-300 rounded px-1 py-0.5">
+        <button onclick="saveMarchTime(${index})" class="bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-0.5 rounded">Save</button>
     `;
 
     document.getElementById(`march-input-${index}`).focus();
@@ -146,7 +151,7 @@ function addRally() {
         });
 
         renderRallies();
-        renderMarchTimes(); // <-- Immediately update delete button state
+        renderMarchTimes(); // Update delete button state
         saveToCache();
     }
 }
@@ -182,29 +187,32 @@ function renderRallies() {
         let div = document.createElement("div");
         div.className = "rally-entry";
 
-        // Highlight logic
+        // Background color based on rally status
         if (remainingLandTime <= 0) {
-            div.style.backgroundColor = "#ffcccc"; // Red for landed rallies
+            div.classList.add("bg-red-100"); // Landed
         } else if (index === soonestRallyIndex) {
-            div.style.backgroundColor = "#ccffcc"; // Green for next rally to land
+            div.classList.add("bg-green-100"); // Next to land
         }
 
+        // More mobile-friendly layout
         div.innerHTML = `
-            <div><strong>${rally.name}</strong></div> <!-- Show rally starter name -->
-            <div style="display: flex; justify-content: space-between; width: 100%;">
-                <div>
-                    <strong>Launch:</strong> ${launchMinutes}m ${launchSeconds}s (${remainingLaunchTime}s)
+            <div class="font-semibold text-center mb-2">${rally.name}</div>
+            <div class="flex flex-col sm:flex-row justify-between gap-2 mobile-compact">
+                <div class="text-sm">
+                    <span class="font-medium">Launch:</span> ${launchMinutes}m ${launchSeconds}s<br>
+                    <span class="text-xs text-gray-500">(${remainingLaunchTime}s)</span>
                 </div>
-                <div>
-                    <strong>Land:</strong> ${landMinutes}m ${landSeconds}s (${remainingLandTime}s)
+                <div class="text-sm">
+                    <span class="font-medium">Land:</span> ${landMinutes}m ${landSeconds}s<br>
+                    <span class="text-xs text-gray-500">(${remainingLandTime}s)</span>
                 </div>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 5px; align-items: center;">
-                <div>
-                    <button onclick="adjustLaunch(${index}, -1)" style="margin-right: 2px;">-1s</button>
-                    <button onclick="adjustLaunch(${index}, 1)">+1s</button>
+            <div class="flex justify-between mt-2">
+                <div class="space-x-1">
+                    <button onclick="adjustLaunch(${index}, -1)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">-1s</button>
+                    <button onclick="adjustLaunch(${index}, 1)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">+1s</button>
                 </div>
-                <button onclick="deleteRally(${index})">Delete</button>
+                <button onclick="deleteRally(${index})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">Delete</button>
             </div>
         `;
 
@@ -226,7 +234,7 @@ function deleteRally(index) {
 
     // Check if this was the last rally using that march time
     if (!rallies.some(rally => rally.name === rallyName)) {
-        renderMarchTimes(); // <-- Re-enable delete button if march is no longer used
+        renderMarchTimes(); // Re-enable delete button if march is no longer used
     }
 
     renderRallies();
@@ -241,19 +249,32 @@ function toggleRallyTimeMode() {
     rallyTimeMode = rallyTimeMode === "minutes" ? "seconds" : "minutes";
     document.getElementById("time-mode-min-sec").style.display = rallyTimeMode === "minutes" ? "flex" : "none";
     document.getElementById("time-mode-seconds").style.display = rallyTimeMode === "seconds" ? "flex" : "none";
+    
+    // Update the values when switching modes
+    if (rallyTimeMode === "minutes") {
+        let totalSeconds = parseInt(document.getElementById("new-rally-total-seconds").value);
+        document.getElementById("new-rally-minutes").value = Math.floor(totalSeconds / 60);
+        document.getElementById("new-rally-seconds").value = totalSeconds % 60;
+    } else {
+        let minutes = parseInt(document.getElementById("new-rally-minutes").value);
+        let seconds = parseInt(document.getElementById("new-rally-seconds").value);
+        document.getElementById("new-rally-total-seconds").value = minutes * 60 + seconds;
+    }
 }
 
 function deleteMarchTime(index) {
+    let playerName = marchTimes[index].name;
     marchTimes.splice(index, 1);
 
     // Remove any rallies that were using this player
-    rallies = rallies.filter(rally => rally.name !== marchTimes[index]?.name);
+    rallies = rallies.filter(rally => rally.name !== playerName);
 
     renderMarchTimes();
     renderRallies();
     updatePlayerDropdown();
     saveToCache();
 }
+
 function clearAllData() {
     if (confirm("Are you sure you want to delete all data? This cannot be undone.")) {
         marchTimes = [];

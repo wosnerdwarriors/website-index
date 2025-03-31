@@ -1,49 +1,60 @@
-// Function to dynamically load the CSS file
-function loadCSS(filename) {
-	const link = document.createElement('link');
-	link.rel = 'stylesheet';
-	link.type = 'text/css';
-	link.href = filename;
-	document.head.appendChild(link);
-}
+/**
+ * Mobile Enhancement Script
+ * 
+ * Instead of showing a warning for mobile devices, this script
+ * now enhances the mobile experience with additional functionality.
+ */
 
-// Function to detect small screens and show the popup
-function checkScreenSize() {
-	// Check if the screen width is less than 768px (common for tablets/phones)
-	if (window.innerWidth < 768) {
-		// Load the CSS dynamically
-		loadCSS('/css/small-screen.css');
+document.addEventListener('DOMContentLoaded', function() {
+  // Function to determine if we're on a mobile device
+  function isMobileDevice() {
+    return window.innerWidth < 768;
+  }
 
-		// Create the popup HTML dynamically
-		const popup = document.createElement('div');
-		popup.id = 'small-screen-popup';
-		popup.innerHTML = `
-			<div class="popup-content">
-				<h3>Notice: Small Screen Detected</h3>
-				<p>
-					This website is not optimized for mobile devices. You can try enabling "Desktop Mode" on Android, but for the best experience, please use a laptop or desktop.
-				</p>
-				<button onclick="closePopup()">OK</button>
-			</div>
-		`;
+  // Add mobile-specific enhancements
+  function enhanceMobileExperience() {
+    if (isMobileDevice()) {
+      // Add 'mobile' class to body for potential CSS targeting
+      document.body.classList.add('mobile-device');
+      
+      // Ensure proper viewport scaling
+      const viewportMeta = document.querySelector('meta[name="viewport"]');
+      if (viewportMeta) {
+        viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+      }
+      
+      // Add double-tap detection to prevent accidental zooming
+      let lastTap = 0;
+      document.addEventListener('touchend', function(event) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 300 && tapLength > 0) {
+          event.preventDefault();
+        }
+        lastTap = currentTime;
+      });
 
-		// Append the popup to the body
-		document.body.appendChild(popup);
+      // Make tables more mobile friendly by adding horizontal scroll wrapper
+      const tables = document.querySelectorAll('table:not(.mobile-enhanced)');
+      tables.forEach(table => {
+        if (!table.parentElement.classList.contains('overflow-x-auto')) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'overflow-x-auto w-full';
+          table.parentNode.insertBefore(wrapper, table);
+          wrapper.appendChild(table);
+        }
+        table.classList.add('mobile-enhanced');
+      });
+    }
+  }
 
-		// Add styles for visibility
-		document.getElementById('small-screen-popup').style.display = 'flex';
-	}
-}
+  // Run enhancements on page load
+  enhanceMobileExperience();
 
-// Function to close the popup
-function closePopup() {
-	const popup = document.getElementById('small-screen-popup');
-	if (popup) {
-		popup.style.display = 'none';
-	}
-}
-
-// Trigger the check when the page loads
-document.addEventListener('DOMContentLoaded', function () {
-	checkScreenSize();
+  // Re-run on resize (with debounce)
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(enhanceMobileExperience, 250);
+  });
 });

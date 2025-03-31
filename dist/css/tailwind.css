@@ -1,0 +1,5 @@
+/* Fallback Tailwind CSS file */
+/* This will be overwritten when you run the build command */
+
+/* Using CDN version as fallback */
+@import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');

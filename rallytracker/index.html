@@ -4,55 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WOS Rally Tracker</title>
-    <link href="/rallytracker/css/style.css" rel="stylesheet">
-    <script defer src="/rallytracker/js/script.js"></script>
-    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="/dist/css/tailwind.css">
+    <link rel="stylesheet" href="/rallytracker/css/style.css">
 </head>
-<body>
-    <div class="dashboard">
-        <header>
-            <h1>WOS Rally Tracker</h1>
-	    <button onclick="clearAllData()" class="clear-btn">Clear All Data</button>
+<body class="bg-gray-50">
+    <!-- Main Content -->
+    <div class="md:ml-64 p-4 transition-all duration-300 min-h-screen flex flex-col">
+        <div class="wos-container">
+            <header class="text-center py-4 border-b border-gray-300 mb-6">
+                <h1 class="text-2xl md:text-3xl font-bold mb-2">WOS Rally Tracker</h1>
+                <button onclick="clearAllData()" class="wos-btn-sm bg-red-500 hover:bg-red-600">Clear All Data</button>
+            </header>
 
-        </header>
-        <main>
-            <section class="march-times-section">
-                <h2>March Times</h2>
-                <div class="march-times-list" id="march-times"></div>
-                <div class="input-group">
-                    <input type="text" id="new-player-name" placeholder="Player Name">
-                    <input type="number" id="new-player-time" placeholder="March Time (seconds)">
-                    <button onclick="addMarchTime()">Add</button>
-                </div>
-            </section>
+            <main class="flex flex-col md:flex-row gap-4">
+                <!-- March Times Section - Mobile first -->
+                <section class="wos-card w-full md:w-1/2">
+                    <h2 class="text-xl font-semibold text-center border-b border-gray-200 pb-2 mb-4">March Times</h2>
+                    <div class="march-times-list max-h-[300px] overflow-y-auto border border-gray-200 rounded p-3 bg-gray-50 mb-4" id="march-times"></div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="new-player-name" placeholder="Player Name" class="wos-input">
+                        <input type="number" id="new-player-time" placeholder="March Time (seconds)" class="wos-input">
+                        <button onclick="addMarchTime()" class="wos-btn">Add</button>
+                    </div>
+                </section>
 
-            <section class="rallies-section">
-                <h2>Rallies</h2>
-                <div class="rallies-list" id="rallies"></div>
-
-                <label for="rally-starter">Select Rally Starter:</label>
-                <select id="rally-starter"></select>
-
-                <label for="new-rally-minutes">Launch Time:</label>
-                <div id="time-mode-min-sec">
-                    <label for="new-rally-minutes">Minutes:</label>
-                    <input type="number" id="new-rally-minutes" value="5">
-                    <label for="new-rally-seconds">Seconds:</label>
-                    <input type="number" id="new-rally-seconds" value="0">
-                </div>
-                
-                <div id="time-mode-seconds" style="display: none;">
-                    <label for="new-rally-total-seconds">Total Seconds:</label>
-                    <input type="number" id="new-rally-total-seconds" value="300">
-                </div>
-
-                <button onclick="addRally()">Start Rally</button>
-                <button onclick="toggleRallyTimeMode()">Switch Time Mode</button>
-            </section>
-        </main>
+                <!-- Rallies Section -->
+                <section class="wos-card w-full md:w-1/2">
+                    <h2 class="text-xl font-semibold text-center border-b border-gray-200 pb-2 mb-4">Rallies</h2>
+                    <div class="rallies-list max-h-[300px] overflow-y-auto border border-gray-200 rounded p-3 bg-gray-50 mb-4" id="rallies"></div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                        <div>
+                            <label for="rally-starter" class="block text-sm font-medium text-gray-700 mb-1">Rally Starter:</label>
+                            <select id="rally-starter" class="wos-input"></select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Launch Time:</label>
+                            
+                            <!-- Minutes:Seconds Mode -->
+                            <div id="time-mode-min-sec" class="flex gap-2">
+                                <div class="w-1/2">
+                                    <label for="new-rally-minutes" class="block text-xs text-gray-500">Minutes:</label>
+                                    <input type="number" id="new-rally-minutes" value="5" class="wos-input">
+                                </div>
+                                <div class="w-1/2">
+                                    <label for="new-rally-seconds" class="block text-xs text-gray-500">Seconds:</label>
+                                    <input type="number" id="new-rally-seconds" value="0" class="wos-input">
+                                </div>
+                            </div>
+                            
+                            <!-- Seconds Only Mode -->
+                            <div id="time-mode-seconds" class="hidden">
+                                <label for="new-rally-total-seconds" class="block text-xs text-gray-500">Total Seconds:</label>
+                                <input type="number" id="new-rally-total-seconds" value="300" class="wos-input">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="addRally()" class="wos-btn">Start Rally</button>
+                        <button onclick="toggleRallyTimeMode()" class="wos-btn-secondary">Switch Time Mode</button>
+                    </div>
+                </section>
+            </main>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="mt-auto py-4 text-center text-gray-600 border-t">
+            <p>All data is free to copy and use. See <a href="https://github.com/wosnerdwarriors" target="_blank" class="text-blue-600 hover:underline">https://github.com/wosnerdwarriors</a> for source code</p>
+        </footer>
     </div>
-<script src="/js/navbar.js"></script>
 
+    <script src="/js/small-screen.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script src="/rallytracker/js/script.js"></script>
 </body>
 </html>
-

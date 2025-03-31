@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .wos-navbar-link {
+    @apply text-gray-800 my-2 py-2 px-4 rounded bg-gray-100 w-[90%] text-center no-underline block hover:bg-gray-200 transition-colors;
+  }
+  
+  .wos-btn {
+    @apply px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm md:text-base;
+  }
+  
+  .wos-btn-sm {
+    @apply px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-xs;
+  }
+  
+  .wos-btn-secondary {
+    @apply px-3 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors text-sm md:text-base;
+  }
+  
+  .wos-card {
+    @apply bg-white rounded-lg shadow-md p-4;
+  }
+  
+  .wos-input {
+    @apply border border-gray-300 rounded px-3 py-2 w-full;
+  }
+  
+  .wos-table {
+    @apply w-full border-collapse;
+  }
+  
+  .wos-table th {
+    @apply bg-gray-100 p-2 text-left border border-gray-300;
+  }
+  
+  .wos-table td {
+    @apply p-2 border border-gray-300;
+  }
+  
+  .wos-container {
+    @apply container mx-auto px-4 py-6;
+  }
+}

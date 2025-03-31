@@ -1,85 +1,87 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 0;
-}
+/* Any custom styles that aren't handled by Tailwind */
 
-.dashboard {
-    width: 80%;
-    margin: 20px auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-header {
-    text-align: center;
-    padding: 20px;
-    font-size: 24px;
-    font-weight: bold;
-    border-bottom: 2px solid #ccc;
-}
-
-main {
+/* March entry styling */
+.march-entry {
     display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 0.5rem;
 }
 
-section {
-    width: 48%;
-    padding: 15px;
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+.march-entry:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
 }
 
-h2 {
-    text-align: center;
-    border-bottom: 2px solid #ddd;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+.march-entry > span {
+    flex: 1 1 auto;
+    min-width: 120px;
 }
 
-.disabled-btn {
-    background: #ccc;
+/* Rally entry styling */
+.rally-entry {
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 0.75rem;
+}
+
+.rally-entry > div {
+    margin-bottom: 0.5rem;
+}
+
+/* Button sizes for march entries */
+.march-entry button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+}
+
+.march-entry .edit-btn {
+    background-color: #4f46e5;
+}
+
+.march-entry .edit-btn:hover {
+    background-color: #4338ca;
+}
+
+.march-entry .delete-btn {
+    background-color: #ef4444;
+}
+
+.march-entry .delete-btn:hover {
+    background-color: #dc2626;
+}
+
+.march-entry .disabled-btn {
+    background-color: #9ca3af;
     cursor: not-allowed;
 }
-.march-times-list, .rallies-list {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 6px;
-    background: #fafafa;
+
+/* Media queries for responsive design */
+@media (max-width: 640px) {
+    .march-entry {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .march-entry > span {
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
+    
+    .march-entry .button-group {
+        display: flex;
+        gap: 0.25rem;
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    /* Make rally info more compact on mobile */
+    .rally-entry .mobile-compact {
+        flex-direction: column;
+    }
 }
-
-.input-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-input, select {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-}
-
-button {
-    padding: 10px 15px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #0056b3;
-}
-
-
