@@ -181,18 +181,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// Troop Allocation and March Generation
 	document.getElementById('generate-btn').addEventListener('click', function() {
+		console.log("==================== STARTING TROOP ALLOCATION AND MARCH GENERATION ====================");
+		
 		const numMarches = parseInt(document.getElementById('num_marches').value) || 0;
 		const maxMarchSize = parseInt(document.getElementById('max_march_size').value) || 0;
+		console.log(`DEBUG - Initial Parameters: numMarches=${JSON.stringify(numMarches)}, maxMarchSize=${JSON.stringify(maxMarchSize)}`);
 
 		const infantryMin = parseInt(document.getElementById('infantry_min').value) || 0;
 		const lancerMax = parseInt(document.getElementById('lancer_max').value) || 0;
 		const marksmanMax = parseInt(document.getElementById('marksman_max').value) || 0;
+		console.log(`DEBUG - Troop Distribution Parameters: infantryMin=${JSON.stringify(infantryMin)}%, lancerMax=${JSON.stringify(lancerMax)}%, marksmanMax=${JSON.stringify(marksmanMax)}%`);
+			console.log(`DEBUG - Troop Distribution Parameters (raw): infantryMin=${JSON.stringify(document.getElementById('infantry_min').value)}, lancerMax=${JSON.stringify(document.getElementById('lancer_max').value)}, marksmanMax=${JSON.stringify(document.getElementById('marksman_max').value)}`);
 
 		let totalTroops = {
 			infantry: parseInt(document.getElementById('infantry_t11').value) || 0,
 			lancer: parseInt(document.getElementById('lancer_t11').value) || 0,
 			marksman: parseInt(document.getElementById('marksman_t11').value) || 0
 		};
+		console.log(`DEBUG - Total Available Troops: ${JSON.stringify(totalTroops)}`);
+		console.log(`DEBUG - Total Troop Count: ${JSON.stringify(totalTroops.infantry + totalTroops.lancer + totalTroops.marksman)}`);
+			console.log(`DEBUG - Raw input values: infantry=${JSON.stringify(document.getElementById('infantry_t11').value)}, lancer=${JSON.stringify(document.getElementById('lancer_t11').value)}, marksman=${JSON.stringify(document.getElementById('marksman_t11').value)}`);
 
 		const marches = Array(numMarches).fill().map(() => ({
 			infantry: 0,
@@ -200,93 +208,229 @@ document.addEventListener('DOMContentLoaded', function() {
 			marksman: 0,
 			total: 0
 		}));
+		console.log(`DEBUG - Created ${JSON.stringify(numMarches)} empty marches: ${JSON.stringify(marches)}`);
 
 		// Step 1: Fill Infantry Min
 		const infantryMinTroops = Math.floor(infantryMin / 100 * maxMarchSize);
+		console.log(`DEBUG - Step 1: Fill Infantry Min - Calculated infantryMinTroops=${JSON.stringify(infantryMinTroops)} per march (${JSON.stringify(infantryMin)}% of ${JSON.stringify(maxMarchSize)})`); 
+		console.log(`DEBUG - Step 1: Formula details: Math.floor(${JSON.stringify(infantryMin)} / 100 * ${JSON.stringify(maxMarchSize)}) = ${JSON.stringify(infantryMinTroops)}`);
+		console.log(`DEBUG - Step 1: Total infantry available before allocation: ${JSON.stringify(totalTroops.infantry)}`);
+		
+		const allocateInfantry = Math.min(infantryMinTroops,  Math.floor(totalTroops.infantry  / numMarches));
 		for (let i = 0; i < numMarches; i++) {
-			const allocate = Math.min(infantryMinTroops, totalTroops.infantry);
-			marches[i].infantry += allocate;
-			marches[i].total += allocate;
-			totalTroops.infantry -= allocate;
+			
+			console.log(`DEBUG - Step 1: March #${JSON.stringify(i+1)} - Min calculation: Math.min(${JSON.stringify(infantryMinTroops)}, Math.floor(${JSON.stringify(totalTroops.infantry)} / ${JSON.stringify(numMarches)})) = ${JSON.stringify(allocateInfantry)}`);
+			console.log(`DEBUG - Step 1: March #${JSON.stringify(i+1)} - Allocating ${JSON.stringify(allocateInfantry)} infantry (min of ${JSON.stringify(infantryMinTroops)} and Math.floor(${JSON.stringify(totalTroops.infantry)} / ${JSON.stringify(numMarches)}) available)`);
+			
+			const oldMarchData = JSON.parse(JSON.stringify(marches[i]));
+			marches[i].infantry += allocateInfantry;
+			marches[i].total += allocateInfantry;
+			const oldTotalTroops = JSON.parse(JSON.stringify(totalTroops));
+			totalTroops.infantry -= allocateInfantry;
+			
+			console.log(`DEBUG - Step 1: March #${JSON.stringify(i+1)} - March before: ${JSON.stringify(oldMarchData)}`);
+			console.log(`DEBUG - Step 1: March #${JSON.stringify(i+1)} - March after: ${JSON.stringify(marches[i])}`);
+			console.log(`DEBUG - Step 1: Troops before: ${JSON.stringify(oldTotalTroops)}`);
+			console.log(`DEBUG - Step 1: Troops after: ${JSON.stringify(totalTroops)}`);
 		}
+		console.log(`DEBUG - Step 1: Infantry allocation complete. Marches: ${JSON.stringify(marches)}`);
+		console.log(`DEBUG - Step 1: Remaining troops: ${JSON.stringify(totalTroops)}`);
 
 		// Step 2: Fill Lancer Max
 		const lancerMaxTroops = Math.floor(lancerMax / 100 * maxMarchSize);
+		console.log(`DEBUG - Step 2: Fill Lancer Max - Calculated lancerMaxTroops=${JSON.stringify(lancerMaxTroops)} per march (${JSON.stringify(lancerMax)}% of ${JSON.stringify(maxMarchSize)})`);
+		console.log(`DEBUG - Step 2: Formula details: Math.floor(${JSON.stringify(lancerMax)} / 100 * ${JSON.stringify(maxMarchSize)}) = ${JSON.stringify(lancerMaxTroops)}`);
+		console.log(`DEBUG - Step 2: Total lancer available before allocation: ${JSON.stringify(totalTroops.lancer)}`);
+		const allocateLancer = Math.min(lancerMaxTroops, Math.floor(totalTroops.lancer / numMarches));
+
 		for (let i = 0; i < numMarches; i++) {
-			const allocate = Math.min(lancerMaxTroops, totalTroops.lancer);
-			marches[i].lancer += allocate;
-			marches[i].total += allocate;
-			totalTroops.lancer -= allocate;
+			console.log(`DEBUG - Step 2: March #${JSON.stringify(i+1)} - Processing loop iteration ${JSON.stringify(i)}`);
+			console.log(`DEBUG - Step 2: March #${JSON.stringify(i+1)} - Min calculation: Math.min(${JSON.stringify(lancerMaxTroops)}, Math.floor(${JSON.stringify(totalTroops.lancer)} / ${JSON.stringify(numMarches)})) = ${JSON.stringify(allocateLancer)}`);
+			console.log(`DEBUG - Step 2: March #${JSON.stringify(i+1)} - Allocating ${JSON.stringify(allocateLancer)} lancers (min of ${JSON.stringify(lancerMaxTroops)} and Math.floor(${JSON.stringify(totalTroops.lancer)} / ${JSON.stringify(numMarches)}) available)`);
+			
+			const oldMarchData = JSON.parse(JSON.stringify(marches[i]));
+			marches[i].lancer += allocateLancer;
+			marches[i].total += allocateLancer;
+			const oldTotalTroops = JSON.parse(JSON.stringify(totalTroops));
+			totalTroops.lancer -= allocateLancer;
+			
+			console.log(`DEBUG - Step 2: March #${JSON.stringify(i+1)} - March before: ${JSON.stringify(oldMarchData)}`);
+			console.log(`DEBUG - Step 2: March #${JSON.stringify(i+1)} - March after: ${JSON.stringify(marches[i])}`);
+			console.log(`DEBUG - Step 2: Troops before: ${JSON.stringify(oldTotalTroops)}`);
+			console.log(`DEBUG - Step 2: Troops after: ${JSON.stringify(totalTroops)}`);
 		}
+		console.log(`DEBUG - Step 2: Lancer allocation complete. Marches: ${JSON.stringify(marches)}`);
+		console.log(`DEBUG - Step 2: Remaining troops: ${JSON.stringify(totalTroops)}`);
 
 		// Step 3: Fill Marksman Max
 		const marksmanMaxTroops = Math.floor(marksmanMax / 100 * maxMarchSize);
-		for (let i = 0; i < numMarches; i++) {
-			const allocate = Math.min(marksmanMaxTroops, totalTroops.marksman);
-			marches[i].marksman += allocate;
-			marches[i].total += allocate;
-			totalTroops.marksman -= allocate;
-		}
+		console.log(`DEBUG - Step 3: Fill Marksman Max - Calculated marksmanMaxTroops=${JSON.stringify(marksmanMaxTroops)} per march (${JSON.stringify(marksmanMax)}% of ${JSON.stringify(maxMarchSize)})`); 
+		console.log(`DEBUG - Step 3: Formula details: Math.floor(${JSON.stringify(marksmanMax)} / 100 * ${JSON.stringify(maxMarchSize)}) = ${JSON.stringify(marksmanMaxTroops)}`);
+		console.log(`DEBUG - Step 3: Total marksman available before allocation: ${JSON.stringify(totalTroops.marksman)}`);
+		const allocatemarksman = Math.min(marksmanMaxTroops, Math.floor(totalTroops.marksman / numMarches));
 
-		// Step 4: Allocate Remaining Marksman
 		for (let i = 0; i < numMarches; i++) {
-			if (totalTroops.marksman > 0) {
-				const remainingCapacity = maxMarchSize - marches[i].total;
-				const allocate = Math.min(remainingCapacity, totalTroops.marksman);
-				marches[i].marksman += allocate;
-				marches[i].total += allocate;
-				totalTroops.marksman -= allocate;
-			}
+			console.log(`DEBUG - Step 3: March #${JSON.stringify(i+1)} - Processing loop iteration ${JSON.stringify(i)}`);
+			console.log(`DEBUG - Step 3: March #${JSON.stringify(i+1)} - Min calculation: Math.min(${JSON.stringify(marksmanMaxTroops)}, Math.floor(${JSON.stringify(totalTroops.marksman)} / ${JSON.stringify(numMarches)})) = ${JSON.stringify(allocatemarksman)}`);
+			console.log(`DEBUG - Step 3: March #${JSON.stringify(i+1)} - Allocating ${JSON.stringify(allocatemarksman)} marksmen (min of ${JSON.stringify(marksmanMaxTroops)} and Math.floor(${JSON.stringify(totalTroops.marksman)} / ${JSON.stringify(numMarches)}) available)`);
+			
+			const oldMarchData = JSON.parse(JSON.stringify(marches[i]));
+			marches[i].marksman += allocatemarksman;
+			marches[i].total += allocatemarksman;
+			const oldTotalTroops = JSON.parse(JSON.stringify(totalTroops));
+			totalTroops.marksman -= allocatemarksman;
+			
+			console.log(`DEBUG - Step 3: March #${JSON.stringify(i+1)} - March before: ${JSON.stringify(oldMarchData)}`);
+			console.log(`DEBUG - Step 3: March #${JSON.stringify(i+1)} - March after: ${JSON.stringify(marches[i])}`);
+			console.log(`DEBUG - Step 3: Troops before: ${JSON.stringify(oldTotalTroops)}`);
+			console.log(`DEBUG - Step 3: Troops after: ${JSON.stringify(totalTroops)}`);
+		}
+		console.log(`DEBUG - Step 3: Marksman allocation complete. Marches: ${JSON.stringify(marches)}`);
+		console.log(`DEBUG - Step 3: Remaining troops: ${JSON.stringify(totalTroops)}`);
+		// Step 4: Allocate Remaining Marksman
+		console.log("\n=== STEP 4: DISTRIBUTING REMAINING MARKSMEN ===");
+		let marksmanRemaining = totalTroops.marksman;
+		console.log(`Remaining marksmen to distribute: ${marksmanRemaining}`);
+
+		while (marksmanRemaining > 0) {
+		    let distributed = false;
+		    
+		    for (let i = 0; i < numMarches; i++) {
+		        if (marksmanRemaining <= 0) break;
+		        
+		        // Calculate remaining capacity in this march
+		        const remainingCapacity = maxMarchSize - marches[i].total;
+		        if (remainingCapacity <= 0) continue;
+		        
+		        // Calculate fair share of remaining troops for this march
+		        const fairShare = Math.ceil(marksmanRemaining / (numMarches - i));
+		        const allocate = Math.min(remainingCapacity, fairShare, marksmanRemaining);
+		        
+		        if (allocate > 0) {
+		            console.log(`March ${i+1}: Adding ${allocate} marksmen (fair share: ${fairShare}, capacity: ${remainingCapacity})`);
+		            
+		            marches[i].marksman += allocate;
+		            marches[i].total += allocate;
+		            marksmanRemaining -= allocate;
+		            distributed = true;
+		        }
+		    }
+		    
+		    if (!distributed) break; // No more capacity in any march
 		}
 
 		// Step 5: Allocate Remaining Lancer
-		for (let i = 0; i < numMarches; i++) {
-			if (totalTroops.lancer > 0) {
-				const remainingCapacity = maxMarchSize - marches[i].total;
-				const allocate = Math.min(remainingCapacity, totalTroops.lancer);
-				marches[i].lancer += allocate;
-				marches[i].total += allocate;
-				totalTroops.lancer -= allocate;
-			}
+		console.log("\n=== STEP 5: DISTRIBUTING REMAINING LANCERS ===");
+		let lancerRemaining = totalTroops.lancer;
+		console.log(`Remaining lancers to distribute: ${lancerRemaining}`);
+
+		while (lancerRemaining > 0) {
+		    let distributed = false;
+		    
+		    for (let i = 0; i < numMarches; i++) {
+		        if (lancerRemaining <= 0) break;
+		        
+		        const remainingCapacity = maxMarchSize - marches[i].total;
+		        if (remainingCapacity <= 0) continue;
+		        
+		        const fairShare = Math.ceil(lancerRemaining / (numMarches - i));
+		        const allocate = Math.min(remainingCapacity, fairShare, lancerRemaining);
+		        
+		        if (allocate > 0) {
+		            console.log(`March ${i+1}: Adding ${allocate} lancers (fair share: ${fairShare}, capacity: ${remainingCapacity})`);
+		            
+		            marches[i].lancer += allocate;
+		            marches[i].total += allocate;
+		            lancerRemaining -= allocate;
+		            distributed = true;
+		        }
+		    }
+		    
+		    if (!distributed) break;
 		}
 
 		// Step 6: Allocate Remaining Infantry
-		for (let i = 0; i < numMarches; i++) {
-			if (totalTroops.infantry > 0) {
-				const remainingCapacity = maxMarchSize - marches[i].total;
-				const allocate = Math.min(remainingCapacity, totalTroops.infantry);
-				marches[i].infantry += allocate;
-				marches[i].total += allocate;
-				totalTroops.infantry -= allocate;
-			}
+		console.log("\n=== STEP 6: DISTRIBUTING REMAINING INFANTRY ===");
+		let infantryRemaining = totalTroops.infantry;
+		console.log(`Remaining infantry to distribute: ${infantryRemaining}`);
+
+		while (infantryRemaining > 0) {
+		    let distributed = false;
+		    
+		    for (let i = 0; i < numMarches; i++) {
+		        if (infantryRemaining <= 0) break;
+		        
+		        const remainingCapacity = maxMarchSize - marches[i].total;
+		        if (remainingCapacity <= 0) continue;
+		        
+		        const fairShare = Math.ceil(infantryRemaining / (numMarches - i));
+		        const allocate = Math.min(remainingCapacity, fairShare, infantryRemaining);
+		        
+		        if (allocate > 0) {
+		            console.log(`March ${i+1}: Adding ${allocate} infantry (fair share: ${fairShare}, capacity: ${remainingCapacity})`);
+		            
+		            marches[i].infantry += allocate;
+		            marches[i].total += allocate;
+		            infantryRemaining -= allocate;
+		            distributed = true;
+		        }
+		    }
+		    
+		    if (!distributed) break;
 		}
 
-		// Display the results in a table format
-		const resultsDiv = document.getElementById('results');
-		resultsDiv.innerHTML = '';
+		console.log(`DEBUG - FINAL MARCH CONFIGURATIONS: ${JSON.stringify(marches, null, 2)}`);
+		console.log("==================== TROOP ALLOCATION AND MARCH GENERATION COMPLETE ====================");
 
+		// Display the results in a more mobile-friendly format
+		const resultsDiv = document.getElementById('results');
+		resultsDiv.innerHTML = '<h2 class="text-lg font-semibold mb-4">Formation Results</h2>';
+		
+		// Add toggle button for desktop/mobile view
+		const viewToggle = document.createElement('div');
+		viewToggle.className = 'mb-4';
+		viewToggle.innerHTML = `
+			<div class="flex flex-wrap gap-2 mb-4">
+				<button id="table-view-btn" class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600">Table View</button>
+				<button id="card-view-btn" class="bg-gray-200 text-gray-800 px-3 py-2 rounded hover:bg-gray-300">Card View</button>
+			</div>
+		`;
+		resultsDiv.appendChild(viewToggle);
+		
+		// Container for both views
+		const viewsContainer = document.createElement('div');
+		viewsContainer.className = 'views-container';
+		resultsDiv.appendChild(viewsContainer);
+
+		// Create the table view (desktop-friendly)
+		const tableView = document.createElement('div');
+		tableView.id = 'table-view';
+		tableView.className = 'overflow-x-auto';
+		
 		// Create the table element
 		const table = document.createElement('table');
-		table.className = 'table table-bordered table-striped';
+		table.className = 'min-w-full bg-white border border-gray-200';
 
 		// Create the table header
 		const thead = document.createElement('thead');
+		thead.className = 'bg-gray-100';
 		thead.innerHTML = `
 			<tr>
-				<th>March #</th>
-				<th>Infantry</th>
-				<th>Lancer</th>
-				<th>Marksman</th>
-				<th>Total</th>
-				<th>% Infantry</th>
-				<th>% Lancer</th>
-				<th>% Marksman</th>
+				<th class="border px-4 py-2">March #</th>
+				<th class="border px-4 py-2">Infantry</th>
+				<th class="border px-4 py-2">Lancer</th>
+				<th class="border px-4 py-2">Marksman</th>
+				<th class="border px-4 py-2">Total</th>
+				<th class="border px-4 py-2">% Infantry</th>
+				<th class="border px-4 py-2">% Lancer</th>
+				<th class="border px-4 py-2">% Marksman</th>
 			</tr>
 		`;
 		table.appendChild(thead);
 
 		// Create the table body
 		const tbody = document.createElement('tbody');
+		tbody.className = 'divide-y divide-gray-200';
 		marches.forEach((march, index) => {
 			const infantryPercent = ((march.infantry / march.total) * 100).toFixed(1);
 			const lancerPercent = ((march.lancer / march.total) * 100).toFixed(1);
@@ -294,18 +438,91 @@ document.addEventListener('DOMContentLoaded', function() {
 
 			const row = document.createElement('tr');
 			row.innerHTML = `
-				<td>${index + 1}</td>
-				<td>${march.infantry}</td>
-				<td>${march.lancer}</td>
-				<td>${march.marksman}</td>
-				<td>${march.total}</td>
-				<td>${infantryPercent}%</td>
-				<td>${lancerPercent}%</td>
-				<td>${marksmanPercent}%</td>
+				<td class="border px-4 py-2">${index + 1}</td>
+				<td class="border px-4 py-2">${march.infantry}</td>
+				<td class="border px-4 py-2">${march.lancer}</td>
+				<td class="border px-4 py-2">${march.marksman}</td>
+				<td class="border px-4 py-2">${march.total}</td>
+				<td class="border px-4 py-2">${infantryPercent}%</td>
+				<td class="border px-4 py-2">${lancerPercent}%</td>
+				<td class="border px-4 py-2">${marksmanPercent}%</td>
 			`;
 			tbody.appendChild(row);
 		});
 		table.appendChild(tbody);
-		resultsDiv.appendChild(table);
+		tableView.appendChild(table);
+		viewsContainer.appendChild(tableView);
+		
+		// Create card view (mobile-friendly)
+		const cardView = document.createElement('div');
+		cardView.id = 'card-view';
+		cardView.className = 'hidden';
+		
+		marches.forEach((march, index) => {
+			const infantryPercent = ((march.infantry / march.total) * 100).toFixed(1);
+			const lancerPercent = ((march.lancer / march.total) * 100).toFixed(1);
+			const marksmanPercent = ((march.marksman / march.total) * 100).toFixed(1);
+			
+			const card = document.createElement('div');
+			card.className = 'bg-gray-50 p-4 rounded border border-gray-200 mb-4';
+			
+			card.innerHTML = `
+				<h3 class="font-bold text-lg mb-2">March #${index + 1}</h3>
+				<div class="flex flex-col space-y-2 mb-3">
+					<div class="bg-white p-2 rounded border border-gray-200 flex justify-between items-center">
+						<span class="font-medium">Total:</span>
+						<span class="font-bold">${march.total}</span>
+					</div>
+					<div class="bg-blue-50 p-2 rounded border border-blue-200 flex justify-between items-center">
+						<span class="font-medium text-blue-800">Infantry:</span>
+						<span>
+							<span class="font-bold">${march.infantry}</span>
+							<span class="text-sm text-gray-600 ml-2">(${infantryPercent}%)</span>
+						</span>
+					</div>
+					<div class="bg-green-50 p-2 rounded border border-green-200 flex justify-between items-center">
+						<span class="font-medium text-green-800">Lancer:</span>
+						<span>
+							<span class="font-bold">${march.lancer}</span>
+							<span class="text-sm text-gray-600 ml-2">(${lancerPercent}%)</span>
+						</span>
+					</div>
+					<div class="bg-red-50 p-2 rounded border border-red-200 flex justify-between items-center">
+						<span class="font-medium text-red-800">Marksman:</span>
+						<span>
+							<span class="font-bold">${march.marksman}</span>
+							<span class="text-sm text-gray-600 ml-2">(${marksmanPercent}%)</span>
+						</span>
+					</div>
+				</div>
+			`;
+			
+			cardView.appendChild(card);
+		});
+		viewsContainer.appendChild(cardView);
+		
+		// Add event listeners for toggle buttons
+		document.getElementById('table-view-btn').addEventListener('click', function() {
+			document.getElementById('table-view').classList.remove('hidden');
+			document.getElementById('card-view').classList.add('hidden');
+			this.classList.remove('bg-gray-200', 'text-gray-800');
+			this.classList.add('bg-blue-500', 'text-white');
+			document.getElementById('card-view-btn').classList.remove('bg-blue-500', 'text-white');
+			document.getElementById('card-view-btn').classList.add('bg-gray-200', 'text-gray-800');
+		});
+		
+		document.getElementById('card-view-btn').addEventListener('click', function() {
+			document.getElementById('card-view').classList.remove('hidden');
+			document.getElementById('table-view').classList.add('hidden');
+			this.classList.remove('bg-gray-200', 'text-gray-800');
+			this.classList.add('bg-blue-500', 'text-white');
+			document.getElementById('table-view-btn').classList.remove('bg-blue-500', 'text-white');
+			document.getElementById('table-view-btn').classList.add('bg-gray-200', 'text-gray-800');
+		});
+		
+		// Auto-select card view on mobile, table view on desktop
+		if (window.innerWidth < 768) {
+			document.getElementById('card-view-btn').click();
+		}
 	});
 });

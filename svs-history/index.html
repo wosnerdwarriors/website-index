@@ -3,154 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SVS History</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="/svs-history/css/svs-history.css" rel="stylesheet">
+    <title>SVS History - WOS Nerds</title>
+    <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
+    <link rel="stylesheet" href="/svs-history/css/svs-history.css">
     <style>
-        .filter-container {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .filter-container label {
-            margin-right: 5px;
-        }
-
-        .filter-container select {
-            width: 150px;
-        }
-
         .scrollable-list {
             max-height: 200px;
             overflow-y: auto;
-            margin-top: 10px;
         }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        .pagination-controls {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            background-color: #f8f9fa;
-            padding: 10px;
-        }
-
-        .pagination-controls button {
-            margin: 0 5px;
-        }
-
-        .chart-container {
-            margin-top: 20px;
-        }
-
-        #filterMessage {
-            color: red;
-            margin-left: 15px;
-            font-size: 0.9rem;
-            display: none; /* Initially hidden */
+        @media (max-width: 768px) {
+            .scrollable-list {
+                max-height: 150px;
+            }
         }
     </style>
 </head>
-<body>
-    <div class="container-fluid mt-5">
-        <h1 class="text-center mb-4">SVS History</h1>
+<body class="bg-gray-50">
+    <!-- Main Content -->
+    <div class="md:ml-64 p-4 transition-all duration-300 min-h-screen flex flex-col">
+        <main class="flex-grow container mx-auto px-4 py-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-center mb-6">SVS History</h1>
 
-        <!-- Search and Select States and Dates -->
-        <div class="row mb-4">
-            <!-- State List -->
-            <div class="col-md-6">
-                <label for="stateSearch" class="form-label">Search States</label>
-                <input type="text" id="stateSearch" class="form-control" placeholder="Search for states...">
-                <div class="d-flex mt-2">
-                    <button id="addAllStatesBtn" class="btn btn-outline-primary me-2">Add All States</button>
-                    <button id="clearAllStatesBtn" class="btn btn-outline-danger">Clear All States</button>
+            <!-- Search and Select States and Dates -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- State List -->
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <label for="stateSearch" class="block text-sm font-medium text-gray-700 mb-2">Search States</label>
+                    <input type="text" id="stateSearch" class="w-full border border-gray-300 rounded-md px-3 py-2 mb-3" placeholder="Search for states...">
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <button id="addAllStatesBtn" class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">Add All States</button>
+                        <button id="clearAllStatesBtn" class="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600">Clear All States</button>
+                    </div>
+                    <div id="stateSelectContainer" class="scrollable-list bg-gray-50 p-2 rounded border border-gray-200">
+                        <!-- State checkboxes dynamically populated via JS -->
+                    </div>
                 </div>
-                <div id="stateSelectContainer" class="select-list scrollable-list">
-                    <!-- State checkboxes dynamically populated via JS -->
+
+                <!-- Date List -->
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <label for="dateSearch" class="block text-sm font-medium text-gray-700 mb-2">Search Dates</label>
+                    <input type="text" id="dateSearch" class="w-full border border-gray-300 rounded-md px-3 py-2 mb-3" placeholder="Search for dates...">
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <button id="addAllDatesBtn" class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">Add All Dates</button>
+                        <button id="clearAllDatesBtn" class="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600">Clear All Dates</button>
+                    </div>
+                    <div id="dateSelectContainer" class="scrollable-list bg-gray-50 p-2 rounded border border-gray-200">
+                        <!-- Date checkboxes dynamically populated via JS -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Date List -->
-            <div class="col-md-6">
-                <label for="dateSearch" class="form-label">Search Dates</label>
-                <input type="text" id="dateSearch" class="form-control" placeholder="Search for dates...">
-                <div class="d-flex mt-2">
-                    <button id="addAllDatesBtn" class="btn btn-outline-primary me-2">Add All Dates</button>
-                    <button id="clearAllDatesBtn" class="btn btn-outline-danger">Clear All Dates</button>
-                </div>
-                <div id="dateSelectContainer" class="select-list scrollable-list">
-                    <!-- Date checkboxes dynamically populated via JS -->
+            <!-- Filter Dropdowns -->
+            <div class="bg-white p-4 rounded-lg shadow mb-6">
+                <div class="flex flex-wrap gap-4 items-center">
+                    <div class="flex items-center">
+                        <label for="prepFilter" class="text-sm font-medium text-gray-700 mr-2">Prep:</label>
+                        <select id="prepFilter" class="border border-gray-300 rounded-md py-1 px-2">
+                            <option value="all">All</option>
+                            <option value="won">Won</option>
+                            <option value="lost">Lost</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center">
+                        <label for="castleFilter" class="text-sm font-medium text-gray-700 mr-2">Castle:</label>
+                        <select id="castleFilter" class="border border-gray-300 rounded-md py-1 px-2">
+                            <option value="all">All</option>
+                            <option value="won">Won</option>
+                            <option value="lost">Lost</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center">
+                        <label for="matchFilter" class="text-sm font-medium text-gray-700 mr-2">Had Match:</label>
+                        <select id="matchFilter" class="border border-gray-300 rounded-md py-1 px-2">
+                            <option value="all">All</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+
+                    <!-- Filter Message -->
+                    <span id="filterMessage" class="text-red-600 text-sm hidden">Filters are disabled when multiple dates are selected. Please select a single date to enable filters.</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Filter Dropdowns -->
-        <div class="filter-container">
-            <label for="prepFilter">Prep:</label>
-            <select id="prepFilter" class="form-select">
-                <option value="all">All</option>
-                <option value="won">Won</option>
-                <option value="lost">Lost</option>
-            </select>
+            <!-- Table Container -->
+            <div class="bg-white p-4 rounded-lg shadow mb-16">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead id="tableHead" class="bg-gray-100">
+                            <tr>
+                                <th class="py-2 px-3 text-left text-sm font-medium text-gray-700">State</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-gray-200">
+                            <!-- Rows dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-            <label for="castleFilter">Castle:</label>
-            <select id="castleFilter" class="form-select">
-                <option value="all">All</option>
-                <option value="won">Won</option>
-                <option value="lost">Lost</option>
-            </select>
+            <!-- Pagination Controls -->
+            <div class="fixed bottom-0 left-0 right-0 py-3 px-4 bg-gray-100 border-t border-gray-300 flex justify-center items-center z-10 md:ml-64">
+                <button id="firstPageBtn" class="px-3 py-1 mx-1 bg-blue-500 text-white rounded hover:bg-blue-600 shadow-sm">First</button>
+                <button id="prevPageBtn" class="px-3 py-1 mx-1 bg-blue-500 text-white rounded hover:bg-blue-600 shadow-sm">Previous</button>
+                <span id="currentPage" class="mx-2 font-medium">1</span>
+                <button id="nextPageBtn" class="px-3 py-1 mx-1 bg-blue-500 text-white rounded hover:bg-blue-600 shadow-sm">Next</button>
+                <button id="lastPageBtn" class="px-3 py-1 mx-1 bg-blue-500 text-white rounded hover:bg-blue-600 shadow-sm">Last</button>
+            </div>
 
-            <label for="matchFilter">Had Match:</label>
-            <select id="matchFilter" class="form-select">
-                <option value="all">All</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-            </select>
+            <!-- Chart Placeholder -->
+            <div id="charts" class="bg-white p-4 rounded-lg shadow mt-6 hidden">
+                <!-- Dynamic content populated via JS -->
+            </div>
+        </main>
 
-            <!-- Filter Message -->
-            <span id="filterMessage">Filters are disabled when multiple dates are selected. Please select a single date to enable filters.</span>
-        </div>
-
-        <!-- Table Container -->
-        <div class="table-container scrollable-table">
-            <table class="table table-striped">
-                <thead id="tableHead">
-                    <tr>
-                        <th>State</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Rows dynamically populated -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination Controls -->
-        <div class="pagination-controls">
-            <button id="firstPageBtn" class="btn btn-outline-primary">First</button>
-            <button id="prevPageBtn" class="btn btn-outline-primary">Previous</button>
-            <span id="currentPage" class="mx-2">1</span>
-            <button id="nextPageBtn" class="btn btn-outline-primary">Next</button>
-            <button id="lastPageBtn" class="btn btn-outline-primary">Last</button>
-        </div>
-
-        <!-- Chart Placeholder -->
-        <div id="charts" class="chart-container" style="display: none;">
-            <!-- Dynamic content populated via JS -->
-        </div>
-
-        <!-- JavaScript -->
-        <script src="/svs-history/js/svs-history.js"></script>
+        <!-- Footer -->
+        <footer class="mt-auto py-4 text-center text-gray-600 border-t">
+            <p>All data is free to copy and use. See <a href="https://github.com/wosnerdwarriors" target="_blank" class="text-blue-600 hover:underline">https://github.com/wosnerdwarriors</a> for source code</p>
+        </footer>
     </div>
-<script src="/js/google-analytics.js"></script>
+
+    <!-- JavaScript -->
+    <script src="/svs-history/js/svs-history.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/google-analytics.js"></script>
 </body>
 </html>

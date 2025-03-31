@@ -1,53 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="google-site-verification" content="Gwuj2-KRkUvjAuLyM9SJaZ9ZcYl5qcrwYQKSGNT2154" />
-	<title>WOS Nerds - Whiteout Survival</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link rel="stylesheet" href="css/index.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="Gwuj2-KRkUvjAuLyM9SJaZ9ZcYl5qcrwYQKSGNT2154" />
+  <title>WOS Nerds - Whiteout Survival</title>
+  <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
+  
+  <!-- Ensure teal colors are included in compiled CSS -->
+  <style>
+    .tailwind-teal-fix {
+      color: #115e59; /* teal-800 */
+      background-color: #14b8a6; /* teal-500 */
+      border-color: #0d9488; /* teal-600 */
+    }
+    .tailwind-teal-fix:hover {
+      background-color: #0f766e; /* teal-700 */
+    }
+  </style>
 </head>
-<body>
-	<div class="d-flex">
+<body class="bg-gray-50">
+  <!-- Navbar will be injected here by navbar.js -->
+  
+  <!-- Hidden element to ensure teal colors are included in the build -->
+  <div class="hidden">
+    <div class="bg-teal-500 hover:bg-teal-600 text-teal-900 border-teal-700"></div>
+    <div class="bg-teal-600 hover:bg-teal-700 text-white"></div>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="md:ml-64 p-4 transition-all duration-300 min-h-screen flex flex-col">
+    <main class="flex-grow container mx-auto px-4 py-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-center mb-8">WOS Nerds - Whiteout Survival</h1>
 
-		<!-- Main Content -->
-		<div class="d-flex flex-column main-content-container">
-			<div class="container-fluid text-center main-content">
-				<h1 class="header-text">WOS Nerds - Whiteout Survival</h1>
+      <div class="mt-5 max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold mb-4 text-center">About</h2>
+        <div class="space-y-4 text-gray-700">
+          <p>
+            WOS Nerds is all about digging into data, running tests, and figuring out the best strategies. We'd like to minimise any guides/advice that's not based on some solid/decent proof.
+          </p>
+          <p>
+            Our focus is simple: find out what works, why it works, and how it can be improved. We love data, calculators, spreadsheets and using it to win!
+          </p>
+          <p>
+            Think our Website is very... unpolished/unfinished? It is. Everything is mostly in draft mode at the moment. Come contribute and help us though!
+          </p>
+        </div>
+      </div>
+      
+      <!-- Tool Cards Grid -->
+      <div class="mt-8 max-w-5xl mx-auto px-4">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Available Tools</h2>
+        
+        <!-- Data Collection Banner -->
+        <div class="bg-cyan-600 text-white p-4 rounded-lg shadow-md mb-6">
+          <h3 class="text-lg font-semibold mb-2">Help Us Collect Data</h3>
+          <p class="mb-3">Contribute to our research by submitting game data through our forms:</p>
+          <div class="flex flex-wrap gap-3 justify-center">
+            <a href="https://forms.gle/BBnuL5V8LJ12mB9S7" target="_blank" class="bg-white text-cyan-800 px-3 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors">SvS Match Results</a>
+            <a href="https://forms.gle/zeZJY8PBRHWsem2u7" target="_blank" class="bg-white text-cyan-800 px-3 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors">State Age</a>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Rally Tracker -->
+          <a href="/rallytracker" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-blue-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-blue-800">Rally Tracker</h3>
+            <p class="text-gray-600 text-sm">Coordinate rally timings and manage march times for optimal coordination.</p>
+          </a>
+          
+          <!-- Research Calculator -->
+          <a href="/researchtree" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-green-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-green-800">Research Calculator</h3>
+            <p class="text-gray-600 text-sm">Plan your research strategy and calculate efficiency.</p>
+          </a>
+          
+          <!-- Troop Stats -->
+          <a href="/troop-stats" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-yellow-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-yellow-800">Troop Stats</h3>
+            <p class="text-gray-600 text-sm">Compare troop types and their effectiveness in battle.</p>
+          </a>
+          
+          <!-- Calendar -->
+          <a href="/calendar" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-purple-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-purple-800">Event Calendar</h3>
+            <p class="text-gray-600 text-sm">Keep track of upcoming events and packs in the game.</p>
+          </a>
+          
+          <!-- SVS History -->
+          <a href="/svs-history" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-red-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-red-800">SVS History</h3>
+            <p class="text-gray-600 text-sm">Historical data and analysis for State vs State events.</p>
+          </a>
+          
+          <!-- Alliance RSS Calculator -->
+          <a href="/alliancerss" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-indigo-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-indigo-800">Alliance RSS Calculator</h3>
+            <p class="text-gray-600 text-sm">Calculate resource distribution and needs for your alliance.</p>
+          </a>
+          
+          <!-- Formation Builder -->
+          <a href="/formationbuilder" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-pink-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-pink-800">Formation Builder</h3>
+            <p class="text-gray-600 text-sm">Create and optimize troop formations for battle.</p>
+          </a>
+          
+          <!-- Layout Planner -->
+          <a href="/layout-planner" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-teal-600 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-teal-900">Layout Planner</h3>
+            <p class="text-gray-600 text-sm">Plan your base layout for optimal defense and resource production.</p>
+          </a>
+          
+          <!-- GitHub -->
+          <a href="https://github.com/wosnerdwarriors" target="_blank" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+            <div class="h-2 bg-gray-800 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 flex items-center">
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+              </svg>
+              GitHub Repository
+            </h3>
+            <p class="text-gray-600 text-sm">Contribute to the development of these tools on GitHub.</p>
+          </a>
+        </div>
+      </div>
+    </main>
 
-				<div class="mission-statement mt-5">
-					<h2>About</h2>
-					<p>
-						WOS Nerds is all about digging into data, running tests, and figuring out the best strategies. We'd like to minimise any guides/advice that's not based on some solid/decent proof.
-					</p>
-					<p>
-						Our focus is simple: find out what works, why it works, and how it can be improved. We love data, calculators, spreadsheets and using it to win!
-					</p>
-					<p>
-						Think our Website is very... unpolished/unfinished? It is. Everything is mostly in draft mode at the moment. Come contribute and help us though!
-					</p>
-				</div>
+    <!-- Footer -->
+    <footer class="mt-auto py-4 text-center text-gray-600 border-t">
+      <p>All data is free to copy and use. See <a href="https://github.com/wosnerdwarriors" target="_blank" class="text-blue-600 hover:underline">https://github.com/wosnerdwarriors</a> for source code</p>
+    </footer>
+  </div>
 
-				<div class="row mt-5">
-					<div class="col-md-12">
-					</div>
-				</div>
-			</div>
-
-			<!-- Footer -->
-			<div class="footer text-center">
-				<p>All data is free to copy and use. See <a href="https://github.com/wosnerdwarriors" target="_blank">https://github.com/wosnerdwarriors</a> for source code</p>
-			</div>
-
-		</div>
-	</div>
-
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-	<script src="/js/navbar.js"></script>
-
-	<script src="/js/google-analytics.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/google-analytics.js"></script>
 </body>
 </html>
-

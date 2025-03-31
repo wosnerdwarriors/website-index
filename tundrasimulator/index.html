@@ -3,45 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tile Game</title>
-    <!-- Include Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <title>Tundra Simulator</title>
+    <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
+    <script src="/js/navbar.js" defer></script>
     <style>
-        body {
-            height: 100vh;
-            margin: 0;
-        }
-        .container-fluid {
-            height: 100%;
-        }
-        .row {
-            height: 100%;
-        }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            margin-right: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .grid-container {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            height: 100%;
-        }
         .grid {
             display: grid;
-            grid-template-columns: repeat(8, 100px);
-            grid-template-rows: repeat(8, 100px);
+            grid-template-columns: repeat(8, minmax(40px, 100px));
+            grid-template-rows: repeat(8, minmax(40px, 100px));
             gap: 5px;
         }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(8, minmax(30px, 40px));
+                grid-template-rows: repeat(8, minmax(30px, 40px));
+                gap: 2px;
+            }
+        }
         .tile {
-            width: 100px;
-            height: 100px;
-            background-color: lightblue; /* Non-path tiles */
+            background-color: lightblue;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -49,12 +29,13 @@
             cursor: pointer;
             position: relative;
             transition: background-color 0.3s, filter 0.3s;
+            aspect-ratio: 1/1;
         }
         .tile[data-path] {
-            background-color: grey; /* Path tiles without XP */
+            background-color: grey;
         }
         .tile[data-xp] {
-            background-color: lightblue; /* Path tiles with XP */
+            background-color: lightblue;
         }
         .tile span {
             position: absolute;
@@ -84,142 +65,139 @@
         .tracker-highlight-shadow .tracker {
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
         }
-        #tracker-info, #distance-info, #error-message {
-            font-size: 18px;
-            margin-top: 10px;
-        }
-        #error-message {
-            color: red;
-        }
-        .tile-history {
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .tile-history-item {
-            font-size: 14px;
-            padding: 5px;
-            border-bottom: 1px solid #ddd;
-        }
     </style>
 </head>
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="controls">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Controls</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <button id="move-1-btn" class="btn btn-primary mb-2" onclick="startJumpSequence(1, 1)">Jump 1 Tile</button>
-                                    <span>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(1, 2)">x2</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(1, 3)">x3</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(1, 4)">x4</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(1, 5)">x5</button>
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <button id="move-2-btn" class="btn btn-primary mb-2" onclick="startJumpSequence(2, 1)">Jump 2 Tiles</button>
-                                    <span>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(2, 2)">x2</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(2, 3)">x3</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(2, 4)">x4</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(2, 5)">x5</button>
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <button id="move-3-btn" class="btn btn-primary mb-2" onclick="startJumpSequence(3, 1)">Jump 3 Tiles</button>
-                                    <span>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(3, 2)">x2</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(3, 3)">x3</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(3, 4)">x4</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(3, 5)">x5</button>
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <button id="move-4-btn" class="btn btn-primary mb-2" onclick="startJumpSequence(4, 1)">Jump 4 Tiles</button>
-                                    <span>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(4, 2)">x2</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(4, 3)">x3</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(4, 4)">x4</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(4, 5)">x5</button>
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <button id="move-5-btn" class="btn btn-primary mb-2" onclick="startJumpSequence(5, 1)">Jump 5 Tiles</button>
-                                    <span>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(5, 2)">x2</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(5, 3)">x3</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(5, 4)">x4</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="startJumpSequence(5, 5)">x5</button>
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <button id="roll-dice-btn" class="btn btn-secondary mb-2" onclick="rollAndJump(1)">Roll and Jump</button>
-                                    <span>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="rollAndJump(2)">x2</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="rollAndJump(3)">x3</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="rollAndJump(4)">x4</button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="rollAndJump(5)">x5</button>
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label><input type="checkbox" id="border-style" checked onchange="changeTrackerStyle()"> Border</label><br>
-                                    <label><input type="checkbox" id="pattern-style" checked onchange="changeTrackerStyle()"> Pattern</label><br>
-                                    <label><input type="checkbox" id="pulse-style" checked onchange="changeTrackerStyle()"> Pulsating</label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="pulse-speed">Pulse Speed:</label>
-                                    <input type="range" id="pulse-speed" min="0.5" max="3" step="0.1" value="0.5" onchange="changePulseSpeed()">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <label for="delay-slider">Delay (seconds):</label>
-                                    <input type="range" id="delay-slider" min="0" max="3" step="0.5" value="0.5">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><button id="reset-btn" class="btn btn-warning mb-2" onclick="resetGame()">Reset Game</button></td>
-                            </tr>
-                            <tr>
-                                <td><button id="revert-btn" class="btn btn-danger mb-2" onclick="revertLastMove()">Revert Last Move</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div id="dice-result" class="mt-2">Dice Result: N/A</div>
-                    <div id="tracker-info">Current Position: (x: 0, y: 1)</div>
-                    <div id="distance-info">Distance from Start: 0</div>
-                    <div id="error-message"></div>
-                    <div class="tile-history mt-4">
-                        <h5>Tile History</h5>
-                        <div id="tile-history-list"></div>
+<body class="bg-gray-100 min-h-screen">
+    <div id="navbar-container"></div>
+    
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold mb-6 text-center">Tundra Simulator</h1>
+        
+        <div class="flex flex-col md:flex-row">
+            <div class="w-full md:w-1/3 bg-white rounded-lg shadow-md p-4 mb-6 md:mb-0 md:mr-4">
+                <h2 class="text-xl font-semibold mb-4 text-center border-b pb-2">Controls</h2>
+                
+                <div class="space-y-4">
+                    <!-- Jump 1 Tile -->
+                    <div>
+                        <button id="move-1-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-2 w-full" onclick="startJumpSequence(1, 1)">Jump 1 Tile</button>
+                        <div class="flex space-x-1">
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(1, 2)">x2</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(1, 3)">x3</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(1, 4)">x4</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(1, 5)">x5</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Jump 2 Tiles -->
+                    <div>
+                        <button id="move-2-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-2 w-full" onclick="startJumpSequence(2, 1)">Jump 2 Tiles</button>
+                        <div class="flex space-x-1">
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(2, 2)">x2</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(2, 3)">x3</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(2, 4)">x4</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(2, 5)">x5</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Jump 3 Tiles -->
+                    <div>
+                        <button id="move-3-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-2 w-full" onclick="startJumpSequence(3, 1)">Jump 3 Tiles</button>
+                        <div class="flex space-x-1">
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(3, 2)">x2</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(3, 3)">x3</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(3, 4)">x4</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(3, 5)">x5</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Jump 4 Tiles -->
+                    <div>
+                        <button id="move-4-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-2 w-full" onclick="startJumpSequence(4, 1)">Jump 4 Tiles</button>
+                        <div class="flex space-x-1">
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(4, 2)">x2</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(4, 3)">x3</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(4, 4)">x4</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(4, 5)">x5</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Jump 5 Tiles -->
+                    <div>
+                        <button id="move-5-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-2 w-full" onclick="startJumpSequence(5, 1)">Jump 5 Tiles</button>
+                        <div class="flex space-x-1">
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(5, 2)">x2</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(5, 3)">x3</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(5, 4)">x4</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="startJumpSequence(5, 5)">x5</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Roll and Jump -->
+                    <div>
+                        <button id="roll-dice-btn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded mb-2 w-full" onclick="rollAndJump(1)">Roll and Jump</button>
+                        <div class="flex space-x-1">
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="rollAndJump(2)">x2</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="rollAndJump(3)">x3</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="rollAndJump(4)">x4</button>
+                            <button class="border border-gray-300 hover:bg-gray-200 px-2 py-1 rounded text-sm" onclick="rollAndJump(5)">x5</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Style Controls -->
+                    <div class="border-t pt-4">
+                        <h3 class="text-lg font-medium mb-2">Appearance</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="border-style" checked onchange="changeTrackerStyle()" class="mr-2">
+                                <span>Border</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="pattern-style" checked onchange="changeTrackerStyle()" class="mr-2">
+                                <span>Pattern</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="pulse-style" checked onchange="changeTrackerStyle()" class="mr-2">
+                                <span>Pulsating</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Speed Controls -->
+                    <div>
+                        <label for="pulse-speed" class="block mb-1">Pulse Speed:</label>
+                        <input type="range" id="pulse-speed" min="0.5" max="3" step="0.1" value="0.5" onchange="changePulseSpeed()" class="w-full">
+                    </div>
+                    
+                    <div>
+                        <label for="delay-slider" class="block mb-1">Delay (seconds):</label>
+                        <input type="range" id="delay-slider" min="0" max="3" step="0.5" value="0.5" class="w-full">
+                    </div>
+                    
+                    <!-- Control Buttons -->
+                    <div class="flex space-x-2">
+                        <button id="reset-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded flex-1" onclick="resetGame()">Reset Game</button>
+                        <button id="revert-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex-1" onclick="revertLastMove()">Revert Last Move</button>
+                    </div>
+                    
+                    <!-- Info -->
+                    <div class="mt-4 space-y-2">
+                        <div id="dice-result" class="text-lg">Dice Result: N/A</div>
+                        <div id="tracker-info" class="text-lg">Current Position: (x: 0, y: 1)</div>
+                        <div id="distance-info" class="text-lg">Distance from Start: 0</div>
+                        <div id="error-message" class="text-red-500"></div>
+                    </div>
+                    
+                    <!-- History -->
+                    <div class="mt-4">
+                        <h3 class="text-lg font-medium mb-2">Tile History</h3>
+                        <div id="tile-history-list" class="bg-gray-50 p-2 rounded max-h-60 overflow-y-auto"></div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-9 grid-container">
-                <div id="grid-wrapper">
+            
+            <div class="w-full md:w-2/3 flex justify-center items-center">
+                <div id="grid-wrapper" class="overflow-auto">
                     <div class="grid tracker-full-brightness" id="grid">
                         <!-- The grid will be generated by JavaScript -->
                     </div>

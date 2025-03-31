@@ -3,280 +3,494 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Troop Stats</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <title>Troop Stats - WOS Nerds</title>
+    <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
     <!-- DataTables CSS for sortable tables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
-    
     <!-- Chart.js for graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom styles for DataTables compatibility */
+        .dataTables_wrapper .dataTables_length, 
+        .dataTables_wrapper .dataTables_filter {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .dataTables_wrapper .dataTables_length select {
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background-color: white;
+        }
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background-color: white;
+        }
+        .dataTables_wrapper .dataTables_paginate {
+            margin-top: 1rem;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0.25rem 0.75rem;
+            margin: 0 0.25rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: #3b82f6;
+            color: white !important;
+            border-color: #3b82f6;
+        }
+        .dataTables_wrapper .dataTables_info {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+        
+        /* Fix for DataTables header/cell alignment */
+        table.dataTable thead th, table.dataTable thead td,
+        table.dataTable tbody th, table.dataTable tbody td {
+            text-align: left;
+            padding: 8px 10px;
+        }
+        
+        /* Ensure table takes full width */
+        table.dataTable {
+            width: 100% !important;
+        }
+        
+        /* Fix for DataTables scrolling */
+        .dataTables_scrollHeadInner, .dataTables_scrollHeadInner table {
+            width: 100% !important;
+        }
+        
+        /* Fix header width */
+        .dataTables_scrollHeadInner table thead th {
+            width: auto !important;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen">
+    <div id="navbar-container"></div>
 
-<div class="container my-5">
-    <h1 class="text-center">Troop Stats</h1>
-    <h3>Draft mode: Please note, this doesn't account for skills that unlock at various levels of FC level</h3>
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-6 mt-16 md:ml-64">
+        <h1 class="text-3xl font-bold text-center mb-4">Troop Stats</h1>
+        <h3 class="text-center text-red-600 mb-6">Draft mode: Please note, this doesn't account for skills that unlock at various levels of FC level</h3>
 
-    <!-- Infantry Section -->
-    <section id="infantry">
-        <h2>Infantry Stats</h2>
-        <table id="infantryTable" class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th>Troop Level</th>
-                    <th>FC Level</th>
-                    <th>Power</th>
-                    <th>Defense</th>
-                    <th>Lethality</th>
-                    <th>Load</th>
-                    <th>Attack</th>
-                    <th>Health</th>
-                    <th>Speed</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Populated dynamically -->
-            </tbody>
-        </table>
-
-        <!-- Chart Section -->
-        <div class="my-3">
-            <h3>Compare Infantry Stats</h3>
-            <select id="infantryChartSelector" class="form-select" onchange="updateInfantryChart()">
-                <option value="power_vs_attack">Power vs Attack</option>
-                <option value="defense_vs_health">Defense vs Health</option>
-                <option value="lethality_vs_load">Lethality vs Load</option>
-            </select>
-            <canvas id="infantryChart"></canvas>
+        <!-- Tabs for different troop types -->
+        <div class="mb-6 border-b border-gray-200">
+            <ul class="flex flex-wrap -mb-px" id="troop-tabs" role="tablist">
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-blue-500 rounded-t-lg" id="infantry-tab" data-target="infantry" role="tab" aria-controls="infantry" aria-selected="true">Infantry</button>
+                </li>
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="lancer-tab" data-target="lancer" role="tab" aria-controls="lancer" aria-selected="false">Lancer</button>
+                </li>
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="marksman-tab" data-target="marksman" role="tab" aria-controls="marksman" aria-selected="false">Marksman</button>
+                </li>
+            </ul>
         </div>
-    </section>
 
-    <!-- Lancer Section -->
-    <section id="lancer" class="mt-5">
-        <h2>Lancer Stats</h2>
-        <table id="lancerTable" class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th>Troop Level</th>
-                    <th>FC Level</th>
-                    <th>Power</th>
-                    <th>Defense</th>
-                    <th>Lethality</th>
-                    <th>Load</th>
-                    <th>Attack</th>
-                    <th>Health</th>
-                    <th>Speed</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Populated dynamically -->
-            </tbody>
-        </table>
+        <!-- Tab content containers -->
+        <div class="tab-content">
+            <!-- Infantry Section -->
+            <section id="infantry" class="tab-pane block">
+                <div class="bg-white p-4 rounded-lg shadow mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Infantry Stats</h2>
+                    <div class="w-full overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table id="infantryTable" class="stripe hover w-full">
+                                <thead>
+                                    <tr>
+                                        <th>Troop Level</th>
+                                        <th>FC Level</th>
+                                        <th>Power</th>
+                                        <th>Defense</th>
+                                        <th>Lethality</th>
+                                        <th>Load</th>
+                                        <th>Attack</th>
+                                        <th>Health</th>
+                                        <th>Speed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-        <!-- Chart Section -->
-        <div class="my-3">
-            <h3>Compare Lancer Stats</h3>
-            <select id="lancerChartSelector" class="form-select" onchange="updateLancerChart()">
-                <option value="power_vs_attack">Power vs Attack</option>
-                <option value="defense_vs_health">Defense vs Health</option>
-                <option value="lethality_vs_load">Lethality vs Load</option>
-            </select>
-            <canvas id="lancerChart"></canvas>
+                    <!-- Chart Section -->
+                    <div class="mt-6">
+                        <h3 class="text-lg font-medium mb-2">Compare Infantry Stats</h3>
+                        <select id="infantryChartSelector" class="border border-gray-300 rounded px-3 py-2 mb-4" onchange="updateInfantryChart()">
+                            <option value="power_vs_attack">Power vs Attack</option>
+                            <option value="defense_vs_health">Defense vs Health</option>
+                            <option value="lethality_vs_load">Lethality vs Load</option>
+                        </select>
+                        <div class="h-64">
+                            <canvas id="infantryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lancer Section -->
+            <section id="lancer" class="tab-pane hidden">
+                <div class="bg-white p-4 rounded-lg shadow mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Lancer Stats</h2>
+                    <div class="w-full overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table id="lancerTable" class="stripe hover w-full">
+                                <thead>
+                                    <tr>
+                                        <th>Troop Level</th>
+                                        <th>FC Level</th>
+                                        <th>Power</th>
+                                        <th>Defense</th>
+                                        <th>Lethality</th>
+                                        <th>Load</th>
+                                        <th>Attack</th>
+                                        <th>Health</th>
+                                        <th>Speed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Chart Section -->
+                    <div class="mt-6">
+                        <h3 class="text-lg font-medium mb-2">Compare Lancer Stats</h3>
+                        <select id="lancerChartSelector" class="border border-gray-300 rounded px-3 py-2 mb-4" onchange="updateLancerChart()">
+                            <option value="power_vs_attack">Power vs Attack</option>
+                            <option value="defense_vs_health">Defense vs Health</option>
+                            <option value="lethality_vs_load">Lethality vs Load</option>
+                        </select>
+                        <div class="h-64">
+                            <canvas id="lancerChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Marksman Section -->
+            <section id="marksman" class="tab-pane hidden">
+                <div class="bg-white p-4 rounded-lg shadow mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Marksman Stats</h2>
+                    <div class="w-full overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table id="marksmanTable" class="stripe hover w-full">
+                                <thead>
+                                    <tr>
+                                        <th>Troop Level</th>
+                                        <th>FC Level</th>
+                                        <th>Power</th>
+                                        <th>Defense</th>
+                                        <th>Lethality</th>
+                                        <th>Load</th>
+                                        <th>Attack</th>
+                                        <th>Health</th>
+                                        <th>Speed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Chart Section -->
+                    <div class="mt-6">
+                        <h3 class="text-lg font-medium mb-2">Compare Marksman Stats</h3>
+                        <select id="marksmanChartSelector" class="border border-gray-300 rounded px-3 py-2 mb-4" onchange="updateMarksmanChart()">
+                            <option value="power_vs_attack">Power vs Attack</option>
+                            <option value="defense_vs_health">Defense vs Health</option>
+                            <option value="lethality_vs_load">Lethality vs Load</option>
+                        </select>
+                        <div class="h-64">
+                            <canvas id="marksmanChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
-    </section>
 
-    <!-- Marksman Section -->
-    <section id="marksman" class="mt-5">
-        <h2>Marksman Stats</h2>
-        <table id="marksmanTable" class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th>Troop Level</th>
-                    <th>FC Level</th>
-                    <th>Power</th>
-                    <th>Defense</th>
-                    <th>Lethality</th>
-                    <th>Load</th>
-                    <th>Attack</th>
-                    <th>Health</th>
-                    <th>Speed</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Populated dynamically -->
-            </tbody>
-        </table>
+        <!-- Footer -->
+        <footer class="mt-auto py-4 text-center text-gray-600 border-t">
+            <p>All data is free to copy and use. See <a href="https://github.com/wosnerdwarriors" target="_blank" class="text-blue-600 hover:underline">https://github.com/wosnerdwarriors</a> for source code</p>
+        </footer>
+    </div>
 
-        <!-- Chart Section -->
-        <div class="my-3">
-            <h3>Compare Marksman Stats</h3>
-            <select id="marksmanChartSelector" class="form-select" onchange="updateMarksmanChart()">
-                <option value="power_vs_attack">Power vs Attack</option>
-                <option value="defense_vs_health">Defense vs Health</option>
-                <option value="lethality_vs_load">Lethality vs Load</option>
-            </select>
-            <canvas id="marksmanChart"></canvas>
-        </div>
-    </section>
-</div>
-
-<!-- jQuery and DataTables JS -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
-
-<script>
-// Function to get URL parameters
-function getUrlParameter(name) {
-    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-    var results = regex.exec(location.search);
-    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-}
-
-// Check if debug mode is enabled
-const debugMode = getUrlParameter('debug') === 'true';
-
-// Debugging helper function
-function debugLog(message) {
-    if (debugMode) {
-        console.log(message);
-    }
-}
-
-// Function to populate troop data into tables
-function populateTable(tableId, troopData) {
-    debugLog(`Populating table: ${tableId}`);
-    debugLog(`Troop data for ${tableId}: ${JSON.stringify(troopData)}`);
+    <!-- jQuery and DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
     
-    let tableBody = document.querySelector(`#${tableId} tbody`);
-    tableBody.innerHTML = ""; // Clear previous content
-
-    if (!troopData || troopData.length === 0) {
-        debugLog(`No troop data for table: ${tableId}`);
-        return;
+    <!-- Custom Tab Navigation Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up tab navigation
+            const tabs = document.querySelectorAll('#troop-tabs button');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Deactivate all tabs
+                    tabs.forEach(t => {
+                        t.classList.remove('border-blue-500');
+                        t.classList.add('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
+                        t.setAttribute('aria-selected', 'false');
+                    });
+                    
+                    // Activate selected tab
+                    this.classList.remove('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
+                    this.classList.add('border-blue-500');
+                    this.setAttribute('aria-selected', 'true');
+                    
+                    // Hide all tab panes
+                    document.querySelectorAll('.tab-pane').forEach(pane => {
+                        pane.classList.add('hidden');
+                        pane.classList.remove('block');
+                    });
+                    
+                    // Show the selected tab pane
+                    const target = this.getAttribute('data-target');
+                    document.getElementById(target).classList.remove('hidden');
+                    document.getElementById(target).classList.add('block');
+                });
+            });
+        });
+    </script>
+    
+    <!-- Main Script -->
+    <script>
+    // Function to get URL parameters
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     }
 
-    troopData.forEach(troop => {
-        let row = `
-            <tr>
-                <td>${troop["Troop Level"]}</td>
-                <td>${troop["FC level"]}</td>
-                <td>${troop["power"]}</td>
-                <td>${troop["defense"]}</td>
-                <td>${troop["lethality"]}</td>
-                <td>${troop["load"]}</td>
-                <td>${troop["attack"]}</td>
-                <td>${troop["health"]}</td>
-                <td>${troop["speed"]}</td>
-            </tr>
-        `;
-        tableBody.innerHTML += row;
-    });
+    // Check if debug mode is enabled
+    const debugMode = getUrlParameter('debug') === 'true';
 
-    debugLog(`Completed populating table: ${tableId}`);
-}
-
-// Load the data and initialize the page
-$.getJSON("https://data.wosnerds.com/data/troop-stats.json", function(data) {
-    debugLog("Loaded JSON data:");
-    debugLog(data);
-
-    // Validate troop-stats exist
-    if (!data || !data["troop-stats"]) {
-        debugLog("No 'troop-stats' found in the JSON.");
-        return;
+    // Debugging helper function
+    function debugLog(message) {
+        if (debugMode) {
+            console.log(message);
+        }
     }
 
-    // Debugging data structure
-    if (debugMode) {
-        console.log("Troop stats structure:");
-        console.log(JSON.stringify(data["troop-stats"], null, 2));
-    }
+    // Function to populate troop data into tables
+    function populateTable(tableId, troopData) {
+        debugLog(`Populating table: ${tableId}`);
+        debugLog(`Troop data for ${tableId}: ${JSON.stringify(troopData)}`);
+        
+        let tableBody = document.querySelector(`#${tableId} tbody`);
+        tableBody.innerHTML = ""; // Clear previous content
 
-    // Populate tables for each troop type
-    populateTable('infantryTable', data["troop-stats"]["infantry"]);
-    populateTable('lancerTable', data["troop-stats"]["lancer"]);
-    populateTable('marksmanTable', data["troop-stats"]["marksman"]);
-
-    // Initialize DataTable for sorting
-    $('#infantryTable').DataTable();
-    $('#lancerTable').DataTable();
-    $('#marksmanTable').DataTable();
-
-    // Debugging: check if the tables were populated
-    debugLog("Checking tables:");
-    debugLog(document.querySelector('#infantryTable tbody').innerHTML);
-    debugLog(document.querySelector('#lancerTable tbody').innerHTML);
-    debugLog(document.querySelector('#marksmanTable tbody').innerHTML);
-
-    // Initialize Chart.js for each troop type
-    const infantryChart = new Chart(document.getElementById('infantryChart'), { type: 'line', data: {} });
-    const lancerChart = new Chart(document.getElementById('lancerChart'), { type: 'line', data: {} });
-    const marksmanChart = new Chart(document.getElementById('marksmanChart'), { type: 'line', data: {} });
-
-    // Function to update chart for a given troop type
-    function updateChart(chartInstance, selectorId, troopData) {
-        const selectedOption = document.getElementById(selectorId).value;
-
-        debugLog(`Updating chart: ${chartInstance}, option: ${selectedOption}`);
-
-        let labels = troopData.map(troop => `Level ${troop["Troop Level"]}, FC ${troop["FC level"]}`);
-        let datasets;
-
-        if (selectedOption === 'power_vs_attack') {
-            datasets = [
-                {
-                    label: 'Power',
-                    data: troopData.map(troop => troop["power"]),
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    yAxisID: 'y',
-                },
-                {
-                    label: 'Attack',
-                    data: troopData.map(troop => troop["attack"]),
-                    borderColor: 'rgba(153, 102, 255, 1)',
-                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                    yAxisID: 'y',
-                }
-            ];
+        if (!troopData || troopData.length === 0) {
+            debugLog(`No troop data for table: ${tableId}`);
+            return;
         }
 
-        // Update chart
-        chartInstance.data = {
-            labels: labels,
-            datasets: datasets
-        };
-        chartInstance.update();
+        troopData.forEach(troop => {
+            let row = `
+                <tr>
+                    <td>${troop["Troop Level"]}</td>
+                    <td>${troop["FC level"]}</td>
+                    <td>${troop["power"]}</td>
+                    <td>${troop["defense"]}</td>
+                    <td>${troop["lethality"]}</td>
+                    <td>${troop["load"]}</td>
+                    <td>${troop["attack"]}</td>
+                    <td>${troop["health"]}</td>
+                    <td>${troop["speed"]}</td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
 
-        debugLog(`Updated chart for selector: ${selectorId}`);
+        debugLog(`Completed populating table: ${tableId}`);
     }
 
-    // Set up chart update functions
-    window.updateInfantryChart = function() {
-        updateChart(infantryChart, 'infantryChartSelector', data["troop-stats"]["infantry"]);
-    };
-    window.updateLancerChart = function() {
-        updateChart(lancerChart, 'lancerChartSelector', data["troop-stats"]["lancer"]);
-    };
-    window.updateMarksmanChart = function() {
-        updateChart(marksmanChart, 'marksmanChartSelector', data["troop-stats"]["marksman"]);
-    };
+    // Load the data and initialize the page
+    $.getJSON("https://data.wosnerds.com/data/troop-stats.json", function(data) {
+        debugLog("Loaded JSON data:");
+        debugLog(data);
 
-    // Initialize charts with the first selected option
-    updateInfantryChart();
-    updateLancerChart();
-    updateMarksmanChart();
-}).fail(function(jqxhr, textStatus, error) {
-    debugLog(`Request Failed: ${textStatus}, ${error}`);
-});
-</script>
+        // Validate troop-stats exist
+        if (!data || !data["troop-stats"]) {
+            debugLog("No 'troop-stats' found in the JSON.");
+            return;
+        }
 
-<script src="/js/navbar.js"></script>
-<script src="/js/google-analytics.js"></script>
+        // Debugging data structure
+        if (debugMode) {
+            console.log("Troop stats structure:");
+            console.log(JSON.stringify(data["troop-stats"], null, 2));
+        }
+
+        // Populate tables for each troop type
+        populateTable('infantryTable', data["troop-stats"]["infantry"]);
+        populateTable('lancerTable', data["troop-stats"]["lancer"]);
+        populateTable('marksmanTable', data["troop-stats"]["marksman"]);
+
+        // Initialize DataTable for sorting with fixed columns
+        $('#infantryTable, #lancerTable, #marksmanTable').DataTable({
+            responsive: true,
+            scrollX: true,
+            columnDefs: [
+                { width: '10%', targets: 0 },
+                { width: '10%', targets: 1 },
+                { width: '10%', targets: 2 },
+                { width: '10%', targets: 3 },
+                { width: '10%', targets: 4 },
+                { width: '10%', targets: 5 },
+                { width: '10%', targets: 6 },
+                { width: '10%', targets: 7 },
+                { width: '10%', targets: 8 }
+            ],
+            fixedColumns: true,
+            autoWidth: false
+        });
+
+        // Force a redraw after initialization to fix alignment
+        setTimeout(function() {
+            $('.dataTable').DataTable().columns.adjust();
+            $('.dataTable').DataTable().responsive.recalc();
+        }, 100);
+
+        // Debugging: check if the tables were populated
+        debugLog("Checking tables:");
+        debugLog(document.querySelector('#infantryTable tbody').innerHTML);
+        debugLog(document.querySelector('#lancerTable tbody').innerHTML);
+        debugLog(document.querySelector('#marksmanTable tbody').innerHTML);
+
+        // Initialize Chart.js for each troop type
+        const infantryChart = new Chart(document.getElementById('infantryChart'), { 
+            type: 'line', 
+            data: {},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+        const lancerChart = new Chart(document.getElementById('lancerChart'), { 
+            type: 'line', 
+            data: {},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+        const marksmanChart = new Chart(document.getElementById('marksmanChart'), { 
+            type: 'line', 
+            data: {},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Function to update chart for a given troop type
+        function updateChart(chartInstance, selectorId, troopData) {
+            const selectedOption = document.getElementById(selectorId).value;
+
+            debugLog(`Updating chart: ${chartInstance}, option: ${selectedOption}`);
+
+            let labels = troopData.map(troop => `Level ${troop["Troop Level"]}, FC ${troop["FC level"]}`);
+            let datasets;
+
+            if (selectedOption === 'power_vs_attack') {
+                datasets = [
+                    {
+                        label: 'Power',
+                        data: troopData.map(troop => troop["power"]),
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        yAxisID: 'y',
+                    },
+                    {
+                        label: 'Attack',
+                        data: troopData.map(troop => troop["attack"]),
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        yAxisID: 'y',
+                    }
+                ];
+            } else if (selectedOption === 'defense_vs_health') {
+                datasets = [
+                    {
+                        label: 'Defense',
+                        data: troopData.map(troop => troop["defense"]),
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        yAxisID: 'y',
+                    },
+                    {
+                        label: 'Health',
+                        data: troopData.map(troop => troop["health"]),
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        yAxisID: 'y',
+                    }
+                ];
+            } else if (selectedOption === 'lethality_vs_load') {
+                datasets = [
+                    {
+                        label: 'Lethality',
+                        data: troopData.map(troop => troop["lethality"]),
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                        yAxisID: 'y',
+                    },
+                    {
+                        label: 'Load',
+                        data: troopData.map(troop => troop["load"]),
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        yAxisID: 'y',
+                    }
+                ];
+            }
+
+            // Update chart
+            chartInstance.data = {
+                labels: labels,
+                datasets: datasets
+            };
+            chartInstance.update();
+
+            debugLog(`Updated chart for selector: ${selectorId}`);
+        }
+
+        // Set up chart update functions
+        window.updateInfantryChart = function() {
+            updateChart(infantryChart, 'infantryChartSelector', data["troop-stats"]["infantry"]);
+        };
+        window.updateLancerChart = function() {
+            updateChart(lancerChart, 'lancerChartSelector', data["troop-stats"]["lancer"]);
+        };
+        window.updateMarksmanChart = function() {
+            updateChart(marksmanChart, 'marksmanChartSelector', data["troop-stats"]["marksman"]);
+        };
+
+        // Initialize charts with the first selected option
+        updateInfantryChart();
+        updateLancerChart();
+        updateMarksmanChart();
+    }).fail(function(jqxhr, textStatus, error) {
+        debugLog(`Request Failed: ${textStatus}, ${error}`);
+    });
+    </script>
+
+    <script src="/js/navbar.js"></script>
 </body>
 </html>
-

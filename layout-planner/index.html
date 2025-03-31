@@ -3,34 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/researchtree/css/researchtree.css">
-    <link rel="stylesheet" href="/css/navbar.css">
-    <link rel="stylesheet" href="/layout-planner/css/style.css">
+    <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
     <title>Alliance Layout Planner</title>
+    <style>
+        #layoutCanvas {
+            max-width: 100%;
+            height: auto;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+        }
+        @media (max-width: 640px) {
+            #layoutCanvas {
+                height: 320px;
+            }
+        }
+    </style>
 </head>
 
-<body>
-    <div id="toolbar">
-        <button data-type="flag">Flag (1x1)</button>
-        <button data-type="city">City (2x2)</button>
-        <button data-type="building">Bear Trap (3x3)</button>
-        <button data-type="select">Select</button>
-        <button id="deleteButton" style="background-color: #ff4d4d; color: white;">Delete</button>
-    </div>
-    <div id="counters">
-        <span>Flags: <span id="flagCounter">0</span></span> |
-        <span>Cities: <span id="cityCounter">0</span></span> |
-        <span>Bear Traps: <span id="buildingCounter">0</span></span>
-    </div>
-    <canvas id="layoutCanvas" width="1000" height="1000"></canvas>
-    <div id="info">
-        <span id="copyMessage" style="display:none; color: green; margin-top: 5px;">Copied to Clipboard!</span>
-    </div>
-    <div id="controls">
-        <button id="downloadButton">Save as PNG</button>
-        <button id="saveButton">Generate Code</button>
-        <textarea id="mapData" rows="5" cols="50" placeholder="Map code will appear here..."></textarea>
-        <button id="loadButton">Load</button>
+<body class="bg-gray-100 min-h-screen">
+    <div id="navbar-container"></div>
+    
+    <div class="container mx-auto px-4 py-6 mt-16 md:ml-64">
+        <h1 class="text-3xl font-bold mb-6 text-center">Alliance Layout Planner</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div id="toolbar" class="flex flex-wrap gap-2 mb-4">
+                <button data-type="flag" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Flag (1x1)</button>
+                <button data-type="city" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">City (2x2)</button>
+                <button data-type="building" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Bear Trap (3x3)</button>
+                <button data-type="select" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Select</button>
+                <button id="deleteButton" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Delete</button>
+            </div>
+            
+            <div id="counters" class="text-lg mb-4 p-2 bg-gray-100 rounded">
+                <span class="mr-4">Flags: <span id="flagCounter" class="font-bold">0</span></span>
+                <span class="mr-4">Cities: <span id="cityCounter" class="font-bold">0</span></span>
+                <span>Bear Traps: <span id="buildingCounter" class="font-bold">0</span></span>
+            </div>
+        </div>
+        
+        <div class="flex flex-col md:flex-row gap-6">
+            <div class="w-full md:w-3/4 bg-white rounded-lg shadow-md p-4 flex justify-center">
+                <canvas id="layoutCanvas" width="1000" height="1000"></canvas>
+            </div>
+            
+            <div class="w-full md:w-1/4 bg-white rounded-lg shadow-md p-4">
+                <h2 class="text-xl font-semibold mb-4 text-center border-b pb-2">Actions</h2>
+                
+                <div id="controls" class="space-y-4">
+                    <button id="downloadButton" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full">Save as PNG</button>
+                    <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full">Generate Code</button>
+                    <textarea id="mapData" rows="5" placeholder="Map code will appear here..." class="w-full p-2 border border-gray-300 rounded"></textarea>
+                    <button id="loadButton" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded w-full">Load</button>
+                </div>
+                
+                <div id="info" class="mt-4">
+                    <span id="copyMessage" class="hidden text-green-500 font-medium">Copied to Clipboard!</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="/layout-planner/js/script.js"></script>
