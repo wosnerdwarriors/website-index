@@ -1,4 +1,28 @@
 (function() {
+  // Navigation menu data structure
+  const navMenuData = {
+    tools: [
+      { name: "Rally Tracker", url: "/rallytracker", color: "blue" },
+      { name: "Research Calc", url: "/researchtree", color: "green" },
+      { name: "Troop Stats", url: "/troop-stats", color: "yellow" },
+      { name: "Calendar", url: "/calendar", color: "purple" },
+      { name: "SVS History", url: "/svs-history", color: "red" },
+      { name: "Alliance RSS Calc", url: "/alliancerss", color: "indigo" },
+      { name: "Formation Builder", url: "/formationbuilder", color: "pink" },
+      { name: "Layout Planner", url: "/layout-planner", color: "teal" }
+    ],
+    external: [
+      { name: "Google Drive", url: "https://drive.google.com/drive/folders/1rTwI6mXDYvFZHo8MhWQciCcNPprTmfFe?usp=sharing", color: "gray" },
+      { name: "YouTube", url: "https://www.youtube.com/@WosNerds", color: "gray" },
+      { name: "Discord", url: "https://discord.gg/dMYY8bcPXp", color: "gray" },
+      { name: "Github Source Code", url: "https://github.com/wosnerdwarriors", color: "gray" }
+    ],
+    dataCollection: [
+      { name: "SvS Match Results", url: "https://forms.gle/BBnuL5V8LJ12mB9S7", color: "cyan" },
+      { name: "State Age", url: "https://forms.gle/zeZJY8PBRHWsem2u7", color: "cyan" }
+    ]
+  };
+
   // Function to load external HTML
   function loadHTML(file, callback) {
     const xhr = new XMLHttpRequest();
@@ -21,9 +45,123 @@
   loadHTML("/navbar.html", function(data) {
     document.getElementById('wosnerds-navbar').innerHTML = data;
     
+    // Add close button for mobile
+    addCloseButton();
+    
+    // Generate the dynamic navbar
+    generateNavbar();
+    
     // Set up mobile menu toggle functionality after navbar is loaded
     setupMobileMenu();
   });
+
+  // Function to generate the navbar items
+  function generateNavbar() {
+    const navbarLinks = document.getElementById('navbar-links');
+    if (!navbarLinks) return;
+    
+    // Add more space between items on mobile
+    if (window.innerWidth < 768) {
+      navbarLinks.classList.replace('space-y-3', 'space-y-4');
+    }
+
+    // Generate tools section
+    navMenuData.tools.forEach(item => {
+      const li = createNavItem(item.name, item.url, item.color);
+      navbarLinks.appendChild(li);
+    });
+
+    // Generate external links section
+    const externalHeader = createSectionHeader("External Links");
+    navbarLinks.appendChild(externalHeader);
+    
+    navMenuData.external.forEach(item => {
+      const li = createNavItem(item.name, item.url, item.color, true);
+      navbarLinks.appendChild(li);
+    });
+
+    // Generate data collection section
+    const dataHeader = createSectionHeader("Data Collection");
+    navbarLinks.appendChild(dataHeader);
+    
+    navMenuData.dataCollection.forEach(item => {
+      const li = createNavItem(item.name, item.url, item.color, true);
+      navbarLinks.appendChild(li);
+    });
+  }
+
+  // Helper function to create a navigation item
+  function createNavItem(name, url, color, isExternal = false) {
+    const li = document.createElement('li');
+    li.className = 'flex justify-center';
+    
+    const a = document.createElement('a');
+    a.href = url;
+    
+    // Base classes that don't change
+    const baseClasses = "text-white my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md";
+    
+    // Color mapping for background
+    const colorClasses = {
+      blue: "bg-blue-500 hover:bg-blue-600",
+      green: "bg-green-500 hover:bg-green-600",
+      yellow: "bg-yellow-500 hover:bg-yellow-600", 
+      purple: "bg-purple-500 hover:bg-purple-600",
+      red: "bg-red-500 hover:bg-red-600",
+      indigo: "bg-indigo-500 hover:bg-indigo-600",
+      pink: "bg-pink-500 hover:bg-pink-600",
+      teal: "bg-teal-600 hover:bg-teal-700", // Using darker teal for better contrast
+      cyan: "bg-cyan-600 hover:bg-cyan-700", // Darker cyan for better contrast
+      gray: "bg-gray-600 hover:bg-gray-700"
+    };
+    
+    // Combine classes safely, with fallback to blue if color not found
+    a.className = `${baseClasses} ${colorClasses[color] || 'bg-blue-500 hover:bg-blue-600'}`;
+    a.textContent = name;
+    
+    if (isExternal) {
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    }
+    
+    li.appendChild(a);
+    return li;
+  }
+
+  // Create section header
+  function createSectionHeader(title) {
+    const li = document.createElement('li');
+    li.className = 'mt-6 mb-2';
+    
+    const h5 = document.createElement('h5');
+    h5.className = 'text-center font-semibold text-gray-700 bg-gray-200 py-1 rounded';
+    h5.textContent = title;
+    
+    li.appendChild(h5);
+    return li;
+  }
+  
+  // Add close button for mobile view
+  function addCloseButton() {
+    const navbar = document.getElementById('wosnerds-navbar-container');
+    if (!navbar) return;
+    
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.className = 'absolute top-2 right-2 p-1 rounded-full bg-gray-300 text-gray-700 hover:bg-gray-400 md:hidden';
+    closeButton.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      <span class="sr-only">Close Menu</span>
+    `;
+    
+    // Add click event
+    closeButton.addEventListener('click', closeMobileMenu);
+    
+    // Add to navbar
+    navbar.appendChild(closeButton);
+  }
 
   // Function to set up mobile menu toggle
   function setupMobileMenu() {

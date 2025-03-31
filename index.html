@@ -5,10 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="google-site-verification" content="Gwuj2-KRkUvjAuLyM9SJaZ9ZcYl5qcrwYQKSGNT2154" />
   <title>WOS Nerds - Whiteout Survival</title>
-  <link rel="stylesheet" href="/dist/css/tailwind.css">
+  <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
+  
+  <!-- Ensure teal colors are included in compiled CSS -->
+  <style>
+    .tailwind-teal-fix {
+      color: #115e59; /* teal-800 */
+      background-color: #14b8a6; /* teal-500 */
+      border-color: #0d9488; /* teal-600 */
+    }
+    .tailwind-teal-fix:hover {
+      background-color: #0f766e; /* teal-700 */
+    }
+  </style>
 </head>
 <body class="bg-gray-50">
   <!-- Navbar will be injected here by navbar.js -->
+  
+  <!-- Hidden element to ensure teal colors are included in the build -->
+  <div class="hidden">
+    <div class="bg-teal-500 hover:bg-teal-600 text-teal-900 border-teal-700"></div>
+    <div class="bg-teal-600 hover:bg-teal-700 text-white"></div>
+  </div>
   
   <!-- Main Content -->
   <div class="md:ml-64 p-4 transition-all duration-300 min-h-screen flex flex-col">
@@ -31,10 +49,20 @@
       </div>
       
       <!-- Tool Cards Grid -->
-      <div class="mt-8 max-w-5xl mx-auto">
+      <div class="mt-8 max-w-5xl mx-auto px-4">
         <h2 class="text-2xl font-semibold mb-6 text-center">Available Tools</h2>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <!-- Data Collection Banner -->
+        <div class="bg-cyan-600 text-white p-4 rounded-lg shadow-md mb-6">
+          <h3 class="text-lg font-semibold mb-2">Help Us Collect Data</h3>
+          <p class="mb-3">Contribute to our research by submitting game data through our forms:</p>
+          <div class="flex flex-wrap gap-3 justify-center">
+            <a href="https://forms.gle/BBnuL5V8LJ12mB9S7" target="_blank" class="bg-white text-cyan-800 px-3 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors">SvS Match Results</a>
+            <a href="https://forms.gle/zeZJY8PBRHWsem2u7" target="_blank" class="bg-white text-cyan-800 px-3 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors">State Age</a>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <!-- Rally Tracker -->
           <a href="/rallytracker" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
             <div class="h-2 bg-blue-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
@@ -86,8 +114,8 @@
           
           <!-- Layout Planner -->
           <a href="/layout-planner" class="bg-white rounded-lg shadow-md p-4 border border-gray-100 hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-            <div class="h-2 bg-teal-500 rounded-t-md -mt-4 -mx-4 mb-3"></div>
-            <h3 class="text-lg font-bold mb-2 text-teal-800">Layout Planner</h3>
+            <div class="h-2 bg-teal-600 rounded-t-md -mt-4 -mx-4 mb-3"></div>
+            <h3 class="text-lg font-bold mb-2 text-teal-900">Layout Planner</h3>
             <p class="text-gray-600 text-sm">Plan your base layout for optimal defense and resource production.</p>
           </a>
           

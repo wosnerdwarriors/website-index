@@ -30,7 +30,7 @@ module.exports = {
     'bg-indigo-500', 'hover:bg-indigo-600', 'text-indigo-800',
     'bg-pink-500', 'hover:bg-pink-600', 'text-pink-800',
     'bg-teal-500', 'hover:bg-teal-600', 'text-teal-800',
-    'bg-teal-600', 'hover:bg-teal-700',
+    'bg-teal-600', 'hover:bg-teal-700', 'text-teal-900',
     'bg-cyan-500', 'hover:bg-cyan-600', 'text-cyan-800',
     'bg-cyan-600', 'hover:bg-cyan-700',
     'bg-gray-500', 'hover:bg-gray-600', 'text-gray-800',

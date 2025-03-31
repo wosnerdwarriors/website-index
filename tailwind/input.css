@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ensure teal colors are included in the build */
+.teal-color-references {
+  @apply bg-teal-50 bg-teal-100 bg-teal-200 bg-teal-300 bg-teal-400 bg-teal-500 bg-teal-600 bg-teal-700 bg-teal-800 bg-teal-900;
+  @apply text-teal-50 text-teal-100 text-teal-200 text-teal-300 text-teal-400 text-teal-500 text-teal-600 text-teal-700 text-teal-800 text-teal-900;
+  @apply hover:bg-teal-500 hover:bg-teal-600 hover:bg-teal-700;
+  @apply border-teal-500;
+}
+
 @layer components {
   /* Navbar Links are now directly in the HTML with unique colors */
   
