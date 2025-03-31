@@ -181,18 +181,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// Troop Allocation and March Generation
 	document.getElementById('generate-btn').addEventListener('click', function() {
+		console.log("==================== STARTING TROOP ALLOCATION AND MARCH GENERATION ====================");
+		
 		const numMarches = parseInt(document.getElementById('num_marches').value) || 0;
 		const maxMarchSize = parseInt(document.getElementById('max_march_size').value) || 0;
+		console.log(`DEBUG - Initial Parameters: numMarches=${JSON.stringify(numMarches)}, maxMarchSize=${JSON.stringify(maxMarchSize)}`);
 
 		const infantryMin = parseInt(document.getElementById('infantry_min').value) || 0;
 		const lancerMax = parseInt(document.getElementById('lancer_max').value) || 0;
 		const marksmanMax = parseInt(document.getElementById('marksman_max').value) || 0;
+		console.log(`DEBUG - Troop Distribution Parameters: infantryMin=${JSON.stringify(infantryMin)}%, lancerMax=${JSON.stringify(lancerMax)}%, marksmanMax=${JSON.stringify(marksmanMax)}%`);
+			console.log(`DEBUG - Troop Distribution Parameters (raw): infantryMin=${JSON.stringify(document.getElementById('infantry_min').value)}, lancerMax=${JSON.stringify(document.getElementById('lancer_max').value)}, marksmanMax=${JSON.stringify(document.getElementById('marksman_max').value)}`);
 
 		let totalTroops = {
 			infantry: parseInt(document.getElementById('infantry_t11').value) || 0,
 			lancer: parseInt(document.getElementById('lancer_t11').value) || 0,
 			marksman: parseInt(document.getElementById('marksman_t11').value) || 0
 		};
+		console.log(`DEBUG - Total Available Troops: ${JSON.stringify(totalTroops)}`);
+		console.log(`DEBUG - Total Troop Count: ${JSON.stringify(totalTroops.infantry + totalTroops.lancer + totalTroops.marksman)}`);
+			console.log(`DEBUG - Raw input values: infantry=${JSON.stringify(document.getElementById('infantry_t11').value)}, lancer=${JSON.stringify(document.getElementById('lancer_t11').value)}, marksman=${JSON.stringify(document.getElementById('marksman_t11').value)}`);
 
 		const marches = Array(numMarches).fill().map(() => ({
 			infantry: 0,
@@ -200,66 +208,185 @@ document.addEventListener('DOMContentLoaded', function() {
 			marksman: 0,
 			total: 0
 		}));
+		console.log(`DEBUG - Created ${JSON.stringify(numMarches)} empty marches: ${JSON.stringify(marches)}`);
 
 		// Step 1: Fill Infantry Min
 		const infantryMinTroops = Math.floor(infantryMin / 100 * maxMarchSize);
+		console.log(`DEBUG - Step 1: Fill Infantry Min - Calculated infantryMinTroops=${JSON.stringify(infantryMinTroops)} per march (${JSON.stringify(infantryMin)}% of ${JSON.stringify(maxMarchSize)})`); 
+			console.log(`DEBUG - Step 1: Formula details: Math.floor(${JSON.stringify(infantryMin)} / 100 * ${JSON.stringify(maxMarchSize)}) = ${JSON.stringify(infantryMinTroops)}`);
+		console.log(`DEBUG - Step 1: Total infantry available before allocation: ${JSON.stringify(totalTroops.infantry)}`);
+		
 		for (let i = 0; i < numMarches; i++) {
 			const allocate = Math.min(infantryMinTroops, totalTroops.infantry);
+			console.log(`DEBUG - Step 1: March #${JSON.stringify(i+1)} - Min calculation: Math.min(${JSON.stringify(infantryMinTroops)}, ${JSON.stringify(totalTroops.infantry)}) = ${JSON.stringify(allocate)}`);
+			console.log(`DEBUG - Step 1: March #${JSON.stringify(i+1)} - Allocating ${JSON.stringify(allocate)} infantry (min of ${JSON.stringify(infantryMinTroops)} and ${JSON.stringify(totalTroops.infantry)} available)`);
+			
+			const oldMarchData = JSON.parse(JSON.stringify(marches[i]));
 			marches[i].infantry += allocate;
 			marches[i].total += allocate;
+			const oldTotalTroops = JSON.parse(JSON.stringify(totalTroops));
 			totalTroops.infantry -= allocate;
+			
+			console.log(`DEBUG - Step 1: March #${JSON.stringify(i+1)} - March before: ${JSON.stringify(oldMarchData)}`);
+			console.log(`DEBUG - Step 1: March #${JSON.stringify(i+1)} - March after: ${JSON.stringify(marches[i])}`);
+			console.log(`DEBUG - Step 1: Troops before: ${JSON.stringify(oldTotalTroops)}`);
+			console.log(`DEBUG - Step 1: Troops after: ${JSON.stringify(totalTroops)}`);
 		}
+		console.log(`DEBUG - Step 1: Infantry allocation complete. Marches: ${JSON.stringify(marches)}`);
+		console.log(`DEBUG - Step 1: Remaining troops: ${JSON.stringify(totalTroops)}`);
 
 		// Step 2: Fill Lancer Max
 		const lancerMaxTroops = Math.floor(lancerMax / 100 * maxMarchSize);
+		console.log(`DEBUG - Step 2: Fill Lancer Max - Calculated lancerMaxTroops=${JSON.stringify(lancerMaxTroops)} per march (${JSON.stringify(lancerMax)}% of ${JSON.stringify(maxMarchSize)})`);
+		console.log(`DEBUG - Step 2: Formula details: Math.floor(${JSON.stringify(lancerMax)} / 100 * ${JSON.stringify(maxMarchSize)}) = ${JSON.stringify(lancerMaxTroops)}`);
+		console.log(`DEBUG - Step 2: Total lancer available before allocation: ${JSON.stringify(totalTroops.lancer)}`);
+		
 		for (let i = 0; i < numMarches; i++) {
+			console.log(`DEBUG - Step 2: March #${JSON.stringify(i+1)} - Processing loop iteration ${JSON.stringify(i)}`);
 			const allocate = Math.min(lancerMaxTroops, totalTroops.lancer);
+			console.log(`DEBUG - Step 2: March #${JSON.stringify(i+1)} - Min calculation: Math.min(${JSON.stringify(lancerMaxTroops)}, ${JSON.stringify(totalTroops.lancer)}) = ${JSON.stringify(allocate)}`);
+			console.log(`DEBUG - Step 2: March #${JSON.stringify(i+1)} - Allocating ${JSON.stringify(allocate)} lancers (min of ${JSON.stringify(lancerMaxTroops)} and ${JSON.stringify(totalTroops.lancer)} available)`);
+			
+			const oldMarchData = JSON.parse(JSON.stringify(marches[i]));
 			marches[i].lancer += allocate;
 			marches[i].total += allocate;
+			const oldTotalTroops = JSON.parse(JSON.stringify(totalTroops));
 			totalTroops.lancer -= allocate;
+			
+			console.log(`DEBUG - Step 2: March #${JSON.stringify(i+1)} - March before: ${JSON.stringify(oldMarchData)}`);
+			console.log(`DEBUG - Step 2: March #${JSON.stringify(i+1)} - March after: ${JSON.stringify(marches[i])}`);
+			console.log(`DEBUG - Step 2: Troops before: ${JSON.stringify(oldTotalTroops)}`);
+			console.log(`DEBUG - Step 2: Troops after: ${JSON.stringify(totalTroops)}`);
 		}
+		console.log(`DEBUG - Step 2: Lancer allocation complete. Marches: ${JSON.stringify(marches)}`);
+		console.log(`DEBUG - Step 2: Remaining troops: ${JSON.stringify(totalTroops)}`);
 
 		// Step 3: Fill Marksman Max
 		const marksmanMaxTroops = Math.floor(marksmanMax / 100 * maxMarchSize);
+		console.log(`DEBUG - Step 3: Fill Marksman Max - Calculated marksmanMaxTroops=${JSON.stringify(marksmanMaxTroops)} per march (${JSON.stringify(marksmanMax)}% of ${JSON.stringify(maxMarchSize)})`); 
+		console.log(`DEBUG - Step 3: Formula details: Math.floor(${JSON.stringify(marksmanMax)} / 100 * ${JSON.stringify(maxMarchSize)}) = ${JSON.stringify(marksmanMaxTroops)}`);
+		console.log(`DEBUG - Step 3: Total marksman available before allocation: ${JSON.stringify(totalTroops.marksman)}`);
+		
 		for (let i = 0; i < numMarches; i++) {
+			console.log(`DEBUG - Step 3: March #${JSON.stringify(i+1)} - Processing loop iteration ${JSON.stringify(i)}`);
 			const allocate = Math.min(marksmanMaxTroops, totalTroops.marksman);
+			console.log(`DEBUG - Step 3: March #${JSON.stringify(i+1)} - Min calculation: Math.min(${JSON.stringify(marksmanMaxTroops)}, ${JSON.stringify(totalTroops.marksman)}) = ${JSON.stringify(allocate)}`);
+			console.log(`DEBUG - Step 3: March #${JSON.stringify(i+1)} - Allocating ${JSON.stringify(allocate)} marksmen (min of ${JSON.stringify(marksmanMaxTroops)} and ${JSON.stringify(totalTroops.marksman)} available)`);
+			
+			const oldMarchData = JSON.parse(JSON.stringify(marches[i]));
 			marches[i].marksman += allocate;
 			marches[i].total += allocate;
+			const oldTotalTroops = JSON.parse(JSON.stringify(totalTroops));
 			totalTroops.marksman -= allocate;
+			
+			console.log(`DEBUG - Step 3: March #${JSON.stringify(i+1)} - March before: ${JSON.stringify(oldMarchData)}`);
+			console.log(`DEBUG - Step 3: March #${JSON.stringify(i+1)} - March after: ${JSON.stringify(marches[i])}`);
+			console.log(`DEBUG - Step 3: Troops before: ${JSON.stringify(oldTotalTroops)}`);
+			console.log(`DEBUG - Step 3: Troops after: ${JSON.stringify(totalTroops)}`);
 		}
+		console.log(`DEBUG - Step 3: Marksman allocation complete. Marches: ${JSON.stringify(marches)}`);
+		console.log(`DEBUG - Step 3: Remaining troops: ${JSON.stringify(totalTroops)}`);
 
 		// Step 4: Allocate Remaining Marksman
+		console.log(`DEBUG - Step 4: Allocate Remaining Marksman - Remaining=${JSON.stringify(totalTroops.marksman)}`);
 		for (let i = 0; i < numMarches; i++) {
+			console.log(`DEBUG - Step 4: March #${JSON.stringify(i+1)} - Processing loop iteration ${JSON.stringify(i)}`);
+			console.log(`DEBUG - Step 4: March #${JSON.stringify(i+1)} - Before allocation: ${JSON.stringify(marches[i])}`);
+			
 			if (totalTroops.marksman > 0) {
+				console.log(`DEBUG - Step 4: March #${JSON.stringify(i+1)} - Marksman available: ${JSON.stringify(totalTroops.marksman)} > 0, proceeding with allocation`);
 				const remainingCapacity = maxMarchSize - marches[i].total;
+				console.log(`DEBUG - Step 4: March #${JSON.stringify(i+1)} - Calculation: ${JSON.stringify(maxMarchSize)} - ${JSON.stringify(marches[i].total)} = ${JSON.stringify(remainingCapacity)}`);
+				console.log(`DEBUG - Step 4: March #${JSON.stringify(i+1)} - Remaining capacity=${JSON.stringify(remainingCapacity)}, available marksman=${JSON.stringify(totalTroops.marksman)}`);
+				
 				const allocate = Math.min(remainingCapacity, totalTroops.marksman);
+				console.log(`DEBUG - Step 4: March #${JSON.stringify(i+1)} - Min calculation: Math.min(${JSON.stringify(remainingCapacity)}, ${JSON.stringify(totalTroops.marksman)}) = ${JSON.stringify(allocate)}`);
+				console.log(`DEBUG - Step 4: March #${JSON.stringify(i+1)} - Allocating ${JSON.stringify(allocate)} additional marksmen`);
+				
+				const oldMarchData = JSON.parse(JSON.stringify(marches[i]));
 				marches[i].marksman += allocate;
 				marches[i].total += allocate;
+				const oldTotalTroops = JSON.parse(JSON.stringify(totalTroops));
 				totalTroops.marksman -= allocate;
+				
+				console.log(`DEBUG - Step 4: March #${JSON.stringify(i+1)} - March before: ${JSON.stringify(oldMarchData)}`);
+				console.log(`DEBUG - Step 4: March #${JSON.stringify(i+1)} - March after: ${JSON.stringify(marches[i])}`);
+				console.log(`DEBUG - Step 4: Troops before: ${JSON.stringify(oldTotalTroops)}`);
+				console.log(`DEBUG - Step 4: Troops after: ${JSON.stringify(totalTroops)}`);
+			} else {
+				console.log(`DEBUG - Step 4: March #${JSON.stringify(i+1)} - No marksman left to allocate. Current value: ${JSON.stringify(totalTroops.marksman)}`);
 			}
 		}
+		console.log(`DEBUG - Step 4: Remaining marksman allocation complete. Marches: ${JSON.stringify(marches)}`);
+		console.log(`DEBUG - Step 4: Remaining troops: ${JSON.stringify(totalTroops)}`);
 
 		// Step 5: Allocate Remaining Lancer
+		console.log(`DEBUG - Step 5: Allocate Remaining Lancer - Remaining=${JSON.stringify(totalTroops.lancer)}`);
 		for (let i = 0; i < numMarches; i++) {
+			console.log(`DEBUG - Step 5: March #${JSON.stringify(i+1)} - Processing loop iteration ${JSON.stringify(i)}`);
+			console.log(`DEBUG - Step 5: March #${JSON.stringify(i+1)} - Before allocation: ${JSON.stringify(marches[i])}`);
+			
 			if (totalTroops.lancer > 0) {
+				console.log(`DEBUG - Step 5: March #${JSON.stringify(i+1)} - Lancer available: ${JSON.stringify(totalTroops.lancer)} > 0, proceeding with allocation`);
 				const remainingCapacity = maxMarchSize - marches[i].total;
+				console.log(`DEBUG - Step 5: March #${JSON.stringify(i+1)} - Calculation: ${JSON.stringify(maxMarchSize)} - ${JSON.stringify(marches[i].total)} = ${JSON.stringify(remainingCapacity)}`);
+				console.log(`DEBUG - Step 5: March #${JSON.stringify(i+1)} - Remaining capacity=${JSON.stringify(remainingCapacity)}, available lancer=${JSON.stringify(totalTroops.lancer)}`);
+				
 				const allocate = Math.min(remainingCapacity, totalTroops.lancer);
+				console.log(`DEBUG - Step 5: March #${JSON.stringify(i+1)} - Min calculation: Math.min(${JSON.stringify(remainingCapacity)}, ${JSON.stringify(totalTroops.lancer)}) = ${JSON.stringify(allocate)}`);
+				console.log(`DEBUG - Step 5: March #${JSON.stringify(i+1)} - Allocating ${JSON.stringify(allocate)} additional lancers`);
+				
+				const oldMarchData = JSON.parse(JSON.stringify(marches[i]));
 				marches[i].lancer += allocate;
 				marches[i].total += allocate;
+				const oldTotalTroops = JSON.parse(JSON.stringify(totalTroops));
 				totalTroops.lancer -= allocate;
+				
+				console.log(`DEBUG - Step 5: March #${JSON.stringify(i+1)} - March before: ${JSON.stringify(oldMarchData)}`);
+				console.log(`DEBUG - Step 5: March #${JSON.stringify(i+1)} - March after: ${JSON.stringify(marches[i])}`);
+				console.log(`DEBUG - Step 5: Troops before: ${JSON.stringify(oldTotalTroops)}`);
+				console.log(`DEBUG - Step 5: Troops after: ${JSON.stringify(totalTroops)}`);
+			} else {
+				console.log(`DEBUG - Step 5: March #${JSON.stringify(i+1)} - No lancer left to allocate. Current value: ${JSON.stringify(totalTroops.lancer)}`);
 			}
 		}
+		console.log(`DEBUG - Step 5: Remaining lancer allocation complete. Marches: ${JSON.stringify(marches)}`);
+		console.log(`DEBUG - Step 5: Remaining troops: ${JSON.stringify(totalTroops)}`);
 
 		// Step 6: Allocate Remaining Infantry
+		console.log(`DEBUG - Step 6: Allocate Remaining Infantry - Remaining=${JSON.stringify(totalTroops.infantry)}`);
 		for (let i = 0; i < numMarches; i++) {
+			console.log(`DEBUG - Step 6: March #${JSON.stringify(i+1)} - Processing loop iteration ${JSON.stringify(i)}`);
+			console.log(`DEBUG - Step 6: March #${JSON.stringify(i+1)} - Before allocation: ${JSON.stringify(marches[i])}`);
+			
 			if (totalTroops.infantry > 0) {
+				console.log(`DEBUG - Step 6: March #${JSON.stringify(i+1)} - Infantry available: ${JSON.stringify(totalTroops.infantry)} > 0, proceeding with allocation`);
 				const remainingCapacity = maxMarchSize - marches[i].total;
+				console.log(`DEBUG - Step 6: March #${JSON.stringify(i+1)} - Calculation: ${JSON.stringify(maxMarchSize)} - ${JSON.stringify(marches[i].total)} = ${JSON.stringify(remainingCapacity)}`);
+				console.log(`DEBUG - Step 6: March #${JSON.stringify(i+1)} - Remaining capacity=${JSON.stringify(remainingCapacity)}, available infantry=${JSON.stringify(totalTroops.infantry)}`);
+				
 				const allocate = Math.min(remainingCapacity, totalTroops.infantry);
+				console.log(`DEBUG - Step 6: March #${JSON.stringify(i+1)} - Min calculation: Math.min(${JSON.stringify(remainingCapacity)}, ${JSON.stringify(totalTroops.infantry)}) = ${JSON.stringify(allocate)}`);
+				console.log(`DEBUG - Step 6: March #${JSON.stringify(i+1)} - Allocating ${JSON.stringify(allocate)} additional infantry`);
+				
+				const oldMarchData = JSON.parse(JSON.stringify(marches[i]));
 				marches[i].infantry += allocate;
 				marches[i].total += allocate;
+				const oldTotalTroops = JSON.parse(JSON.stringify(totalTroops));
 				totalTroops.infantry -= allocate;
+				
+				console.log(`DEBUG - Step 6: March #${JSON.stringify(i+1)} - March before: ${JSON.stringify(oldMarchData)}`);
+				console.log(`DEBUG - Step 6: March #${JSON.stringify(i+1)} - March after: ${JSON.stringify(marches[i])}`);
+				console.log(`DEBUG - Step 6: Troops before: ${JSON.stringify(oldTotalTroops)}`);
+				console.log(`DEBUG - Step 6: Troops after: ${JSON.stringify(totalTroops)}`);
+			} else {
+				console.log(`DEBUG - Step 6: March #${JSON.stringify(i+1)} - No infantry left to allocate. Current value: ${JSON.stringify(totalTroops.infantry)}`);
 			}
 		}
+		console.log(`DEBUG - Step 6: Remaining infantry allocation complete. Marches: ${JSON.stringify(marches)}`);
+		console.log(`DEBUG - Step 6: Final remaining troops: ${JSON.stringify(totalTroops)}`);
+		console.log(`DEBUG - FINAL MARCH CONFIGURATIONS: ${JSON.stringify(marches, null, 2)}`);
+		console.log("==================== TROOP ALLOCATION AND MARCH GENERATION COMPLETE ====================");
 
 		// Display the results in a more mobile-friendly format
 		const resultsDiv = document.getElementById('results');
