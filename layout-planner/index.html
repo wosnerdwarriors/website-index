@@ -28,9 +28,10 @@
     
     <div class="container mx-auto px-4 py-6 mt-16 md:ml-64">
         <h1 class="text-3xl font-bold mb-6 text-center">Alliance Layout Planner</h1>
-        <div class="flex justify-center mb-4">
-            <input id="mapNameInput" type="text" placeholder="Map Name (optional)" class="border p-2 rounded w-64 text-center">
-        </div>
+        <div class="flex flex-col items-center mb-4">
+            <input id="mapNameInput" type="text" placeholder="Map Name (optional)" class="border p-2 rounded text-center block" style="width: 30ch;" maxlength="30">
+            <div id="mapNameHint" class="text-center text-red-500 text-sm mt-2" style="display: none;"></div>
+        </div>        
         
         <div class="bg-white rounded-lg shadow-md p-4 mb-6">
             <div id="toolbar" class="flex flex-wrap gap-2 mb-4">

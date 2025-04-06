@@ -478,21 +478,46 @@ function decompressMap(base64) {
     return entities;
 }
 
+
+// Sanitize map name to remove invalid characters and limit length
+function sanitizeMapName(name) {
+    return name.replace(/[^a-zA-Z0-9 \-_]/g, '').substring(0, 30);
+  }
+
+function compressMapWithName(entities, mapName) {
+    let base64String = compressMap(entities);
+    if (mapName && mapName.trim() !== '') {
+        const sanitized = sanitizeMapName(mapName);
+        base64String += "||" + sanitized;
+    }
+    return base64String;
+}
+
+function decompressMapWithName(combinedString) {
+    let mapName = "";
+    let base64String = combinedString;
+    const marker = "||";
+    if (combinedString.includes(marker)) {
+        const parts = combinedString.split(marker);
+        base64String = parts[0];
+        mapName = parts[1];
+        const mapNameInput = document.getElementById('mapNameInput');
+        if (mapNameInput) {
+            mapNameInput.value = mapName;
+        }
+    }
+    return decompressMap(base64String);
+}
+
 function saveMap() {
     try {
-        const compressedMap = compressMap(entities);
+        const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
         mapData.value = compressedMap;
         
-        const mapName = document.getElementById('mapNameInput').value;
         const newUrl = new URL(window.location.href);
-        if (mapName) {
-            newUrl.searchParams.set('name', mapName);
-        } else {
-            newUrl.searchParams.delete('name');
-        }
         newUrl.searchParams.set('mapData', compressedMap);
         window.history.replaceState(null, '', newUrl);
-
     } catch (e) {
         console.error('Error saving map:', e);
     }
@@ -500,16 +525,11 @@ function saveMap() {
 
 function shareMap() {
     try {
-        const compressedMap = compressMap(entities);
-        mapData.value = compressedMap;
-
         const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
+        mapData.value = compressedMap;
+        
         const newUrl = new URL(window.location.href);
-        if (mapName) {
-            newUrl.searchParams.set('name', mapName);
-        } else {
-            newUrl.searchParams.delete('name');
-        }
         newUrl.searchParams.set('mapData', compressedMap);
         window.history.replaceState(null, '', newUrl);
 
@@ -531,7 +551,7 @@ function shareMap() {
 function loadMap() {
     try {
         const compressedMap = mapData.value;
-        const loadedEntities = decompressMap(compressedMap);
+        const loadedEntities = decompressMapWithName(compressedMap);
         entities.length = 0;
         bearTraps.length = 0;
 
@@ -568,15 +588,7 @@ function loadMap() {
 // Load Map from URL Hash
 function loadMapFromQuery() {
     const urlParams = new URLSearchParams(window.location.search);
-    const mapNameParam = urlParams.get('name');
     const mapDataParam = urlParams.get('mapData');
-
-    if (mapNameParam) {
-        const mapNameInput = document.getElementById('mapNameInput');
-        if (mapNameInput) {
-            mapNameInput.value = mapNameParam;
-        }
-    }
     if (mapDataParam) {
         mapData.value = mapDataParam;
         loadMap();
@@ -585,20 +597,12 @@ function loadMapFromQuery() {
 
 window.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
-    const mapNameParam = urlParams.get('name');
     const mapDataParam = urlParams.get('mapData');
-    
-    const mapNameInput = document.getElementById('mapNameInput');
-    if (mapNameParam && mapNameInput) {
-      mapNameInput.value = mapNameParam;
-    }
-    
     if (mapDataParam) {
-      mapData.value = mapDataParam;
-      loadMap();
-
+        mapData.value = mapDataParam;
+        loadMap();
     }
-  });
+});
   
 loadButton.addEventListener('click', loadMap);
 saveButton.addEventListener('click', saveMap);
@@ -702,4 +706,19 @@ canvas.addEventListener('mouseup', () => {
 
 canvas.addEventListener('mouseleave', () => {
     isDragging = false;
+});
+
+// Check Mapname for invalid characters
+document.getElementById("mapNameInput").addEventListener("input", function() {
+    const value = this.value;
+    // Allowed: a-z, A-Z, 0-9, Space, -,_.
+    const disallowedRegex = /[^a-zA-Z0-9 \-_]/;
+    const hintElement = document.getElementById("mapNameHint");
+    if (disallowedRegex.test(value)) {
+         hintElement.textContent = "Invalid characters detected! Only letters, numbers, spaces, hyphens, and underscores are allowed.";
+         hintElement.style.display = "block";
+    } else {
+         hintElement.textContent = "";
+         hintElement.style.display = "none";
+    }
 });
