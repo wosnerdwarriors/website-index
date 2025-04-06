@@ -478,8 +478,6 @@ function decompressMap(base64) {
     return entities;
 }
 
-
-
 function saveMap() {
     try {
         const compressedMap = compressMap(entities);
@@ -495,6 +493,28 @@ function saveMap() {
         }).catch(err => {
             console.error('Failed to copy text: ', err);
         });
+    } catch (e) {
+        console.error('Error saving map:', e);
+    }
+}
+
+function shareMap() {
+    try {
+        const compressedMap = compressMap(entities);
+        mapData.value = compressedMap;
+
+        window.location.hash = '!' + compressedMap;
+
+        navigator.clipboard.writeText(window.location.href)
+            .then(() => {
+                copyMessage.style.display = 'inline';
+                setTimeout(() => {
+                    copyMessage.style.display = 'none';
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
     } catch (e) {
         console.error('Error saving map:', e);
     }
@@ -580,6 +600,7 @@ window.addEventListener('hashchange', loadMapFromHash);
 
 loadButton.addEventListener('click', loadMap);
 saveButton.addEventListener('click', saveMap);
+shareButton.addEventListener('click', shareMap);
 
 toolbar.addEventListener('click', (e) => {
     if (e.target.dataset.type) {
