@@ -482,8 +482,16 @@ function saveMap() {
     try {
         const compressedMap = compressMap(entities);
         mapData.value = compressedMap;
-
-        window.location.hash = '!' + compressedMap;        
+        
+        const mapName = document.getElementById('mapNameInput').value;
+        const newUrl = new URL(window.location.href);
+        if (mapName) {
+            newUrl.searchParams.set('name', mapName);
+        } else {
+            newUrl.searchParams.delete('name');
+        }
+        newUrl.searchParams.set('mapData', compressedMap);
+        window.history.replaceState(null, '', newUrl);
 
         navigator.clipboard.writeText(compressedMap).then(() => {
             copyMessage.style.display = 'inline';
@@ -503,9 +511,17 @@ function shareMap() {
         const compressedMap = compressMap(entities);
         mapData.value = compressedMap;
 
-        window.location.hash = '!' + compressedMap;
+        const mapName = document.getElementById('mapNameInput').value;
+        const newUrl = new URL(window.location.href);
+        if (mapName) {
+            newUrl.searchParams.set('name', mapName);
+        } else {
+            newUrl.searchParams.delete('name');
+        }
+        newUrl.searchParams.set('mapData', compressedMap);
+        window.history.replaceState(null, '', newUrl);
 
-        navigator.clipboard.writeText(window.location.href)
+        navigator.clipboard.writeText(newUrl.toString())
             .then(() => {
                 copyMessage.style.display = 'inline';
                 setTimeout(() => {
@@ -516,7 +532,7 @@ function shareMap() {
                 console.error('Failed to copy text: ', err);
             });
     } catch (e) {
-        console.error('Error saving map:', e);
+        console.error('Error sharing map:', e);
     }
 }
 
@@ -554,50 +570,44 @@ function loadMap() {
     } catch (e) {
         alert('Error loading the map. Please check the format.');
         console.error(e);
-        console.log("Binary String Length:", binaryString.length);
-        console.log("BitString (last 24 bits):", binaryString.slice(-24));
     }
 }
 
-function loadMapFromHash() {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#!')) {
-        const compressedMap = hash.slice(2); // Remove the '#!'
-        mapData.value = compressedMap;
-        const loadedEntities = decompressMap(compressedMap);
-        entities.length = 0;
-        bearTraps.length = 0;
+// Load Map from URL Hash
+function loadMapFromQuery() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mapNameParam = urlParams.get('name');
+    const mapDataParam = urlParams.get('mapData');
 
-        loadedEntities.forEach(entity => {
-            entities.push(entity);
-            if (entity.type === "building") {
-                bearTraps.push(entity);
-            }
-        });
-
-        let cityId = 1;
-        entities.forEach(entity => {
-            if (entity.type === "city") {
-                entity.id = cityId;
-                if (!entity.name) {
-                    entity.name = `City ${cityId}`;
-                }
-                cityId++;
-            }
-        });
-        cityCounterId = cityId;
-
-        drawGrid();
-        drawEntities();
-        updateCounters();
-        updateCityList();
+    if (mapNameParam) {
+        const mapNameInput = document.getElementById('mapNameInput');
+        if (mapNameInput) {
+            mapNameInput.value = mapNameParam;
+        }
+    }
+    if (mapDataParam) {
+        mapData.value = mapDataParam;
+        loadMap();
     }
 }
 
-window.addEventListener('load', loadMapFromHash);
-window.addEventListener('hashchange', loadMapFromHash);
+window.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mapNameParam = urlParams.get('name');
+    const mapDataParam = urlParams.get('mapData');
+    
+    const mapNameInput = document.getElementById('mapNameInput');
+    if (mapNameParam && mapNameInput) {
+      mapNameInput.value = mapNameParam;
+    }
+    
+    if (mapDataParam) {
+      mapData.value = mapDataParam;
+      loadMap();
 
-
+    }
+  });
+  
 loadButton.addEventListener('click', loadMap);
 saveButton.addEventListener('click', saveMap);
 shareButton.addEventListener('click', shareMap);
