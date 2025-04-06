@@ -581,8 +581,6 @@ window.addEventListener('hashchange', loadMapFromHash);
 loadButton.addEventListener('click', loadMap);
 saveButton.addEventListener('click', saveMap);
 
-        saveButton.addEventListener('click', saveMap);
-
 toolbar.addEventListener('click', (e) => {
     if (e.target.dataset.type) {
         selectedType = e.target.dataset.type;
