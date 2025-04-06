@@ -277,6 +277,29 @@ function handleDeleteOrMove(event) {
         event.preventDefault();
     }    
 
+    // Editing mode of city name if a city is selected
+    if (selectedEntity.type === 'city' &&
+        !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(event.key)
+    ) {
+        if (event.key === 'Enter') {
+            selectedEntity.isEditing = false;
+        } else if (event.key === 'Backspace') {
+            event.preventDefault();
+            selectedEntity.name = selectedEntity.name ? selectedEntity.name.slice(0, -1) : '';
+        } else if (event.key.length === 1) { 
+            if (!selectedEntity.isEditing) {
+                selectedEntity.name = '';
+                selectedEntity.isEditing = true;
+            }
+            selectedEntity.name += event.key;
+        }
+        drawGrid();
+        drawEntities();
+        updateCityList();
+        return;
+    }
+
+
     if (event.key === 'Delete') {
         const index = entities.indexOf(selectedEntity);
         if (index !== -1) {
