@@ -485,6 +485,8 @@ function saveMap() {
         const compressedMap = compressMap(entities);
         mapData.value = compressedMap;
 
+        window.location.hash = '!' + compressedMap;        
+
         navigator.clipboard.writeText(compressedMap).then(() => {
             copyMessage.style.display = 'inline';
             setTimeout(() => {
@@ -536,6 +538,44 @@ function loadMap() {
         console.log("BitString (last 24 bits):", binaryString.slice(-24));
     }
 }
+
+function loadMapFromHash() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#!')) {
+        const compressedMap = hash.slice(2); // Remove the '#!'
+        mapData.value = compressedMap;
+        const loadedEntities = decompressMap(compressedMap);
+        entities.length = 0;
+        bearTraps.length = 0;
+
+        loadedEntities.forEach(entity => {
+            entities.push(entity);
+            if (entity.type === "building") {
+                bearTraps.push(entity);
+            }
+        });
+
+        let cityId = 1;
+        entities.forEach(entity => {
+            if (entity.type === "city") {
+                entity.id = cityId;
+                if (!entity.name) {
+                    entity.name = `City ${cityId}`;
+                }
+                cityId++;
+            }
+        });
+        cityCounterId = cityId;
+
+        drawGrid();
+        drawEntities();
+        updateCounters();
+        updateCityList();
+    }
+}
+
+window.addEventListener('load', loadMapFromHash);
+window.addEventListener('hashchange', loadMapFromHash);
 
 
 loadButton.addEventListener('click', loadMap);
