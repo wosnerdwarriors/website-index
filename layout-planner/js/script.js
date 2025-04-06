@@ -17,6 +17,9 @@ let selectedType = null;
 let selectedEntity = null;
 let cityCounterId = 1;
 let bearTraps = [];
+let isDragging = false;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
 
 function updateCounters() {
     const flags = entities.filter(entity => entity.type === 'flag').length;
@@ -84,7 +87,8 @@ function drawCityDetails(city) {
     ctx.fillStyle = 'black';
     ctx.font = '14px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(city.id, (city.x + 1) * gridSize, (city.y + 0.6) * gridSize);
+    const label = city.name || city.id;
+    ctx.fillText(label, (city.x + 1) * gridSize, (city.y + 0.6) * gridSize);
 
     const marchTimes = calculateMarchTimes(city);
     marchTimes.forEach((time, index) => {
@@ -206,8 +210,45 @@ function addEntity(event) {
         drawGrid();
         drawEntities();
         updateCounters();
+
+        if (selectedType === 'city') {
+            updateCityList();
+        }
     }
 }
+
+function updateCityList() {
+    const cityList = document.getElementById('cityList');
+    if (!cityList) return;
+    cityList.innerHTML = '';
+
+    // List by ID
+    const cities = entities
+        .filter(entity => entity.type === 'city')
+        .sort((a, b) => a.id - b.id);
+
+    cities.forEach(city => {
+        const li = document.createElement('li');
+        const input = document.createElement('input');
+        input.type = 'text';
+        // Show custom name or ID
+        input.value = city.name || `City ${city.id}`;
+        input.placeholder = `City ${city.id}`;
+        input.className = "border p-1 rounded w-full";
+
+        // Update map on namechange
+        input.addEventListener('change', () => {
+            city.name = input.value;
+            drawGrid();
+            drawEntities();
+        });
+        
+        li.appendChild(input);
+        cityList.appendChild(li);
+    });
+}
+
+
 
 function selectEntity(event) {
     if (selectedType !== 'select') return;
@@ -232,6 +273,33 @@ function selectEntity(event) {
 function handleDeleteOrMove(event) {
     if (!selectedEntity) return;
 
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)) {
+        event.preventDefault();
+    }    
+
+    // Editing mode of city name if a city is selected
+    if (selectedEntity.type === 'city' &&
+        !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(event.key)
+    ) {
+        if (event.key === 'Enter') {
+            selectedEntity.isEditing = false;
+        } else if (event.key === 'Backspace') {
+            event.preventDefault();
+            selectedEntity.name = selectedEntity.name ? selectedEntity.name.slice(0, -1) : '';
+        } else if (event.key.length === 1) { 
+            if (!selectedEntity.isEditing) {
+                selectedEntity.name = '';
+                selectedEntity.isEditing = true;
+            }
+            selectedEntity.name += event.key;
+        }
+        drawGrid();
+        drawEntities();
+        updateCityList();
+        return;
+    }
+
+
     if (event.key === 'Delete') {
         const index = entities.indexOf(selectedEntity);
         if (index !== -1) {
@@ -251,25 +319,58 @@ function handleDeleteOrMove(event) {
       }
     }
 
-    if (event.key === 'ArrowUp' && selectedEntity.y > 0) {
-        selectedEntity.y--;
-    } else if (event.key === 'ArrowDown' && selectedEntity.y + selectedEntity.height < gridCount) {
-        selectedEntity.y++;
-    } else if (event.key === 'ArrowLeft' && selectedEntity.x > 0) {
-        selectedEntity.x--;
-    } else if (event.key === 'ArrowRight' && selectedEntity.x + selectedEntity.width < gridCount) {
-        selectedEntity.x++;
+    if (event.key === 'ArrowUp') {
+        const newY = selectedEntity.y - 1;
+        if (newY >= 0 && isPositionValid(selectedEntity.x, newY, selectedEntity)) {
+            selectedEntity.y = newY;
+        }
+    } else if (event.key === 'ArrowDown') {
+        const newY = selectedEntity.y + 1;
+        if (newY + selectedEntity.height <= gridCount && isPositionValid(selectedEntity.x, newY, selectedEntity)) {
+            selectedEntity.y = newY;
+        }
+    } else if (event.key === 'ArrowLeft') {
+        const newX = selectedEntity.x - 1;
+        if (newX >= 0 && isPositionValid(newX, selectedEntity.y, selectedEntity)) {
+            selectedEntity.x = newX;
+        }
+    } else if (event.key === 'ArrowRight') {
+        const newX = selectedEntity.x + 1;
+        if (newX + selectedEntity.width <= gridCount && isPositionValid(newX, selectedEntity.y, selectedEntity)) {
+            selectedEntity.x = newX;
+        }
     }
 
     drawGrid();
     drawEntities();
 }
+
+function isPositionValid(newX, newY, entity) {
+    for (let other of entities) {
+        if (other !== entity) {
+            if (
+                newX < other.x + other.width &&
+                newX + entity.width > other.x &&
+                newY < other.y + other.height &&
+                newY + entity.height > other.y
+            ) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 function renumberCities() {
   let newId = 1;
   entities
       .filter(entity => entity.type === 'city')
       .forEach(city => {
-          city.id = newId++;
+            city.id = newId;
+            if (!city.name || city.name.startsWith('City ')) {
+                city.name = `City ${newId}`;
+            }
+            newId++;
       });
   cityCounterId = newId;
 }
@@ -289,6 +390,18 @@ function compressMap(entities) {
         }
 
         bitString += type + x + y;
+
+        // Add custom name
+        if (entity.type === "city") {
+            const name = entity.name || `City ${entity.id}`;
+            const nameLength = name.length;
+            const nameLengthBin = nameLength.toString(2).padStart(8, "0");
+            bitString += nameLengthBin;
+            for (let i = 0; i < name.length; i++) {
+                const charBin = name.charCodeAt(i).toString(2).padStart(8, "0");
+                bitString += charBin;
+            }
+        }
     });
 
     if (bitString.length % 8 !== 0) {
@@ -303,15 +416,21 @@ function compressMap(entities) {
 
 
 function decompressMap(base64) {
-    const binaryString = atob(base64).split("").map(char => {
-        return char.charCodeAt(0).toString(2).padStart(8, "0");
-    }).join("");
+    const binaryString = atob(base64)
+      .split("")
+      .map(char => char.charCodeAt(0).toString(2).padStart(8, "0"))
+      .join("");
 
     const entities = [];
-    for (let i = 0; i + 22 <= binaryString.length; i += 22) { // Ensure full 22 bits
+    let i = 0;
+
+    while (i + 22 <= binaryString.length) { // Ensure full 22 bits
         const typeBits = binaryString.slice(i, i + 2);
-        const xBits = binaryString.slice(i + 2, i + 12);
-        const yBits = binaryString.slice(i + 12, i + 22);
+        i += 2;
+        const xBits = binaryString.slice(i, i + 10);
+        i += 10;
+        const yBits = binaryString.slice(i, i + 10);
+        i += 10;
 
         const type = typeBits === "00" ? "flag" :
                      typeBits === "01" ? "city" : "building";
@@ -323,14 +442,42 @@ function decompressMap(base64) {
             continue;
         }
 
-        const size = type === "flag" ? 1 : type === "city" ? 2 : 3;
-        const color = type === "flag" ? "gray" : type === "city" ? getRandomColor() : "black";
+        let entity = { x, y, type };
 
-        entities.push({ x, y, width: size, height: size, type, color });
+        if (type === "flag") {
+            entity.width = 1;
+            entity.height = 1;
+            entity.color = "gray";
+        } else if (type === "city") {
+            entity.width = 2;
+            entity.height = 2;
+            entity.color = getRandomColor();
+
+            if (i + 8 > binaryString.length) break;
+            const nameLengthBits = binaryString.slice(i, i + 8);
+            i += 8;
+            const nameLength = parseInt(nameLengthBits, 2);
+
+            let name = "";
+            for (let j = 0; j < nameLength; j++) {
+                if (i + 8 > binaryString.length) break;
+                const charBits = binaryString.slice(i, i + 8);
+                i += 8;
+                name += String.fromCharCode(parseInt(charBits, 2));
+            }
+            entity.name = name;
+        } else if (type === "building") {
+            entity.width = 3;
+            entity.height = 3;
+            entity.color = "black";
+        }
+
+        entities.push(entity);
     }
 
     return entities;
 }
+
 
 
 function saveMap() {
@@ -368,7 +515,11 @@ function loadMap() {
         let cityId = 1;
         entities.forEach(entity => {
             if (entity.type === "city") {
-                entity.id = cityId++;
+                entity.id = cityId;
+                if (!entity.name) {
+                    entity.name = `${cityId}`;
+                }
+                cityId++;
             }
         });
 
@@ -377,6 +528,7 @@ function loadMap() {
         drawGrid();
         drawEntities();
         updateCounters();
+        updateCityList();
     } catch (e) {
         alert('Error loading the map. Please check the format.');
         console.error(e);
@@ -439,3 +591,54 @@ function downloadCanvasAsPNG() {
 }
 
 downloadButton.addEventListener('click', downloadCanvasAsPNG);
+
+canvas.addEventListener('mousedown', (event) => {
+    if (selectedType === 'select' && selectedEntity) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = Math.floor((event.clientX - rect.left) / gridSize);
+        const mouseY = Math.floor((event.clientY - rect.top) / gridSize);
+
+        if (
+            mouseX >= selectedEntity.x &&
+            mouseX < selectedEntity.x + selectedEntity.width &&
+            mouseY >= selectedEntity.y &&
+            mouseY < selectedEntity.y + selectedEntity.height
+        ) {
+            isDragging = true;
+            dragOffsetX = mouseX - selectedEntity.x;
+            dragOffsetY = mouseY - selectedEntity.y;
+        }
+    }
+});
+
+canvas.addEventListener('mousemove', (event) => {
+    if (!isDragging) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = Math.floor((event.clientX - rect.left) / gridSize);
+    const mouseY = Math.floor((event.clientY - rect.top) / gridSize);
+    
+    const newX = mouseX - dragOffsetX;
+    const newY = mouseY - dragOffsetY;
+    
+    if (
+        newX >= 0 &&
+        newX + selectedEntity.width <= gridCount &&
+        newY >= 0 &&
+        newY + selectedEntity.height <= gridCount &&
+        isPositionValid(newX, newY, selectedEntity)
+    ) {
+        selectedEntity.x = newX;
+        selectedEntity.y = newY;
+        drawGrid();
+        drawEntities();
+    }
+});
+
+canvas.addEventListener('mouseup', () => {
+    isDragging = false;
+});
+
+canvas.addEventListener('mouseleave', () => {
+    isDragging = false;
+});
