@@ -493,14 +493,6 @@ function saveMap() {
         newUrl.searchParams.set('mapData', compressedMap);
         window.history.replaceState(null, '', newUrl);
 
-        navigator.clipboard.writeText(compressedMap).then(() => {
-            copyMessage.style.display = 'inline';
-            setTimeout(() => {
-                copyMessage.style.display = 'none';
-            }, 2000);
-        }).catch(err => {
-            console.error('Failed to copy text: ', err);
-        });
     } catch (e) {
         console.error('Error saving map:', e);
     }
