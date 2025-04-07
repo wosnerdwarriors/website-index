@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Alliance Layout Planner">
+    <meta property="og:description" content="Check out this Layout!">
+    <meta property="og:url" content="https://wosnerds.com/layout-planner/index.html">
     <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
     <title>Alliance Layout Planner</title>
     <style>
@@ -25,6 +28,10 @@
     
     <div class="container mx-auto px-4 py-6 mt-16 md:ml-64">
         <h1 class="text-3xl font-bold mb-6 text-center">Alliance Layout Planner</h1>
+        <div class="flex flex-col items-center mb-4">
+            <input id="mapNameInput" type="text" placeholder="Map Name (optional)" class="border p-2 rounded text-center block" style="width: 30ch;" maxlength="30">
+            <div id="mapNameHint" class="text-center text-red-500 text-sm mt-2" style="display: none;"></div>
+        </div>        
         
         <div class="bg-white rounded-lg shadow-md p-4 mb-6">
             <div id="toolbar" class="flex flex-wrap gap-2 mb-4">
@@ -53,6 +60,7 @@
                 <div id="controls" class="space-y-4">
                     <button id="downloadButton" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full">Save as PNG</button>
                     <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full">Generate Code</button>
+                    <button id="shareButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full">Copy Link to Map</button>
                     <textarea id="mapData" rows="5" placeholder="Map code will appear here..." class="w-full p-2 border border-gray-300 rounded"></textarea>
                     <button id="loadButton" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded w-full">Load</button>
                 </div>

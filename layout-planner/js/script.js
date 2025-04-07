@@ -479,29 +479,79 @@ function decompressMap(base64) {
 }
 
 
+// Sanitize map name to remove invalid characters and limit length
+function sanitizeMapName(name) {
+    return name.replace(/[^a-zA-Z0-9 \-_]/g, '').substring(0, 30);
+  }
+
+function compressMapWithName(entities, mapName) {
+    let base64String = compressMap(entities);
+    if (mapName && mapName.trim() !== '') {
+        const sanitized = sanitizeMapName(mapName);
+        base64String += "||" + sanitized;
+    }
+    return base64String;
+}
+
+function decompressMapWithName(combinedString) {
+    let mapName = "";
+    let base64String = combinedString;
+    const marker = "||";
+    if (combinedString.includes(marker)) {
+        const parts = combinedString.split(marker);
+        base64String = parts[0];
+        mapName = parts[1];
+        const mapNameInput = document.getElementById('mapNameInput');
+        if (mapNameInput) {
+            mapNameInput.value = mapName;
+        }
+    }
+    return decompressMap(base64String);
+}
 
 function saveMap() {
     try {
-        const compressedMap = compressMap(entities);
+        const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
         mapData.value = compressedMap;
-
-        navigator.clipboard.writeText(compressedMap).then(() => {
-            copyMessage.style.display = 'inline';
-            setTimeout(() => {
-                copyMessage.style.display = 'none';
-            }, 2000);
-        }).catch(err => {
-            console.error('Failed to copy text: ', err);
-        });
+        
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('mapData', compressedMap);
+        window.history.replaceState(null, '', newUrl);
     } catch (e) {
         console.error('Error saving map:', e);
+    }
+}
+
+function shareMap() {
+    try {
+        const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
+        mapData.value = compressedMap;
+        
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('mapData', compressedMap);
+        window.history.replaceState(null, '', newUrl);
+
+        navigator.clipboard.writeText(newUrl.toString())
+            .then(() => {
+                copyMessage.style.display = 'inline';
+                setTimeout(() => {
+                    copyMessage.style.display = 'none';
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+    } catch (e) {
+        console.error('Error sharing map:', e);
     }
 }
 
 function loadMap() {
     try {
         const compressedMap = mapData.value;
-        const loadedEntities = decompressMap(compressedMap);
+        const loadedEntities = decompressMapWithName(compressedMap);
         entities.length = 0;
         bearTraps.length = 0;
 
@@ -532,16 +582,31 @@ function loadMap() {
     } catch (e) {
         alert('Error loading the map. Please check the format.');
         console.error(e);
-        console.log("Binary String Length:", binaryString.length);
-        console.log("BitString (last 24 bits):", binaryString.slice(-24));
     }
 }
 
+// Load Map from URL Hash
+function loadMapFromQuery() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mapDataParam = urlParams.get('mapData');
+    if (mapDataParam) {
+        mapData.value = mapDataParam;
+        loadMap();
+    }
+}
 
+window.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mapDataParam = urlParams.get('mapData');
+    if (mapDataParam) {
+        mapData.value = mapDataParam;
+        loadMap();
+    }
+});
+  
 loadButton.addEventListener('click', loadMap);
 saveButton.addEventListener('click', saveMap);
-
-        saveButton.addEventListener('click', saveMap);
+shareButton.addEventListener('click', shareMap);
 
 toolbar.addEventListener('click', (e) => {
     if (e.target.dataset.type) {
@@ -641,4 +706,19 @@ canvas.addEventListener('mouseup', () => {
 
 canvas.addEventListener('mouseleave', () => {
     isDragging = false;
+});
+
+// Check Mapname for invalid characters
+document.getElementById("mapNameInput").addEventListener("input", function() {
+    const value = this.value;
+    // Allowed: a-z, A-Z, 0-9, Space, -,_.
+    const disallowedRegex = /[^a-zA-Z0-9 \-_]/;
+    const hintElement = document.getElementById("mapNameHint");
+    if (disallowedRegex.test(value)) {
+         hintElement.textContent = "Invalid characters detected! Only letters, numbers, spaces, hyphens, and underscores are allowed.";
+         hintElement.style.display = "block";
+    } else {
+         hintElement.textContent = "";
+         hintElement.style.display = "none";
+    }
 });
