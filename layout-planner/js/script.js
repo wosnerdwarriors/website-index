@@ -316,6 +316,7 @@ function handleDeleteOrMove(event) {
           drawGrid();
           drawEntities();
           updateCounters();
+          updateCityList();
       }
     }
 
@@ -368,7 +369,7 @@ function renumberCities() {
       .forEach(city => {
             city.id = newId;
             if (!city.name || city.name.startsWith('City ')) {
-                city.name = `City ${newId}`;
+                city.name = `${newId}`;
             }
             newId++;
       });
@@ -641,6 +642,7 @@ deleteButton.addEventListener('click', () => {
           updateCounters();
           drawGrid();
           drawEntities();
+          updateCityList();
       }
   } else {
       alert('No entity selected to delete.');
