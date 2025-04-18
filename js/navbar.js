@@ -9,7 +9,8 @@
       { name: "SVS History", url: "/svs-history", color: "rose" },
       { name: "Alliance RSS Calc", url: "/alliancerss", color: "teal" },
       { name: "Formation Builder", url: "/formationbuilder", color: "zinc" },
-      { name: "Layout Planner", url: "/layout-planner", color: "slate" }
+      { name: "Layout Planner", url: "/layout-planner", color: "slate" },
+      { name: "Videos", url: "/videos", color: "purple" }
     ],
     external: [
       { name: "Google Drive", url: "https://drive.google.com/drive/folders/1rTwI6mXDYvFZHo8MhWQciCcNPprTmfFe?usp=sharing", color: "zinc" },
@@ -109,7 +110,8 @@
       indigo: "bg-indigo-600 hover:bg-indigo-700",
       rose: "bg-rose-600 hover:bg-rose-700",
       teal: "bg-teal-700 hover:bg-teal-800",
-      zinc: "bg-zinc-700 hover:bg-zinc-800"
+      zinc: "bg-zinc-700 hover:bg-zinc-800",
+      purple: "bg-purple-600 hover:bg-purple-700"
     };
         
     // Combine classes safely, with fallback to blue if color not found
