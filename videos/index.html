@@ -6,12 +6,75 @@
   <title>Videos - WOS Nerds</title>
   <link rel="stylesheet" href="/dist/css/tailwind.css">
   <link rel="stylesheet" href="/videos/css/videos.css">
+  <!-- Debug styles will be injected here if debug mode is active -->
+  <div id="debug-styles"></div>
 </head>
 <body class="bg-gray-50">
   <!-- Navbar will be injected here by navbar.js -->
   
+  <!-- Debug Toolbar (hidden by default) -->
+  <div id="debug-toolbar" class="hidden fixed top-0 left-0 right-0 bg-gray-900 text-white z-50 p-4 shadow-lg">
+    <div class="container mx-auto">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-yellow-400">🛠️ Debug Mode</span>
+          <span class="bg-green-500 px-2 py-1 rounded text-xs">Active</span>
+        </div>
+        
+        <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+          <div class="flex items-center gap-2">
+            <label for="layout-style" class="text-sm">Layout:</label>
+            <select id="layout-style" class="bg-gray-800 text-white px-2 py-1 rounded text-sm border border-gray-600">
+              <option value="grid">Grid (Default)</option>
+              <option value="masonry">Masonry</option>
+              <option value="carousel">Carousel</option>
+              <option value="list">List View</option>
+              <option value="magazine">Magazine</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <label for="category-style" class="text-sm">Categories:</label>
+            <select id="category-style" class="bg-gray-800 text-white px-2 py-1 rounded text-sm border border-gray-600">
+              <option value="flat">Flat (Default)</option>
+              <option value="hierarchical">Hierarchical</option>
+              <option value="tabbed">Tabbed</option>
+              <option value="dropdown">Dropdown</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <label for="video-display" class="text-sm">Video Display:</label>
+            <select id="video-display" class="bg-gray-800 text-white px-2 py-1 rounded text-sm border border-gray-600">
+              <option value="thumbnail">Thumbnail (Default)</option>
+              <option value="embed">Embedded Players</option>
+              <option value="fullwidth">Full Width</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <label for="color-theme" class="text-sm">Theme:</label>
+            <select id="color-theme" class="bg-gray-800 text-white px-2 py-1 rounded text-sm border border-gray-600">
+              <option value="default">Default</option>
+              <option value="dark">Dark Mode</option>
+              <option value="high-contrast">High Contrast</option>
+              <option value="playful">Playful</option>
+              <option value="minimal">Minimal</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="flex gap-3">
+          <button id="apply-changes" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">Apply Changes</button>
+          <button id="generate-url" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm">Generate URL</button>
+          <button id="reset-debug" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <!-- Main Content -->
-  <div class="md:ml-64 p-4 transition-all duration-300 min-h-screen flex flex-col">
+  <div class="md:ml-64 p-4 transition-all duration-300 min-h-screen flex flex-col" id="main-content">
     <main class="flex-grow container mx-auto px-4 py-8">
       <h1 class="text-3xl md:text-4xl font-bold text-center mb-8">Videos</h1>
 
@@ -59,5 +122,6 @@
   <script src="/js/navbar.js"></script>
   <script src="/js/google-analytics.js"></script>
   <script src="/videos/js/videos.js"></script>
+  <script src="/videos/js/debug.js"></script>
 </body>
 </html>

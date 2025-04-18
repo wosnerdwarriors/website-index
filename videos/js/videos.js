@@ -15,14 +15,37 @@
     const searchButton = document.getElementById('search-button');
     const noResults = document.getElementById('no-results');
     
+    // Get data source URL from config
+    async function getDataSourceUrl() {
+        try {
+            const configResponse = await fetch('/config.json');
+            if (configResponse.ok) {
+                const config = await configResponse.json();
+                if (config.dataSources && config.dataSources.videos) {
+                    return config.dataSources.videos.url;
+                }
+            }
+        } catch (error) {
+            console.warn('Error loading config.json, falling back to local data', error);
+        }
+        // Fallback to local data if config fails
+        return '/videos/videos-data.json';
+    }
+    
     // Fetch videos data
     async function fetchVideos() {
         try {
-            const response = await fetch('/videos/videos-data.json');
+            const dataUrl = await getDataSourceUrl();
+            console.log('Fetching videos from:', dataUrl);
+            
+            const response = await fetch(dataUrl);
             if (!response.ok) {
                 throw new Error('Failed to fetch videos data');
             }
             videoData = await response.json();
+            
+            // Make videoData globally available for debug mode
+            window.videoData = videoData;
             
             // Extract all unique categories
             videoData.forEach(video => {
@@ -45,6 +68,46 @@
                     <p class="text-gray-500 mt-2">Please try again later</p>
                 </div>
             `;
+            
+            // Try to load local fallback data if remote fails
+            try {
+                // Get fallback path from config if possible
+                let fallbackPath = '/videos/videos-data.json';
+                try {
+                    const configResponse = await fetch('/config.json');
+                    if (configResponse.ok) {
+                        const config = await configResponse.json();
+                        if (config.dataSources?.videos?.fallbackPath) {
+                            fallbackPath = config.dataSources.videos.fallbackPath;
+                        }
+                    }
+                } catch (configError) {
+                    console.warn('Could not load config for fallback path', configError);
+                }
+                
+                console.log('Attempting to load fallback data from:', fallbackPath);
+                const fallbackResponse = await fetch(fallbackPath);
+                if (fallbackResponse.ok) {
+                    console.log('Using fallback data');
+                    videoData = await fallbackResponse.json();
+                    window.videoData = videoData;
+                    
+                    // Clear and rebuild categories
+                    categories.clear();
+                    videoData.forEach(video => {
+                        if (video.categories && Array.isArray(video.categories)) {
+                            video.categories.forEach(category => categories.add(category));
+                        }
+                    });
+                    
+                    // Recreate UI
+                    createCategoryFilters();
+                    filteredVideos = [...videoData];
+                    renderVideos(filteredVideos);
+                }
+            } catch (fallbackError) {
+                console.error('Even fallback data failed to load', fallbackError);
+            }
         }
     }
     
@@ -145,10 +208,73 @@
         } else {
             noResults.classList.add('hidden');
             
-            videos.forEach(video => {
-                const videoCard = createVideoCard(video);
-                videosContainer.appendChild(videoCard);
-            });
+            // Check for fullwidth mode before rendering
+            if (window.videoDisplayMode === 'fullwidth') {
+                // Create a wrapper for non-featured videos
+                const otherVideos = document.createElement('div');
+                otherVideos.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full mt-8';
+                
+                // Add featured video first
+                if (videos.length > 0) {
+                    const featuredVideo = createVideoCard(videos[0]);
+                    featuredVideo.classList.add('featured-video', 'mb-8');
+                    videosContainer.appendChild(featuredVideo);
+                    
+                    // Add style to make it stand out
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .featured-video {
+                            width: 100%;
+                            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                            border-radius: 8px;
+                        }
+                        @media (min-width: 768px) {
+                            .featured-video {
+                                display: flex;
+                                flex-direction: row;
+                                background: linear-gradient(90deg, rgba(59, 130, 246, 0.05), transparent);
+                            }
+                            .featured-video > div:first-child {
+                                width: 60%;
+                            }
+                            .featured-video > div:last-child {
+                                width: 40%;
+                                padding: 1rem;
+                            }
+                            .featured-video h3 {
+                                font-size: 1.5rem;
+                                line-height: 2rem;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                // Add remaining videos to the grid
+                videos.slice(1).forEach(video => {
+                    const videoCard = createVideoCard(video);
+                    otherVideos.appendChild(videoCard);
+                });
+                
+                videosContainer.appendChild(otherVideos);
+            } else {
+                // Standard rendering
+                videos.forEach(video => {
+                    const videoCard = createVideoCard(video);
+                    videosContainer.appendChild(videoCard);
+                });
+            }
+        }
+    }
+    
+    // Function to reload videos with current filters (for debug mode)
+    function reloadVideos() {
+        // Re-apply current filters to refresh the display
+        const activeCategory = document.querySelector('.category-filter.active');
+        if (activeCategory) {
+            filterByCategory(activeCategory.dataset.category);
+        } else {
+            renderVideos(filteredVideos);
         }
     }
     
@@ -171,6 +297,7 @@
             if (video.embedUrl.includes('youtube.com') || video.embedUrl.includes('youtu.be')) {
                 const videoId = getYoutubeVideoId(video.embedUrl);
                 if (videoId) {
+                    // Always start with the thumbnail
                     thumbnail.innerHTML = `
                         <img src="https://i.ytimg.com/vi/${videoId}/mqdefault.jpg" 
                             alt="${video.title}" 
@@ -184,10 +311,35 @@
                         </div>
                     `;
                     
-                    // Add click event to open YouTube in a new tab
-                    thumbnail.addEventListener('click', () => {
-                        window.open(video.embedUrl, '_blank');
-                    });
+                    // But handle the click differently based on mode
+                    if (window.videoDisplayMode === 'embed') {
+                        // Convert to embedded player when clicked
+                        thumbnail.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            
+                            // First, pause any other playing videos
+                            pauseAllVideos();
+                            
+                            // Replace the thumbnail with actual embedded player
+                            thumbnail.innerHTML = `
+                                <iframe 
+                                    class="youtube-embed w-full h-full border-0"
+                                    src="https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1" 
+                                    title="${video.title}"
+                                    allowfullscreen
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                                </iframe>
+                            `;
+                            
+                            // Set up message listener for this iframe to detect when it starts playing
+                            setupVideoEventListener(thumbnail.querySelector('iframe'), videoId);
+                        });
+                    } else {
+                        // Regular thumbnail behavior - open in new tab
+                        thumbnail.addEventListener('click', () => {
+                            window.open(video.embedUrl, '_blank');
+                        });
+                    }
                 }
             } else {
                 // Generic video thumbnail for non-YouTube videos
@@ -252,6 +404,53 @@
         const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = url.match(regExp);
         return (match && match[2].length === 11) ? match[2] : null;
+    }
+    
+    // Helper function to pause all currently playing videos
+    function pauseAllVideos() {
+        const embeddedVideos = document.querySelectorAll('.youtube-embed');
+        embeddedVideos.forEach(iframe => {
+            // Send postMessage to pause the video
+            iframe.contentWindow.postMessage(JSON.stringify({
+                event: 'command',
+                func: 'pauseVideo',
+                args: ''
+            }), '*');
+        });
+    }
+    
+    // Function to set up event listener for YouTube iframe API
+    function setupVideoEventListener(iframe, videoId) {
+        // Add a unique ID to identify this video
+        iframe.id = `youtube-${videoId}`;
+        
+        // Listen for messages from YouTube
+        window.addEventListener('message', function(event) {
+            // Only process messages from YouTube
+            if (event.origin !== 'https://www.youtube.com') return;
+            
+            try {
+                const data = JSON.parse(event.data);
+                
+                // When this video starts playing, pause all others
+                if (data.event === 'onStateChange' && data.info === 1) { // 1 = playing
+                    const currentVideoId = iframe.id;
+                    
+                    // Pause all other videos
+                    document.querySelectorAll('.youtube-embed').forEach(otherIframe => {
+                        if (otherIframe.id !== currentVideoId) {
+                            otherIframe.contentWindow.postMessage(JSON.stringify({
+                                event: 'command',
+                                func: 'pauseVideo',
+                                args: ''
+                            }), '*');
+                        }
+                    });
+                }
+            } catch (e) {
+                // Not a JSON message we can process
+            }
+        });
     }
     
     // Event listeners
