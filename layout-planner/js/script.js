@@ -217,10 +217,16 @@ function addEntity(event) {
     }
 }
 
-evaluateBTTime = (city, index) => {
+function evaluateBTTime(city, index){
     const times = calculateMarchTimes(city);
     return times.length > index ? times[index] : Infinity;
   };
+  
+function evaluateCombinedTime(city) {
+    const times = calculateMarchTimes(city);
+    if (times.length < 2) return Infinity;
+    return times[0] + times[1];
+  }
   
 // Populate sort selector dynamically
 enablePopulateSortOptions = (selected) => {
@@ -235,7 +241,7 @@ enablePopulateSortOptions = (selected) => {
     const anyBT2 = cities.some(c => calculateMarchTimes(c).length >= 2);
     if (anyBT1) sortSelect.appendChild(new Option('BT1-Time', 'bt1'));
     if (anyBT2) sortSelect.appendChild(new Option('BT2-Time', 'bt2'));
-    
+    if (anyBT1 && anyBT2) sortSelect.appendChild(new Option('Combined BT1+BT2', 'both'));
     if (selected && Array.from(sortSelect.options).some(o => o.value === selected)) {
       sortSelect.value = selected;
     } else {
@@ -278,6 +284,8 @@ function updateCityList() {
           return evaluateBTTime(a, 0) - evaluateBTTime(b, 0);
         case 'bt2':
           return evaluateBTTime(a, 1) - evaluateBTTime(b, 1);
+        case 'both':
+          return evaluateCombinedTime(a) - evaluateCombinedTime(b);
         default:
           return a.id - b.id;
       }
@@ -307,44 +315,42 @@ function updateCityList() {
       li.appendChild(input);
   
       // Create BT bubbles next to the city name
-      const marchTimes = city.marchTimes || calculateMarchTimes(city);
-      marchTimes.forEach((time, i) => {
-      const key = `bt${i+1}`;
-      const isPriority = city.priorities && city.priorities[key];
-      const bubble = document.createElement('span');
-      bubble.textContent = `BT${i+1}: ${time}s`;
-      // Use CSS classes for styling
-      bubble.classList.add('bt-bubble');
-      if (isPriority) bubble.classList.add('selected');
-      
-      bubble.addEventListener('click', () => {
-        city.priorities = city.priorities || {};
-        city.priorities[key] = !city.priorities[key];
-        if (city.priorities[key]) {
-          // Swap with best unprioritized candidate
-          const candidates = entities
-            .filter(e => e.type === 'city')
-            .filter(e => !(e.priorities && e.priorities[key]));
-          if (candidates.length) {
-            let bestCity = candidates[0];
-            let bestTime = evaluateBTTime(bestCity, i);
-            candidates.forEach(c => {
-              const t = evaluateBTTime(c, i);
-              if (t < bestTime) {
-                bestTime = t;
-                bestCity = c;
+      city.marchTimes.forEach((time, i) => {
+        const key = `bt${i+1}`;
+        const isPriority = city.priorities && city.priorities[key];
+        const bubble = document.createElement('span');
+        bubble.textContent = `BT${i+1}: ${time}s`;
+        bubble.classList.add('bt-bubble');
+        if (isPriority) bubble.classList.add('selected');
+        bubble.addEventListener('click', () => {
+          city.priorities = city.priorities || {};
+          city.priorities[key] = !city.priorities[key];
+          if (city.priorities[key]) {
+            // Get best candidate for swap
+            const candidates = entities.filter(e => e.type === 'city' && !(e.priorities && e.priorities[key]));
+            if (candidates.length) {
+              let bestCity = candidates[0];
+              let bestTime;
+              if (sortBy === 'both') {
+                bestTime = evaluateCombinedTime(bestCity);
+              } else {
+                bestTime = evaluateBTTime(bestCity, i);
               }
-            });
-            // Swap coords
-            [city.x, bestCity.x] = [bestCity.x, city.x];
-            [city.y, bestCity.y] = [bestCity.y, city.y];
+              candidates.forEach(c => {
+                const t = sortBy === 'both' ? evaluateCombinedTime(c) : evaluateBTTime(c, i);
+                if (t < bestTime) {
+                  bestTime = t;
+                  bestCity = c;
+                }
+              });
+              // Swap coords
+              [city.x, bestCity.x] = [bestCity.x, city.x];
+              [city.y, bestCity.y] = [bestCity.y, city.y];
+            }
           }
-        }
-        drawGrid();
-        drawEntities();
-        updateCityList();
-      });
-      li.appendChild(bubble);
+          drawGrid(); drawEntities(); updateCityList();
+        });
+        li.appendChild(bubble);
       });
   
       cityList.appendChild(li);
