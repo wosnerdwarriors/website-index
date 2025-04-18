@@ -35,8 +35,16 @@ function applyTemplate(pageTitle, options = {}) {
   // Save the current body content
   const currentContent = document.body.innerHTML;
   
+  // Get template URL from config
+  async function getTemplateUrl() {
+    const configResponse = await fetch('/config.json');
+    const config = await configResponse.json();
+    return config.dataSources.template.url;
+  }
+
   // Fetch the template
-  fetch('/template.html')
+  getTemplateUrl()
+    .then(templateUrl => fetch(templateUrl))
     .then(response => response.text())
     .then(templateHtml => {
       // Replace placeholders
