@@ -355,8 +355,19 @@ document.addEventListener('DOMContentLoaded', function () {
     castleFilter.addEventListener('change', renderTable);
     matchFilter.addEventListener('change', renderTable);
 
+    // Get data source URL from config
+    async function getDataSourceUrl() {
+        const configResponse = await fetch('/config.json');
+        const config = await configResponse.json();
+        return config.dataSources.svs.url;
+    }
+
     // Fetch the JSON data and initialize
-    fetch('https://data.wosnerds.com/data/svs-history.json')
+    getDataSourceUrl()
+        .then(dataUrl => {
+            if (debug) console.log('Using data source URL:', dataUrl);
+            return fetch(dataUrl);
+        })
         .then(response => response.json())
         .then(data => {
             if (debug) console.log('JSON data loaded:', data);

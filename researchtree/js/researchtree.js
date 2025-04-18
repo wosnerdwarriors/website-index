@@ -270,8 +270,8 @@ function generateResearchItemCell(researchItem, researchTreeType) {
 	// Strip the suffix (dash and Roman numeral) from the research ID for the image URL
 	const strippedName = researchItem.researchID.replace(/-\w+$/, '');
 
-	// Construct the image URL
-	const imageURL = `https://data.wosnerds.com/images/research/${strippedName}.png`;
+	// Construct the image URL using the helper function
+	const imageURL = getImageUrl(`research/${strippedName}.png`);
 
 
 	// Check which type of requirement to show (research/building or resource costs)
@@ -358,6 +358,32 @@ function getResearchRequirementsHTML(researchItem, researchTreeType, targetLevel
 }
 
 
+// Helper function to get image URLs from config
+async function getImageBaseUrl() {
+    const configResponse = await fetch('/config.json');
+    const config = await configResponse.json();
+    return config.images.baseUrl;
+}
+
+// Cache the base URL promise
+const imageBaseUrlPromise = getImageBaseUrl();
+
+// Helper function to get image URLs
+function getImageUrl(path) {
+    // Get base URL from localStorage (cached from config)
+    const configResponse = localStorage.getItem('researchConfig');
+    if (configResponse) {
+        const config = JSON.parse(configResponse);
+        if (config.imageBaseUrl) {
+            return `${config.imageBaseUrl}/${path}`;
+        }
+    }
+    
+    // If localStorage cache doesn't exist yet, use a placeholder
+    // This will be replaced after the config loads
+    return `images/${path}`;
+}
+
 function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed, isMaxed=false) {
 	let formattedTime = '';
 	let reducedResearchTime = '';
@@ -371,28 +397,28 @@ function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed, isMa
 	return `
 		<div class="resource-costs">
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/meat-ico.png" alt="Meat Icon"> Meat</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/meat-ico.png')}" alt="Meat Icon"> Meat</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.meat || 0)}</div>
 			</div>
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/wood-ico.png" alt="Wood Icon"> Wood</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/wood-ico.png')}" alt="Wood Icon"> Wood</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.wood || 0)}</div>
 			</div>
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/coal-ico.png" alt="Coal Icon"> Coal</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/coal-ico.png')}" alt="Coal Icon"> Coal</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.coal || 0)}</div>
 			</div>
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/iron-ico.png" alt="Iron Icon"> Iron</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/iron-ico.png')}" alt="Iron Icon"> Iron</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.iron || 0)}</div>
 			</div>
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/steel-ico.png" alt="Steel Icon"> Steel</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/steel-ico.png')}" alt="Steel Icon"> Steel</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.steel || 0)}</div>
 			</div>
 			<!--
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/fc-ico.png" alt="FC Icon"> FC</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/fc-ico.png')}" alt="FC Icon"> FC</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.fc || 0)}</div>
 			</div>
 			-->
@@ -534,18 +560,36 @@ function getResearchSpeed() {
 	return isNaN(speedValue) || speedValue < 0 ? 0 : speedValue / 100;
 }
 
-function loadresearchConfigData() {
-	if (debugMode) console.log('Attempting to load research data json');
+// Get data source URL from config
+async function getResearchDataUrl() {
+    const configResponse = await fetch('/config.json');
+    const config = await configResponse.json();
+    return config.dataSources.research.url;
+}
 
-	fetch('https://data.wosnerds.com/data/research-upgrades.json')
-		.then(response => response.ok ? response.json() : Promise.reject(`Failed with status ${response.status}`))
-		.then(data => {
-			researchConfigData = data;
-			initializeResearchStates();
-			if (debugMode) console.log('Research data loaded:', researchConfigData);
-			renderResearchTree();
-		})
-		.catch(error => console.error('Error loading research data:', error));
+async function loadresearchConfigData() {
+    if (debugMode) console.log('Attempting to load research data json');
+
+    // Load and cache the image base URL in localStorage
+    const imageBaseUrl = await imageBaseUrlPromise;
+    localStorage.setItem('researchConfig', JSON.stringify({
+        imageBaseUrl: imageBaseUrl
+    }));
+    if (debugMode) console.log('Cached image base URL:', imageBaseUrl);
+    
+    // Get data URL from config
+    const dataUrl = await getResearchDataUrl();
+    console.log('Fetching research data from:', dataUrl);
+    
+    // Fetch the data
+    const response = await fetch(dataUrl);
+    const data = await response.json();
+    
+    // Process the data
+    researchConfigData = data;
+    initializeResearchStates();
+    if (debugMode) console.log('Research data loaded:', researchConfigData);
+    renderResearchTree();
 }
 
 function updateDebugTable() {

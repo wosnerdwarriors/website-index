@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Videos - WOS Nerds</title>
+  <link rel="stylesheet" href="/dist/css/tailwind.css">
+  <link rel="stylesheet" href="/videos/css/videos.css">
+  <!-- Debug styles will be injected here if debug mode is active -->
+  <div id="debug-styles"></div>
+</head>
+<body class="bg-gray-50">
+  <!-- Navbar will be injected here by navbar.js -->
+  
+  <!-- Debug Toolbar (hidden by default) -->
+  <div id="debug-toolbar" class="hidden fixed top-0 left-0 right-0 bg-gray-900 text-white z-50 p-4 shadow-lg">
+    <div class="container mx-auto">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-yellow-400">🛠️ Debug Mode</span>
+          <span class="bg-green-500 px-2 py-1 rounded text-xs">Active</span>
+        </div>
+        
+        <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+          <div class="flex items-center gap-2">
+            <label for="layout-style" class="text-sm">Layout:</label>
+            <select id="layout-style" class="bg-gray-800 text-white px-2 py-1 rounded text-sm border border-gray-600">
+              <option value="grid">Grid (Default)</option>
+              <option value="masonry">Masonry</option>
+              <option value="carousel">Carousel</option>
+              <option value="list">List View</option>
+              <option value="magazine">Magazine</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <label for="category-style" class="text-sm">Categories:</label>
+            <select id="category-style" class="bg-gray-800 text-white px-2 py-1 rounded text-sm border border-gray-600">
+              <option value="flat">Flat (Default)</option>
+              <option value="hierarchical">Hierarchical</option>
+              <option value="tabbed">Tabbed</option>
+              <option value="dropdown">Dropdown</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <label for="video-display" class="text-sm">Video Display:</label>
+            <select id="video-display" class="bg-gray-800 text-white px-2 py-1 rounded text-sm border border-gray-600">
+              <option value="thumbnail">Thumbnail (Default)</option>
+              <option value="embed">Embedded Players</option>
+              <option value="fullwidth">Full Width</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <label for="color-theme" class="text-sm">Theme:</label>
+            <select id="color-theme" class="bg-gray-800 text-white px-2 py-1 rounded text-sm border border-gray-600">
+              <option value="default">Default</option>
+              <option value="dark">Dark Mode</option>
+              <option value="high-contrast">High Contrast</option>
+              <option value="playful">Playful</option>
+              <option value="minimal">Minimal</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="flex gap-3">
+          <button id="apply-changes" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">Apply Changes</button>
+          <button id="generate-url" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm">Generate URL</button>
+          <button id="reset-debug" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="md:ml-64 p-4 transition-all duration-300 min-h-screen flex flex-col" id="main-content">
+    <main class="flex-grow container mx-auto px-4 py-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-center mb-8">Videos</h1>
+
+      <!-- Search Bar -->
+      <div class="mb-8">
+        <div class="max-w-xl mx-auto">
+          <div class="relative flex items-center">
+            <input type="text" id="video-search" placeholder="Search videos..." 
+              class="w-full py-2 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button id="search-button" class="absolute right-2 text-gray-500 hover:text-gray-700">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Filter Buttons -->
+      <div class="flex flex-wrap justify-center gap-2 mb-8" id="category-filters">
+        <button class="category-filter active bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-full text-sm" data-category="all">All Videos</button>
+        <!-- Category buttons will be added dynamically -->
+      </div>
+
+      <!-- Videos Container -->
+      <div id="videos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Videos will be loaded dynamically -->
+        <div class="flex justify-center items-center col-span-full py-8">
+          <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+
+      <!-- No Results Message -->
+      <div id="no-results" class="hidden text-center py-8 text-gray-500">
+        <p class="text-xl">No videos found matching your search</p>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-4 text-center text-gray-600 border-t">
+      <p>All data is free to copy and use. See <a href="https://github.com/wosnerdwarriors" target="_blank" class="text-blue-600 hover:underline">https://github.com/wosnerdwarriors</a> for source code</p>
+    </footer>
+  </div>
+
+  <script src="/js/navbar.js"></script>
+  <script src="/js/google-analytics.js"></script>
+  <script src="/videos/js/videos.js"></script>
+  <script src="/videos/js/debug.js"></script>
+</body>
+</html>

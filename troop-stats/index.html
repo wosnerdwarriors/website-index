@@ -320,175 +320,190 @@
         debugLog(`Completed populating table: ${tableId}`);
     }
 
+    // Get data source URL from config
+    async function getTroopStatsUrl() {
+        const configResponse = await fetch('/config.json');
+        const config = await configResponse.json();
+        return config.dataSources.troopStats.url;
+    }
+    
     // Load the data and initialize the page
-    $.getJSON("https://data.wosnerds.com/data/troop-stats.json", function(data) {
-        debugLog("Loaded JSON data:");
-        debugLog(data);
+    (async function() {
+        const dataUrl = await getTroopStatsUrl();
+        console.log('Fetching troop stats from:', dataUrl);
+        
+        $.getJSON(dataUrl, function(data) {
+            debugLog("Loaded JSON data:");
+            debugLog(data);
 
-        // Validate troop-stats exist
-        if (!data || !data["troop-stats"]) {
-            debugLog("No 'troop-stats' found in the JSON.");
-            return;
-        }
+            // Validate troop-stats exist
+            if (!data || !data["troop-stats"]) {
+                debugLog("No 'troop-stats' found in the JSON.");
+                return;
+            }
 
-        // Debugging data structure
-        if (debugMode) {
-            console.log("Troop stats structure:");
-            console.log(JSON.stringify(data["troop-stats"], null, 2));
-        }
+            // Debugging data structure
+            if (debugMode) {
+                console.log("Troop stats structure:");
+                console.log(JSON.stringify(data["troop-stats"], null, 2));
+            }
 
-        // Populate tables for each troop type
-        populateTable('infantryTable', data["troop-stats"]["infantry"]);
-        populateTable('lancerTable', data["troop-stats"]["lancer"]);
-        populateTable('marksmanTable', data["troop-stats"]["marksman"]);
+            // Populate tables for each troop type
+            populateTable('infantryTable', data["troop-stats"]["infantry"]);
+            populateTable('lancerTable', data["troop-stats"]["lancer"]);
+            populateTable('marksmanTable', data["troop-stats"]["marksman"]);
 
-        // Initialize DataTable for sorting with fixed columns
-        $('#infantryTable, #lancerTable, #marksmanTable').DataTable({
-            responsive: true,
-            scrollX: true,
-            columnDefs: [
-                { width: '10%', targets: 0 },
-                { width: '10%', targets: 1 },
-                { width: '10%', targets: 2 },
-                { width: '10%', targets: 3 },
-                { width: '10%', targets: 4 },
-                { width: '10%', targets: 5 },
-                { width: '10%', targets: 6 },
-                { width: '10%', targets: 7 },
-                { width: '10%', targets: 8 }
-            ],
-            fixedColumns: true,
-            autoWidth: false
-        });
-
-        // Force a redraw after initialization to fix alignment
-        setTimeout(function() {
-            $('.dataTable').DataTable().columns.adjust();
-            $('.dataTable').DataTable().responsive.recalc();
-        }, 100);
-
-        // Debugging: check if the tables were populated
-        debugLog("Checking tables:");
-        debugLog(document.querySelector('#infantryTable tbody').innerHTML);
-        debugLog(document.querySelector('#lancerTable tbody').innerHTML);
-        debugLog(document.querySelector('#marksmanTable tbody').innerHTML);
-
-        // Initialize Chart.js for each troop type
-        const infantryChart = new Chart(document.getElementById('infantryChart'), { 
-            type: 'line', 
-            data: {},
-            options: {
+            // Initialize DataTable for sorting with fixed columns
+            $('#infantryTable, #lancerTable, #marksmanTable').DataTable({
                 responsive: true,
-                maintainAspectRatio: false
+                scrollX: true,
+                columnDefs: [
+                    { width: '10%', targets: 0 },
+                    { width: '10%', targets: 1 },
+                    { width: '10%', targets: 2 },
+                    { width: '10%', targets: 3 },
+                    { width: '10%', targets: 4 },
+                    { width: '10%', targets: 5 },
+                    { width: '10%', targets: 6 },
+                    { width: '10%', targets: 7 },
+                    { width: '10%', targets: 8 }
+                ],
+                fixedColumns: true,
+                autoWidth: false
+            });
+
+            // Force a redraw after initialization to fix alignment
+            setTimeout(function() {
+                $('.dataTable').DataTable().columns.adjust();
+                $('.dataTable').DataTable().responsive.recalc();
+            }, 100);
+
+            // Debugging: check if the tables were populated
+            debugLog("Checking tables:");
+            debugLog(document.querySelector('#infantryTable tbody').innerHTML);
+            debugLog(document.querySelector('#lancerTable tbody').innerHTML);
+            debugLog(document.querySelector('#marksmanTable tbody').innerHTML);
+
+            // Initialize Chart.js for each troop type
+            const infantryChart = new Chart(document.getElementById('infantryChart'), { 
+                type: 'line', 
+                data: {},
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            const lancerChart = new Chart(document.getElementById('lancerChart'), { 
+                type: 'line', 
+                data: {},
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            const marksmanChart = new Chart(document.getElementById('marksmanChart'), { 
+                type: 'line', 
+                data: {},
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Function to update chart for a given troop type
+            function updateChart(chartInstance, selectorId, troopData) {
+                const selectedOption = document.getElementById(selectorId).value;
+
+                debugLog(`Updating chart: ${chartInstance}, option: ${selectedOption}`);
+
+                let labels = troopData.map(troop => `Level ${troop["Troop Level"]}, FC ${troop["FC level"]}`);
+                let datasets;
+
+                if (selectedOption === 'power_vs_attack') {
+                    datasets = [
+                        {
+                            label: 'Power',
+                            data: troopData.map(troop => troop["power"]),
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: 'Attack',
+                            data: troopData.map(troop => troop["attack"]),
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            yAxisID: 'y',
+                        }
+                    ];
+                } else if (selectedOption === 'defense_vs_health') {
+                    datasets = [
+                        {
+                            label: 'Defense',
+                            data: troopData.map(troop => troop["defense"]),
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: 'Health',
+                            data: troopData.map(troop => troop["health"]),
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            yAxisID: 'y',
+                        }
+                    ];
+                } else if (selectedOption === 'lethality_vs_load') {
+                    datasets = [
+                        {
+                            label: 'Lethality',
+                            data: troopData.map(troop => troop["lethality"]),
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: 'Load',
+                            data: troopData.map(troop => troop["load"]),
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            yAxisID: 'y',
+                        }
+                    ];
+                }
+
+                // Update chart
+                chartInstance.data = {
+                    labels: labels,
+                    datasets: datasets
+                };
+                chartInstance.update();
+
+                debugLog(`Updated chart for selector: ${selectorId}`);
             }
-        });
-        const lancerChart = new Chart(document.getElementById('lancerChart'), { 
-            type: 'line', 
-            data: {},
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-        const marksmanChart = new Chart(document.getElementById('marksmanChart'), { 
-            type: 'line', 
-            data: {},
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
 
-        // Function to update chart for a given troop type
-        function updateChart(chartInstance, selectorId, troopData) {
-            const selectedOption = document.getElementById(selectorId).value;
-
-            debugLog(`Updating chart: ${chartInstance}, option: ${selectedOption}`);
-
-            let labels = troopData.map(troop => `Level ${troop["Troop Level"]}, FC ${troop["FC level"]}`);
-            let datasets;
-
-            if (selectedOption === 'power_vs_attack') {
-                datasets = [
-                    {
-                        label: 'Power',
-                        data: troopData.map(troop => troop["power"]),
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        yAxisID: 'y',
-                    },
-                    {
-                        label: 'Attack',
-                        data: troopData.map(troop => troop["attack"]),
-                        borderColor: 'rgba(153, 102, 255, 1)',
-                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                        yAxisID: 'y',
-                    }
-                ];
-            } else if (selectedOption === 'defense_vs_health') {
-                datasets = [
-                    {
-                        label: 'Defense',
-                        data: troopData.map(troop => troop["defense"]),
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        yAxisID: 'y',
-                    },
-                    {
-                        label: 'Health',
-                        data: troopData.map(troop => troop["health"]),
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        yAxisID: 'y',
-                    }
-                ];
-            } else if (selectedOption === 'lethality_vs_load') {
-                datasets = [
-                    {
-                        label: 'Lethality',
-                        data: troopData.map(troop => troop["lethality"]),
-                        borderColor: 'rgba(255, 206, 86, 1)',
-                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                        yAxisID: 'y',
-                    },
-                    {
-                        label: 'Load',
-                        data: troopData.map(troop => troop["load"]),
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        yAxisID: 'y',
-                    }
-                ];
-            }
-
-            // Update chart
-            chartInstance.data = {
-                labels: labels,
-                datasets: datasets
+            // Set up chart update functions
+            window.updateInfantryChart = function() {
+                updateChart(infantryChart, 'infantryChartSelector', data["troop-stats"]["infantry"]);
             };
-            chartInstance.update();
+            window.updateLancerChart = function() {
+                updateChart(lancerChart, 'lancerChartSelector', data["troop-stats"]["lancer"]);
+            };
+            window.updateMarksmanChart = function() {
+                updateChart(marksmanChart, 'marksmanChartSelector', data["troop-stats"]["marksman"]);
+            };
 
-            debugLog(`Updated chart for selector: ${selectorId}`);
-        }
+            // Initialize charts with the first selected option
+            updateInfantryChart();
+            updateLancerChart();
+            updateMarksmanChart();
+        }).fail(function(jqxhr, textStatus, error) {
+            debugLog(`Request Failed: ${textStatus}, ${error}`);
+            // No fallback - we only use data from the config file source
+        });
+    })();
+    
 
-        // Set up chart update functions
-        window.updateInfantryChart = function() {
-            updateChart(infantryChart, 'infantryChartSelector', data["troop-stats"]["infantry"]);
-        };
-        window.updateLancerChart = function() {
-            updateChart(lancerChart, 'lancerChartSelector', data["troop-stats"]["lancer"]);
-        };
-        window.updateMarksmanChart = function() {
-            updateChart(marksmanChart, 'marksmanChartSelector', data["troop-stats"]["marksman"]);
-        };
-
-        // Initialize charts with the first selected option
-        updateInfantryChart();
-        updateLancerChart();
-        updateMarksmanChart();
-    }).fail(function(jqxhr, textStatus, error) {
-        debugLog(`Request Failed: ${textStatus}, ${error}`);
-    });
     </script>
 
     <script src="/js/navbar.js"></script>

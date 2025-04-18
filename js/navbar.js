@@ -9,7 +9,8 @@
       { name: "SVS History", url: "/svs-history", color: "rose" },
       { name: "Alliance RSS Calc", url: "/alliancerss", color: "teal" },
       { name: "Formation Builder", url: "/formationbuilder", color: "zinc" },
-      { name: "Layout Planner", url: "/layout-planner", color: "slate" }
+      { name: "Layout Planner", url: "/layout-planner", color: "slate" },
+      { name: "Videos", url: "/videos", color: "purple" }
     ],
     external: [
       { name: "Google Drive", url: "https://drive.google.com/drive/folders/1rTwI6mXDYvFZHo8MhWQciCcNPprTmfFe?usp=sharing", color: "zinc" },
@@ -41,18 +42,27 @@
   navbarDiv.id = 'wosnerds-navbar';
   body.insertBefore(navbarDiv, body.firstChild);
 
-  // Load the HTML content
-  loadHTML("/navbar.html", function(data) {
-    document.getElementById('wosnerds-navbar').innerHTML = data;
-    
-    // Add close button for mobile
-    addCloseButton();
-    
-    // Generate the dynamic navbar
-    generateNavbar();
-    
-    // Set up mobile menu toggle functionality after navbar is loaded
-    setupMobileMenu();
+  // Get navbar URL from config
+  async function getNavbarUrl() {
+    const configResponse = await fetch('/config.json');
+    const config = await configResponse.json();
+    return config.dataSources.navbar.url;
+  }
+
+  // Load the navbar content
+  getNavbarUrl().then(navbarUrl => {
+    loadHTML(navbarUrl, function(data) {
+      document.getElementById('wosnerds-navbar').innerHTML = data;
+      
+      // Add close button for mobile
+      addCloseButton();
+      
+      // Generate the dynamic navbar
+      generateNavbar();
+      
+      // Set up mobile menu toggle functionality after navbar is loaded
+      setupMobileMenu();
+    });
   });
 
   // Function to generate the navbar items
@@ -109,7 +119,8 @@
       indigo: "bg-indigo-600 hover:bg-indigo-700",
       rose: "bg-rose-600 hover:bg-rose-700",
       teal: "bg-teal-700 hover:bg-teal-800",
-      zinc: "bg-zinc-700 hover:bg-zinc-800"
+      zinc: "bg-zinc-700 hover:bg-zinc-800",
+      purple: "bg-purple-600 hover:bg-purple-700"
     };
         
     // Combine classes safely, with fallback to blue if color not found
