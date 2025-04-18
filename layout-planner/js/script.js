@@ -211,43 +211,150 @@ function addEntity(event) {
         drawEntities();
         updateCounters();
 
-        if (selectedType === 'city') {
+        if (selectedType === 'city' || selectedType === 'building') {
             updateCityList();
         }
     }
 }
 
+evaluateBTTime = (city, index) => {
+    const times = calculateMarchTimes(city);
+    return times.length > index ? times[index] : Infinity;
+  };
+  
+// Populate sort selector dynamically
+enablePopulateSortOptions = (selected) => {
+    const sortSelect = document.getElementById('citySort');
+    if (!sortSelect) return;
+    sortSelect.innerHTML = '';
+    sortSelect.appendChild(new Option('ID', 'id'));
+    sortSelect.appendChild(new Option('Name', 'name'));
+    // Check presence of BT1/BT2
+    const cities = entities.filter(e => e.type === 'city');
+    const anyBT1 = cities.some(c => calculateMarchTimes(c).length >= 1);
+    const anyBT2 = cities.some(c => calculateMarchTimes(c).length >= 2);
+    if (anyBT1) sortSelect.appendChild(new Option('BT1-Time', 'bt1'));
+    if (anyBT2) sortSelect.appendChild(new Option('BT2-Time', 'bt2'));
+    
+    if (selected && Array.from(sortSelect.options).some(o => o.value === selected)) {
+      sortSelect.value = selected;
+    } else {
+      sortSelect.value = 'id';
+    }
+    sortSelect.onchange = updateCityList;
+  };
+  
+// Main: sort, pin prioritized, render list
 function updateCityList() {
+    // Get march times for all cities
+    entities.filter(e => e.type === 'city').forEach(city => { city.marchTimes = calculateMarchTimes(city); });
     const cityList = document.getElementById('cityList');
-    if (!cityList) return;
+    const sortSelect = document.getElementById('citySort');
+    if (!cityList || !sortSelect) return;
+  
+    const sortBy = sortSelect.value;
+    enablePopulateSortOptions(sortBy);
     cityList.innerHTML = '';
-
-    // List by ID
-    const cities = entities
-        .filter(entity => entity.type === 'city')
-        .sort((a, b) => a.id - b.id);
-
-    cities.forEach(city => {
-        const li = document.createElement('li');
-        const input = document.createElement('input');
-        input.type = 'text';
-        // Show custom name or ID
-        input.value = city.name || `City ${city.id}`;
-        input.placeholder = `City ${city.id}`;
-        input.className = "border p-1 rounded w-full";
-
-        // Update map on namechange
-        input.addEventListener('change', () => {
-            city.name = input.value;
-            drawGrid();
-            drawEntities();
-        });
-        
-        li.appendChild(input);
-        cityList.appendChild(li);
+  
+    let cities = entities.filter(e => e.type === 'city');
+    const btIndex = sortBy === 'bt1' ? 0 : sortBy === 'bt2' ? 1 : null;
+  
+    // Separate prioritized
+    const prioritized = btIndex !== null
+      ? cities.filter(c => c.priorities && c.priorities[`bt${btIndex+1}`])
+      : [];
+    const others = btIndex !== null
+      ? cities.filter(c => !(c.priorities && c.priorities[`bt${btIndex+1}`]))
+      : cities;
+  
+    // Comparator for sorting
+    const comparator = (a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return (a.name || `City ${a.id}`)
+            .toLowerCase()
+            .localeCompare((b.name || `City ${b.id}`).toLowerCase());
+        case 'bt1':
+          return evaluateBTTime(a, 0) - evaluateBTTime(b, 0);
+        case 'bt2':
+          return evaluateBTTime(a, 1) - evaluateBTTime(b, 1);
+        default:
+          return a.id - b.id;
+      }
+    };
+  
+    prioritized.sort(comparator);
+    others.sort(comparator);
+  
+    // Prioritize cities 
+    [...prioritized, ...others].forEach(city => {
+      const li = document.createElement('li');
+      li.className = 'flex items-center space-x-2 mb-2';
+  
+      // City name input
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = city.name || `City ${city.id}`;
+      input.placeholder = `City ${city.id}`;
+      input.className = 'border p-1 rounded';
+      input.style.width = '30ch';
+      input.addEventListener('change', () => {
+        city.name = input.value;
+        drawGrid();
+        drawEntities();
+        updateCityList();
+      });
+      li.appendChild(input);
+  
+      // Create BT bubbles next to the city name
+      const marchTimes = city.marchTimes || calculateMarchTimes(city);
+      marchTimes.forEach((time, i) => {
+      const key = `bt${i+1}`;
+      const isPriority = city.priorities && city.priorities[key];
+      const bubble = document.createElement('span');
+      bubble.textContent = `BT${i+1}: ${time}s`;
+      // Use CSS classes for styling
+      bubble.classList.add('bt-bubble');
+      if (isPriority) bubble.classList.add('selected');
+      
+      bubble.addEventListener('click', () => {
+        city.priorities = city.priorities || {};
+        city.priorities[key] = !city.priorities[key];
+        if (city.priorities[key]) {
+          // Swap with best unprioritized candidate
+          const candidates = entities
+            .filter(e => e.type === 'city')
+            .filter(e => !(e.priorities && e.priorities[key]));
+          if (candidates.length) {
+            let bestCity = candidates[0];
+            let bestTime = evaluateBTTime(bestCity, i);
+            candidates.forEach(c => {
+              const t = evaluateBTTime(c, i);
+              if (t < bestTime) {
+                bestTime = t;
+                bestCity = c;
+              }
+            });
+            // Swap coords
+            [city.x, bestCity.x] = [bestCity.x, city.x];
+            [city.y, bestCity.y] = [bestCity.y, city.y];
+          }
+        }
+        drawGrid();
+        drawEntities();
+        updateCityList();
+      });
+      li.appendChild(bubble);
+      });
+  
+      cityList.appendChild(li);
     });
-}
-
+  }
+  
+  window.addEventListener('DOMContentLoaded', () => {
+    enablePopulateSortOptions('id');
+    updateCityList();
+  });
 
 
 function selectEntity(event) {
@@ -369,7 +476,7 @@ function renumberCities() {
       .forEach(city => {
             city.id = newId;
             if (!city.name || city.name.startsWith('City ')) {
-                city.name = `${newId}`;
+                city.name = `City ${newId}`;
             }
             newId++;
       });
@@ -699,6 +806,7 @@ canvas.addEventListener('mousemove', (event) => {
         selectedEntity.y = newY;
         drawGrid();
         drawEntities();
+        updateCityList();
     }
 });
 
