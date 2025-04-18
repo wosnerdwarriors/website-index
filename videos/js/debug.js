@@ -8,7 +8,7 @@
         active: false,
         layout: 'grid',
         categories: 'flat',
-        videoDisplay: 'thumbnail', 
+        videoDisplay: 'embed', 
         theme: 'default'
     };
 
@@ -382,13 +382,13 @@
         // Reset form values
         layoutStyle.value = 'grid';
         categoryStyle.value = 'flat';
-        videoDisplay.value = 'thumbnail';
+        videoDisplay.value = 'embed';
         colorTheme.value = 'default';
         
         // Update state
         debugState.layout = 'grid';
         debugState.categories = 'flat';
-        debugState.videoDisplay = 'thumbnail';
+        debugState.videoDisplay = 'embed';
         debugState.theme = 'default';
         
         // Clear styles

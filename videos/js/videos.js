@@ -208,6 +208,11 @@
         } else {
             noResults.classList.add('hidden');
             
+            // Set default videoDisplayMode to 'embed' if not set by debug
+            if (window.videoDisplayMode === undefined) {
+                window.videoDisplayMode = 'embed';
+            }
+            
             // Check for fullwidth mode before rendering
             if (window.videoDisplayMode === 'fullwidth') {
                 // Create a wrapper for non-featured videos
