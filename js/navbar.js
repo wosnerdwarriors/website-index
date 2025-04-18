@@ -42,18 +42,27 @@
   navbarDiv.id = 'wosnerds-navbar';
   body.insertBefore(navbarDiv, body.firstChild);
 
-  // Load the HTML content
-  loadHTML("/navbar.html", function(data) {
-    document.getElementById('wosnerds-navbar').innerHTML = data;
-    
-    // Add close button for mobile
-    addCloseButton();
-    
-    // Generate the dynamic navbar
-    generateNavbar();
-    
-    // Set up mobile menu toggle functionality after navbar is loaded
-    setupMobileMenu();
+  // Get navbar URL from config
+  async function getNavbarUrl() {
+    const configResponse = await fetch('/config.json');
+    const config = await configResponse.json();
+    return config.dataSources.navbar.url;
+  }
+
+  // Load the navbar content
+  getNavbarUrl().then(navbarUrl => {
+    loadHTML(navbarUrl, function(data) {
+      document.getElementById('wosnerds-navbar').innerHTML = data;
+      
+      // Add close button for mobile
+      addCloseButton();
+      
+      // Generate the dynamic navbar
+      generateNavbar();
+      
+      // Set up mobile menu toggle functionality after navbar is loaded
+      setupMobileMenu();
+    });
   });
 
   // Function to generate the navbar items
