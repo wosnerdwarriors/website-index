@@ -7,6 +7,7 @@
     <meta property="og:description" content="Check out this Layout!">
     <meta property="og:url" content="https://wosnerds.com/layout-planner/index.html">
     <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
+    <link rel="stylesheet" href="./css/style.css">
     <title>Alliance Layout Planner</title>
     <style>
         #layoutCanvas {
@@ -73,7 +74,9 @@
     </div>
 
     <div class="container mx-auto px-4 py-6 mt-16 md:ml-64">
-        <h2 class="text-xl font-semibold mb-4 text-center">Cities List</h2>
+        <h2 class="text-xl font-semibold mb-4">Cities List</h2>
+            <label for="citySort">Sort by:</label>
+            <select id="citySort"></select>
         <ul id="cityList" class="space-y-2 p-0 m-0"></ul>
     </div>
 
