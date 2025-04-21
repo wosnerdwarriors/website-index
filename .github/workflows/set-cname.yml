@@ -14,22 +14,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up custom domain
+      - name: Determine domain name
+        id: set-cname
         run: |
-          DOMAIN=""
           if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-          	DOMAIN="wosnerds.com"
+          	echo "domain=wosnerds.com" >> $GITHUB_OUTPUT
           elif [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
-          	DOMAIN="dev.wosnerds.com"
+          	echo "domain=dev.wosnerds.com" >> $GITHUB_OUTPUT
           fi
-          echo "$DOMAIN" > CNAME
-
-      - name: Verify CNAME file
-        run: cat CNAME
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./  # This assumes your HTML is in the root
+          publish_dir: ./
+          cname: ${{ steps.set-cname.outputs.domain }}
 
