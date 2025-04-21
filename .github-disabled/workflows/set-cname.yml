@@ -1,32 +1,34 @@
-#name: Set CNAME based on branch
-#
-#on:
-#  push:
-#    branches:
-#      - main
-#      - dev
-#
-#jobs:
-#  set-cname:
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v3
-#
-#      - name: Set CNAME for main branch
-#        if: github.ref == 'refs/heads/main'
-#        run: echo "wosnerds.com" > CNAME
-#
-#      - name: Set CNAME for dev branch
-#        if: github.ref == 'refs/heads/dev'
-#        run: echo "dev.wosnerds.com" > CNAME
-#
-#      - name: Verify CNAME file
-#        run: cat CNAME
-#
-#      - name: Deploy to GitHub Pages
-#        uses: peaceiris/actions-gh-pages@v3
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          publish_dir: ./  # The directory to publish
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up custom domain
+        run: |
+          DOMAIN=""
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+          	DOMAIN="wosnerds.com"
+          elif [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+          	DOMAIN="dev.wosnerds.com"
+          fi
+          echo "$DOMAIN" > CNAME
+
+      - name: Verify CNAME file
+        run: cat CNAME
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
