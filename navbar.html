@@ -1,48 +1,26 @@
-<div class="wosnerds-navbar-container">
-	<a href="/">
-		<img src="/greg.png" alt="WOS Nerds Logo" class="wosnerds-navbar-logo">
-	</a>
-	<ul class="wosnerds-navbar-nav flex-column mt-4">
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="/researchtree">Research Calc</a>
-		</li>
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="/troop-stats">Troop Stats</a>
-		</li>
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="/calendar">Calendar</a>
-		</li>
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="/svs-history">SVS History</a>
-		</li>
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="/alliancerss">Alliance RSS Calculator</a>
-		</li>
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="/formationbuilder">Formation Builder</a>
-		</li>
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="https://drive.google.com/drive/folders/1rTwI6mXDYvFZHo8MhWQciCcNPprTmfFe?usp=sharing" target="_blank">Google Drive</a>
-		</li>
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="https://www.youtube.com/@WosNerds" target="_blank">YouTube</a>
-		</li>
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="https://discord.gg/dMYY8bcPXp" target="_blank">Discord</a>
-		</li>
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="https://github.com/wosnerdwarriors" target="_blank">Github Source Code</a>
-		</li>
+<!-- Mobile Menu Toggle Button (only visible on small screens) -->
+<button id="mobile-menu-toggle" class="fixed top-4 right-4 z-50 p-2 rounded-md bg-blue-500 border border-blue-600 shadow-md md:hidden">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+  </svg>
+  <span class="sr-only">Toggle Menu</span>
+</button>
 
-		<!-- New Section: Data Collection -->
-		<li class="wosnerds-navbar-item mt-4">
-			<h5>Data Collection</h5>
-		</li>
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="https://forms.gle/BBnuL5V8LJ12mB9S7" target="_blank">SvS Match Results</a>
-		</li>
-		<li class="wosnerds-navbar-item">
-			<a class="wosnerds-navbar-link" href="https://forms.gle/zeZJY8PBRHWsem2u7" target="_blank">State Age</a>
-		</li>
-	</ul>
+<!-- Sidebar Navigation - Hidden on Mobile by Default -->
+<div id="wosnerds-navbar-container" class="bg-gray-100 w-full md:w-64 h-screen fixed top-0 left-0 md:flex flex-col items-center py-4 shadow-md rounded-r-lg overflow-y-auto z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+  <div class="p-3 flex justify-center w-full">
+    <a href="/" class="block w-auto md:w-4/5 mx-auto">
+      <img src="/greg.png" alt="WOS Nerds Logo" class="w-auto h-auto object-contain pb-2 md:pb-4 border-b-2 border-gray-500 max-h-[80px] md:max-h-none max-w-[70px] md:max-w-full">
+    </a>
+  </div>
+  <h2 class="text-center text-lg font-bold text-gray-800 mb-2 md:hidden">WOS Nerds</h2>
+  
+  <nav class="w-full px-4 mt-4 overflow-y-auto">
+    <ul id="navbar-links" class="space-y-3 w-full">
+      <!-- Menu items will be dynamically inserted here by JavaScript -->
+    </ul>
+  </nav>
 </div>
+
+<!-- Overlay for mobile menu backdrop -->
+<div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-30 hidden md:hidden"></div>

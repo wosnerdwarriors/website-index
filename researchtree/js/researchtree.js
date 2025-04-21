@@ -23,13 +23,14 @@ let wantedResearchState = {
 	Battle: {}
 };
 
-let currentWantedOrExistingResearchState = existingResearchState;
+let currentWantedOrExistingResearchState = wantedResearchState;
 
 // Function to attach event handlers to research items
 function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType) {
 	researchItemsInRow.forEach(researchItem => {
 		let currentResearchLevel = currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID];
 		const maxResearchLevel = researchItem.levels ? Object.keys(researchItem.levels).length : 0;
+		const existingResearchLevel = existingResearchState[researchTreeType][researchItem.researchID] || 0;
 
 		// Add event listener to increase button
 		const increaseButton = document.getElementById(`increase-${researchTreeType}-${researchItem.researchID}`);
@@ -72,8 +73,20 @@ function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType
 		// Add event listener to decrease button
 		const decreaseButton = document.getElementById(`decrease-${researchTreeType}-${researchItem.researchID}`);
 		if (decreaseButton) {
+			// Disable the button if the current level is <= existing level
+			if (currentResearchLevel <= existingResearchLevel) {
+				decreaseButton.disabled = true;
+				decreaseButton.classList.add('btn-secondary');
+				decreaseButton.classList.remove('btn-primary');
+			} else {
+				decreaseButton.disabled = false;
+				decreaseButton.classList.remove('btn-secondary');
+				decreaseButton.classList.add('btn-primary');
+			}
+
+			// Add click event listener to handle downgrades
 			decreaseButton.addEventListener('click', () => {
-				if (currentResearchLevel > 0) {
+				if (currentResearchLevel > 0 && currentResearchLevel > existingResearchLevel) {
 					if (!isBlockedFromDowngrade(researchItem.researchID, researchTreeType)) {
 						currentResearchLevel--;
 						currentWantedOrExistingResearchState[researchTreeType][researchItem.researchID] = currentResearchLevel;
@@ -87,9 +100,26 @@ function attachEventHandlersToResearchItems(researchItemsInRow, researchTreeType
 }
 
 
+function getWhichWantedOrExistingModeIsActive()
+{
+	if (currentWantedOrExistingResearchState === existingResearchState) {
+	    return "existingResearchState";
+	} else if (currentWantedOrExistingResearchState === wantedResearchState) {
+	    return "wantedResearchState";
+	} else {
+	    return "unknown";
+	}
+}
 
 // Function to update the research info bar with total resources and time for all trees
 function updateTotalResourcesAndTime() {
+	if (debugMode) {
+		console.log("running updateTotalResourcesAndTime");
+		console.log("wantedResearchState is:", wantedResearchState);
+		console.log("current mode is:", getWhichWantedOrExistingModeIsActive());
+	}
+
+let currentWantedOrExistingResearchState = existingResearchState;
 	let totalResources = {
 		meat: 0,
 		wood: 0,
@@ -102,6 +132,7 @@ function updateTotalResourcesAndTime() {
 	let totalResearchTime = 0;
 	let reducedResearchTime = 0;
 	const researchSpeed = getResearchSpeed();  // Retrieve research speed as a decimal (e.g., 0.8 for 80%)
+
 
 	// Calculate total resources and total research time for all research trees
 	['Growth', 'Economy', 'Battle'].forEach(treeType => {
@@ -147,7 +178,7 @@ function updateTotalResourcesAndTime() {
 }
 // Function to generate HTML for total stats
 function generateTotalStatsHTML(stats, title) {
-	let htmlContent = `<h4>${title}</h4><div class="stat-section">`;
+	let htmlContent = `<h4>${title} (unfinished)</h4><div class="stat-section">`;
 	Object.keys(stats).forEach(statName => {
 		htmlContent += `
 			<div class="stat-item">
@@ -236,12 +267,27 @@ function generateResearchItemCell(researchItem, researchTreeType) {
 	const stat = researchItem.stat || "N/A";
 	const statAddition = nextLevelData['stat-addition'] || 0;
 
+	// Strip the suffix (dash and Roman numeral) from the research ID for the image URL
+	const strippedName = researchItem.researchID.replace(/-\w+$/, '');
+
+	// Construct the image URL using the helper function
+	const imageURL = getImageUrl(`research/${strippedName}.png`);
+
+
+	// Check which type of requirement to show (research/building or resource costs)
+	const showResearchRequirements = document.getElementById('requirementsToggle').checked;
+	const requirementsHTML = showResearchRequirements ? 
+		getResearchRequirementsHTML(researchItem, researchTreeType, nextLevel) : 
+		getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time-seconds'] || 0, researchSpeed, isMaxed);
+
 	return `
 		<td>
 			<div class="d-flex justify-content-between" style="height: 100%;">
 				<!-- Left Side: Research Info -->
 				<div class="left-side" style="width: 50%; padding-right: 10px;">
-					<div class="research-square"></div>
+					<div class="research-square">
+						<img src="${imageURL}" alt="${researchItem.name} image" onerror="this.style.display='none'; this.parentElement.style.backgroundColor='red';" style="width: 100%; height: 100%; object-fit: contain;" />
+					</div>
 					<div class="research-item-name">${researchItem.name}</div>
 					<div class="research-item-level">Level: <span id="level-${researchTreeType}-${researchItem.researchID}">${currentLevel}</span>/${maxLevel}</div>
 					<div class="button-group">
@@ -259,13 +305,83 @@ function generateResearchItemCell(researchItem, researchTreeType) {
 					</div>
 				</div>
 
-				<!-- Right Side: Resource Costs, Time -->
+				<!-- Right Side: Resource or Research/Building Requirements -->
 				<div class="right-side" style="width: 50%; padding-left: 10px;">
-					${getResourceAndTimeHTML(nextLevelData.cost || {}, nextLevelData['research-time-seconds'] || 0, researchSpeed, isMaxed)}
+					${requirementsHTML}
 				</div>
 			</div>
 		</td>
 	`;
+}
+
+
+
+
+function getResearchRequirementsHTML(researchItem, researchTreeType, targetLevel) {
+    let htmlContent = '';
+
+    // Retrieve research requirements for the specified level
+    const researchRequirements = researchItem.levels[targetLevel]?.requirements?.['research-items'];
+    const buildingRequirements = researchItem.levels[targetLevel]?.requirements?.['buildings'];
+
+    if (researchRequirements) {
+        htmlContent += '<div class="requirements-section"><b>Research:</b>';
+        Object.entries(researchRequirements).forEach(([requiredResearchID, requiredLevel]) => {
+            const currentLevel = currentWantedOrExistingResearchState[researchTreeType][requiredResearchID] || 0;
+            const requirementMet = currentLevel >= requiredLevel;
+            const requirementClass = requirementMet ? 'requirement-met' : 'requirement-not-met';
+
+            const researchName = researchConfigData[researchTreeType][requiredResearchID].name || requiredResearchID;
+            htmlContent += `
+                <div class="requirement-item ${requirementClass}">
+                    <span>${researchName}	lvl ${requiredLevel} </span>
+                </div>`;
+        });
+        htmlContent += '</div>';
+    }
+
+    if (buildingRequirements) {
+        htmlContent += '<div class="requirements-section"><b>Buildings:</b>';
+        Object.entries(buildingRequirements).forEach(([requiredBuilding, requiredLevel]) => {
+            //const requirementMet = currentBuildingLevel >= requiredLevel;
+            //const requirementClass = requirementMet ? 'requirement-met' : 'requirement-not-met';
+        	const requirementClass = 'requirement-met';
+            
+            htmlContent += `
+                <div class="requirement-item ${requirementClass}">
+                    <span>${requiredBuilding}	 lvl ${requiredLevel}</span>
+                </div>`;
+        });
+        htmlContent += '</div>';
+    }
+    return htmlContent;
+}
+
+
+// Helper function to get image URLs from config
+async function getImageBaseUrl() {
+    const configResponse = await fetch('/config.json');
+    const config = await configResponse.json();
+    return config.images.baseUrl;
+}
+
+// Cache the base URL promise
+const imageBaseUrlPromise = getImageBaseUrl();
+
+// Helper function to get image URLs
+function getImageUrl(path) {
+    // Get base URL from localStorage (cached from config)
+    const configResponse = localStorage.getItem('researchConfig');
+    if (configResponse) {
+        const config = JSON.parse(configResponse);
+        if (config.imageBaseUrl) {
+            return `${config.imageBaseUrl}/${path}`;
+        }
+    }
+    
+    // If localStorage cache doesn't exist yet, use a placeholder
+    // This will be replaced after the config loads
+    return `images/${path}`;
 }
 
 function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed, isMaxed=false) {
@@ -281,28 +397,28 @@ function getResourceAndTimeHTML(resourceCosts, researchTime, researchSpeed, isMa
 	return `
 		<div class="resource-costs">
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/meat-ico.png" alt="Meat Icon"> Meat</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/meat-ico.png')}" alt="Meat Icon"> Meat</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.meat || 0)}</div>
 			</div>
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/wood-ico.png" alt="Wood Icon"> Wood</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/wood-ico.png')}" alt="Wood Icon"> Wood</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.wood || 0)}</div>
 			</div>
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/coal-ico.png" alt="Coal Icon"> Coal</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/coal-ico.png')}" alt="Coal Icon"> Coal</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.coal || 0)}</div>
 			</div>
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/iron-ico.png" alt="Iron Icon"> Iron</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/iron-ico.png')}" alt="Iron Icon"> Iron</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.iron || 0)}</div>
 			</div>
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/steel-ico.png" alt="Steel Icon"> Steel</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/steel-ico.png')}" alt="Steel Icon"> Steel</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.steel || 0)}</div>
 			</div>
 			<!--
 			<div class="resource-item">
-				<div class="resource-item-left"><img src="https://data.wosnerds.com/images/items/fc-ico.png" alt="FC Icon"> FC</div>
+				<div class="resource-item-left"><img src="${getImageUrl('items/fc-ico.png')}" alt="FC Icon"> FC</div>
 				<div class="resource-item-right">${isMaxed ? 'MAXED' : formatResource(resourceCosts.fc || 0)}</div>
 			</div>
 			-->
@@ -444,18 +560,36 @@ function getResearchSpeed() {
 	return isNaN(speedValue) || speedValue < 0 ? 0 : speedValue / 100;
 }
 
-function loadresearchConfigData() {
-	if (debugMode) console.log('Attempting to load research data json');
+// Get data source URL from config
+async function getResearchDataUrl() {
+    const configResponse = await fetch('/config.json');
+    const config = await configResponse.json();
+    return config.dataSources.research.url;
+}
 
-	fetch('https://data.wosnerds.com/data/research-upgrades.json')
-		.then(response => response.ok ? response.json() : Promise.reject(`Failed with status ${response.status}`))
-		.then(data => {
-			researchConfigData = data;
-			initializeResearchStates();
-			if (debugMode) console.log('Research data loaded:', researchConfigData);
-			renderResearchTree();
-		})
-		.catch(error => console.error('Error loading research data:', error));
+async function loadresearchConfigData() {
+    if (debugMode) console.log('Attempting to load research data json');
+
+    // Load and cache the image base URL in localStorage
+    const imageBaseUrl = await imageBaseUrlPromise;
+    localStorage.setItem('researchConfig', JSON.stringify({
+        imageBaseUrl: imageBaseUrl
+    }));
+    if (debugMode) console.log('Cached image base URL:', imageBaseUrl);
+    
+    // Get data URL from config
+    const dataUrl = await getResearchDataUrl();
+    console.log('Fetching research data from:', dataUrl);
+    
+    // Fetch the data
+    const response = await fetch(dataUrl);
+    const data = await response.json();
+    
+    // Process the data
+    researchConfigData = data;
+    initializeResearchStates();
+    if (debugMode) console.log('Research data loaded:', researchConfigData);
+    renderResearchTree();
 }
 
 function updateDebugTable() {
@@ -634,5 +768,9 @@ document.getElementById('recursiveUpgradeToggle').addEventListener('change', fun
     if (debugMode) {
         console.log(`Recursive upgrade enabled: ${allowRecursiveUpgradeWanted}`);
     }
+    renderResearchTree(); // Re-render the research tree to apply the toggle change
+});
+
+document.getElementById('requirementsToggle').addEventListener('change', function () {
     renderResearchTree(); // Re-render the research tree to apply the toggle change
 });

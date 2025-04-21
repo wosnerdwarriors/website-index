@@ -1,0 +1,16 @@
+{
+  "name": "wos-index",
+  "version": "1.0.0",
+  "description": "WOS Nerds Website",
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./tailwind/input.css -o ./dist/css/tailwind.css",
+    "watch:css": "npx tailwindcss -i ./tailwind/input.css -o ./dist/css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  },
+  "main": "convert-page.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

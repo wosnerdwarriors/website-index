@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whiteout Survival Events/Packs Calendar</title>
-
+    
+    <link rel="stylesheet" href="/dist/css/tailwind.css?v=1">
     <link rel="stylesheet" href="/calendar/css/calendar.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- FullCalendar and RRULE scripts -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
@@ -14,60 +14,91 @@
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/rrule@6.1.15/index.global.min.js"></script>
 </head>
 
-<body>
-    <h1>Whiteout Survival Events/Packs Calendar (UTC)</h1>
-    <h2>WORK IN PROGRESS! Not too much data yet and web vew not finished either</h2>
+<body class="bg-gray-50">
+    <div id="navbar-container"></div>
 
-    <!-- Buttons to switch between calendar views -->
-    <div class="btn-group" role="group" aria-label="Calendar Views" style="margin-bottom: 20px;">
-        <button type="button" id="month-view" class="btn btn-primary active">Month View</button>
-        <button type="button" id="week-view" class="btn btn-outline-primary">Week View</button>
-        <button type="button" id="day-view" class="btn btn-outline-primary">Day View</button>
-        <button type="button" id="agenda-view" class="btn btn-outline-primary">Agenda View</button>
-    </div>
+    <!-- Main Content Container -->
+    <div class="container mx-auto px-4 py-6 mt-16 md:ml-64">
+        <div class="wos-container">
+            <header class="text-center mb-6">
+                <h1 class="text-2xl md:text-3xl font-bold mb-2">Whiteout Survival Events/Packs Calendar (UTC)</h1>
+                <h2 class="text-red-500 text-sm md:text-base">WORK IN PROGRESS! Not too much data yet and web view not finished either</h2>
+                
+                <!-- Calendar View Buttons -->
+                <div class="flex flex-wrap justify-center gap-2 mt-4">
+                    <button type="button" id="month-view" class="px-3 py-2 bg-blue-500 text-white rounded text-sm">Month View</button>
+                    <button type="button" id="week-view" class="px-3 py-2 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300">Week View</button>
+                    <button type="button" id="day-view" class="px-3 py-2 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300">Day View</button>
+                    <button type="button" id="agenda-view" class="px-3 py-2 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300">Agenda View</button>
+                </div>
+            </header>
 
-    <div id="layout" class="d-flex">
-        <!-- Filter box on the left -->
-        <div id="filters" class="p-3">
-            <!-- Events Section -->
-            <h3>Events</h3>
-            <div class="mb-2">
-                <button id="select-all-events" class="btn btn-sm btn-outline-secondary">Select All</button>
-                <button id="select-none-events" class="btn btn-sm btn-outline-secondary">Select None</button>
-            </div>
-            <div id="event-filter-list" class="scroll-box">
-                <!-- Event checkboxes will be dynamically added here -->
-            </div>
+            <!-- Responsive Layout - Mobile First -->
+            <div class="flex flex-col md:flex-row md:space-x-4">
+                <!-- Filters Section - Toggleable on Mobile -->
+                <div id="mobile-filters-toggle" class="md:hidden mb-4">
+                    <button class="w-full py-2 bg-blue-500 text-white rounded-md" onclick="toggleFilters()">
+                        Toggle Filters
+                    </button>
+                </div>
+                
+                <!-- Filters Box -->
+                <div id="filters" class="wos-card mb-4 md:mb-0 md:w-64 hidden md:block">
+                    <!-- Events Section -->
+                    <h3 class="text-lg font-semibold mb-2">Events</h3>
+                    <div class="flex gap-2 mb-2">
+                        <button id="select-all-events" class="wos-btn-sm bg-gray-200 text-gray-800 hover:bg-gray-300">Select All</button>
+                        <button id="select-none-events" class="wos-btn-sm bg-gray-200 text-gray-800 hover:bg-gray-300">Select None</button>
+                    </div>
+                    <div id="event-filter-list" class="max-h-[200px] overflow-y-auto border border-gray-200 rounded p-2 mb-4"></div>
 
-            <!-- Packs Section -->
-            <h3>Packs</h3>
-            <div class="mb-2">
-                <button id="select-all-packs" class="btn btn-sm btn-outline-secondary">Select All</button>
-                <button id="select-none-packs" class="btn btn-sm btn-outline-secondary">Select None</button>
-            </div>
-            <div id="pack-filter-list" class="scroll-box">
-                <!-- Pack checkboxes will be dynamically added here -->
+                    <!-- Packs Section -->
+                    <h3 class="text-lg font-semibold mb-2">Packs</h3>
+                    <div class="flex gap-2 mb-2">
+                        <button id="select-all-packs" class="wos-btn-sm bg-gray-200 text-gray-800 hover:bg-gray-300">Select All</button>
+                        <button id="select-none-packs" class="wos-btn-sm bg-gray-200 text-gray-800 hover:bg-gray-300">Select None</button>
+                    </div>
+                    <div id="pack-filter-list" class="max-h-[200px] overflow-y-auto border border-gray-200 rounded p-2"></div>
+                </div>
+
+                <!-- Calendar in the center - Full Width on Mobile -->
+                <div id="calendar" class="wos-card flex-grow mb-4"></div>
+
+                <!-- Event Details Box - Bottom on Mobile, Right on Desktop -->
+                <div id="event-details" class="wos-card md:w-64">
+                    <h3 class="text-lg font-semibold mb-2">Event Details</h3>
+                    <div id="specific-event-details" class="mb-4">
+                        <p class="text-gray-500">Click on an event to see details</p>
+                    </div>
+                    <hr class="border-gray-200 my-3">
+                    <h4 class="font-medium mb-2">General Information</h4>
+                    <div id="general-event-details">
+                        <p class="text-gray-500">No event selected</p>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <!-- Calendar in the center -->
-        <div id="calendar" class="flex-grow-1"></div>
-
-        <!-- Event details box on the right -->
-        <div id="event-details" class="p-3">
-            <h3>Event Details</h3>
-            <div id="specific-event-details">
-                <p>Click on an event to see details</p>
-            </div>
-            <hr>
-            <h4>General Information</h4>
-            <div id="general-event-details">
-                <p>No event selected</p>
-            </div>
-        </div>
+        
+        <!-- Footer -->
+        <footer class="mt-auto py-4 text-center text-gray-600 border-t">
+            <p>All data is free to copy and use. See <a href="https://github.com/wosnerdwarriors" target="_blank" class="text-blue-600 hover:underline">https://github.com/wosnerdwarriors</a> for source code</p>
+        </footer>
     </div>
 
+    <!-- Add mobile filter toggle script -->
+    <script>
+        function toggleFilters() {
+            const filtersElem = document.getElementById('filters');
+            if (filtersElem.classList.contains('hidden')) {
+                filtersElem.classList.remove('hidden');
+            } else {
+                filtersElem.classList.add('hidden');
+            }
+        }
+    </script>
+    
     <!-- Link to JS files -->
+    <script src="/js/navbar.js"></script>
     <script src="/calendar/js/data-links.js"></script>
     <script src="/calendar/js/calendar.js"></script>
 </body>

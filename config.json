@@ -1,0 +1,32 @@
+{
+  "dataSources": {
+    "videos": {
+      "url": "https://data.wosnerds.com/data/website-videos.json"
+    },
+    "calendar": {
+      "url": "https://data.wosnerds.com/data/calendar-data.json"
+    },
+    "svs": {
+      "url": "https://data.wosnerds.com/data/svs-history.json"
+    },
+    "research": {
+      "url": "https://data.wosnerds.com/data/research-upgrades.json"
+    },
+    "troopStats": {
+      "url": "https://data.wosnerds.com/data/troop-stats.json"
+    },
+    "template": {
+      "url": "/template.html"
+    },
+    "navbar": {
+      "url": "/navbar.html"
+    }
+  },
+  "images": {
+    "baseUrl": "https://data.wosnerds.com/images"
+  },
+  "features": {
+    "enableDebug": true,
+    "cacheTimeout": 3600
+  }
+}
