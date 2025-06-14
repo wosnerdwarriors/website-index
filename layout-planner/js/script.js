@@ -20,6 +20,7 @@ let bearTraps = [];
 let isDragging = false;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
+let hasUnsavedChanges = false;
 
 function updateCounters() {
     const flags = entities.filter(entity => entity.type === 'flag').length;
@@ -210,157 +211,46 @@ function addEntity(event) {
         drawGrid();
         drawEntities();
         updateCounters();
+        markUnsavedChanges();
 
-        if (selectedType === 'city' || selectedType === 'building') {
+        if (selectedType === 'city') {
             updateCityList();
         }
     }
 }
 
-function evaluateBTTime(city, index){
-    const times = calculateMarchTimes(city);
-    return times.length > index ? times[index] : Infinity;
-  };
-  
-function evaluateCombinedTime(city) {
-    const times = calculateMarchTimes(city);
-    if (times.length < 2) return Infinity;
-    return times[0] + times[1];
-  }
-  
-// Populate sort selector dynamically
-enablePopulateSortOptions = (selected) => {
-    const sortSelect = document.getElementById('citySort');
-    if (!sortSelect) return;
-    sortSelect.innerHTML = '';
-    sortSelect.appendChild(new Option('ID', 'id'));
-    sortSelect.appendChild(new Option('Name', 'name'));
-    // Check presence of BT1/BT2
-    const cities = entities.filter(e => e.type === 'city');
-    const anyBT1 = cities.some(c => calculateMarchTimes(c).length >= 1);
-    const anyBT2 = cities.some(c => calculateMarchTimes(c).length >= 2);
-    if (anyBT1) sortSelect.appendChild(new Option('BT1-Time', 'bt1'));
-    if (anyBT2) sortSelect.appendChild(new Option('BT2-Time', 'bt2'));
-    if (anyBT1 && anyBT2) sortSelect.appendChild(new Option('Combined BT1+BT2', 'both'));
-    if (selected && Array.from(sortSelect.options).some(o => o.value === selected)) {
-      sortSelect.value = selected;
-    } else {
-      sortSelect.value = 'id';
-    }
-    sortSelect.onchange = updateCityList;
-  };
-  
-// Main: sort, pin prioritized, render list
 function updateCityList() {
-    // Get march times for all cities
-    entities.filter(e => e.type === 'city').forEach(city => { city.marchTimes = calculateMarchTimes(city); });
     const cityList = document.getElementById('cityList');
-    const sortSelect = document.getElementById('citySort');
-    if (!cityList || !sortSelect) return;
-  
-    const sortBy = sortSelect.value;
-    enablePopulateSortOptions(sortBy);
+    if (!cityList) return;
     cityList.innerHTML = '';
-  
-    let cities = entities.filter(e => e.type === 'city');
-    const btIndex = sortBy === 'bt1' ? 0 : sortBy === 'bt2' ? 1 : null;
-  
-    // Separate prioritized
-    const prioritized = btIndex !== null
-      ? cities.filter(c => c.priorities && c.priorities[`bt${btIndex+1}`])
-      : [];
-    const others = btIndex !== null
-      ? cities.filter(c => !(c.priorities && c.priorities[`bt${btIndex+1}`]))
-      : cities;
-  
-    // Comparator for sorting
-    const comparator = (a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return (a.name || `City ${a.id}`)
-            .toLowerCase()
-            .localeCompare((b.name || `City ${b.id}`).toLowerCase());
-        case 'bt1':
-          return evaluateBTTime(a, 0) - evaluateBTTime(b, 0);
-        case 'bt2':
-          return evaluateBTTime(a, 1) - evaluateBTTime(b, 1);
-        case 'both':
-          return evaluateCombinedTime(a) - evaluateCombinedTime(b);
-        default:
-          return a.id - b.id;
-      }
-    };
-  
-    prioritized.sort(comparator);
-    others.sort(comparator);
-  
-    // Prioritize cities 
-    [...prioritized, ...others].forEach(city => {
-      const li = document.createElement('li');
-      li.className = 'flex items-center space-x-2 mb-2';
-  
-      // City name input
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.value = city.name || `City ${city.id}`;
-      input.placeholder = `City ${city.id}`;
-      input.className = 'border p-1 rounded';
-      input.style.width = '30ch';
-      input.addEventListener('change', () => {
-        city.name = input.value;
-        drawGrid();
-        drawEntities();
-        updateCityList();
-      });
-      li.appendChild(input);
-  
-      // Create BT bubbles next to the city name
-      city.marchTimes.forEach((time, i) => {
-        const key = `bt${i+1}`;
-        const isPriority = city.priorities && city.priorities[key];
-        const bubble = document.createElement('span');
-        bubble.textContent = `BT${i+1}: ${time}s`;
-        bubble.classList.add('bt-bubble');
-        if (isPriority) bubble.classList.add('selected');
-        bubble.addEventListener('click', () => {
-          city.priorities = city.priorities || {};
-          city.priorities[key] = !city.priorities[key];
-          if (city.priorities[key]) {
-            // Get best candidate for swap
-            const candidates = entities.filter(e => e.type === 'city' && !(e.priorities && e.priorities[key]));
-            if (candidates.length) {
-              let bestCity = candidates[0];
-              let bestTime;
-              if (sortBy === 'both') {
-                bestTime = evaluateCombinedTime(bestCity);
-              } else {
-                bestTime = evaluateBTTime(bestCity, i);
-              }
-              candidates.forEach(c => {
-                const t = sortBy === 'both' ? evaluateCombinedTime(c) : evaluateBTTime(c, i);
-                if (t < bestTime) {
-                  bestTime = t;
-                  bestCity = c;
-                }
-              });
-              // Swap coords
-              [city.x, bestCity.x] = [bestCity.x, city.x];
-              [city.y, bestCity.y] = [bestCity.y, city.y];
-            }
-          }
-          drawGrid(); drawEntities(); updateCityList();
+
+    // List by ID
+    const cities = entities
+        .filter(entity => entity.type === 'city')
+        .sort((a, b) => a.id - b.id);
+
+    cities.forEach(city => {
+        const li = document.createElement('li');
+        const input = document.createElement('input');
+        input.type = 'text';
+        // Show custom name or ID
+        input.value = city.name || `City ${city.id}`;
+        input.placeholder = `City ${city.id}`;
+        input.className = "border p-1 rounded w-full";
+
+        // Update map on namechange
+        input.addEventListener('change', () => {
+            city.name = input.value;
+            drawGrid();
+            drawEntities();
+            markUnsavedChanges();
         });
-        li.appendChild(bubble);
-      });
-  
-      cityList.appendChild(li);
+        
+        li.appendChild(input);
+        cityList.appendChild(li);
     });
-  }
-  
-  window.addEventListener('DOMContentLoaded', () => {
-    enablePopulateSortOptions('id');
-    updateCityList();
-  });
+}
+
 
 
 function selectEntity(event) {
@@ -409,6 +299,7 @@ function handleDeleteOrMove(event) {
         drawGrid();
         drawEntities();
         updateCityList();
+        markUnsavedChanges();
         return;
     }
 
@@ -430,6 +321,7 @@ function handleDeleteOrMove(event) {
           drawEntities();
           updateCounters();
           updateCityList();
+          markUnsavedChanges();
       }
     }
 
@@ -437,21 +329,25 @@ function handleDeleteOrMove(event) {
         const newY = selectedEntity.y - 1;
         if (newY >= 0 && isPositionValid(selectedEntity.x, newY, selectedEntity)) {
             selectedEntity.y = newY;
+            markUnsavedChanges();
         }
     } else if (event.key === 'ArrowDown') {
         const newY = selectedEntity.y + 1;
         if (newY + selectedEntity.height <= gridCount && isPositionValid(selectedEntity.x, newY, selectedEntity)) {
             selectedEntity.y = newY;
+            markUnsavedChanges();
         }
     } else if (event.key === 'ArrowLeft') {
         const newX = selectedEntity.x - 1;
         if (newX >= 0 && isPositionValid(newX, selectedEntity.y, selectedEntity)) {
             selectedEntity.x = newX;
+            markUnsavedChanges();
         }
     } else if (event.key === 'ArrowRight') {
         const newX = selectedEntity.x + 1;
         if (newX + selectedEntity.width <= gridCount && isPositionValid(newX, selectedEntity.y, selectedEntity)) {
             selectedEntity.x = newX;
+            markUnsavedChanges();
         }
     }
 
@@ -482,7 +378,7 @@ function renumberCities() {
       .forEach(city => {
             city.id = newId;
             if (!city.name || city.name.startsWith('City ')) {
-                city.name = `City ${newId}`;
+                city.name = `${newId}`;
             }
             newId++;
       });
@@ -592,7 +488,6 @@ function decompressMap(base64) {
     return entities;
 }
 
-
 // Sanitize map name to remove invalid characters and limit length
 function sanitizeMapName(name) {
     return name.replace(/[^a-zA-Z0-9 \-_]/g, '').substring(0, 30);
@@ -632,7 +527,10 @@ function saveMap() {
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.set('mapData', compressedMap);
         window.history.replaceState(null, '', newUrl);
-    } catch (e) {
+        markChangesSaved();
+    } 
+    
+    catch (e) {
         console.error('Error saving map:', e);
     }
 }
@@ -657,7 +555,10 @@ function shareMap() {
             .catch(err => {
                 console.error('Failed to copy text: ', err);
             });
-    } catch (e) {
+        markChangesSaved();
+    } 
+    
+    catch (e) {
         console.error('Error sharing map:', e);
     }
 }
@@ -693,7 +594,10 @@ function loadMap() {
         drawEntities();
         updateCounters();
         updateCityList();
-    } catch (e) {
+        markChangesSaved();
+    } 
+    
+    catch (e) {
         alert('Error loading the map. Please check the format.');
         console.error(e);
     }
@@ -756,6 +660,7 @@ deleteButton.addEventListener('click', () => {
           drawGrid();
           drawEntities();
           updateCityList();
+          markUnsavedChanges();
       }
   } else {
       alert('No entity selected to delete.');
@@ -812,7 +717,7 @@ canvas.addEventListener('mousemove', (event) => {
         selectedEntity.y = newY;
         drawGrid();
         drawEntities();
-        updateCityList();
+        markUnsavedChanges();
     }
 });
 
@@ -836,5 +741,28 @@ document.getElementById("mapNameInput").addEventListener("input", function() {
     } else {
          hintElement.textContent = "";
          hintElement.style.display = "none";
+    }
+});
+
+function markUnsavedChanges() {
+    hasUnsavedChanges = true;
+    updatePageTitle();
+}
+
+function markChangesSaved() {
+    hasUnsavedChanges = false;
+    updatePageTitle();
+}
+
+function updatePageTitle() {
+    const baseTitle = 'Alliance Layout Planner';
+    document.title = hasUnsavedChanges ? `${baseTitle} - Unsaved changes` : baseTitle;
+}
+
+window.addEventListener('beforeunload', function(e) {
+    if (hasUnsavedChanges) {
+        const message = 'You have unsaved changes. Do you really want to leave?';
+        e.preventDefault();
+        return message;
     }
 });
