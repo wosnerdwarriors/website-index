@@ -775,6 +775,7 @@ deleteButton.addEventListener('click', () => {
           drawGrid();
           drawEntities();
           updateCityList();
+          markUnsavedChanges();
       }
   } 
   
