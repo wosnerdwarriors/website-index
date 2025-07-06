@@ -120,19 +120,19 @@ body, html {
 @media (min-width: 768px) {
   /* Specific positioning adjustments for each panel */
   #toolbarPanel {
-    left: 272px; /* Utilities - oben links (neben navbar) */
+    left: 272px; /* Utilities - top left */
     top: 20px;
     max-width: 500px;
   }
   
   #actionsPanel {
-    right: 20px; /* Actions - oben rechts */
+    right: 20px; /* Actions - top right */
     top: 20px;
     width: 200px;
   }
   
   #citiesPanel {
-    left: 272px; /* Cities - unten links (neben navbar) */
+    left: 272px; /* Cities - bottom left */
     bottom: 20px;
     max-width: 500px; /* Same as toolbarPanel */
     max-height: 200px;
@@ -140,7 +140,7 @@ body, html {
   }
   
   #helpPanel {
-    right: 20px; /* Controls - unten rechts */
+    right: 20px; /* Controls - bottom right */
     bottom: 20px;
     width: 250px;
   }
