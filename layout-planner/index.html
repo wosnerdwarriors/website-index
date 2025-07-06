@@ -9,86 +9,117 @@
     <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
     <link rel="stylesheet" href="./css/style.css">
     <title>Alliance Layout Planner</title>
-    <style>
-        #layoutCanvas {
-            max-width: 100%;
-            height: auto;
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-        }
-        @media (max-width: 640px) {
-            #layoutCanvas {
-                height: 320px;
-            }
-        }
-    </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen">
-    <div id="navbar-container"></div>
+<body>
+    <!-- Fullscreen Canvas -->
+    <canvas id="layoutCanvas"></canvas>
     
-    <div class="container mx-auto px-4 py-6 mt-16 md:ml-64">
-        <h1 class="text-3xl font-bold mb-6 text-center">Alliance Layout Planner</h1>
-        <div class="flex flex-col items-center mb-4">
-            <input id="mapNameInput" type="text" placeholder="Map Name (optional)" class="border p-2 rounded text-center block" style="width: 30ch;" maxlength="30">
-            <div id="mapNameHint" class="text-center text-red-500 text-sm mt-2" style="display: none;"></div>
-        </div>        
+    <!-- Top Toolbar Panel -->
+    <div id="toolbarPanel" class="floating-panel">
+        <button class="panel-toggle" onclick="togglePanel('toolbarPanel')">▼</button>
+        <h2 class="text-lg font-bold mb-3 text-center"></h2>
         
-        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-            <div id="toolbar" class="flex flex-wrap gap-2 mb-4">
-                <button data-type="flag" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Flag (1x1)</button>
-                <button data-type="city" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">City (2x2)</button>
-                <button data-type="building" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Bear Trap (3x3)</button>
-                <button data-type="select" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Select</button>
-                <button id="deleteButton" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Delete</button>
+        <div class="flex flex-col items-center mb-3">
+            <input id="mapNameInput" type="text" placeholder="Map Name (optional)" class="border p-2 rounded text-center" style="width: 30ch;" maxlength="30">
+            <div id="mapNameHint" class="text-center text-red-500 text-sm mt-1" style="display: none;"></div>
+        </div>
+        
+        <div id="toolbar" class="mb-3">
+            <!-- Control buttons row -->
+            <div class="flex flex-wrap gap-2 mb-2">
+                <button data-type="select" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm">Select</button>
+                <button id="deleteButton" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm">Delete</button>
             </div>
-            
-            <div id="counters" class="text-lg mb-4 p-2 bg-gray-100 rounded">
-                <span class="mr-4">Flags: <span id="flagCounter" class="font-bold">0</span></span>
-                <span class="mr-4">Cities: <span id="cityCounter" class="font-bold">0</span></span>
-                <span>Bear Traps: <span id="buildingCounter" class="font-bold">0</span></span>
+            <!-- Object buttons row -->
+            <div class="flex flex-wrap gap-2">
+                <button data-type="flag" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm">Flag (1x1)</button>
+                <button data-type="city" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm">City (2x2)</button>
+                <button data-type="building" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm">Bear Trap (3x3)</button>
+                <button data-type="node" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm">Node (3x3)</button>
+                <button data-type="obstacle" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm">Obstacle (1x1)</button>
             </div>
         </div>
         
-        <div class="flex flex-col md:flex-row gap-6">
-            <div class="w-full md:w-3/4 bg-white rounded-lg shadow-md p-4 flex justify-center">
-                <canvas id="layoutCanvas" width="1000" height="1000"></canvas>
-            </div>
-            
-            <div class="w-full md:w-1/4 bg-white rounded-lg shadow-md p-4">
-                <h2 class="text-xl font-semibold mb-4 text-center border-b pb-2">Actions</h2>
-                
-                <div id="controls" class="space-y-4">
-                    <button id="downloadButton" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full">Save as PNG</button>
-                    <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full">Generate Code</button>
-                    <button id="shareButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded w-full">Copy Link to Map</button>
-                    <textarea id="mapData" rows="5" placeholder="Map code will appear here..." class="w-full p-2 border border-gray-300 rounded"></textarea>
-                    <button id="loadButton" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded w-full">Load</button>
-                </div>
-                
-                <div id="info" class="mt-4">
-                    <span id="copyMessage" class="hidden text-green-500 font-medium">Copied to Clipboard!</span>
-                </div>
-            </div>
+        <div id="counters" class="text-sm p-2 bg-gray-100 rounded text-center">
+            <span class="mr-3">Flags: <span id="flagCounter" class="font-bold">0</span></span>
+            <span class="mr-3">Cities: <span id="cityCounter" class="font-bold">0</span></span>
+            <span class="mr-3">Bear Traps: <span id="buildingCounter" class="font-bold">0</span></span>
+            <span>Nodes: <span id="nodeCounter" class="font-bold">0</span></span>
+        </div>
+    </div>
+    
+    <!-- Right Actions Panel -->
+    <div id="actionsPanel" class="floating-panel">
+        <button class="panel-toggle" onclick="togglePanel('actionsPanel')">▼</button>
+        <h2 class="text-lg font-bold mb-3 text-center">Actions</h2>
+        
+        <div class="space-y-2">
+            <button id="downloadButton" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded w-full text-sm">Save as PNG</button>
+            <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded w-full text-sm">Generate Code</button>
+            <button id="shareButton" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded w-full text-sm">Copy Link</button>
+            <textarea id="mapData" rows="3" placeholder="Map code..." class="w-full p-2 border border-gray-300 rounded text-xs"></textarea>
+            <button id="loadButton" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded w-full text-sm">Load</button>
+        </div>
+        
+        <div id="info" class="mt-3">
+            <span id="copyMessage" class="hidden text-green-500 font-medium text-xs">Copied!</span>
         </div>
     </div>
 
-    <div class="container mx-auto px-4 py-6 mt-16 md:ml-64">
-        <h2 class="text-xl font-semibold mb-4">Cities List</h2>
-            <label for="citySort">Sort by:</label>
-            <select id="citySort"></select>
-        <ul id="cityList" class="space-y-2 p-0 m-0"></ul>
+    <!-- Bottom Cities Panel -->
+    <div id="citiesPanel" class="floating-panel">
+        <button class="panel-toggle" onclick="togglePanel('citiesPanel')" style="top: -12px; bottom: auto;">▼</button>
+        <h2 class="text-lg font-bold mb-3 text-center">Cities List</h2>
+        <div class="mb-2">
+            <label for="citySort" class="text-sm">Sort by:</label>
+            <select id="citySort" class="text-sm border rounded p-1"></select>
+        </div>
+        <ul id="cityList" class="space-y-1"></ul>
+    </div>
+
+    <!-- Controls Panel -->
+    <div id="helpPanel" class="floating-panel">
+        <button class="panel-toggle" onclick="togglePanel('helpPanel')" style="top: -12px; bottom: auto;">▼</button>
+        <h2 class="text-lg font-bold mb-3 text-center">Controls</h2>
+        <div class="text-xs space-y-2">
+            <div>
+                <p class="font-semibold text-blue-600 mb-1">Placing Objects</p>
+                <p class="ml-2">• Select an object type from toolbar</p>
+                <p class="ml-2">• Click on grid to place</p>
+            </div>
+            <div>
+                <p class="font-semibold text-green-600 mb-1">Selection & Movement</p>
+                <p class="ml-2">• Choose "Select" → click object</p>
+                <p class="ml-2">• Drag or use arrow keys to move</p>
+                <p class="ml-2">• Type to rename cities</p>
+            </div>
+            <div>
+                <p class="font-semibold text-red-600 mb-1">Deletion</p>
+                <p class="ml-2">• Choose "Select" → click object</p>
+                <p class="ml-2">• Delete key or Delete button</p>
+            </div>
+            <div>
+                <p class="font-semibold text-purple-600 mb-1">Navigation</p>
+                <p class="ml-2">• Mouse wheel: Zoom in/out</p>
+                <p class="ml-2">• Middle mouse: Pan around map</p>
+            </div>
+        </div>
     </div>
 
     <script src="/layout-planner/js/script.js"></script>
     <script src="/js/navbar.js"></script>
-    <footer class="bg-white shadow-inner mt-12">
-        <div class="container mx-auto px-4 py-4 text-center text-sm text-gray-600">
-            Layout Planner Original author: 
-            <a href="https://github.com/GFXSpeed" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-medium underline">
-                GFXSpeed
-            </a>
-        </div>
-    </footer>
+    
+    <script>
+        function togglePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            panel.classList.toggle('panel-collapsed');
+        }
+        
+        // Initialize panels as visible
+        document.addEventListener('DOMContentLoaded', function() {
+            // Panels start visible, no action needed
+        });
+    </script>
 </body>
 </html>

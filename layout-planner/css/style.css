@@ -1,3 +1,23 @@
+/* Base layout styles */
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+#layoutCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  cursor: crosshair;
+}
+
+/* Legacy bubbles for compatibility */
 .bt-bubble {
   display: inline-block;
   padding: 0.25rem 0.5rem;
@@ -8,6 +28,7 @@
   margin-left: 0.5rem;
   position: relative;
 }
+
 .bt-bubble.selected {
   background-color: #a3e635;
 }
@@ -28,7 +49,293 @@
   pointer-events: none;
 }
 
-.bt-bubble[data-tooltip] { position: relative; }
-.bt-bubble[data-tooltip]::after { content: attr(data-tooltip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.75); color: #fff; padding: 0.25rem 0.5rem; border-radius: 0.25rem; white-space: nowrap; display: none; font-size: 0.75rem; margin-bottom: 0.25rem; }
-.bt-bubble[data-tooltip]:hover::after { display: block; }
-.bt-bubble.selected { background-color: #a3e635; }
+.bt-bubble[data-tooltip] { 
+  position: relative; 
+}
+
+.bt-bubble[data-tooltip]::after { 
+  content: attr(data-tooltip); 
+  position: absolute; 
+  bottom: 100%; 
+  left: 50%; 
+  transform: translateX(-50%); 
+  background: rgba(0, 0, 0, 0.75); 
+  color: #fff; 
+  padding: 0.25rem 0.5rem; 
+  border-radius: 0.25rem; 
+  white-space: nowrap; 
+  display: none; 
+  font-size: 0.75rem; 
+  margin-bottom: 0.25rem; 
+}
+
+.bt-bubble[data-tooltip]:hover::after { 
+  display: block; 
+}
+
+/* Enhanced floating panel styles */
+.floating-panel {
+  position: fixed;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  user-select: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: none;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.floating-panel:hover {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.panel-collapsed {
+  transform: translateY(-100%);
+  opacity: 0.7;
+}
+
+.panel-toggle {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Ensure panels don't overlap with navbar on desktop */
+@media (min-width: 768px) {
+  /* Specific positioning adjustments for each panel */
+  #toolbarPanel {
+    left: 272px; /* Utilities - oben links (neben navbar) */
+    top: 20px;
+    max-width: 500px;
+  }
+  
+  #actionsPanel {
+    right: 20px; /* Actions - oben rechts */
+    top: 20px;
+    width: 200px;
+  }
+  
+  #citiesPanel {
+    left: 272px; /* Cities - unten links (neben navbar) */
+    bottom: 20px;
+    max-width: 500px; /* Same as toolbarPanel */
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  #helpPanel {
+    right: 20px; /* Controls - unten rechts */
+    bottom: 20px;
+    width: 250px;
+  }
+}
+
+.floating-panel.panel-collapsed {
+  transform: translateY(-100%);
+  opacity: 0.7;
+}
+
+/* Bottom panels should collapse downward */
+#citiesPanel.panel-collapsed,
+#helpPanel.panel-collapsed {
+  transform: translateY(100%);
+}
+
+.floating-panel .panel-toggle {
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.floating-panel .panel-toggle:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateX(-50%) scale(1.05);
+}
+
+/* Ensure normal hover state for non-collapsed panels */
+#toolbarPanel:not(.panel-collapsed) .panel-toggle:hover,
+#actionsPanel:not(.panel-collapsed) .panel-toggle:hover {
+  transform: translateX(-50%) rotate(180deg) scale(1.05); /* Keep rotation for top panels */
+}
+
+#citiesPanel:not(.panel-collapsed) .panel-toggle:hover,
+#helpPanel:not(.panel-collapsed) .panel-toggle:hover {
+  transform: translateX(-50%) scale(1.05); /* No rotation for bottom panels */
+}
+
+/* Dynamic arrow rotation for panel toggles */
+.panel-toggle {
+  transition: all 0.3s ease;
+}
+
+/* Top panels (collapse upward) - show up arrow when expanded, down arrow when collapsed */
+#toolbarPanel .panel-toggle,
+#actionsPanel .panel-toggle {
+  transform: translateX(-50%) rotate(180deg); /* Start with up arrow (▲) */
+}
+
+#toolbarPanel .panel-toggle:hover,
+#actionsPanel .panel-toggle:hover {
+  transform: translateX(-50%) rotate(180deg) scale(1.05);
+}
+
+#toolbarPanel.panel-collapsed .panel-toggle,
+#actionsPanel.panel-collapsed .panel-toggle {
+  transform: translateX(-50%) rotate(0deg); /* Rotate to down arrow (▼) when collapsed */
+}
+
+#toolbarPanel.panel-collapsed .panel-toggle:hover,
+#actionsPanel.panel-collapsed .panel-toggle:hover {
+  transform: translateX(-50%) rotate(0deg) scale(1.05);
+}
+
+/* Bottom panels (collapse downward) - show down arrow when expanded, up arrow when collapsed */
+#citiesPanel.panel-collapsed .panel-toggle,
+#helpPanel.panel-collapsed .panel-toggle {
+  transform: translateX(-50%) rotate(180deg);
+}
+
+#citiesPanel.panel-collapsed .panel-toggle:hover,
+#helpPanel.panel-collapsed .panel-toggle:hover {
+  transform: translateX(-50%) rotate(180deg) scale(1.05);
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 767px) {
+  .floating-panel {
+    max-width: 90vw !important;
+    width: auto !important;
+    left: auto !important; /* Reset desktop positioning */
+  }
+  
+  #toolbarPanel {
+    left: 10px !important;
+    right: 10px !important;
+    top: 20px !important;
+    max-width: none !important;
+  }
+  
+  #actionsPanel {
+    right: 10px !important;
+    top: 20px !important;
+    width: 150px !important;
+  }
+  
+  #citiesPanel {
+    left: 10px !important;
+    bottom: 20px !important;
+    width: 250px !important;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+  }
+  
+  #helpPanel {
+    right: 10px !important;
+    bottom: 20px !important;
+    width: 200px !important;
+  }
+}
+
+/* Animation for entity placement */
+@keyframes entityPlace {
+  0% { transform: scale(0.5); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.entity-placed {
+  animation: entityPlace 0.3s ease-out;
+}
+
+/* Custom scrollbar for city list */
+#cityList {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+#cityList::-webkit-scrollbar {
+  width: 6px;
+}
+
+#cityList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#cityList::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+#cityList::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.8);
+}
+
+/* Button hover effects */
+.floating-panel button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.floating-panel button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Toolbar button selection state */
+#toolbar button {
+  background-color: #3b82f6 !important; /* Default blue background */
+  color: white !important;
+}
+
+#toolbar button:hover {
+  background-color: #2563eb !important; /* Darker blue on hover */
+}
+
+#toolbar button.bg-yellow-500 {
+  background-color: #eab308 !important;
+  border: 2px solid #facc15;
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.3);
+}
+
+#toolbar button.bg-yellow-500:hover {
+  background-color: #d97706 !important;
+}
+
+/* Gray button (Select) styling */
+#toolbar button[data-type="select"] {
+  background-color: #6b7280 !important; /* Gray background */
+}
+
+#toolbar button[data-type="select"]:hover {
+  background-color: #4b5563 !important; /* Darker gray on hover */
+}
+
+#toolbar button[data-type="select"].bg-yellow-500 {
+  background-color: #eab308 !important; /* Selected state overrides gray */
+}
+
+/* Red button (Delete) styling */
+#toolbar button#deleteButton {
+  background-color: #ef4444 !important; /* Red background */
+}
+
+#toolbar button#deleteButton:hover {
+  background-color: #dc2626 !important; /* Darker red on hover */
+}
