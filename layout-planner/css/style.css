@@ -339,3 +339,28 @@ body, html {
 #toolbar button#deleteButton:hover {
   background-color: #dc2626 !important; /* Darker red on hover */
 }
+
+/* Credit bubble styling */
+.credit-bubble {
+  position: fixed !important;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(209, 213, 219, 0.8);
+  border-radius: 9999px;
+  padding: 8px 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  user-select: none;
+  width: auto;
+  min-width: 200px;
+}
+
+.credit-bubble:hover {
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+  transform: translateX(-50%) translateY(-2px);
+}
