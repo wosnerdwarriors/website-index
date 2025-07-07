@@ -899,6 +899,125 @@ function decompressMap(base64) {
       .map(char => char.charCodeAt(0).toString(2).padStart(8, "0"))
       .join("");
 
+    // Auto-detect format: try to determine if this is legacy (22-bit) or new (23-bit) format
+    const isLegacyFormat = detectLegacyFormat(binaryString);
+    
+    if (isLegacyFormat) {
+        return decompressLegacy(binaryString);
+    } else {
+        return decompressNew(binaryString);
+    }
+}
+
+function detectLegacyFormat(binaryString) {
+    // Check if the data length is more consistent with 22-bit chunks vs 23-bit chunks
+    const totalBits = binaryString.length;
+    
+    // Estimate how many entities we'd have with each format
+    let entities22 = 0;
+    let entities23 = 0;
+    let i = 0;
+    
+    // Try parsing as 22-bit chunks (legacy format)
+    while (i + 22 <= totalBits) {
+        const typeBits = binaryString.slice(i, i + 2);
+        i += 2;
+        i += 20; // Skip x and y coordinates
+        
+        if (typeBits === "01") { // city in legacy format
+            if (i + 8 > totalBits) break;
+            const nameLengthBits = binaryString.slice(i, i + 8);
+            i += 8;
+            const nameLength = parseInt(nameLengthBits, 2);
+            i += nameLength * 8;
+        }
+        entities22++;
+    }
+    
+    // Reset and try parsing as 23-bit chunks (new format)
+    i = 0;
+    while (i + 23 <= totalBits) {
+        const typeBits = binaryString.slice(i, i + 3);
+        i += 3;
+        i += 20;
+        
+        if (typeBits === "001") { // city in new format
+            if (i + 8 > totalBits) break;
+            const nameLengthBits = binaryString.slice(i, i + 8);
+            i += 8;
+            const nameLength = parseInt(nameLengthBits, 2);
+            i += nameLength * 8;
+        }
+        entities23++;
+    }
+    
+    // If we found more valid entities with 22-bit parsing, it's probably legacy
+    return entities22 > entities23;
+}
+
+function decompressLegacy(binaryString) {
+    const entities = [];
+    let i = 0;
+
+    while (i + 22 <= binaryString.length) {
+        const typeBits = binaryString.slice(i, i + 2);
+        i += 2;
+        const xBits = binaryString.slice(i, i + 10);
+        i += 10;
+        const yBits = binaryString.slice(i, i + 10);
+        i += 10;
+
+        const type = typeBits === "00" ? "flag" :
+                     typeBits === "01" ? "city" : 
+                     typeBits === "10" ? "building" : "node";
+        
+        // Convert from old coordinate system (0-24) to new centered system (-12 to +12)
+        const oldX = parseInt(xBits, 2);
+        const oldY = parseInt(yBits, 2);
+        const x = oldX - 12; // Center the old 0-24 range to -12 to +12
+        const y = oldY - 12;
+
+        let entity = { x, y, type };
+
+        if (type === "flag") {
+            entity.width = 1;
+            entity.height = 1;
+            entity.color = "gray";
+        } else if (type === "city") {
+            entity.width = 2;
+            entity.height = 2;
+            entity.color = getRandomColor();
+
+            if (i + 8 > binaryString.length) break;
+            const nameLengthBits = binaryString.slice(i, i + 8);
+            i += 8;
+            const nameLength = parseInt(nameLengthBits, 2);
+
+            let name = "";
+            for (let j = 0; j < nameLength; j++) {
+                if (i + 8 > binaryString.length) break;
+                const charBits = binaryString.slice(i, i + 8);
+                i += 8;
+                name += String.fromCharCode(parseInt(charBits, 2));
+            }
+            entity.name = name;
+        } else if (type === "building") {
+            entity.width = 3;
+            entity.height = 3;
+            entity.color = "black";
+        } else if (type === "node") {
+            entity.width = 3;
+            entity.height = 3;
+            entity.color = "darkgreen";
+        }
+
+        entities.push(entity);
+    }
+
+    return entities;
+}
+
+function decompressNew(binaryString) {
     const entities = [];
     let i = 0;
 
