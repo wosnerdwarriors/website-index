@@ -271,14 +271,15 @@ function drawEntity(entity) {
 function drawCityDetails(city, screen) {
     ctx.fillStyle = 'black';
     
-    // Scale font size relative to grid size, not zoom
-    const baseFontSize = Math.max(8, gridSize * 0.4); // Font scales with grid, not zoom
+    // Scale font size, with minimum and maximum limits
+    const currentGridSize = gridSize * zoom;
+    const baseFontSize = Math.max(6, Math.min(16, currentGridSize * 0.25));
     ctx.font = `${baseFontSize}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
     // Shift text upward to accommodate multiple bear trap times
-    const baseOffset = -gridSize * 0.3; // Scale offset with grid size
+    const baseOffset = -currentGridSize * 0.2;
     
     const label = city.name || `C${city.id}`;
     ctx.fillText(label, screen.x, screen.y + baseOffset);
@@ -286,7 +287,7 @@ function drawCityDetails(city, screen) {
     // Draw march times to bear traps
     const marchTimes = calculateMarchTimes(city);
     marchTimes.forEach((time, index) => {
-        const yOffset = baseOffset + (index + 1) * gridSize * 0.35; // Scale spacing with grid
+        const yOffset = baseOffset + (index + 1) * currentGridSize * 0.25;
         ctx.fillText(`BT${index + 1}: ${time}s`, screen.x, screen.y + yOffset);
     });
 }
@@ -294,8 +295,8 @@ function drawCityDetails(city, screen) {
 function drawBearTrapDetails(trap, screen) {
     ctx.fillStyle = 'white';
     
-    // Scale font size relative to grid size, not zoom
-    const baseFontSize = Math.max(10, gridSize * 0.45);
+    const currentGridSize = gridSize * zoom;
+    const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
     ctx.font = `${baseFontSize}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -307,8 +308,8 @@ function drawBearTrapDetails(trap, screen) {
 function drawNodeDetails(node, screen) {
     ctx.fillStyle = 'white';
     
-    // Scale font size relative to grid size, not zoom
-    const baseFontSize = Math.max(10, gridSize * 0.4);
+    const currentGridSize = gridSize * zoom;
+    const baseFontSize = Math.max(6, Math.min(18, currentGridSize * 0.25));
     ctx.font = `${baseFontSize}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -319,8 +320,9 @@ function drawNodeDetails(node, screen) {
 function drawObstacleDetails(obstacle, screen) {
     ctx.fillStyle = 'white';
     
-    // Scale font size relative to grid size, not zoom
-    const baseFontSize = Math.max(8, gridSize * 0.35);
+    // Scale font size with both grid size and zoom, with minimum and maximum limits  
+    const currentGridSize = gridSize * zoom;
+    const baseFontSize = Math.max(4, Math.min(12, currentGridSize * 0.2));
     ctx.font = `${baseFontSize}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
