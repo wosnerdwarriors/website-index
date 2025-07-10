@@ -1309,6 +1309,54 @@ document.getElementById('saveButton').addEventListener('click', saveMap);
 document.getElementById('loadButton').addEventListener('click', loadMap);
 document.getElementById('shareButton').addEventListener('click', shareMap);
 
+// Short URL feature
+document.getElementById('shortUrlButton').addEventListener('click', async function() {
+    const mapName = document.getElementById('mapNameInput').value;
+    const compressedMap = compressMapWithName(entities, mapName);
+    mapData.value = compressedMap;
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('mapData', compressedMap);
+    const longUrl = newUrl.toString();
+
+    const shortUrlContainer = document.getElementById('shortUrlContainer');
+    const shortUrlOutput = document.getElementById('shortUrlOutput');
+    const shortUrlError = document.getElementById('shortUrlError');
+    shortUrlContainer.classList.remove('hidden');
+    shortUrlOutput.value = '';
+    shortUrlError.textContent = '';
+
+    try {
+        shortUrlOutput.value = 'Generating...';
+        const response = await fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(longUrl));
+        if (!response.ok) throw new Error('TinyURL API error');
+        const shortUrl = await response.text();
+        if (!shortUrl.startsWith('http')) throw new Error('TinyURL returned invalid URL');
+        shortUrlOutput.value = shortUrl;
+    } catch (e) {
+        shortUrlOutput.value = '';
+        shortUrlError.textContent = 'Failed to generate. ';
+        // Offer fallback: open TinyURL in new tab
+        const fallback = document.createElement('a');
+        fallback.href = 'https://tinyurl.com/app/?url=' + encodeURIComponent(longUrl);
+        fallback.target = '_blank';
+        fallback.rel = 'noopener noreferrer';
+        fallback.textContent = 'Try manually';
+        fallback.className = 'underline text-blue-600';
+        shortUrlError.appendChild(fallback);
+    }
+});
+
+document.getElementById('copyShortUrlButton').addEventListener('click', function() {
+    const shortUrlOutput = document.getElementById('shortUrlOutput');
+    if (shortUrlOutput.value) {
+        navigator.clipboard.writeText(shortUrlOutput.value)
+            .then(() => {
+                shortUrlOutput.classList.add('bg-green-100');
+                setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
+            });
+    }
+});
+
 // Map name validation
 document.getElementById("mapNameInput").addEventListener("input", function() {
     const value = this.value;
