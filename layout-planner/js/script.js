@@ -1400,7 +1400,7 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
 
     copyShortUrlButton.addEventListener('click', function() {
         const urlToCopy = shortUrlOutput.value;
-        if (urlToCopy && urlToCopy === shortUrlOutput.value && urlToCopy !== SHORT_URL_GENERATING_TEXT) {
+        if (urlToCopy && urlToCopy !== SHORT_URL_GENERATING_TEXT) {
             navigator.clipboard.writeText(urlToCopy)
                 .then(() => {
                     shortUrlOutput.classList.add('bg-green-100');
