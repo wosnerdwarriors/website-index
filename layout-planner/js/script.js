@@ -1136,17 +1136,23 @@ function saveMap() {
     }
 }
 
+// Pure helper to generate a shareable URL with provided map data and name
+function getShareableUrl(entitiesArg, mapNameArg) {
+    const compressedMap = compressMapWithName(entitiesArg, mapNameArg);
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('mapData', compressedMap);
+    return newUrl.toString();
+}
+
 function shareMap() {
     try {
         const mapName = document.getElementById('mapNameInput').value;
         const compressedMap = compressMapWithName(entities, mapName);
         mapData.value = compressedMap;
-        
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('mapData', compressedMap);
-        window.history.replaceState(null, '', newUrl);
+        const longUrl = getShareableUrl(entities, mapName);
+        window.history.replaceState(null, '', longUrl);
 
-        navigator.clipboard.writeText(newUrl.toString())
+        navigator.clipboard.writeText(longUrl)
             .then(() => {
                 copyMessage.classList.remove('hidden');
                 setTimeout(() => {
@@ -1308,6 +1314,116 @@ document.getElementById('downloadButton').addEventListener('click', downloadCanv
 document.getElementById('saveButton').addEventListener('click', saveMap);
 document.getElementById('loadButton').addEventListener('click', loadMap);
 document.getElementById('shareButton').addEventListener('click', shareMap);
+
+// Short URL feature: encapsulated in async IIFE to avoid race conditions and keep config/vars scoped
+const SHORT_URL_GENERATING_TEXT = 'Generating...';
+
+(async () => {
+    const shortUrlButton = document.getElementById('shortUrlButton');
+    const copyShortUrlButton = document.getElementById('copyShortUrlButton');
+    const shortUrlContainer = document.getElementById('shortUrlContainer');
+    const shortUrlOutput = document.getElementById('shortUrlOutput');
+    const shortUrlError = document.getElementById('shortUrlError');
+
+    // Default endpoints (will only be used if config.json fails to load)
+    const config = {
+        tinyurlApi: 'https://tinyurl.com/api-create.php',
+        tinyurlManual: 'https://tinyurl.com/app/'
+    };
+
+    let configLoaded = false;
+    try {
+        const response = await fetch('/config.json');
+        const loadedConfig = await response.json();
+        if (loadedConfig.endpoints && loadedConfig.endpoints.tinyurlApi && loadedConfig.endpoints.tinyurlManual) {
+            config.tinyurlApi = loadedConfig.endpoints.tinyurlApi;
+            config.tinyurlManual = loadedConfig.endpoints.tinyurlManual;
+            configLoaded = true;
+        } else {
+            showShortUrlConfigError('Short URL feature is unavailable: config.json is missing required endpoints.');
+        }
+    } catch (e) {
+        showShortUrlConfigError('Short URL feature is unavailable: config.json could not be loaded.');
+    }
+
+    function showShortUrlConfigError(message) {
+        if (shortUrlContainer) shortUrlContainer.classList.remove('hidden');
+        if (shortUrlOutput) shortUrlOutput.value = '';
+        if (shortUrlError) {
+            shortUrlError.textContent = message;
+            shortUrlError.classList.remove('hidden');
+        }
+        if (shortUrlButton) {
+            shortUrlButton.disabled = true;
+            shortUrlButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        if (copyShortUrlButton) {
+            copyShortUrlButton.disabled = true;
+            copyShortUrlButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    if (!configLoaded) return;
+
+    shortUrlButton.addEventListener('click', async function() {
+        const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
+        mapData.value = compressedMap;
+        const longUrl = getShareableUrl(entities, mapName);
+        shortUrlContainer.classList.remove('hidden');
+        shortUrlOutput.value = SHORT_URL_GENERATING_TEXT;
+        shortUrlError.textContent = '';
+        shortUrlButton.disabled = true;
+        try {
+            // Timeout logic
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            const response = await fetch(`${config.tinyurlApi}?url=${encodeURIComponent(longUrl)}`, {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                throw new Error(`TinyURL API error: ${response.status}`);
+            }
+            const shortUrl = await response.text();
+            if (!shortUrl.startsWith('http')) {
+                throw new Error('TinyURL returned invalid URL');
+            }
+            shortUrlOutput.value = shortUrl;
+            markChangesSaved();
+        } catch (error) {
+            console.error('Short URL generation failed:', error);
+            shortUrlOutput.value = '';
+            shortUrlError.textContent = 'Failed to generate. ';
+            const fallback = document.createElement('a');
+            fallback.href = `${config.tinyurlManual}?url=${encodeURIComponent(longUrl)}`;
+            fallback.target = '_blank';
+            fallback.rel = 'noopener noreferrer';
+            fallback.textContent = 'Try manually';
+            fallback.className = 'underline text-blue-600';
+            shortUrlError.appendChild(fallback);
+        } finally {
+            shortUrlButton.disabled = false;
+        }
+    });
+
+    copyShortUrlButton.addEventListener('click', function() {
+        const urlToCopy = shortUrlOutput.value;
+        if (urlToCopy && urlToCopy !== SHORT_URL_GENERATING_TEXT) {
+            navigator.clipboard.writeText(urlToCopy)
+                .then(() => {
+                    shortUrlOutput.classList.add('bg-green-100');
+                    setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy URL:', err);
+                    shortUrlError.textContent = 'Could not copy URL.';
+                });
+        }
+    });
+})();
+
+// (Removed duplicate global shortUrlButton and copyShortUrlButton event listeners; now handled inside the IIFE only)
 
 // Map name validation
 document.getElementById("mapNameInput").addEventListener("input", function() {
