@@ -1331,6 +1331,8 @@ fetch('/config.json')
   })
   .catch(e => { /* fallback to defaults */ });
 
+
+
 shortUrlButton.addEventListener('click', async function() {
     const mapName = document.getElementById('mapNameInput').value;
     const compressedMap = compressMapWithName(entities, mapName);
@@ -1343,6 +1345,15 @@ shortUrlButton.addEventListener('click', async function() {
     shortUrlOutput.value = 'Generating...';
     shortUrlError.textContent = '';
 
+    // Always show Discord export, use long URL by default
+    const discordExportContainer = document.getElementById('discordExportContainer');
+    const discordExportOutput = document.getElementById('discordExportOutput');
+    if (discordExportContainer && discordExportOutput) {
+        const safeMapName = mapName && mapName.trim() ? mapName.trim() : 'Map';
+        discordExportOutput.value = `[Wosnerds BearPlanner \"${safeMapName}\"](${longUrl})`;
+        discordExportContainer.classList.remove('hidden');
+    }
+
     try {
         const response = await fetch(`${TINYURL_API_ENDPOINT}?url=${encodeURIComponent(longUrl)}`);
         if (!response.ok) {
@@ -1353,6 +1364,12 @@ shortUrlButton.addEventListener('click', async function() {
             throw new Error('TinyURL returned invalid URL');
         }
         shortUrlOutput.value = shortUrl;
+
+        // Update Discord export with short URL
+        if (discordExportContainer && discordExportOutput) {
+            const safeMapName = mapName && mapName.trim() ? mapName.trim() : 'Map';
+            discordExportOutput.value = `[Wosnerds BearPlanner \"${safeMapName}\"](${shortUrl})`;
+        }
     } catch (error) {
         console.error('Short URL generation failed:', error);
         shortUrlOutput.value = '';
@@ -1366,6 +1383,23 @@ shortUrlButton.addEventListener('click', async function() {
         shortUrlError.appendChild(fallback);
     }
 });
+// Discord export copy button
+const copyDiscordExportButton = document.getElementById('copyDiscordExportButton');
+if (copyDiscordExportButton) {
+    copyDiscordExportButton.addEventListener('click', function() {
+        const discordExportOutput = document.getElementById('discordExportOutput');
+        if (discordExportOutput && discordExportOutput.value) {
+            navigator.clipboard.writeText(discordExportOutput.value)
+                .then(() => {
+                    discordExportOutput.classList.add('bg-green-100');
+                    setTimeout(() => discordExportOutput.classList.remove('bg-green-100'), 1000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy Discord export:', err);
+                });
+        }
+    });
+}
 
 copyShortUrlButton.addEventListener('click', function() {
     const urlToCopy = shortUrlOutput.value;
