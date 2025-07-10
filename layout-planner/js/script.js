@@ -1418,50 +1418,7 @@ const shortUrlError = document.getElementById('shortUrlError');
     });
 })();
 
-shortUrlButton.addEventListener('click', async function() {
-    const longUrl = getShareableUrl();
-    shortUrlContainer.classList.remove('hidden');
-    shortUrlOutput.value = 'Generating...';
-    shortUrlError.textContent = '';
-
-    try {
-        const response = await fetch(`${TINYURL_API_ENDPOINT}?url=${encodeURIComponent(longUrl)}`);
-        if (!response.ok) {
-            throw new Error(`TinyURL API error: ${response.status}`);
-        }
-        const shortUrl = await response.text();
-        if (!shortUrl.startsWith('http')) {
-            throw new Error('TinyURL returned invalid URL');
-        }
-        shortUrlOutput.value = shortUrl;
-    } catch (error) {
-        console.error('Short URL generation failed:', error);
-        shortUrlOutput.value = '';
-        shortUrlError.textContent = 'Failed to generate. ';
-        const fallback = document.createElement('a');
-        fallback.href = `${TINYURL_MANUAL_URL}?url=${encodeURIComponent(longUrl)}`;
-        fallback.target = '_blank';
-        fallback.rel = 'noopener noreferrer';
-        fallback.textContent = 'Try manually';
-        fallback.className = 'underline text-blue-600';
-        shortUrlError.appendChild(fallback);
-    }
-});
-
-copyShortUrlButton.addEventListener('click', function() {
-    const urlToCopy = shortUrlOutput.value;
-    if (urlToCopy && !urlToCopy.includes('Generating...')) {
-        navigator.clipboard.writeText(urlToCopy)
-            .then(() => {
-                shortUrlOutput.classList.add('bg-green-100');
-                setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
-            })
-            .catch(err => {
-                console.error('Failed to copy URL:', err);
-                shortUrlError.textContent = 'Could not copy URL.';
-            });
-    }
-});
+// (Removed duplicate global shortUrlButton and copyShortUrlButton event listeners; now handled inside the IIFE only)
 
 // Map name validation
 document.getElementById("mapNameInput").addEventListener("input", function() {
