@@ -1373,9 +1373,15 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
         shortUrlContainer.classList.remove('hidden');
         shortUrlOutput.value = SHORT_URL_GENERATING_TEXT;
         shortUrlError.textContent = '';
-
+        shortUrlButton.disabled = true;
         try {
-            const response = await fetch(`${config.tinyurlApi}?url=${encodeURIComponent(longUrl)}`);
+            // Timeout logic
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            const response = await fetch(`${config.tinyurlApi}?url=${encodeURIComponent(longUrl)}`, {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
             if (!response.ok) {
                 throw new Error(`TinyURL API error: ${response.status}`);
             }
@@ -1384,6 +1390,7 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
                 throw new Error('TinyURL returned invalid URL');
             }
             shortUrlOutput.value = shortUrl;
+            markChangesSaved();
         } catch (error) {
             console.error('Short URL generation failed:', error);
             shortUrlOutput.value = '';
@@ -1395,6 +1402,8 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
             fallback.textContent = 'Try manually';
             fallback.className = 'underline text-blue-600';
             shortUrlError.appendChild(fallback);
+        } finally {
+            shortUrlButton.disabled = false;
         }
     });
 
