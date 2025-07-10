@@ -369,9 +369,15 @@ function drawSelectionHighlight(entity) {
 function calculateMarchTimes(city) {
     const times = [];
     bearTraps.forEach(trap => {
+        // Calculate center points of both entities
+        const cityCenterX = city.x + city.width / 2 - 0.5;
+        const cityCenterY = city.y + city.height / 2 - 0.5;
+        const trapCenterX = trap.x + trap.width / 2 - 0.5;
+        const trapCenterY = trap.y + trap.height / 2 - 0.5;
+        
         const distance = Math.sqrt(
-            Math.pow(trap.x - city.x, 2) +
-            Math.pow(trap.y - city.y, 2)
+            Math.pow(trapCenterX - cityCenterX, 2) +
+            Math.pow(trapCenterY - cityCenterY, 2)
         );
         const time = Math.round((distance / 10) * 32.5);
         times.push(time);
