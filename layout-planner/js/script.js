@@ -1310,7 +1310,28 @@ document.getElementById('loadButton').addEventListener('click', loadMap);
 document.getElementById('shareButton').addEventListener('click', shareMap);
 
 // Short URL feature
-document.getElementById('shortUrlButton').addEventListener('click', async function() {
+// Short URL feature (refactored for maintainability and robustness)
+const shortUrlButton = document.getElementById('shortUrlButton');
+const copyShortUrlButton = document.getElementById('copyShortUrlButton');
+const shortUrlContainer = document.getElementById('shortUrlContainer');
+const shortUrlOutput = document.getElementById('shortUrlOutput');
+const shortUrlError = document.getElementById('shortUrlError');
+
+
+// Load endpoints from config.json
+let TINYURL_API_ENDPOINT = 'https://tinyurl.com/api-create.php';
+let TINYURL_MANUAL_URL = 'https://tinyurl.com/app/';
+fetch('/config.json')
+  .then(r => r.json())
+  .then(cfg => {
+    if (cfg.endpoints) {
+      if (cfg.endpoints.tinyurlApi) TINYURL_API_ENDPOINT = cfg.endpoints.tinyurlApi;
+      if (cfg.endpoints.tinyurlManual) TINYURL_MANUAL_URL = cfg.endpoints.tinyurlManual;
+    }
+  })
+  .catch(e => { /* fallback to defaults */ });
+
+shortUrlButton.addEventListener('click', async function() {
     const mapName = document.getElementById('mapNameInput').value;
     const compressedMap = compressMapWithName(entities, mapName);
     mapData.value = compressedMap;
@@ -1318,26 +1339,26 @@ document.getElementById('shortUrlButton').addEventListener('click', async functi
     newUrl.searchParams.set('mapData', compressedMap);
     const longUrl = newUrl.toString();
 
-    const shortUrlContainer = document.getElementById('shortUrlContainer');
-    const shortUrlOutput = document.getElementById('shortUrlOutput');
-    const shortUrlError = document.getElementById('shortUrlError');
     shortUrlContainer.classList.remove('hidden');
-    shortUrlOutput.value = '';
+    shortUrlOutput.value = 'Generating...';
     shortUrlError.textContent = '';
 
     try {
-        shortUrlOutput.value = 'Generating...';
-        const response = await fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(longUrl));
-        if (!response.ok) throw new Error('TinyURL API error');
+        const response = await fetch(`${TINYURL_API_ENDPOINT}?url=${encodeURIComponent(longUrl)}`);
+        if (!response.ok) {
+            throw new Error(`TinyURL API error: ${response.status}`);
+        }
         const shortUrl = await response.text();
-        if (!shortUrl.startsWith('http')) throw new Error('TinyURL returned invalid URL');
+        if (!shortUrl.startsWith('http')) {
+            throw new Error('TinyURL returned invalid URL');
+        }
         shortUrlOutput.value = shortUrl;
-    } catch (e) {
+    } catch (error) {
+        console.error('Short URL generation failed:', error);
         shortUrlOutput.value = '';
         shortUrlError.textContent = 'Failed to generate. ';
-        // Offer fallback: open TinyURL in new tab
         const fallback = document.createElement('a');
-        fallback.href = 'https://tinyurl.com/app/?url=' + encodeURIComponent(longUrl);
+        fallback.href = `${TINYURL_MANUAL_URL}?url=${encodeURIComponent(longUrl)}`;
         fallback.target = '_blank';
         fallback.rel = 'noopener noreferrer';
         fallback.textContent = 'Try manually';
@@ -1346,13 +1367,17 @@ document.getElementById('shortUrlButton').addEventListener('click', async functi
     }
 });
 
-document.getElementById('copyShortUrlButton').addEventListener('click', function() {
-    const shortUrlOutput = document.getElementById('shortUrlOutput');
-    if (shortUrlOutput.value) {
-        navigator.clipboard.writeText(shortUrlOutput.value)
+copyShortUrlButton.addEventListener('click', function() {
+    const urlToCopy = shortUrlOutput.value;
+    if (urlToCopy && !urlToCopy.includes('Generating...')) {
+        navigator.clipboard.writeText(urlToCopy)
             .then(() => {
                 shortUrlOutput.classList.add('bg-green-100');
                 setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
+            })
+            .catch(err => {
+                console.error('Failed to copy URL:', err);
+                shortUrlError.textContent = 'Could not copy URL.';
             });
     }
 });
