@@ -1136,17 +1136,22 @@ function saveMap() {
     }
 }
 
+// Helper to generate a shareable URL with the current map data and name
+function getShareableUrl() {
+    const mapName = document.getElementById('mapNameInput').value;
+    const compressedMap = compressMapWithName(entities, mapName);
+    mapData.value = compressedMap;
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('mapData', compressedMap);
+    return newUrl.toString();
+}
+
 function shareMap() {
     try {
-        const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName);
-        mapData.value = compressedMap;
-        
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('mapData', compressedMap);
-        window.history.replaceState(null, '', newUrl);
+        const longUrl = getShareableUrl();
+        window.history.replaceState(null, '', longUrl);
 
-        navigator.clipboard.writeText(newUrl.toString())
+        navigator.clipboard.writeText(longUrl)
             .then(() => {
                 copyMessage.classList.remove('hidden');
                 setTimeout(() => {
@@ -1332,13 +1337,7 @@ fetch('/config.json')
   .catch(e => { /* fallback to defaults */ });
 
 shortUrlButton.addEventListener('click', async function() {
-    const mapName = document.getElementById('mapNameInput').value;
-    const compressedMap = compressMapWithName(entities, mapName);
-    mapData.value = compressedMap;
-    const newUrl = new URL(window.location.href);
-    newUrl.searchParams.set('mapData', compressedMap);
-    const longUrl = newUrl.toString();
-
+    const longUrl = getShareableUrl();
     shortUrlContainer.classList.remove('hidden');
     shortUrlOutput.value = 'Generating...';
     shortUrlError.textContent = '';
