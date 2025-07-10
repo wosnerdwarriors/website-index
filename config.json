@@ -28,5 +28,9 @@
   "features": {
     "enableDebug": true,
     "cacheTimeout": 3600
+  },
+  "endpoints": {
+    "tinyurlApi": "https://tinyurl.com/api-create.php",
+    "tinyurlManual": "https://tinyurl.com/app/"
   }
 }

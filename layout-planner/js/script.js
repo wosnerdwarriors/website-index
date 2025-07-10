@@ -1309,6 +1309,113 @@ document.getElementById('saveButton').addEventListener('click', saveMap);
 document.getElementById('loadButton').addEventListener('click', loadMap);
 document.getElementById('shareButton').addEventListener('click', shareMap);
 
+// Short URL feature
+// Short URL feature (refactored for maintainability and robustness)
+const shortUrlButton = document.getElementById('shortUrlButton');
+const copyShortUrlButton = document.getElementById('copyShortUrlButton');
+const shortUrlContainer = document.getElementById('shortUrlContainer');
+const shortUrlOutput = document.getElementById('shortUrlOutput');
+const shortUrlError = document.getElementById('shortUrlError');
+
+
+// Load endpoints from config.json
+let TINYURL_API_ENDPOINT = 'https://tinyurl.com/api-create.php';
+let TINYURL_MANUAL_URL = 'https://tinyurl.com/app/';
+fetch('/config.json')
+  .then(r => r.json())
+  .then(cfg => {
+    if (cfg.endpoints) {
+      if (cfg.endpoints.tinyurlApi) TINYURL_API_ENDPOINT = cfg.endpoints.tinyurlApi;
+      if (cfg.endpoints.tinyurlManual) TINYURL_MANUAL_URL = cfg.endpoints.tinyurlManual;
+    }
+  })
+  .catch(e => { /* fallback to defaults */ });
+
+
+
+shortUrlButton.addEventListener('click', async function() {
+    const mapName = document.getElementById('mapNameInput').value;
+    const compressedMap = compressMapWithName(entities, mapName);
+    mapData.value = compressedMap;
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('mapData', compressedMap);
+    const longUrl = newUrl.toString();
+
+    shortUrlContainer.classList.remove('hidden');
+    shortUrlOutput.value = 'Generating...';
+    shortUrlError.textContent = '';
+
+    // Always show Discord export, use long URL by default
+    const discordExportContainer = document.getElementById('discordExportContainer');
+    const discordExportOutput = document.getElementById('discordExportOutput');
+    if (discordExportContainer && discordExportOutput) {
+        const safeMapName = mapName && mapName.trim() ? mapName.trim() : 'Map';
+        discordExportOutput.value = `[Wosnerds BearPlanner \"${safeMapName}\"](${longUrl})`;
+        discordExportContainer.classList.remove('hidden');
+    }
+
+    try {
+        const response = await fetch(`${TINYURL_API_ENDPOINT}?url=${encodeURIComponent(longUrl)}`);
+        if (!response.ok) {
+            throw new Error(`TinyURL API error: ${response.status}`);
+        }
+        const shortUrl = await response.text();
+        if (!shortUrl.startsWith('http')) {
+            throw new Error('TinyURL returned invalid URL');
+        }
+        shortUrlOutput.value = shortUrl;
+
+        // Update Discord export with short URL
+        if (discordExportContainer && discordExportOutput) {
+            const safeMapName = mapName && mapName.trim() ? mapName.trim() : 'Map';
+            discordExportOutput.value = `[Wosnerds BearPlanner \"${safeMapName}\"](${shortUrl})`;
+        }
+    } catch (error) {
+        console.error('Short URL generation failed:', error);
+        shortUrlOutput.value = '';
+        shortUrlError.textContent = 'Failed to generate. ';
+        const fallback = document.createElement('a');
+        fallback.href = `${TINYURL_MANUAL_URL}?url=${encodeURIComponent(longUrl)}`;
+        fallback.target = '_blank';
+        fallback.rel = 'noopener noreferrer';
+        fallback.textContent = 'Try manually';
+        fallback.className = 'underline text-blue-600';
+        shortUrlError.appendChild(fallback);
+    }
+});
+// Discord export copy button
+const copyDiscordExportButton = document.getElementById('copyDiscordExportButton');
+if (copyDiscordExportButton) {
+    copyDiscordExportButton.addEventListener('click', function() {
+        const discordExportOutput = document.getElementById('discordExportOutput');
+        if (discordExportOutput && discordExportOutput.value) {
+            navigator.clipboard.writeText(discordExportOutput.value)
+                .then(() => {
+                    discordExportOutput.classList.add('bg-green-100');
+                    setTimeout(() => discordExportOutput.classList.remove('bg-green-100'), 1000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy Discord export:', err);
+                });
+        }
+    });
+}
+
+copyShortUrlButton.addEventListener('click', function() {
+    const urlToCopy = shortUrlOutput.value;
+    if (urlToCopy && !urlToCopy.includes('Generating...')) {
+        navigator.clipboard.writeText(urlToCopy)
+            .then(() => {
+                shortUrlOutput.classList.add('bg-green-100');
+                setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
+            })
+            .catch(err => {
+                console.error('Failed to copy URL:', err);
+                shortUrlError.textContent = 'Could not copy URL.';
+            });
+    }
+});
+
 // Map name validation
 document.getElementById("mapNameInput").addEventListener("input", function() {
     const value = this.value;
