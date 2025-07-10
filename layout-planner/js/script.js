@@ -1136,11 +1136,9 @@ function saveMap() {
     }
 }
 
-// Helper to generate a shareable URL with the current map data and name
-function getShareableUrl() {
-    const mapName = document.getElementById('mapNameInput').value;
-    const compressedMap = compressMapWithName(entities, mapName);
-    mapData.value = compressedMap;
+// Pure helper to generate a shareable URL with provided map data and name
+function getShareableUrl(entitiesArg, mapNameArg) {
+    const compressedMap = compressMapWithName(entitiesArg, mapNameArg);
     const newUrl = new URL(window.location.href);
     newUrl.searchParams.set('mapData', compressedMap);
     return newUrl.toString();
@@ -1148,7 +1146,10 @@ function getShareableUrl() {
 
 function shareMap() {
     try {
-        const longUrl = getShareableUrl();
+        const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
+        mapData.value = compressedMap;
+        const longUrl = getShareableUrl(entities, mapName);
         window.history.replaceState(null, '', longUrl);
 
         navigator.clipboard.writeText(longUrl)
@@ -1314,17 +1315,9 @@ document.getElementById('saveButton').addEventListener('click', saveMap);
 document.getElementById('loadButton').addEventListener('click', loadMap);
 document.getElementById('shareButton').addEventListener('click', shareMap);
 
-// Short URL feature
-// Short URL feature (refactored for maintainability and robustness)
-const shortUrlButton = document.getElementById('shortUrlButton');
-const copyShortUrlButton = document.getElementById('copyShortUrlButton');
-const shortUrlContainer = document.getElementById('shortUrlContainer');
-const shortUrlOutput = document.getElementById('shortUrlOutput');
-const shortUrlError = document.getElementById('shortUrlError');
-
-
-
 // Short URL feature: encapsulated in async IIFE to avoid race conditions and keep config/vars scoped
+const SHORT_URL_GENERATING_TEXT = 'Generating...';
+
 (async () => {
     const shortUrlButton = document.getElementById('shortUrlButton');
     const copyShortUrlButton = document.getElementById('copyShortUrlButton');
@@ -1373,9 +1366,12 @@ const shortUrlError = document.getElementById('shortUrlError');
     if (!configLoaded) return;
 
     shortUrlButton.addEventListener('click', async function() {
-        const longUrl = getShareableUrl();
+        const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
+        mapData.value = compressedMap;
+        const longUrl = getShareableUrl(entities, mapName);
         shortUrlContainer.classList.remove('hidden');
-        shortUrlOutput.value = 'Generating...';
+        shortUrlOutput.value = SHORT_URL_GENERATING_TEXT;
         shortUrlError.textContent = '';
 
         try {
@@ -1404,7 +1400,7 @@ const shortUrlError = document.getElementById('shortUrlError');
 
     copyShortUrlButton.addEventListener('click', function() {
         const urlToCopy = shortUrlOutput.value;
-        if (urlToCopy && !urlToCopy.includes('Generating...')) {
+        if (urlToCopy && urlToCopy === shortUrlOutput.value && urlToCopy !== SHORT_URL_GENERATING_TEXT) {
             navigator.clipboard.writeText(urlToCopy)
                 .then(() => {
                     shortUrlOutput.classList.add('bg-green-100');
