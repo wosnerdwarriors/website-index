@@ -289,68 +289,46 @@ function drawGhostEntity(entity) {
     const screen = diamondToScreen(entity.x, entity.y);
     const currentGridSize = gridSize * zoom;
     
-    // Make ghost semi-transparent and grayed out
+    // Helper function to draw the entity path
+    const drawEntityPath = () => {
+        if (entity.width === 1 && entity.height === 1) {
+            // Single cell path
+            const fillSize = currentGridSize * 0.9;
+            ctx.beginPath();
+            ctx.moveTo(screen.x, screen.y - fillSize * 0.5);
+            ctx.lineTo(screen.x + fillSize * 0.5, screen.y);
+            ctx.lineTo(screen.x, screen.y + fillSize * 0.5);
+            ctx.lineTo(screen.x - fillSize * 0.5, screen.y);
+            ctx.closePath();
+        } else {
+            // Multi-cell path
+            const topLeft = diamondToScreenCorner(entity.x, entity.y);
+            const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y);
+            const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height);
+            const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height);
+            
+            ctx.beginPath();
+            ctx.moveTo(topLeft.x, topLeft.y);
+            ctx.lineTo(topRight.x, topRight.y);
+            ctx.lineTo(bottomRight.x, bottomRight.y);
+            ctx.lineTo(bottomLeft.x, bottomLeft.y);
+            ctx.closePath();
+        }
+    };
+    
+    // Fill the ghost entity
     ctx.globalAlpha = 0.5;
     ctx.fillStyle = '#888888';
-    
-    // Draw entity based on its actual size (width x height)
-    if (entity.width === 1 && entity.height === 1) {
-        // Flag: 1x1 - single diamond cell
-        const fillSize = currentGridSize * 0.9;
-        ctx.beginPath();
-        ctx.moveTo(screen.x, screen.y - fillSize * 0.5);
-        ctx.lineTo(screen.x + fillSize * 0.5, screen.y);
-        ctx.lineTo(screen.x, screen.y + fillSize * 0.5);
-        ctx.lineTo(screen.x - fillSize * 0.5, screen.y);
-        ctx.closePath();
-        ctx.fill();
-    } else {
-        // Multi-cell entities
-        const topLeft = diamondToScreenCorner(entity.x, entity.y);
-        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y);
-        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height);
-        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height);
-        
-        ctx.beginPath();
-        ctx.moveTo(topLeft.x, topLeft.y);
-        ctx.lineTo(topRight.x, topRight.y);
-        ctx.lineTo(bottomRight.x, bottomRight.y);
-        ctx.lineTo(bottomLeft.x, bottomLeft.y);
-        ctx.closePath();
-        ctx.fill();
-    }
+    drawEntityPath();
+    ctx.fill();
     
     // Draw dashed border for ghost
     ctx.globalAlpha = 0.8;
     ctx.strokeStyle = '#666666';
     ctx.lineWidth = Math.max(1, 2 * zoom);
     ctx.setLineDash([3 * zoom, 3 * zoom]);
-    
-    if (entity.width === 1 && entity.height === 1) {
-        // Single cell border
-        const fillSize = currentGridSize * 0.9;
-        ctx.beginPath();
-        ctx.moveTo(screen.x, screen.y - fillSize * 0.5);
-        ctx.lineTo(screen.x + fillSize * 0.5, screen.y);
-        ctx.lineTo(screen.x, screen.y + fillSize * 0.5);
-        ctx.lineTo(screen.x - fillSize * 0.5, screen.y);
-        ctx.closePath();
-        ctx.stroke();
-    } else {
-        // Multi-cell border
-        const topLeft = diamondToScreenCorner(entity.x, entity.y);
-        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y);
-        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height);
-        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height);
-        
-        ctx.beginPath();
-        ctx.moveTo(topLeft.x, topLeft.y);
-        ctx.lineTo(topRight.x, topRight.y);
-        ctx.lineTo(bottomRight.x, bottomRight.y);
-        ctx.lineTo(bottomLeft.x, bottomLeft.y);
-        ctx.closePath();
-        ctx.stroke();
-    }
+    drawEntityPath();
+    ctx.stroke();
     
     ctx.restore();
 }
@@ -761,17 +739,9 @@ function handleMouseMove(event) {
             height = 3;
         }
 
-        // Check if position is valid for preview
-        const validPosition = x >= -gridCols && x + width <= gridCols && 
-                             y >= -gridRows && y + height <= gridRows &&
-                             !entities.some(entity => {
-                                 return (
-                                     x < entity.x + entity.width &&
-                                     x + width > entity.x &&
-                                     y < entity.y + entity.height &&
-                                     y + height > entity.y
-                                 );
-                             });
+        // Create a temporary entity object for validation
+        const tempEntity = { x, y, width, height, type: selectedType };
+        const validPosition = isPositionValid(x, y, tempEntity);
 
         // Only show ghost if position is valid
         if (validPosition) {
@@ -1475,8 +1445,7 @@ toolbar.addEventListener('click', (e) => {
         e.target.classList.add('bg-yellow-500');
         e.target.classList.remove('bg-blue-500', 'bg-gray-500');
         
-        // Clear ghost preview when switching tools
-        if (selectedType === 'select') {
+        if (selectedType === 'select' && ghostPreview) {
             ghostPreview = null;
             redraw();
         }
