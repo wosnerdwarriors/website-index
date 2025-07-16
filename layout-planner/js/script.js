@@ -368,7 +368,7 @@ function drawCityDetails(city, screen) {
     // Shift text upward to accommodate multiple bear trap times
     const baseOffset = -currentGridSize * 0.2;
     
-    const label = city.name || `C${city.id}`;
+    const label = city.name || `City ${city.id}`;
     ctx.fillText(label, screen.x, screen.y + baseOffset);
     
     // Draw march times to bear traps
@@ -1013,8 +1013,8 @@ function renumberCities() {
         .filter(entity => entity.type === 'city')
         .forEach(city => {
             city.id = newId;
-            if (!city.name || city.name.startsWith('City ')) {
-                city.name = `${newId}`;
+            if (!city.name || /^City \d+$/.test(city.name)) {
+                city.name = `City ${newId}`;
             }
             newId++;
         });
