@@ -168,7 +168,7 @@ function drawEntities() {
 
     // Draw entities
     entities.forEach(entity => {
-        drawEntity(entity);
+        drawEntity(entity, flagAreas);
         
         if (selectedEntity === entity) {
             drawSelectionHighlight(entity);
@@ -176,7 +176,7 @@ function drawEntities() {
     });
 }
 
-function drawEntity(entity) {
+function drawEntity(entity, flagAreas) {
     ctx.save();
     
     const screen = diamondToScreen(entity.x, entity.y);
@@ -224,8 +224,15 @@ function drawEntity(entity) {
     }
     
     // Draw border around the entire entity
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-    ctx.lineWidth = Math.max(1, 2 * zoom);
+
+    // For cities outside flag areas, use red border; otherwise use black
+    if (entity.type === 'city' && !isCityInFlagArea(entity, flagAreas)) {
+        ctx.strokeStyle = 'rgba(255, 0, 0, 1.0)';
+        ctx.lineWidth = Math.max(2, 4 * zoom);
+    } else {
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)';
+        ctx.lineWidth = Math.max(1, 2 * zoom);
+    }
     
     if (entity.width === 1 && entity.height === 1) {
         // Single cell border
@@ -399,6 +406,25 @@ function markFlagArea(flagEntity, flagAreas) {
             }
         }
     }
+}
+
+// Helper function to check if a city is within any flag's area
+function isCityInFlagArea(cityEntity, flagAreas) {
+    // For a 2x2 city, check all 4 grid cells that the city occupies
+    for (let dx = 0; dx < cityEntity.width; dx++) {
+        for (let dy = 0; dy < cityEntity.height; dy++) {
+            const gridX = cityEntity.x + dx;
+            const gridY = cityEntity.y + dy;
+            
+            // If any cell of the city is NOT in a flag area, the city is not well positioned
+            if (!flagAreas.has(`${gridX},${gridY}`)) {
+                return false;
+            }
+        }
+    }
+    
+    // All cells of the city are within flag areas
+    return true;
 }
 
 function drawFlagAreas(flagAreas) {
