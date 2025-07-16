@@ -5,6 +5,7 @@ const toolbar = document.getElementById('toolbar');
 const flagCounter = document.getElementById('flagCounter');
 const cityCounter = document.getElementById('cityCounter');
 const buildingCounter = document.getElementById('buildingCounter');
+const hqCounter = document.getElementById('hqCounter');
 const nodeCounter = document.getElementById('nodeCounter');
 const saveButton = document.getElementById('saveButton');
 const loadButton = document.getElementById('loadButton');
@@ -99,11 +100,13 @@ function updateCounters() {
     const flags = entities.filter(entity => entity.type === 'flag').length;
     const cities = entities.filter(entity => entity.type === 'city').length;
     const buildings = entities.filter(entity => entity.type === 'building').length;
+    const hqs = entities.filter(entity => entity.type === 'hq').length;
     const nodes = entities.filter(entity => entity.type === 'node').length;
 
     flagCounter.textContent = flags;
     cityCounter.textContent = cities;
     buildingCounter.textContent = buildings;
+    hqCounter.textContent = hqs;
     nodeCounter.textContent = nodes;
 }
 
@@ -159,12 +162,16 @@ function drawDiamondGrid() {
 function drawEntities() {
     // Draw flag areas first
     const flagAreas = new Set();
+    const hqAreas = new Set();
     entities.forEach(entity => {
         if (entity.type === 'flag') {
-            markFlagArea(entity, flagAreas);
+            markFlagArea(entity, flagAreas, 3);
+        } else if (entity.type === 'hq') {
+            markFlagArea(entity, hqAreas, 6);
         }
     });
     drawFlagAreas(flagAreas);
+    drawFlagAreas(hqAreas);
 
     // Draw entities
     entities.forEach(entity => {
@@ -259,6 +266,8 @@ function drawEntity(entity) {
         drawCityDetails(entity, centerScreen);
     } else if (entity.type === 'building') {
         drawBearTrapDetails(entity, centerScreen);
+    } else if (entity.type === 'hq') {
+        drawHQDetails(entity, centerScreen);
     } else if (entity.type === 'node') {
         drawNodeDetails(entity, centerScreen);
     } else if (entity.type === 'obstacle') {
@@ -303,6 +312,18 @@ function drawBearTrapDetails(trap, screen) {
     
     const trapIndex = bearTraps.indexOf(trap) + 1;
     ctx.fillText(`BT${trapIndex}`, screen.x, screen.y);
+}
+
+function drawHQDetails(hq, screen) {
+    ctx.fillStyle = 'white';
+    
+    const currentGridSize = gridSize * zoom;
+    const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
+    ctx.font = `${baseFontSize}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    ctx.fillText('HQ', screen.x, screen.y);
 }
 
 function drawNodeDetails(node, screen) {
@@ -385,27 +406,41 @@ function calculateMarchTimes(city) {
     return times;
 }
 
-function markFlagArea(flagEntity, flagAreas) {
-    const radiusSize = 3;
-    const startX = flagEntity.x - radiusSize;
-    const startY = flagEntity.y - radiusSize;
-    const endX = flagEntity.x + radiusSize;
-    const endY = flagEntity.y + radiusSize;
-
-    for (let x = startX; x <= endX; x++) {
-        for (let y = startY; y <= endY; y++) {
+function markFlagArea(entity, areas, radiusSize = 3) {
+    let centerX, centerY;
+    
+    if (entity.width === 1 && entity.height === 1) {
+        // For flags (1x1), use the entity position directly
+        centerX = entity.x;
+        centerY = entity.y;
+    } else {
+        // For multi-cell entities (HQs), use the center of the entity
+        // For a 3x3 entity at (0,0): center should be at (1,1)
+        centerX = entity.x + Math.floor(entity.width / 2);
+        centerY = entity.y + Math.floor(entity.height / 2);
+    }
+    
+    // For HQs, we want the specified radius OUTSIDE the building
+    let effectiveRadius = radiusSize;
+    if (entity.type === 'hq') {
+        effectiveRadius = radiusSize + Math.floor(entity.width / 2);
+    }
+    
+    // Mark all fields within the effective radius
+    for (let x = centerX - effectiveRadius; x <= centerX + effectiveRadius; x++) {
+        for (let y = centerY - effectiveRadius; y <= centerY + effectiveRadius; y++) {
             if (x >= -gridCols && x <= gridCols && y >= -gridRows && y <= gridRows) {
-                flagAreas.add(`${x},${y}`);
+                areas.add(`${x},${y}`);
             }
         }
     }
 }
 
-function drawFlagAreas(flagAreas) {
+function drawFlagAreas(areas, color = 'rgba(173, 216, 230, 0.3)') {
     ctx.save();
-    ctx.fillStyle = 'rgba(173, 216, 230, 0.3)';
+    ctx.fillStyle = color;
     
-    flagAreas.forEach(coord => {
+    areas.forEach(coord => {
         const [x, y] = coord.split(',').map(Number);
         const screen = diamondToScreen(x, y);
         const currentGridSize = gridSize * zoom;
@@ -467,6 +502,10 @@ function addEntity(event) {
             return;
         }
         color = 'black';
+        width = 3;
+        height = 3;
+    } else if (selectedType === 'hq') {
+        color = 'darkgoldenrod';
         width = 3;
         height = 3;
     } else if (selectedType === 'node') {
@@ -869,7 +908,9 @@ function compressMap(entities) {
         const type = entity.type === "flag" ? "000" :
                      entity.type === "city" ? "001" : 
                      entity.type === "building" ? "010" : 
-                     entity.type === "node" ? "011" : "100"; // obstacle = "100"
+                     entity.type === "node" ? "011" : 
+                     entity.type === "hq" ? "101" :
+                     "100"; // obstacle = "100"
         
         // Convert grid coordinates to positive values for storage
         const storageX = entity.x + gridCols;
@@ -1040,7 +1081,8 @@ function decompressNew(binaryString) {
         const type = typeBits === "000" ? "flag" :
                      typeBits === "001" ? "city" : 
                      typeBits === "010" ? "building" : 
-                     typeBits === "011" ? "node" : "obstacle";
+                     typeBits === "011" ? "node" : 
+                     typeBits === "101" ? "hq" : "obstacle";
         
         // Convert back from storage coordinates
         const storageX = parseInt(xBits, 2);
@@ -1076,6 +1118,10 @@ function decompressNew(binaryString) {
             entity.width = 3;
             entity.height = 3;
             entity.color = "black";
+        } else if (type === "hq") {
+            entity.width = 3;
+            entity.height = 3;
+            entity.color = "darkgoldenrod";
         } else if (type === "node") {
             entity.width = 3;
             entity.height = 3;
