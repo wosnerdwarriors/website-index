@@ -37,6 +37,7 @@ let dragOffsetY = 0;
 let lastMouseX = 0;
 let lastMouseY = 0;
 let hasUnsavedChanges = false;
+let ghostPreview = null;
 
 // ===== CANVAS MANAGEMENT =====
 // Initialize canvas size
@@ -181,6 +182,11 @@ function drawEntities() {
             drawSelectionHighlight(entity);
         }
     });
+    
+    // Draw ghost preview if applicable
+    if (ghostPreview) {
+        drawGhostEntity(ghostPreview);
+    }
 }
 
 function drawEntity(entity) {
@@ -272,6 +278,78 @@ function drawEntity(entity) {
         drawNodeDetails(entity, centerScreen);
     } else if (entity.type === 'obstacle') {
         drawObstacleDetails(entity, centerScreen);
+    }
+    
+    ctx.restore();
+}
+
+function drawGhostEntity(entity) {
+    ctx.save();
+    
+    const screen = diamondToScreen(entity.x, entity.y);
+    const currentGridSize = gridSize * zoom;
+    
+    // Make ghost semi-transparent and grayed out
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = '#888888';
+    
+    // Draw entity based on its actual size (width x height)
+    if (entity.width === 1 && entity.height === 1) {
+        // Flag: 1x1 - single diamond cell
+        const fillSize = currentGridSize * 0.9;
+        ctx.beginPath();
+        ctx.moveTo(screen.x, screen.y - fillSize * 0.5);
+        ctx.lineTo(screen.x + fillSize * 0.5, screen.y);
+        ctx.lineTo(screen.x, screen.y + fillSize * 0.5);
+        ctx.lineTo(screen.x - fillSize * 0.5, screen.y);
+        ctx.closePath();
+        ctx.fill();
+    } else {
+        // Multi-cell entities
+        const topLeft = diamondToScreenCorner(entity.x, entity.y);
+        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y);
+        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height);
+        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height);
+        
+        ctx.beginPath();
+        ctx.moveTo(topLeft.x, topLeft.y);
+        ctx.lineTo(topRight.x, topRight.y);
+        ctx.lineTo(bottomRight.x, bottomRight.y);
+        ctx.lineTo(bottomLeft.x, bottomLeft.y);
+        ctx.closePath();
+        ctx.fill();
+    }
+    
+    // Draw dashed border for ghost
+    ctx.globalAlpha = 0.8;
+    ctx.strokeStyle = '#666666';
+    ctx.lineWidth = Math.max(1, 2 * zoom);
+    ctx.setLineDash([3 * zoom, 3 * zoom]);
+    
+    if (entity.width === 1 && entity.height === 1) {
+        // Single cell border
+        const fillSize = currentGridSize * 0.9;
+        ctx.beginPath();
+        ctx.moveTo(screen.x, screen.y - fillSize * 0.5);
+        ctx.lineTo(screen.x + fillSize * 0.5, screen.y);
+        ctx.lineTo(screen.x, screen.y + fillSize * 0.5);
+        ctx.lineTo(screen.x - fillSize * 0.5, screen.y);
+        ctx.closePath();
+        ctx.stroke();
+    } else {
+        // Multi-cell border
+        const topLeft = diamondToScreenCorner(entity.x, entity.y);
+        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y);
+        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height);
+        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height);
+        
+        ctx.beginPath();
+        ctx.moveTo(topLeft.x, topLeft.y);
+        ctx.lineTo(topRight.x, topRight.y);
+        ctx.lineTo(bottomRight.x, bottomRight.y);
+        ctx.lineTo(bottomLeft.x, bottomLeft.y);
+        ctx.closePath();
+        ctx.stroke();
     }
     
     ctx.restore();
@@ -664,6 +742,50 @@ function handleMouseMove(event) {
             selectedEntity.y = newY;
             redraw();
             markUnsavedChanges();
+        }
+    } else if (selectedType && selectedType !== 'select') {
+        // Update ghost preview
+        const gridPos = screenToDiamond(mouseX, mouseY);
+        const x = gridPos.x;
+        const y = gridPos.y;
+
+        let width, height;
+        if (selectedType === 'flag' || selectedType === 'obstacle') {
+            width = 1;
+            height = 1;
+        } else if (selectedType === 'city') {
+            width = 2;
+            height = 2;
+        } else if (selectedType === 'building' || selectedType === 'hq' || selectedType === 'node') {
+            width = 3;
+            height = 3;
+        }
+
+        // Check if position is valid for preview
+        const validPosition = x >= -gridCols && x + width <= gridCols && 
+                             y >= -gridRows && y + height <= gridRows &&
+                             !entities.some(entity => {
+                                 return (
+                                     x < entity.x + entity.width &&
+                                     x + width > entity.x &&
+                                     y < entity.y + entity.height &&
+                                     y + height > entity.y
+                                 );
+                             });
+
+        // Only show ghost if position is valid
+        if (validPosition) {
+            ghostPreview = { x, y, width, height, type: selectedType };
+        } else {
+            ghostPreview = null;
+        }
+        
+        redraw();
+    } else {
+        // Clear ghost preview when not in placement mode
+        if (ghostPreview) {
+            ghostPreview = null;
+            redraw();
         }
     }
 }
@@ -1337,6 +1459,13 @@ canvas.addEventListener('mousedown', handleMouseDown);
 canvas.addEventListener('mousemove', handleMouseMove);
 canvas.addEventListener('mouseup', handleMouseUp);
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('mouseleave', () => {
+    // Clear ghost preview when mouse leaves canvas
+    if (ghostPreview) {
+        ghostPreview = null;
+        redraw();
+    }
+});
 
 toolbar.addEventListener('click', (e) => {
     if (e.target.dataset.type) {
@@ -1345,6 +1474,12 @@ toolbar.addEventListener('click', (e) => {
             button.classList.remove('bg-yellow-500', 'bg-yellow-600'));
         e.target.classList.add('bg-yellow-500');
         e.target.classList.remove('bg-blue-500', 'bg-gray-500');
+        
+        // Clear ghost preview when switching tools
+        if (selectedType === 'select') {
+            ghostPreview = null;
+            redraw();
+        }
     }
 });
 
