@@ -5,6 +5,7 @@ const toolbar = document.getElementById('toolbar');
 const flagCounter = document.getElementById('flagCounter');
 const cityCounter = document.getElementById('cityCounter');
 const buildingCounter = document.getElementById('buildingCounter');
+const hqCounter = document.getElementById('hqCounter');
 const nodeCounter = document.getElementById('nodeCounter');
 const saveButton = document.getElementById('saveButton');
 const loadButton = document.getElementById('loadButton');
@@ -36,6 +37,7 @@ let dragOffsetY = 0;
 let lastMouseX = 0;
 let lastMouseY = 0;
 let hasUnsavedChanges = false;
+let ghostPreview = null;
 
 // ===== CANVAS MANAGEMENT =====
 // Initialize canvas size
@@ -99,11 +101,13 @@ function updateCounters() {
     const flags = entities.filter(entity => entity.type === 'flag').length;
     const cities = entities.filter(entity => entity.type === 'city').length;
     const buildings = entities.filter(entity => entity.type === 'building').length;
+    const hqs = entities.filter(entity => entity.type === 'hq').length;
     const nodes = entities.filter(entity => entity.type === 'node').length;
 
     flagCounter.textContent = flags;
     cityCounter.textContent = cities;
     buildingCounter.textContent = buildings;
+    hqCounter.textContent = hqs;
     nodeCounter.textContent = nodes;
 }
 
@@ -159,12 +163,16 @@ function drawDiamondGrid() {
 function drawEntities() {
     // Draw flag areas first
     const flagAreas = new Set();
+    const hqAreas = new Set();
     entities.forEach(entity => {
         if (entity.type === 'flag') {
-            markFlagArea(entity, flagAreas);
+            markFlagArea(entity, flagAreas, 3);
+        } else if (entity.type === 'hq') {
+            markFlagArea(entity, hqAreas, 6);
         }
     });
     drawFlagAreas(flagAreas);
+    drawFlagAreas(hqAreas);
 
     // Draw entities
     entities.forEach(entity => {
@@ -174,6 +182,11 @@ function drawEntities() {
             drawSelectionHighlight(entity);
         }
     });
+    
+    // Draw ghost preview if applicable
+    if (ghostPreview) {
+        drawGhostEntity(ghostPreview);
+    }
 }
 
 function drawEntity(entity) {
@@ -259,11 +272,63 @@ function drawEntity(entity) {
         drawCityDetails(entity, centerScreen);
     } else if (entity.type === 'building') {
         drawBearTrapDetails(entity, centerScreen);
+    } else if (entity.type === 'hq') {
+        drawHQDetails(entity, centerScreen);
     } else if (entity.type === 'node') {
         drawNodeDetails(entity, centerScreen);
     } else if (entity.type === 'obstacle') {
         drawObstacleDetails(entity, centerScreen);
     }
+    
+    ctx.restore();
+}
+
+function drawGhostEntity(entity) {
+    ctx.save();
+    
+    const screen = diamondToScreen(entity.x, entity.y);
+    const currentGridSize = gridSize * zoom;
+    
+    // Helper function to draw the entity path
+    const drawEntityPath = () => {
+        if (entity.width === 1 && entity.height === 1) {
+            // Single cell path
+            const fillSize = currentGridSize * 0.9;
+            ctx.beginPath();
+            ctx.moveTo(screen.x, screen.y - fillSize * 0.5);
+            ctx.lineTo(screen.x + fillSize * 0.5, screen.y);
+            ctx.lineTo(screen.x, screen.y + fillSize * 0.5);
+            ctx.lineTo(screen.x - fillSize * 0.5, screen.y);
+            ctx.closePath();
+        } else {
+            // Multi-cell path
+            const topLeft = diamondToScreenCorner(entity.x, entity.y);
+            const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y);
+            const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height);
+            const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height);
+            
+            ctx.beginPath();
+            ctx.moveTo(topLeft.x, topLeft.y);
+            ctx.lineTo(topRight.x, topRight.y);
+            ctx.lineTo(bottomRight.x, bottomRight.y);
+            ctx.lineTo(bottomLeft.x, bottomLeft.y);
+            ctx.closePath();
+        }
+    };
+    
+    // Fill the ghost entity
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = '#888888';
+    drawEntityPath();
+    ctx.fill();
+    
+    // Draw dashed border for ghost
+    ctx.globalAlpha = 0.8;
+    ctx.strokeStyle = '#666666';
+    ctx.lineWidth = Math.max(1, 2 * zoom);
+    ctx.setLineDash([3 * zoom, 3 * zoom]);
+    drawEntityPath();
+    ctx.stroke();
     
     ctx.restore();
 }
@@ -281,7 +346,7 @@ function drawCityDetails(city, screen) {
     // Shift text upward to accommodate multiple bear trap times
     const baseOffset = -currentGridSize * 0.2;
     
-    const label = city.name || `C${city.id}`;
+    const label = city.name || `City ${city.id}`;
     ctx.fillText(label, screen.x, screen.y + baseOffset);
     
     // Draw march times to bear traps
@@ -303,6 +368,18 @@ function drawBearTrapDetails(trap, screen) {
     
     const trapIndex = bearTraps.indexOf(trap) + 1;
     ctx.fillText(`BT${trapIndex}`, screen.x, screen.y);
+}
+
+function drawHQDetails(hq, screen) {
+    ctx.fillStyle = 'white';
+    
+    const currentGridSize = gridSize * zoom;
+    const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
+    ctx.font = `${baseFontSize}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    ctx.fillText('HQ', screen.x, screen.y);
 }
 
 function drawNodeDetails(node, screen) {
@@ -385,27 +462,41 @@ function calculateMarchTimes(city) {
     return times;
 }
 
-function markFlagArea(flagEntity, flagAreas) {
-    const radiusSize = 3;
-    const startX = flagEntity.x - radiusSize;
-    const startY = flagEntity.y - radiusSize;
-    const endX = flagEntity.x + radiusSize;
-    const endY = flagEntity.y + radiusSize;
-
-    for (let x = startX; x <= endX; x++) {
-        for (let y = startY; y <= endY; y++) {
+function markFlagArea(entity, areas, radiusSize = 3) {
+    let centerX, centerY;
+    
+    if (entity.width === 1 && entity.height === 1) {
+        // For flags (1x1), use the entity position directly
+        centerX = entity.x;
+        centerY = entity.y;
+    } else {
+        // For multi-cell entities (HQs), use the center of the entity
+        // For a 3x3 entity at (0,0): center should be at (1,1)
+        centerX = entity.x + Math.floor(entity.width / 2);
+        centerY = entity.y + Math.floor(entity.height / 2);
+    }
+    
+    // For HQs, we want the specified radius OUTSIDE the building
+    let effectiveRadius = radiusSize;
+    if (entity.type === 'hq') {
+        effectiveRadius = radiusSize + Math.floor(entity.width / 2);
+    }
+    
+    // Mark all fields within the effective radius
+    for (let x = centerX - effectiveRadius; x <= centerX + effectiveRadius; x++) {
+        for (let y = centerY - effectiveRadius; y <= centerY + effectiveRadius; y++) {
             if (x >= -gridCols && x <= gridCols && y >= -gridRows && y <= gridRows) {
-                flagAreas.add(`${x},${y}`);
+                areas.add(`${x},${y}`);
             }
         }
     }
 }
 
-function drawFlagAreas(flagAreas) {
+function drawFlagAreas(areas, color = 'rgba(173, 216, 230, 0.3)') {
     ctx.save();
-    ctx.fillStyle = 'rgba(173, 216, 230, 0.3)';
+    ctx.fillStyle = color;
     
-    flagAreas.forEach(coord => {
+    areas.forEach(coord => {
         const [x, y] = coord.split(',').map(Number);
         const screen = diamondToScreen(x, y);
         const currentGridSize = gridSize * zoom;
@@ -467,6 +558,10 @@ function addEntity(event) {
             return;
         }
         color = 'black';
+        width = 3;
+        height = 3;
+    } else if (selectedType === 'hq') {
+        color = 'darkgoldenrod';
         width = 3;
         height = 3;
     } else if (selectedType === 'node') {
@@ -625,6 +720,42 @@ function handleMouseMove(event) {
             selectedEntity.y = newY;
             redraw();
             markUnsavedChanges();
+        }
+    } else if (selectedType && selectedType !== 'select') {
+        // Update ghost preview
+        const gridPos = screenToDiamond(mouseX, mouseY);
+        const x = gridPos.x;
+        const y = gridPos.y;
+
+        let width, height;
+        if (selectedType === 'flag' || selectedType === 'obstacle') {
+            width = 1;
+            height = 1;
+        } else if (selectedType === 'city') {
+            width = 2;
+            height = 2;
+        } else if (selectedType === 'building' || selectedType === 'hq' || selectedType === 'node') {
+            width = 3;
+            height = 3;
+        }
+
+        // Create a temporary entity object for validation
+        const tempEntity = { x, y, width, height, type: selectedType };
+        const validPosition = isPositionValid(x, y, tempEntity);
+
+        // Only show ghost if position is valid
+        if (validPosition) {
+            ghostPreview = { x, y, width, height, type: selectedType };
+        } else {
+            ghostPreview = null;
+        }
+        
+        redraw();
+    } else {
+        // Clear ghost preview when not in placement mode
+        if (ghostPreview) {
+            ghostPreview = null;
+            redraw();
         }
     }
 }
@@ -852,8 +983,8 @@ function renumberCities() {
         .filter(entity => entity.type === 'city')
         .forEach(city => {
             city.id = newId;
-            if (!city.name || city.name.startsWith('City ')) {
-                city.name = `${newId}`;
+            if (!city.name || /^City \d+$/.test(city.name)) {
+                city.name = `City ${newId}`;
             }
             newId++;
         });
@@ -869,7 +1000,9 @@ function compressMap(entities) {
         const type = entity.type === "flag" ? "000" :
                      entity.type === "city" ? "001" : 
                      entity.type === "building" ? "010" : 
-                     entity.type === "node" ? "011" : "100"; // obstacle = "100"
+                     entity.type === "node" ? "011" : 
+                     entity.type === "hq" ? "101" :
+                     "100"; // obstacle = "100"
         
         // Convert grid coordinates to positive values for storage
         const storageX = entity.x + gridCols;
@@ -1040,7 +1173,8 @@ function decompressNew(binaryString) {
         const type = typeBits === "000" ? "flag" :
                      typeBits === "001" ? "city" : 
                      typeBits === "010" ? "building" : 
-                     typeBits === "011" ? "node" : "obstacle";
+                     typeBits === "011" ? "node" : 
+                     typeBits === "101" ? "hq" : "obstacle";
         
         // Convert back from storage coordinates
         const storageX = parseInt(xBits, 2);
@@ -1076,6 +1210,10 @@ function decompressNew(binaryString) {
             entity.width = 3;
             entity.height = 3;
             entity.color = "black";
+        } else if (type === "hq") {
+            entity.width = 3;
+            entity.height = 3;
+            entity.color = "darkgoldenrod";
         } else if (type === "node") {
             entity.width = 3;
             entity.height = 3;
@@ -1291,6 +1429,13 @@ canvas.addEventListener('mousedown', handleMouseDown);
 canvas.addEventListener('mousemove', handleMouseMove);
 canvas.addEventListener('mouseup', handleMouseUp);
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('mouseleave', () => {
+    // Clear ghost preview when mouse leaves canvas
+    if (ghostPreview) {
+        ghostPreview = null;
+        redraw();
+    }
+});
 
 toolbar.addEventListener('click', (e) => {
     if (e.target.dataset.type) {
@@ -1299,6 +1444,11 @@ toolbar.addEventListener('click', (e) => {
             button.classList.remove('bg-yellow-500', 'bg-yellow-600'));
         e.target.classList.add('bg-yellow-500');
         e.target.classList.remove('bg-blue-500', 'bg-gray-500');
+        
+        if (selectedType === 'select' && ghostPreview) {
+            ghostPreview = null;
+            redraw();
+        }
     }
 });
 
