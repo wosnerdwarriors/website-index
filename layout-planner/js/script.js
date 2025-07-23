@@ -174,9 +174,12 @@ function drawEntities() {
     drawFlagAreas(flagAreas);
     drawFlagAreas(hqAreas);
 
+    // Combine flag areas and HQ areas for city positioning check
+    const allProtectedAreas = new Set([...flagAreas, ...hqAreas]);
+
     // Draw entities
     entities.forEach(entity => {
-        drawEntity(entity, flagAreas);
+        drawEntity(entity, allProtectedAreas);
         
         if (selectedEntity === entity) {
             drawSelectionHighlight(entity);
@@ -499,22 +502,22 @@ function markFlagArea(entity, areas, radiusSize = 3) {
     }
 }
 
-// Helper function to check if a city is within any flag's area
-function isCityInFlagArea(cityEntity, flagAreas) {
+// Helper function to check if a city is within any flag's or HQ's area
+function isCityInFlagArea(cityEntity, protectedAreas) {
     // For a 2x2 city, check all 4 grid cells that the city occupies
     for (let dx = 0; dx < cityEntity.width; dx++) {
         for (let dy = 0; dy < cityEntity.height; dy++) {
             const gridX = cityEntity.x + dx;
             const gridY = cityEntity.y + dy;
             
-            // If any cell of the city is NOT in a flag area, the city is not well positioned
-            if (!flagAreas.has(`${gridX},${gridY}`)) {
+            // If any cell of the city is NOT in a protected area (flag or HQ), the city is not well positioned
+            if (!protectedAreas.has(`${gridX},${gridY}`)) {
                 return false;
             }
         }
     }
     
-    // All cells of the city are within flag areas
+    // All cells of the city are within protected areas
     return true;
 }
 
