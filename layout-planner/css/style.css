@@ -90,29 +90,16 @@ body, html {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
 }
 
-/* Desktop Zoom Controls */
-.zoom-controls-desktop {
+/* Unified Zoom Controls */
+.zoom-controls {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  padding: 8px 12px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-/* Mobile Zoom Controls */
-.mobile-zoom-controls {
-  display: none;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  padding: 8px 12px;
+  border-radius: 10px;
+  padding: 6px 10px;
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
@@ -121,12 +108,12 @@ body, html {
   color: white;
   border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -145,8 +132,8 @@ body, html {
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 12px;
+  padding: 6px 10px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -161,10 +148,10 @@ body, html {
 }
 
 .zoom-display {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #374151;
-  min-width: 50px;
+  min-width: 45px;
   text-align: center;
 }
 
@@ -278,195 +265,226 @@ body, html {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Ensure panels don't overlap with navbar on desktop */
+/* Bottom Center Controls Panel */
+.bottom-center-panel {
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: auto !important;
+  min-width: 400px;
+  padding: 12px 16px !important;
+}
+
+/* Desktop panel positioning */
 @media (min-width: 768px) {
-  /* Hide mobile zoom controls on desktop */
-  .mobile-zoom-controls {
+  .mobile-nav-bar {
     display: none !important;
   }
   
-  /* Show desktop zoom controls */
-  .zoom-controls-desktop {
-    display: flex !important;
-  }
-  
-  /* Specific positioning adjustments for each panel */
-  #toolbarPanel {
-    left: 272px; /* Utilities - top left */
+  #buildingPanel {
+    left: 272px;
     top: 20px;
     max-width: 500px;
   }
   
   #actionsPanel {
-    right: 20px; /* Actions - top right */
+    right: 20px;
     top: 20px;
     width: 200px;
   }
   
   #citiesPanel {
-    left: 272px; /* Cities - bottom left */
+    left: 272px;
     bottom: 20px;
-    max-width: 500px; /* Same as toolbarPanel */
+    max-width: 500px;
     max-height: 200px;
     overflow-y: auto;
   }
   
   #helpPanel {
-    right: 20px; /* Controls - bottom right */
+    right: 20px;
     bottom: 20px;
     width: 250px;
   }
 }
 
+/* Panel collapse directions */
 .floating-panel.panel-collapsed {
   transform: translateY(-100%);
   opacity: 0.7;
 }
 
-/* Bottom panels should collapse downward */
 #citiesPanel.panel-collapsed,
 #helpPanel.panel-collapsed {
   transform: translateY(100%);
 }
 
-.floating-panel .panel-toggle {
-  transition: all 0.2s ease;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.floating-panel .panel-toggle:hover {
-  background: rgba(255, 255, 255, 1);
-  transform: translateX(-50%) scale(1.05);
-}
-
-/* Ensure normal hover state for non-collapsed panels */
-#toolbarPanel:not(.panel-collapsed) .panel-toggle:hover,
-#actionsPanel:not(.panel-collapsed) .panel-toggle:hover {
-  transform: translateX(-50%) rotate(180deg) scale(1.05); /* Keep rotation for top panels */
-}
-
-#citiesPanel:not(.panel-collapsed) .panel-toggle:hover,
-#helpPanel:not(.panel-collapsed) .panel-toggle:hover {
-  transform: translateX(-50%) scale(1.05); /* No rotation for bottom panels */
-}
-
-/* Dynamic arrow rotation for panel toggles */
+/* Panel toggle arrow rotation */
 .panel-toggle {
   transition: all 0.3s ease;
 }
 
-/* Top panels (collapse upward) - show up arrow when expanded, down arrow when collapsed */
-#toolbarPanel .panel-toggle,
+#buildingPanel .panel-toggle,
 #actionsPanel .panel-toggle {
-  transform: translateX(-50%) rotate(180deg); /* Start with up arrow (▲) */
+  transform: translateX(-50%) rotate(180deg);
 }
 
-#toolbarPanel .panel-toggle:hover,
+#buildingPanel .panel-toggle:hover,
 #actionsPanel .panel-toggle:hover {
   transform: translateX(-50%) rotate(180deg) scale(1.05);
 }
 
-#toolbarPanel.panel-collapsed .panel-toggle,
+#buildingPanel.panel-collapsed .panel-toggle,
 #actionsPanel.panel-collapsed .panel-toggle {
-  transform: translateX(-50%) rotate(0deg); /* Rotate to down arrow (▼) when collapsed */
+  transform: translateX(-50%) rotate(0deg);
 }
 
-#toolbarPanel.panel-collapsed .panel-toggle:hover,
-#actionsPanel.panel-collapsed .panel-toggle:hover {
-  transform: translateX(-50%) rotate(0deg) scale(1.05);
-}
-
-/* Bottom panels (collapse downward) - show down arrow when expanded, up arrow when collapsed */
 #citiesPanel.panel-collapsed .panel-toggle,
 #helpPanel.panel-collapsed .panel-toggle {
   transform: translateX(-50%) rotate(180deg);
 }
 
-#citiesPanel.panel-collapsed .panel-toggle:hover,
-#helpPanel.panel-collapsed .panel-toggle:hover {
-  transform: translateX(-50%) rotate(180deg) scale(1.05);
+/* Toolbar Sections */
+#toolbar-controls,
+#toolbar-buildings {
+  padding: 6px;
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 6px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
-/* Responsive adjustments for smaller screens */
+#toolbar-controls h3,
+#toolbar-buildings h3 {
+  color: #475569;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+/* Toolbar button styling */
+#toolbar-controls button,
+#toolbar-buildings button {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+#toolbar-controls button:hover,
+#toolbar-buildings button:hover {
+  background-color: #2563eb !important;
+}
+
+#toolbar-controls button.bg-yellow-500,
+#toolbar-buildings button.bg-yellow-500 {
+  background-color: #eab308 !important;
+  border: 2px solid #facc15;
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.3);
+  color: #000 !important;
+}
+
+#toolbar-controls button[data-type="select"] {
+  background-color: #6b7280 !important;
+}
+
+#toolbar-controls button[data-type="move"] {
+  background-color: #8b5cf6 !important;
+}
+
+#toolbar-controls button#deleteButton {
+  background-color: #ef4444 !important;
+}
+
+/* Mobile responsive adjustments */
 @media (max-width: 767px) {
-  /* Show mobile navigation */
   .mobile-nav-bar {
     display: flex !important;
   }
   
-  /* Show mobile zoom controls */
-  .mobile-zoom-controls {
-    display: flex !important;
-  }
-  
-  /* Hide desktop zoom controls on mobile */
-  .zoom-controls-desktop {
-    display: none !important;
-  }
-  
-  /* Adjust canvas for mobile nav bar */
   #layoutCanvas {
     height: calc(100vh - 70px) !important;
   }
   
   .floating-panel {
     max-width: 90vw !important;
-    width: auto !important;
-    left: auto !important; /* Reset desktop positioning */
+    width: 90% !important;
+    left: 5% !important;
+    right: 5% !important;
     max-height: 60vh !important;
   }
   
-  #toolbarPanel {
-    left: 5% !important;
-    right: 5% !important;
+  #buildingPanel {
     top: 10px !important;
-    max-width: none !important;
-    width: 90% !important;
   }
   
   #actionsPanel {
-    right: 5% !important;
     top: 10px !important;
-    left: 5% !important;
-    width: 90% !important;
   }
   
-  #citiesPanel {
-    left: 5% !important;
-    bottom: 80px !important;
-    right: 5% !important;
-    width: 90% !important;
-    max-height: 40vh !important;
-    overflow-y: auto !important;
-  }
-  
+  #citiesPanel,
   #helpPanel {
-    right: 5% !important;
     bottom: 80px !important;
-    left: 5% !important;
-    width: 90% !important;
-    max-height: 50vh !important;
+    max-height: 40vh !important;
   }
   
-  /* Improve touch targets in toolbar */
-  #toolbar .flex {
-    gap: 8px !important;
+  .bottom-center-panel {
+    bottom: 80px !important;
+    left: 2% !important;
+    right: 2% !important;
+    transform: none !important;
+    width: 96% !important;
+    min-width: unset !important;
+    padding: 8px !important;
   }
   
-  #toolbar button {
-    padding: 12px 8px !important;
-    font-size: 12px !important;
-    min-height: 44px !important;
+  .bottom-center-panel .flex {
+    flex-direction: row !important;
+    gap: 4px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+  
+  .bottom-center-panel #toolbar-controls {
+    flex: 1 !important;
+    gap: 2px !important;
+  }
+  
+  .bottom-center-panel #toolbar-controls button {
+    padding: 8px 6px !important;
+    font-size: 10px !important;
+    min-height: 36px !important;
     flex: 1 !important;
   }
   
-  /* Adjust toolbar sections for mobile */
-  #toolbar-controls,
-  #toolbar-buildings {
-    background: rgba(248, 250, 252, 0.6);
-    margin-bottom: 8px;
+  .bottom-center-panel .zoom-controls {
+    flex-shrink: 0 !important;
+    gap: 2px !important;
+    padding: 4px 6px !important;
+  }
+  
+  .bottom-center-panel .zoom-btn {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 14px !important;
+  }
+  
+  .bottom-center-panel .center-btn {
+    padding: 4px 6px !important;
+    font-size: 9px !important;
+  }
+  
+  .bottom-center-panel .zoom-display {
+    font-size: 11px !important;
+    min-width: 35px !important;
+  }
+  
+  .grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  #counters .grid-cols-5 {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 2px !important;
   }
 }
 
@@ -513,115 +531,4 @@ body, html {
 .floating-panel button:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Toolbar Sections */
-#toolbar-controls,
-#toolbar-buildings {
-  padding: 8px;
-  background: rgba(248, 250, 252, 0.8);
-  border-radius: 8px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-}
-
-#toolbar-controls h3,
-#toolbar-buildings h3 {
-  color: #475569;
-  font-weight: 600;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-}
-
-/* Toolbar button selection state - Updated selectors */
-#toolbar-controls button,
-#toolbar-buildings button {
-  background-color: #3b82f6 !important; /* Default blue background */
-  color: white !important;
-}
-
-#toolbar-controls button:hover,
-#toolbar-buildings button:hover {
-  background-color: #2563eb !important; /* Darker blue on hover */
-}
-
-#toolbar-controls button.bg-yellow-500,
-#toolbar-buildings button.bg-yellow-500 {
-  background-color: #eab308 !important;
-  border: 2px solid #facc15;
-  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.3);
-  color: #000 !important; /* Black text for selected state */
-}
-
-#toolbar-controls button.bg-yellow-500:hover,
-#toolbar-buildings button.bg-yellow-500:hover {
-  background-color: #d97706 !important;
-  color: #000 !important; /* Keep black text on hover */
-}
-
-/* Gray button (Select) styling */
-#toolbar-controls button[data-type="select"] {
-  background-color: #6b7280 !important; /* Gray background */
-}
-
-#toolbar-controls button[data-type="select"]:hover {
-  background-color: #4b5563 !important; /* Darker gray on hover */
-}
-
-#toolbar-controls button[data-type="select"].bg-yellow-500 {
-  background-color: #eab308 !important; /* Selected state overrides gray */
-  color: #000 !important; /* Black text for readability */
-}
-
-/* Purple button (Move) styling */
-#toolbar-controls button[data-type="move"] {
-  background-color: #8b5cf6 !important; /* Purple background */
-}
-
-#toolbar-controls button[data-type="move"]:hover {
-  background-color: #7c3aed !important; /* Darker purple on hover */
-}
-
-#toolbar-controls button[data-type="move"].bg-yellow-500 {
-  background-color: #eab308 !important; /* Selected state overrides purple */
-  color: #000 !important; /* Black text for readability */
-}
-
-/* Red button (Delete) styling */
-#toolbar-controls button#deleteButton {
-  background-color: #ef4444 !important; /* Red background */
-}
-
-#toolbar-controls button#deleteButton:hover {
-  background-color: #dc2626 !important; /* Darker red on hover */
-}
-
-/* Building buttons styling */
-#toolbar-buildings button[data-type="flag"],
-#toolbar-buildings button[data-type="city"],
-#toolbar-buildings button[data-type="building"],
-#toolbar-buildings button[data-type="hq"],
-#toolbar-buildings button[data-type="node"],
-#toolbar-buildings button[data-type="obstacle"] {
-  background-color: #3b82f6 !important; /* Blue background */
-}
-
-#toolbar-buildings button[data-type="flag"]:hover,
-#toolbar-buildings button[data-type="city"]:hover,
-#toolbar-buildings button[data-type="building"]:hover,
-#toolbar-buildings button[data-type="hq"]:hover,
-#toolbar-buildings button[data-type="node"]:hover,
-#toolbar-buildings button[data-type="obstacle"]:hover {
-  background-color: #2563eb !important; /* Darker blue on hover */
-}
-
-#toolbar-buildings button[data-type="flag"].bg-yellow-500,
-#toolbar-buildings button[data-type="city"].bg-yellow-500,
-#toolbar-buildings button[data-type="building"].bg-yellow-500,
-#toolbar-buildings button[data-type="hq"].bg-yellow-500,
-#toolbar-buildings button[data-type="node"].bg-yellow-500,
-#toolbar-buildings button[data-type="obstacle"].bg-yellow-500 {
-  background-color: #eab308 !important; /* Selected state */
-  color: #000 !important; /* Black text for readability */
 }

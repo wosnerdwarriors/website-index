@@ -454,6 +454,7 @@ function drawSelectionHighlight(entity) {
     
     ctx.restore();
 }
+
 function calculateMarchTimes(city) {
     const times = [];
     bearTraps.forEach(trap => {
@@ -686,6 +687,52 @@ function handleWheel(event) {
     updateZoomDisplay();
 }
 
+// Unified zoom controls
+function zoomIn() {
+    const newZoom = Math.min(3, zoom * 1.2);
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2;
+    const dx = centerX - panX;
+    const dy = centerY - panY;
+    
+    panX = centerX - dx * (newZoom / zoom);
+    panY = centerY - dy * (newZoom / zoom);
+    
+    zoom = newZoom;
+    gridSize = baseGridSize * zoom;
+    redraw();
+    updateZoomDisplay();
+}
+
+function zoomOut() {
+    const newZoom = Math.max(0.1, zoom * 0.8);
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2;
+    const dx = centerX - panX;
+    const dy = centerY - panY;
+    
+    panX = centerX - dx * (newZoom / zoom);
+    panY = centerY - dy * (newZoom / zoom);
+    
+    zoom = newZoom;
+    gridSize = baseGridSize * zoom;
+    redraw();
+    updateZoomDisplay();
+}
+
+function resetZoom() {
+    zoom = 1;
+    gridSize = baseGridSize;
+    redraw();
+    updateZoomDisplay();
+}
+
+function centerMap() {
+    panX = canvasWidth / 2;
+    panY = canvasHeight / 2;
+    redraw();
+}
+
 function handleMouseDown(event) {
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
@@ -753,120 +800,6 @@ function handleMouseUp(event) {
     }
 }
 
-// Mobile zoom controls
-document.getElementById('zoomInBtn').addEventListener('click', () => {
-    const newZoom = Math.min(3, zoom * 1.2);
-    const centerX = canvasWidth / 2;
-    const centerY = canvasHeight / 2;
-    const dx = centerX - panX;
-    const dy = centerY - panY;
-    
-    panX = centerX - dx * (newZoom / zoom);
-    panY = centerY - dy * (newZoom / zoom);
-    
-    zoom = newZoom;
-    gridSize = baseGridSize * zoom;
-    redraw();
-    updateZoomDisplay();
-});
-
-document.getElementById('zoomOutBtn').addEventListener('click', () => {
-    const newZoom = Math.max(0.1, zoom * 0.8);
-    const centerX = canvasWidth / 2;
-    const centerY = canvasHeight / 2;
-    const dx = centerX - panX;
-    const dy = centerY - panY;
-    
-    panX = centerX - dx * (newZoom / zoom);
-    panY = centerY - dy * (newZoom / zoom);
-    
-    zoom = newZoom;
-    gridSize = baseGridSize * zoom;
-    redraw();
-    updateZoomDisplay();
-});
-
-document.getElementById('centerBtn').addEventListener('click', centerMap);
-
-// Mobile zoom controls (separate buttons)
-document.getElementById('mobileZoomInBtn').addEventListener('click', () => {
-    const newZoom = Math.min(3, zoom * 1.2);
-    const centerX = canvasWidth / 2;
-    const centerY = canvasHeight / 2;
-    const dx = centerX - panX;
-    const dy = centerY - panY;
-    
-    panX = centerX - dx * (newZoom / zoom);
-    panY = centerY - dy * (newZoom / zoom);
-    
-    zoom = newZoom;
-    gridSize = baseGridSize * zoom;
-    redraw();
-    updateZoomDisplay();
-});
-
-document.getElementById('mobileZoomOutBtn').addEventListener('click', () => {
-    const newZoom = Math.max(0.1, zoom * 0.8);
-    const centerX = canvasWidth / 2;
-    const centerY = canvasHeight / 2;
-    const dx = centerX - panX;
-    const dy = centerY - panY;
-    
-    panX = centerX - dx * (newZoom / zoom);
-    panY = centerY - dy * (newZoom / zoom);
-    
-    zoom = newZoom;
-    gridSize = baseGridSize * zoom;
-    redraw();
-    updateZoomDisplay();
-});
-
-document.getElementById('mobileCenterBtn').addEventListener('click', centerMap);
-
-// Touch event listeners
-canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-// ===== EVENT LISTENERS =====
-// Event Listeners
-window.addEventListener('resize', resizeCanvas);
-window.addEventListener('DOMContentLoaded', () => {
-    loadMapFromQuery();
-    enablePopulateSortOptions('id');
-    updateCityList();
-    updateZoomDisplay();
-});
-window.addEventListener('keydown', handleKeyDown);
-
-canvas.addEventListener('wheel', handleWheel);
-canvas.addEventListener('mousedown', handleMouseDown);
-canvas.addEventListener('mousemove', handleMouseMove);
-canvas.addEventListener('mouseup', handleMouseUp);
-canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-canvas.addEventListener('mouseleave', () => {
-    // Clear ghost preview when mouse leaves canvas
-    if (ghostPreview) {
-        ghostPreview = null;
-        redraw();
-    }
-});
-
-// Add event listeners for both toolbar sections
-document.addEventListener('DOMContentLoaded', () => {
-    // Add event listeners for toolbar sections
-    const toolbarControls = document.getElementById('toolbar-controls');
-    const toolbarBuildings = document.getElementById('toolbar-buildings');
-    
-    if (toolbarControls) {
-        toolbarControls.addEventListener('click', handleToolbarClick);
-    }
-    
-    if (toolbarBuildings) {
-        toolbarBuildings.addEventListener('click', handleToolbarClick);
-    }
-});
-
 // Function to handle toolbar clicks
 function handleToolbarClick(e) {
     if (e.target.dataset.type) {
@@ -893,18 +826,66 @@ function handleToolbarClick(e) {
     }
 }
 
-document.getElementById('deleteButton').addEventListener('click', () => {
-    if (selectedEntity) {
-        deleteSelectedEntity();
-    } else {
-        alert('No entity selected to delete.');
+// ===== EVENT LISTENERS =====
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('keydown', handleKeyDown);
+
+canvas.addEventListener('wheel', handleWheel);
+canvas.addEventListener('mousedown', handleMouseDown);
+canvas.addEventListener('mousemove', handleMouseMove);
+canvas.addEventListener('mouseup', handleMouseUp);
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('mouseleave', () => {
+    // Clear ghost preview when mouse leaves canvas
+    if (ghostPreview) {
+        ghostPreview = null;
+        redraw();
     }
 });
 
-document.getElementById('downloadButton').addEventListener('click', downloadCanvasAsPNG);
-document.getElementById('saveButton').addEventListener('click', saveMap);
-document.getElementById('loadButton').addEventListener('click', loadMap);
-document.getElementById('shareButton').addEventListener('click', shareMap);
+// Touch event listeners
+canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+window.addEventListener('DOMContentLoaded', () => {
+    loadMapFromQuery();
+    enablePopulateSortOptions('id');
+    updateCityList();
+    updateZoomDisplay();
+    
+    // Unified zoom control event listeners
+    document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
+    document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
+    document.getElementById('resetZoomBtn').addEventListener('click', resetZoom);
+    document.getElementById('centerBtn').addEventListener('click', centerMap);
+    
+    // Add event listeners for toolbar sections
+    const toolbarControls = document.getElementById('toolbar-controls');
+    const toolbarBuildings = document.getElementById('toolbar-buildings');
+    
+    if (toolbarControls) {
+        toolbarControls.addEventListener('click', handleToolbarClick);
+    }
+    
+    if (toolbarBuildings) {
+        toolbarBuildings.addEventListener('click', handleToolbarClick);
+    }
+    
+    // Button event listeners
+    document.getElementById('loadButton').addEventListener('click', loadMap);
+    document.getElementById('saveButton').addEventListener('click', saveMap);
+    document.getElementById('shareButton').addEventListener('click', shareMap);
+    document.getElementById('downloadButton').addEventListener('click', downloadCanvasAsPNG);
+    document.getElementById('deleteButton').addEventListener('click', () => {
+        if (selectedEntity) {
+            deleteSelectedEntity();
+        } else {
+            alert('No entity selected to delete.');
+        }
+    });
+    
+});
 
 // Short URL feature: encapsulated in async IIFE to avoid race conditions and keep config/vars scoped
 const SHORT_URL_GENERATING_TEXT = 'Generating...';
@@ -1014,53 +995,14 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
     });
 })();
 
-// (Removed duplicate global shortUrlButton and copyShortUrlButton event listeners; now handled inside the IIFE only)
-
-// Map name validation
-document.getElementById("mapNameInput").addEventListener("input", function() {
-    const value = this.value;
-    const disallowedRegex = /[^a-zA-Z0-9 \-_]/;
-    const hintElement = document.getElementById("mapNameHint");
-    if (disallowedRegex.test(value)) {
-         hintElement.textContent = "Invalid characters detected! Only letters, numbers, spaces, hyphens, and underscores are allowed.";
-         hintElement.style.display = "block";
-    } else {
-         hintElement.textContent = "";
-         hintElement.style.display = "none";
-    }
-});
-
-window.addEventListener('beforeunload', function(e) {
-    if (hasUnsavedChanges) {
-        const message = 'You have unsaved changes. Do you really want to leave?';
-        e.preventDefault();
-        return message;
-    }
-});
-
-// ===== APPLICATION INITIALIZATION =====
-// Initialize the application
-resizeCanvas();
-redraw();
-
 // ===== MOBILE/TOUCH CONTROLS =====
 function updateZoomDisplay() {
     const zoomLevel = document.getElementById('zoomLevel');
-    const mobileZoomLevel = document.getElementById('mobileZoomLevel');
     const zoomPercentage = Math.round(zoom * 100) + '%';
     
     if (zoomLevel) {
         zoomLevel.textContent = zoomPercentage;
     }
-    if (mobileZoomLevel) {
-        mobileZoomLevel.textContent = zoomPercentage;
-    }
-}
-
-function centerMap() {
-    panX = canvasWidth / 2;
-    panY = canvasHeight / 2;
-    redraw();
 }
 
 function handleTouchStart(event) {
