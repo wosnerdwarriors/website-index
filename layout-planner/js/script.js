@@ -192,7 +192,7 @@ function drawEntities() {
     }
 }
 
-function drawEntity(entity, flagAreas) {
+function drawEntity(entity, protectedAreas) {
     ctx.save();
     
     const screen = diamondToScreen(entity.x, entity.y);
@@ -241,8 +241,8 @@ function drawEntity(entity, flagAreas) {
     
     // Draw border around the entire entity
 
-    // For cities outside flag areas, use red border; otherwise use black
-    if (entity.type === 'city' && !isCityInFlagArea(entity, flagAreas)) {
+    // For cities outside protected areas, use red border; otherwise use black
+    if (entity.type === 'city' && !isCityInProtectedArea(entity, protectedAreas)) {
         ctx.strokeStyle = 'rgba(255, 0, 0, 1.0)';
         ctx.lineWidth = Math.max(2, 4 * zoom);
     } else {
@@ -503,7 +503,7 @@ function markFlagArea(entity, areas, radiusSize = 3) {
 }
 
 // Helper function to check if a city is within any flag's or HQ's area
-function isCityInFlagArea(cityEntity, protectedAreas) {
+function isCityInProtectedArea(cityEntity, protectedAreas) {
     // For a 2x2 city, check all 4 grid cells that the city occupies
     for (let dx = 0; dx < cityEntity.width; dx++) {
         for (let dy = 0; dy < cityEntity.height; dy++) {
