@@ -15,6 +15,157 @@ body, html {
   height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   cursor: crosshair;
+  touch-action: none;
+}
+
+/* Mobile Navigation Bar */
+.mobile-nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  z-index: 2000;
+  display: none; /* Hidden on desktop */
+}
+
+.mobile-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 60px;
+}
+
+.mobile-nav-btn:hover,
+.mobile-nav-btn:active {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+}
+
+.mobile-nav-icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.mobile-nav-text {
+  font-size: 10px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Touch-friendly button and input styles */
+.touch-btn {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  border-radius: 8px !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-input {
+  min-height: 44px !important;
+  padding: 12px !important;
+  font-size: 16px !important; /* Prevents zoom on iOS */
+  border-radius: 8px !important;
+  border: 2px solid #d1d5db !important;
+  touch-action: manipulation;
+}
+
+.touch-input:focus {
+  border-color: #3b82f6 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Desktop Zoom Controls */
+.zoom-controls-desktop {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile Zoom Controls */
+.mobile-zoom-controls {
+  display: none;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.zoom-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zoom-btn:hover,
+.zoom-btn:active {
+  background: #2563eb;
+  transform: scale(1.1);
+}
+
+.center-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.center-btn:hover,
+.center-btn:active {
+  background: #059669;
+  transform: scale(1.05);
+}
+
+.zoom-display {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  min-width: 50px;
+  text-align: center;
 }
 
 /* Legacy bubbles for compatibility */
@@ -27,6 +178,13 @@ body, html {
   font-size: 0.875rem;
   margin-left: 0.5rem;
   position: relative;
+  min-height: 32px;
+  min-width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .bt-bubble.selected {
@@ -114,10 +272,24 @@ body, html {
   transition: all 0.2s ease;
   border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-height: 28px;
+  min-width: 28px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Ensure panels don't overlap with navbar on desktop */
 @media (min-width: 768px) {
+  /* Hide mobile zoom controls on desktop */
+  .mobile-zoom-controls {
+    display: none !important;
+  }
+  
+  /* Show desktop zoom controls */
+  .zoom-controls-desktop {
+    display: flex !important;
+  }
+  
   /* Specific positioning adjustments for each panel */
   #toolbarPanel {
     left: 272px; /* Utilities - top left */
@@ -219,37 +391,82 @@ body, html {
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 767px) {
+  /* Show mobile navigation */
+  .mobile-nav-bar {
+    display: flex !important;
+  }
+  
+  /* Show mobile zoom controls */
+  .mobile-zoom-controls {
+    display: flex !important;
+  }
+  
+  /* Hide desktop zoom controls on mobile */
+  .zoom-controls-desktop {
+    display: none !important;
+  }
+  
+  /* Adjust canvas for mobile nav bar */
+  #layoutCanvas {
+    height: calc(100vh - 70px) !important;
+  }
+  
   .floating-panel {
     max-width: 90vw !important;
     width: auto !important;
     left: auto !important; /* Reset desktop positioning */
+    max-height: 60vh !important;
   }
   
   #toolbarPanel {
-    left: 10px !important;
-    right: 10px !important;
-    top: 20px !important;
+    left: 5% !important;
+    right: 5% !important;
+    top: 10px !important;
     max-width: none !important;
+    width: 90% !important;
   }
   
   #actionsPanel {
-    right: 10px !important;
-    top: 20px !important;
-    width: 150px !important;
+    right: 5% !important;
+    top: 10px !important;
+    left: 5% !important;
+    width: 90% !important;
   }
   
   #citiesPanel {
-    left: 10px !important;
-    bottom: 20px !important;
-    width: 250px !important;
-    max-height: 200px !important;
+    left: 5% !important;
+    bottom: 80px !important;
+    right: 5% !important;
+    width: 90% !important;
+    max-height: 40vh !important;
     overflow-y: auto !important;
   }
   
   #helpPanel {
-    right: 10px !important;
-    bottom: 20px !important;
-    width: 200px !important;
+    right: 5% !important;
+    bottom: 80px !important;
+    left: 5% !important;
+    width: 90% !important;
+    max-height: 50vh !important;
+  }
+  
+  /* Improve touch targets in toolbar */
+  #toolbar .flex {
+    gap: 8px !important;
+  }
+  
+  #toolbar button {
+    padding: 12px 8px !important;
+    font-size: 12px !important;
+    min-height: 44px !important;
+    flex: 1 !important;
+  }
+  
+  /* Adjust toolbar sections for mobile */
+  #toolbar-controls,
+  #toolbar-buildings {
+    background: rgba(248, 250, 252, 0.6);
+    margin-bottom: 8px;
   }
 }
 
@@ -298,69 +515,113 @@ body, html {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Toolbar button selection state */
-#toolbar button {
+/* Toolbar Sections */
+#toolbar-controls,
+#toolbar-buildings {
+  padding: 8px;
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+#toolbar-controls h3,
+#toolbar-buildings h3 {
+  color: #475569;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+/* Toolbar button selection state - Updated selectors */
+#toolbar-controls button,
+#toolbar-buildings button {
   background-color: #3b82f6 !important; /* Default blue background */
   color: white !important;
 }
 
-#toolbar button:hover {
+#toolbar-controls button:hover,
+#toolbar-buildings button:hover {
   background-color: #2563eb !important; /* Darker blue on hover */
 }
 
-#toolbar button.bg-yellow-500 {
+#toolbar-controls button.bg-yellow-500,
+#toolbar-buildings button.bg-yellow-500 {
   background-color: #eab308 !important;
   border: 2px solid #facc15;
   box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.3);
+  color: #000 !important; /* Black text for selected state */
 }
 
-#toolbar button.bg-yellow-500:hover {
+#toolbar-controls button.bg-yellow-500:hover,
+#toolbar-buildings button.bg-yellow-500:hover {
   background-color: #d97706 !important;
+  color: #000 !important; /* Keep black text on hover */
 }
 
 /* Gray button (Select) styling */
-#toolbar button[data-type="select"] {
+#toolbar-controls button[data-type="select"] {
   background-color: #6b7280 !important; /* Gray background */
 }
 
-#toolbar button[data-type="select"]:hover {
+#toolbar-controls button[data-type="select"]:hover {
   background-color: #4b5563 !important; /* Darker gray on hover */
 }
 
-#toolbar button[data-type="select"].bg-yellow-500 {
+#toolbar-controls button[data-type="select"].bg-yellow-500 {
   background-color: #eab308 !important; /* Selected state overrides gray */
+  color: #000 !important; /* Black text for readability */
+}
+
+/* Purple button (Move) styling */
+#toolbar-controls button[data-type="move"] {
+  background-color: #8b5cf6 !important; /* Purple background */
+}
+
+#toolbar-controls button[data-type="move"]:hover {
+  background-color: #7c3aed !important; /* Darker purple on hover */
+}
+
+#toolbar-controls button[data-type="move"].bg-yellow-500 {
+  background-color: #eab308 !important; /* Selected state overrides purple */
+  color: #000 !important; /* Black text for readability */
 }
 
 /* Red button (Delete) styling */
-#toolbar button#deleteButton {
+#toolbar-controls button#deleteButton {
   background-color: #ef4444 !important; /* Red background */
 }
 
-#toolbar button#deleteButton:hover {
+#toolbar-controls button#deleteButton:hover {
   background-color: #dc2626 !important; /* Darker red on hover */
 }
 
-/* Credit bubble styling */
-.credit-bubble {
-  position: fixed !important;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(209, 213, 219, 0.8);
-  border-radius: 9999px;
-  padding: 8px 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  transition: all 0.3s ease;
-  user-select: none;
-  width: auto;
-  min-width: 200px;
+/* Building buttons styling */
+#toolbar-buildings button[data-type="flag"],
+#toolbar-buildings button[data-type="city"],
+#toolbar-buildings button[data-type="building"],
+#toolbar-buildings button[data-type="hq"],
+#toolbar-buildings button[data-type="node"],
+#toolbar-buildings button[data-type="obstacle"] {
+  background-color: #3b82f6 !important; /* Blue background */
 }
 
-.credit-bubble:hover {
-  background: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
-  transform: translateX(-50%) translateY(-2px);
+#toolbar-buildings button[data-type="flag"]:hover,
+#toolbar-buildings button[data-type="city"]:hover,
+#toolbar-buildings button[data-type="building"]:hover,
+#toolbar-buildings button[data-type="hq"]:hover,
+#toolbar-buildings button[data-type="node"]:hover,
+#toolbar-buildings button[data-type="obstacle"]:hover {
+  background-color: #2563eb !important; /* Darker blue on hover */
+}
+
+#toolbar-buildings button[data-type="flag"].bg-yellow-500,
+#toolbar-buildings button[data-type="city"].bg-yellow-500,
+#toolbar-buildings button[data-type="building"].bg-yellow-500,
+#toolbar-buildings button[data-type="hq"].bg-yellow-500,
+#toolbar-buildings button[data-type="node"].bg-yellow-500,
+#toolbar-buildings button[data-type="obstacle"].bg-yellow-500 {
+  background-color: #eab308 !important; /* Selected state */
+  color: #000 !important; /* Black text for readability */
 }

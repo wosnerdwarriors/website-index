@@ -39,6 +39,16 @@ let lastMouseY = 0;
 let hasUnsavedChanges = false;
 let ghostPreview = null;
 
+// ===== TOUCH/MOBILE SUPPORT =====
+let touchStartDistance = 0;
+let initialZoom = 1;
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartPanX = 0;
+let touchStartPanY = 0;
+let isTouching = false;
+let touchStartTime = 0;
+
 // ===== CANVAS MANAGEMENT =====
 // Initialize canvas size
 function resizeCanvas() {
@@ -52,6 +62,7 @@ function resizeCanvas() {
     panY = canvasHeight / 2;
     
     redraw();
+    updateZoomDisplay();
 }
 
 // ===== COORDINATE CONVERSION =====
@@ -672,6 +683,7 @@ function handleWheel(event) {
     gridSize = baseGridSize * zoom;
     
     redraw();
+    updateZoomDisplay();
 }
 
 function handleMouseDown(event) {
@@ -693,6 +705,10 @@ function handleMouseDown(event) {
                 dragOffsetX = gridPos.x - selectedEntity.x;
                 dragOffsetY = gridPos.y - selectedEntity.y;
             }
+        } else if (selectedType === 'move') {
+            isPanning = true;
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
         } else {
             addEntity(event);
         }
@@ -721,8 +737,462 @@ function handleMouseMove(event) {
             redraw();
             markUnsavedChanges();
         }
-    } else if (selectedType && selectedType !== 'select') {
-        // Update ghost preview
+    } else {
+        updateGhostPreview(mouseX, mouseY);
+    }
+}
+
+function handleMouseUp(event) {
+    if (event.button === 1) {
+        isPanning = false;
+    } else if (event.button === 0) {
+        isDragging = false;
+        if (selectedType === 'move') {
+            isPanning = false;
+        }
+    }
+}
+
+// Mobile zoom controls
+document.getElementById('zoomInBtn').addEventListener('click', () => {
+    const newZoom = Math.min(3, zoom * 1.2);
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2;
+    const dx = centerX - panX;
+    const dy = centerY - panY;
+    
+    panX = centerX - dx * (newZoom / zoom);
+    panY = centerY - dy * (newZoom / zoom);
+    
+    zoom = newZoom;
+    gridSize = baseGridSize * zoom;
+    redraw();
+    updateZoomDisplay();
+});
+
+document.getElementById('zoomOutBtn').addEventListener('click', () => {
+    const newZoom = Math.max(0.1, zoom * 0.8);
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2;
+    const dx = centerX - panX;
+    const dy = centerY - panY;
+    
+    panX = centerX - dx * (newZoom / zoom);
+    panY = centerY - dy * (newZoom / zoom);
+    
+    zoom = newZoom;
+    gridSize = baseGridSize * zoom;
+    redraw();
+    updateZoomDisplay();
+});
+
+document.getElementById('centerBtn').addEventListener('click', centerMap);
+
+// Mobile zoom controls (separate buttons)
+document.getElementById('mobileZoomInBtn').addEventListener('click', () => {
+    const newZoom = Math.min(3, zoom * 1.2);
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2;
+    const dx = centerX - panX;
+    const dy = centerY - panY;
+    
+    panX = centerX - dx * (newZoom / zoom);
+    panY = centerY - dy * (newZoom / zoom);
+    
+    zoom = newZoom;
+    gridSize = baseGridSize * zoom;
+    redraw();
+    updateZoomDisplay();
+});
+
+document.getElementById('mobileZoomOutBtn').addEventListener('click', () => {
+    const newZoom = Math.max(0.1, zoom * 0.8);
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2;
+    const dx = centerX - panX;
+    const dy = centerY - panY;
+    
+    panX = centerX - dx * (newZoom / zoom);
+    panY = centerY - dy * (newZoom / zoom);
+    
+    zoom = newZoom;
+    gridSize = baseGridSize * zoom;
+    redraw();
+    updateZoomDisplay();
+});
+
+document.getElementById('mobileCenterBtn').addEventListener('click', centerMap);
+
+// Touch event listeners
+canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+// ===== EVENT LISTENERS =====
+// Event Listeners
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('DOMContentLoaded', () => {
+    loadMapFromQuery();
+    enablePopulateSortOptions('id');
+    updateCityList();
+    updateZoomDisplay();
+});
+window.addEventListener('keydown', handleKeyDown);
+
+canvas.addEventListener('wheel', handleWheel);
+canvas.addEventListener('mousedown', handleMouseDown);
+canvas.addEventListener('mousemove', handleMouseMove);
+canvas.addEventListener('mouseup', handleMouseUp);
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('mouseleave', () => {
+    // Clear ghost preview when mouse leaves canvas
+    if (ghostPreview) {
+        ghostPreview = null;
+        redraw();
+    }
+});
+
+// Add event listeners for both toolbar sections
+document.addEventListener('DOMContentLoaded', () => {
+    // Add event listeners for toolbar sections
+    const toolbarControls = document.getElementById('toolbar-controls');
+    const toolbarBuildings = document.getElementById('toolbar-buildings');
+    
+    if (toolbarControls) {
+        toolbarControls.addEventListener('click', handleToolbarClick);
+    }
+    
+    if (toolbarBuildings) {
+        toolbarBuildings.addEventListener('click', handleToolbarClick);
+    }
+});
+
+// Function to handle toolbar clicks
+function handleToolbarClick(e) {
+    if (e.target.dataset.type) {
+        selectedType = e.target.dataset.type;
+        // Update all toolbar buttons in both sections
+        document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button').forEach(button => 
+            button.classList.remove('bg-yellow-500', 'bg-yellow-600'));
+        e.target.classList.add('bg-yellow-500');
+        e.target.classList.remove('bg-blue-500', 'bg-gray-500', 'bg-purple-500');
+        
+        if ((selectedType === 'select' || selectedType === 'move') && ghostPreview) {
+            ghostPreview = null;
+            redraw();
+        }
+        
+        // Update cursor style
+        if (selectedType === 'move') {
+            canvas.style.cursor = 'move';
+        } else if (selectedType === 'select') {
+            canvas.style.cursor = 'pointer';
+        } else {
+            canvas.style.cursor = 'crosshair';
+        }
+    }
+}
+
+document.getElementById('deleteButton').addEventListener('click', () => {
+    if (selectedEntity) {
+        deleteSelectedEntity();
+    } else {
+        alert('No entity selected to delete.');
+    }
+});
+
+document.getElementById('downloadButton').addEventListener('click', downloadCanvasAsPNG);
+document.getElementById('saveButton').addEventListener('click', saveMap);
+document.getElementById('loadButton').addEventListener('click', loadMap);
+document.getElementById('shareButton').addEventListener('click', shareMap);
+
+// Short URL feature: encapsulated in async IIFE to avoid race conditions and keep config/vars scoped
+const SHORT_URL_GENERATING_TEXT = 'Generating...';
+
+(async () => {
+    const shortUrlButton = document.getElementById('shortUrlButton');
+    const copyShortUrlButton = document.getElementById('copyShortUrlButton');
+    const shortUrlContainer = document.getElementById('shortUrlContainer');
+    const shortUrlOutput = document.getElementById('shortUrlOutput');
+    const shortUrlError = document.getElementById('shortUrlError');
+
+    // Default endpoints (will only be used if config.json fails to load)
+    const config = {
+        tinyurlApi: 'https://tinyurl.com/api-create.php',
+        tinyurlManual: 'https://tinyurl.com/app/'
+    };
+
+    let configLoaded = false;
+    try {
+        const response = await fetch('/config.json');
+        const loadedConfig = await response.json();
+        if (loadedConfig.endpoints && loadedConfig.endpoints.tinyurlApi && loadedConfig.endpoints.tinyurlManual) {
+            config.tinyurlApi = loadedConfig.endpoints.tinyurlApi;
+            config.tinyurlManual = loadedConfig.endpoints.tinyurlManual;
+            configLoaded = true;
+        } else {
+            showShortUrlConfigError('Short URL feature is unavailable: config.json is missing required endpoints.');
+        }
+    } catch (e) {
+        showShortUrlConfigError('Short URL feature is unavailable: config.json could not be loaded.');
+    }
+
+    function showShortUrlConfigError(message) {
+        if (shortUrlContainer) shortUrlContainer.classList.remove('hidden');
+        if (shortUrlOutput) shortUrlOutput.value = '';
+        if (shortUrlError) {
+            shortUrlError.textContent = message;
+            shortUrlError.classList.remove('hidden');
+        }
+        if (shortUrlButton) {
+            shortUrlButton.disabled = true;
+            shortUrlButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        if (copyShortUrlButton) {
+            copyShortUrlButton.disabled = true;
+            copyShortUrlButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    if (!configLoaded) return;
+
+    shortUrlButton.addEventListener('click', async function() {
+        const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
+        mapData.value = compressedMap;
+        const longUrl = getShareableUrl(entities, mapName);
+        shortUrlContainer.classList.remove('hidden');
+        shortUrlOutput.value = SHORT_URL_GENERATING_TEXT;
+        shortUrlError.textContent = '';
+        shortUrlButton.disabled = true;
+        try {
+            // Timeout logic
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            const response = await fetch(`${config.tinyurlApi}?url=${encodeURIComponent(longUrl)}`, {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                throw new Error(`TinyURL API error: ${response.status}`);
+            }
+            const shortUrl = await response.text();
+            if (!shortUrl.startsWith('http')) {
+                throw new Error('TinyURL returned invalid URL');
+            }
+            shortUrlOutput.value = shortUrl;
+            markChangesSaved();
+        } catch (error) {
+            console.error('Short URL generation failed:', error);
+            shortUrlOutput.value = '';
+            shortUrlError.textContent = 'Failed to generate. ';
+            const fallback = document.createElement('a');
+            fallback.href = `${config.tinyurlManual}?url=${encodeURIComponent(longUrl)}`;
+            fallback.target = '_blank';
+            fallback.rel = 'noopener noreferrer';
+            fallback.textContent = 'Try manually';
+            fallback.className = 'underline text-blue-600';
+            shortUrlError.appendChild(fallback);
+        } finally {
+            shortUrlButton.disabled = false;
+        }
+    });
+
+    copyShortUrlButton.addEventListener('click', function() {
+        const urlToCopy = shortUrlOutput.value;
+        if (urlToCopy && urlToCopy !== SHORT_URL_GENERATING_TEXT) {
+            navigator.clipboard.writeText(urlToCopy)
+                .then(() => {
+                    shortUrlOutput.classList.add('bg-green-100');
+                    setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy URL:', err);
+                    shortUrlError.textContent = 'Could not copy URL.';
+                });
+        }
+    });
+})();
+
+// (Removed duplicate global shortUrlButton and copyShortUrlButton event listeners; now handled inside the IIFE only)
+
+// Map name validation
+document.getElementById("mapNameInput").addEventListener("input", function() {
+    const value = this.value;
+    const disallowedRegex = /[^a-zA-Z0-9 \-_]/;
+    const hintElement = document.getElementById("mapNameHint");
+    if (disallowedRegex.test(value)) {
+         hintElement.textContent = "Invalid characters detected! Only letters, numbers, spaces, hyphens, and underscores are allowed.";
+         hintElement.style.display = "block";
+    } else {
+         hintElement.textContent = "";
+         hintElement.style.display = "none";
+    }
+});
+
+window.addEventListener('beforeunload', function(e) {
+    if (hasUnsavedChanges) {
+        const message = 'You have unsaved changes. Do you really want to leave?';
+        e.preventDefault();
+        return message;
+    }
+});
+
+// ===== APPLICATION INITIALIZATION =====
+// Initialize the application
+resizeCanvas();
+redraw();
+
+// ===== MOBILE/TOUCH CONTROLS =====
+function updateZoomDisplay() {
+    const zoomLevel = document.getElementById('zoomLevel');
+    const mobileZoomLevel = document.getElementById('mobileZoomLevel');
+    const zoomPercentage = Math.round(zoom * 100) + '%';
+    
+    if (zoomLevel) {
+        zoomLevel.textContent = zoomPercentage;
+    }
+    if (mobileZoomLevel) {
+        mobileZoomLevel.textContent = zoomPercentage;
+    }
+}
+
+function centerMap() {
+    panX = canvasWidth / 2;
+    panY = canvasHeight / 2;
+    redraw();
+}
+
+function handleTouchStart(event) {
+    event.preventDefault();
+    isTouching = true;
+    touchStartTime = Date.now();
+    
+    const touches = event.touches;
+    
+    if (touches.length === 1) {
+        // Single touch
+        const rect = canvas.getBoundingClientRect();
+        touchStartX = touches[0].clientX - rect.left;
+        touchStartY = touches[0].clientY - rect.top;
+        touchStartPanX = panX;
+        touchStartPanY = panY;
+        
+        if (selectedType === 'select') {
+            selectEntity({ clientX: touches[0].clientX, clientY: touches[0].clientY });
+            if (selectedEntity) {
+                isDragging = true;
+                const gridPos = screenToDiamond(touchStartX, touchStartY);
+                dragOffsetX = gridPos.x - selectedEntity.x;
+                dragOffsetY = gridPos.y - selectedEntity.y;
+            }
+        } else if (selectedType === 'move') {
+            isPanning = true;
+        }
+    } else if (touches.length === 2) {
+        // Two finger touch for pinch zoom
+        const touch1 = touches[0];
+        const touch2 = touches[1];
+        touchStartDistance = Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+        initialZoom = zoom;
+        
+        // Center point between fingers
+        const rect = canvas.getBoundingClientRect();
+        touchStartX = ((touch1.clientX + touch2.clientX) / 2) - rect.left;
+        touchStartY = ((touch1.clientY + touch2.clientY) / 2) - rect.top;
+    }
+}
+
+function handleTouchMove(event) {
+    event.preventDefault();
+    const touches = event.touches;
+    
+    if (touches.length === 1 && isTouching) {
+        const rect = canvas.getBoundingClientRect();
+        const currentX = touches[0].clientX - rect.left;
+        const currentY = touches[0].clientY - rect.top;
+        
+        if (isDragging && selectedEntity) {
+            // Move selected entity
+            const gridPos = screenToDiamond(currentX, currentY);
+            const newX = gridPos.x - dragOffsetX;
+            const newY = gridPos.y - dragOffsetY;
+            
+            if (isPositionValid(newX, newY, selectedEntity)) {
+                selectedEntity.x = newX;
+                selectedEntity.y = newY;
+                redraw();
+                markUnsavedChanges();
+            }
+        } else if (isPanning || selectedType === 'move') {
+            // Pan the map
+            panX = touchStartPanX + (currentX - touchStartX);
+            panY = touchStartPanY + (currentY - touchStartY);
+            redraw();
+        } else if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
+            // Update ghost preview
+            updateGhostPreview(currentX, currentY);
+        }
+    } else if (touches.length === 2) {
+        // Pinch zoom
+        const touch1 = touches[0];
+        const touch2 = touches[1];
+        const currentDistance = Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+        
+        if (touchStartDistance > 0) {
+            const zoomFactor = currentDistance / touchStartDistance;
+            const newZoom = Math.max(0.1, Math.min(3, initialZoom * zoomFactor));
+            
+            // Zoom towards the center point between fingers
+            const dx = touchStartX - panX;
+            const dy = touchStartY - panY;
+            
+            panX = touchStartX - dx * (newZoom / zoom);
+            panY = touchStartY - dy * (newZoom / zoom);
+            
+            zoom = newZoom;
+            gridSize = baseGridSize * zoom;
+            
+            redraw();
+            updateZoomDisplay();
+        }
+    }
+}
+
+function handleTouchEnd(event) {
+    event.preventDefault();
+    const touchDuration = Date.now() - touchStartTime;
+    
+    if (event.touches.length === 0) {
+        isTouching = false;
+        
+        // Check for tap (short touch duration and minimal movement)
+        if (touchDuration < 300 && !isDragging && !isPanning) {
+            const rect = canvas.getBoundingClientRect();
+            const tapEvent = {
+                clientX: event.changedTouches[0].clientX,
+                clientY: event.changedTouches[0].clientY
+            };
+            
+            if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
+                addEntity(tapEvent);
+            }
+        }
+        
+        isDragging = false;
+        isPanning = false;
+        touchStartDistance = 0;
+    }
+}
+
+function updateGhostPreview(mouseX, mouseY) {
+    if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
         const gridPos = screenToDiamond(mouseX, mouseY);
         const x = gridPos.x;
         const y = gridPos.y;
@@ -739,11 +1209,9 @@ function handleMouseMove(event) {
             height = 3;
         }
 
-        // Create a temporary entity object for validation
         const tempEntity = { x, y, width, height, type: selectedType };
         const validPosition = isPositionValid(x, y, tempEntity);
 
-        // Only show ghost if position is valid
         if (validPosition) {
             ghostPreview = { x, y, width, height, type: selectedType };
         } else {
@@ -751,20 +1219,6 @@ function handleMouseMove(event) {
         }
         
         redraw();
-    } else {
-        // Clear ghost preview when not in placement mode
-        if (ghostPreview) {
-            ghostPreview = null;
-            redraw();
-        }
-    }
-}
-
-function handleMouseUp(event) {
-    if (event.button === 1) {
-        isPanning = false;
-    } else if (event.button === 0) {
-        isDragging = false;
     }
 }
 
@@ -922,7 +1376,7 @@ function updateCityList() {
         input.type = 'text';
         input.value = city.name || `City ${city.id}`;
         input.placeholder = `City ${city.id}`;
-        input.className = 'border p-1 rounded';
+        input.className = 'border p-1 rounded touch-input';
         input.style.width = '30ch';
         input.addEventListener('change', () => {
             city.name = input.value;
@@ -1413,167 +1867,6 @@ function evaluateCombinedTime(city) {
     const bt2 = times[1] || 0;
     return bt1 + bt2;
 }
-
-// ===== EVENT LISTENERS =====
-// Event Listeners
-window.addEventListener('resize', resizeCanvas);
-window.addEventListener('DOMContentLoaded', () => {
-    loadMapFromQuery();
-    enablePopulateSortOptions('id');
-    updateCityList();
-});
-window.addEventListener('keydown', handleKeyDown);
-
-canvas.addEventListener('wheel', handleWheel);
-canvas.addEventListener('mousedown', handleMouseDown);
-canvas.addEventListener('mousemove', handleMouseMove);
-canvas.addEventListener('mouseup', handleMouseUp);
-canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-canvas.addEventListener('mouseleave', () => {
-    // Clear ghost preview when mouse leaves canvas
-    if (ghostPreview) {
-        ghostPreview = null;
-        redraw();
-    }
-});
-
-toolbar.addEventListener('click', (e) => {
-    if (e.target.dataset.type) {
-        selectedType = e.target.dataset.type;
-        document.querySelectorAll('#toolbar button').forEach(button => 
-            button.classList.remove('bg-yellow-500', 'bg-yellow-600'));
-        e.target.classList.add('bg-yellow-500');
-        e.target.classList.remove('bg-blue-500', 'bg-gray-500');
-        
-        if (selectedType === 'select' && ghostPreview) {
-            ghostPreview = null;
-            redraw();
-        }
-    }
-});
-
-document.getElementById('deleteButton').addEventListener('click', () => {
-    if (selectedEntity) {
-        deleteSelectedEntity();
-    } else {
-        alert('No entity selected to delete.');
-    }
-});
-
-document.getElementById('downloadButton').addEventListener('click', downloadCanvasAsPNG);
-document.getElementById('saveButton').addEventListener('click', saveMap);
-document.getElementById('loadButton').addEventListener('click', loadMap);
-document.getElementById('shareButton').addEventListener('click', shareMap);
-
-// Short URL feature: encapsulated in async IIFE to avoid race conditions and keep config/vars scoped
-const SHORT_URL_GENERATING_TEXT = 'Generating...';
-
-(async () => {
-    const shortUrlButton = document.getElementById('shortUrlButton');
-    const copyShortUrlButton = document.getElementById('copyShortUrlButton');
-    const shortUrlContainer = document.getElementById('shortUrlContainer');
-    const shortUrlOutput = document.getElementById('shortUrlOutput');
-    const shortUrlError = document.getElementById('shortUrlError');
-
-    // Default endpoints (will only be used if config.json fails to load)
-    const config = {
-        tinyurlApi: 'https://tinyurl.com/api-create.php',
-        tinyurlManual: 'https://tinyurl.com/app/'
-    };
-
-    let configLoaded = false;
-    try {
-        const response = await fetch('/config.json');
-        const loadedConfig = await response.json();
-        if (loadedConfig.endpoints && loadedConfig.endpoints.tinyurlApi && loadedConfig.endpoints.tinyurlManual) {
-            config.tinyurlApi = loadedConfig.endpoints.tinyurlApi;
-            config.tinyurlManual = loadedConfig.endpoints.tinyurlManual;
-            configLoaded = true;
-        } else {
-            showShortUrlConfigError('Short URL feature is unavailable: config.json is missing required endpoints.');
-        }
-    } catch (e) {
-        showShortUrlConfigError('Short URL feature is unavailable: config.json could not be loaded.');
-    }
-
-    function showShortUrlConfigError(message) {
-        if (shortUrlContainer) shortUrlContainer.classList.remove('hidden');
-        if (shortUrlOutput) shortUrlOutput.value = '';
-        if (shortUrlError) {
-            shortUrlError.textContent = message;
-            shortUrlError.classList.remove('hidden');
-        }
-        if (shortUrlButton) {
-            shortUrlButton.disabled = true;
-            shortUrlButton.classList.add('opacity-50', 'cursor-not-allowed');
-        }
-        if (copyShortUrlButton) {
-            copyShortUrlButton.disabled = true;
-            copyShortUrlButton.classList.add('opacity-50', 'cursor-not-allowed');
-        }
-    }
-
-    if (!configLoaded) return;
-
-    shortUrlButton.addEventListener('click', async function() {
-        const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName);
-        mapData.value = compressedMap;
-        const longUrl = getShareableUrl(entities, mapName);
-        shortUrlContainer.classList.remove('hidden');
-        shortUrlOutput.value = SHORT_URL_GENERATING_TEXT;
-        shortUrlError.textContent = '';
-        shortUrlButton.disabled = true;
-        try {
-            // Timeout logic
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
-            const response = await fetch(`${config.tinyurlApi}?url=${encodeURIComponent(longUrl)}`, {
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-            if (!response.ok) {
-                throw new Error(`TinyURL API error: ${response.status}`);
-            }
-            const shortUrl = await response.text();
-            if (!shortUrl.startsWith('http')) {
-                throw new Error('TinyURL returned invalid URL');
-            }
-            shortUrlOutput.value = shortUrl;
-            markChangesSaved();
-        } catch (error) {
-            console.error('Short URL generation failed:', error);
-            shortUrlOutput.value = '';
-            shortUrlError.textContent = 'Failed to generate. ';
-            const fallback = document.createElement('a');
-            fallback.href = `${config.tinyurlManual}?url=${encodeURIComponent(longUrl)}`;
-            fallback.target = '_blank';
-            fallback.rel = 'noopener noreferrer';
-            fallback.textContent = 'Try manually';
-            fallback.className = 'underline text-blue-600';
-            shortUrlError.appendChild(fallback);
-        } finally {
-            shortUrlButton.disabled = false;
-        }
-    });
-
-    copyShortUrlButton.addEventListener('click', function() {
-        const urlToCopy = shortUrlOutput.value;
-        if (urlToCopy && urlToCopy !== SHORT_URL_GENERATING_TEXT) {
-            navigator.clipboard.writeText(urlToCopy)
-                .then(() => {
-                    shortUrlOutput.classList.add('bg-green-100');
-                    setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
-                })
-                .catch(err => {
-                    console.error('Failed to copy URL:', err);
-                    shortUrlError.textContent = 'Could not copy URL.';
-                });
-        }
-    });
-})();
-
-// (Removed duplicate global shortUrlButton and copyShortUrlButton event listeners; now handled inside the IIFE only)
 
 // Map name validation
 document.getElementById("mapNameInput").addEventListener("input", function() {
