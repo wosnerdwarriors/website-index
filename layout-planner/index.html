@@ -41,8 +41,8 @@
         <h2 class="text-lg font-bold mb-3 text-center">Buildings</h2>
         
         <div class="flex flex-col items-center mb-3">
-            <input id="mapNameInput" type="text" placeholder="Map Name (optional)" class="border p-2 rounded text-center" style="width: 30ch;" maxlength="30">
-            <div id="mapNameHint" class="text-center text-red-500 text-sm mt-1" style="display: none;"></div>
+            <input id="mapNameInput" type="text" placeholder="Map Name (optional)" class="border-2 border-gray-300 p-3 rounded-lg text-center w-full max-w-xs focus:border-blue-500 focus:outline-none" maxlength="30">
+            <div id="mapNameHint" class="text-center text-red-500 text-sm mt-1 hidden"></div>
         </div>
         
         <!-- Buildings Section -->
@@ -50,38 +50,38 @@
             <h3 class="text-sm font-semibold text-gray-700 mb-2 text-center">Buildings</h3>
             <div id="toolbar-buildings">
                 <div class="grid grid-cols-2 gap-2">
-                    <button data-type="flag" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded text-xs touch-btn">Flag</button>
-                    <button data-type="city" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded text-xs touch-btn">City</button>
-                    <button data-type="building" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded text-xs touch-btn">Trap</button>
-                    <button data-type="hq" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded text-xs touch-btn">HQ</button>
-                    <button data-type="node" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded text-xs touch-btn">Node</button>
-                    <button data-type="obstacle" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-2 rounded text-xs touch-btn">Obstacle</button>
+                    <button data-type="flag" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Flag</button>
+                    <button data-type="city" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">City</button>
+                    <button data-type="building" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Trap</button>
+                    <button data-type="hq" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">HQ</button>
+                    <button data-type="node" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Node</button>
+                    <button data-type="obstacle" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Obstacle</button>
                 </div>
             </div>
         </div>
         
         <!-- Counters -->
-        <div id="counters" class="text-sm p-2 bg-gray-100 rounded text-center">
-            <span class="mr-3">Flags: <span id="flagCounter" class="font-bold">0</span></span>
-            <span class="mr-3">Cities: <span id="cityCounter" class="font-bold">0</span></span>
-            <span class="mr-3">Bear Traps: <span id="buildingCounter" class="font-bold">0</span></span>
-            <span class="mr-3">HQs: <span id="hqCounter" class="font-bold">0</span></span>
+        <div id="counters" class="text-sm p-3 bg-gray-100 rounded-lg text-center space-x-3">
+            <span>Flags: <span id="flagCounter" class="font-bold">0</span></span>
+            <span>Cities: <span id="cityCounter" class="font-bold">0</span></span>
+            <span>Bear Traps: <span id="buildingCounter" class="font-bold">0</span></span>
+            <span>HQs: <span id="hqCounter" class="font-bold">0</span></span>
             <span>Nodes: <span id="nodeCounter" class="font-bold">0</span></span>
         </div>
     </div>
     
     <!-- Bottom Center Controls Panel -->
     <div id="controlsPanel" class="floating-panel bottom-center-panel">
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-wrap justify-center">
             <!-- Controls -->
             <div id="toolbar-controls" class="flex gap-2">
-                <button data-type="select" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs touch-btn">Select</button>
-                <button data-type="move" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-xs touch-btn">Move</button>
-                <button id="deleteButton" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-xs touch-btn">Delete</button>
+                <button data-type="select" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Select</button>
+                <button data-type="move" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Move</button>
+                <button id="deleteButton" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Delete</button>
             </div>
             
             <!-- Separator -->
-            <div class="w-px h-8 bg-gray-300"></div>
+            <div class="w-px h-8 bg-gray-300 hidden md:block"></div>
             
             <!-- Unified Zoom Controls -->
             <div id="zoomControls" class="zoom-controls">
@@ -100,21 +100,21 @@
         <h2 class="text-lg font-bold mb-3 text-center">Actions</h2>
         
         <div class="space-y-2">
-            <button id="downloadButton" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded w-full text-sm touch-btn">Save as PNG</button>
-            <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded w-full text-sm touch-btn">Generate Code</button>
-            <button id="shareButton" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded w-full text-sm touch-btn">Copy Link</button>
-            <button id="shortUrlButton" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded w-full text-sm touch-btn">Generate Short URL</button>
-            <textarea id="mapData" rows="3" placeholder="Map code..." class="w-full p-2 border border-gray-300 rounded text-xs touch-input"></textarea>
-            <button id="loadButton" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded w-full text-sm touch-btn">Load</button>
+            <button id="downloadButton" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg w-full text-sm font-medium transition-all duration-200 min-h-[44px]">Save as PNG</button>
+            <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg w-full text-sm font-medium transition-all duration-200 min-h-[44px]">Generate Code</button>
+            <button id="shareButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg w-full text-sm font-medium transition-all duration-200 min-h-[44px]">Copy Link</button>
+            <button id="shortUrlButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg w-full text-sm font-medium transition-all duration-200 min-h-[44px]">Generate Short URL</button>
+            <textarea id="mapData" rows="3" placeholder="Map code..." class="w-full p-3 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:outline-none min-h-[44px]"></textarea>
+            <button id="loadButton" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-lg w-full text-sm font-medium transition-all duration-200 min-h-[44px]">Load</button>
             <div id="shortUrlContainer" class="mt-2 hidden">
-                <input id="shortUrlOutput" type="text" readonly class="w-full p-2 border border-gray-300 rounded text-xs mb-1 touch-input" />
-                <button id="copyShortUrlButton" class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs touch-btn">Copy</button>
-                <span id="shortUrlError" class="text-red-500 text-xs ml-2"></span>
+                <input id="shortUrlOutput" type="text" readonly class="w-full p-3 border-2 border-gray-300 rounded-lg text-sm mb-2 min-h-[44px]" />
+                <button id="copyShortUrlButton" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Copy</button>
+                <span id="shortUrlError" class="text-red-500 text-sm ml-2"></span>
             </div>
         </div>
         
         <div id="info" class="mt-3">
-            <span id="copyMessage" class="hidden text-green-500 font-medium text-xs">Copied!</span>
+            <span id="copyMessage" class="hidden text-green-500 font-medium text-sm">Copied!</span>
         </div>
     </div>
 
@@ -122,11 +122,11 @@
     <div id="citiesPanel" class="floating-panel">
         <button class="panel-toggle" onclick="togglePanel('citiesPanel')" style="top: -12px; bottom: auto;">▼</button>
         <h2 class="text-lg font-bold mb-3 text-center">Cities List</h2>
-        <div class="mb-2">
-            <label for="citySort" class="text-sm">Sort by:</label>
-            <select id="citySort" class="text-sm border rounded p-1 touch-input"></select>
+        <div class="mb-3 flex items-center gap-2">
+            <label for="citySort" class="text-sm font-medium">Sort by:</label>
+            <select id="citySort" class="text-sm border-2 border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none min-h-[44px]"></select>
         </div>
-        <ul id="cityList" class="space-y-1"></ul>
+        <ul id="cityList" class="space-y-2"></ul>
     </div>
 
     <!-- Help Panel -->
@@ -135,32 +135,32 @@
         <div class="flex items-center justify-between mb-3">
             <h2 class="text-lg font-bold text-center flex-1">Help</h2>
         </div>
-        <div class="text-xs space-y-2">
+        <div class="text-sm space-y-3">
             <div>
-                <p class="font-semibold text-blue-600 mb-1">Placing Objects</p>
-                <p class="ml-2">• Select an object type from toolbar</p>
-                <p class="ml-2">• Tap on grid to place</p>
+                <p class="font-semibold text-blue-600 mb-2">Placing Objects</p>
+                <p class="ml-2 text-gray-700">• Select an object type from toolbar</p>
+                <p class="ml-2 text-gray-700">• Tap on grid to place</p>
             </div>
             <div>
-                <p class="font-semibold text-green-600 mb-1">Selection & Movement</p>
-                <p class="ml-2">• Choose "Select" → tap object</p>
-                <p class="ml-2">• Drag to move selected object</p>
-                <p class="ml-2">• Type to rename cities</p>
+                <p class="font-semibold text-green-600 mb-2">Selection & Movement</p>
+                <p class="ml-2 text-gray-700">• Choose "Select" → tap object</p>
+                <p class="ml-2 text-gray-700">• Drag to move selected object</p>
+                <p class="ml-2 text-gray-700">• Type to rename cities</p>
             </div>
             <div>
-                <p class="font-semibold text-purple-600 mb-1">Navigation</p>
-                <p class="ml-2">• Choose "Move" → drag to pan map</p>
-                <p class="ml-2">• Pinch to zoom (mobile)</p>
-                <p class="ml-2">• Mouse wheel: Zoom (desktop)</p>
-                <p class="ml-2">• Middle mouse: Pan (desktop)</p>
+                <p class="font-semibold text-purple-600 mb-2">Navigation</p>
+                <p class="ml-2 text-gray-700">• Choose "Move" → drag to pan map</p>
+                <p class="ml-2 text-gray-700">• Pinch to zoom (mobile)</p>
+                <p class="ml-2 text-gray-700">• Mouse wheel: Zoom (desktop)</p>
+                <p class="ml-2 text-gray-700">• Middle mouse: Pan (desktop)</p>
             </div>
             <div>
-                <p class="font-semibold text-red-600 mb-1">Deletion</p>
-                <p class="ml-2">• Select object → Delete button</p>
-                <p class="ml-2">• Or use Delete key (desktop)</p>
+                <p class="font-semibold text-red-600 mb-2">Deletion</p>
+                <p class="ml-2 text-gray-700">• Select object → Delete button</p>
+                <p class="ml-2 text-gray-700">• Or use Delete key (desktop)</p>
             </div>
-            <div class="mt-4 pt-2 border-t border-gray-200">
-                <p class="text-xs text-gray-500 text-center">
+            <div class="mt-4 pt-3 border-t border-gray-200">
+                <p class="text-sm text-gray-500 text-center">
                     Original author: 
                     <a href="https://github.com/GFXSpeed" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">
                         GFXSpeed
