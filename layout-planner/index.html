@@ -17,10 +17,10 @@
     <!-- Top Controls -->
     <div id="topControls"
         class="fixed top-4 left-0 z-40 flex justify-center pointer-events-none rounded-lg"
-        style="right: var(--sidebar-width, 0px);">
+        style="right: 320px;">
     <!-- Weiße Karte -->
     <div class="flex bg-white shadow-lg rounded-lg pointer-events-auto justify-center"
-        style="min-width: 500px; max-width: calc(100vw - var(--sidebar-width, 0px) - 2rem);">
+        style="min-width: 500px; max-width: calc(100vw - 320px - 2rem);">
         <!-- Two Groups + Divider -->
         <div class="flex items-center px-8 py-3">
         <!-- Group 1: Tools -->
@@ -46,11 +46,8 @@
     </div>
 
 
-    <!-- Resizable Right Sidebar -->
-    <div id="rightSidebar" class="fixed right-0 top-0 h-full bg-white shadow-lg z-50 flex flex-col border-l border-gray-200" style="width: 320px; min-width: 280px;">
-        <!-- Resize Handle -->
-        <div id="sidebarResizer" class="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-blue-500 transition-colors"></div>
-
+    <!-- Right Sidebar -->
+    <div id="rightSidebar" class="fixed right-0 top-0 h-full bg-white shadow-lg z-50 flex flex-col border-l border-gray-200" style="width: 320px;">
         <!-- Main Content Area -->
         <div class="flex flex-col h-full">
             <!-- Top Section with Map Name -->
@@ -220,60 +217,6 @@
             content.classList.toggle('hidden');
             arrow.style.transform = content.classList.contains('hidden') ? 'rotate(180deg)' : '';
         }
-
-        function initSidebarResize() {
-            const sidebar = document.getElementById('rightSidebar');
-            const resizer = document.getElementById('sidebarResizer');
-            const minWidth = 280;
-            const maxWidth = window.innerWidth * 0.4; // 40% of window width
-
-            // Load saved width
-            const savedWidth = localStorage.getItem('sidebarWidth');
-            if (savedWidth) {
-                sidebar.style.width = `${Math.min(Math.max(minWidth, savedWidth), maxWidth)}px`;
-            }
-
-            let isResizing = false;
-
-            resizer.addEventListener('mousedown', (e) => {
-                isResizing = true;
-                document.body.style.cursor = 'ew-resize';
-                e.preventDefault();
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!isResizing) return;
-
-                const newWidth = window.innerWidth - e.clientX;
-                if (newWidth >= minWidth && newWidth <= maxWidth) {
-                    sidebar.style.width = `${newWidth}px`;
-                }
-            });
-
-            document.addEventListener('mouseup', () => {
-                if (isResizing) {
-                    isResizing = false;
-                    document.body.style.cursor = '';
-                    // Save width
-                    localStorage.setItem('sidebarWidth', sidebar.offsetWidth);
-                }
-            });
-
-            // Update maxWidth on window resize
-            window.addEventListener('resize', () => {
-                const maxWidth = window.innerWidth * 0.4;
-                const currentWidth = sidebar.offsetWidth;
-                if (currentWidth > maxWidth) {
-                    sidebar.style.width = `${maxWidth}px`;
-                    localStorage.setItem('sidebarWidth', maxWidth);
-                }
-            });
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            initSidebarResize();
-        });
     </script>
     
     <script src="/layout-planner/js/script.js"></script>
