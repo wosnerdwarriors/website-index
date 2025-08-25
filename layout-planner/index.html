@@ -16,34 +16,35 @@
     
     <!-- Top Controls -->
     <div id="topControls"
-        class="fixed top-4 left-0 z-40 flex justify-center pointer-events-none rounded-lg"
-        style="right: 320px;">
-    <!-- Weiße Karte -->
-    <div class="flex bg-white shadow-lg rounded-lg pointer-events-auto justify-center"
-        style="min-width: 500px; max-width: calc(100vw - 320px - 2rem);">
-        <!-- Two Groups + Divider -->
-        <div class="flex items-center px-8 py-3">
-        <!-- Group 1: Tools -->
-        <div id="toolbar-controls" class="flex items-center gap-1">
-            <button data-type="select" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Select</button>
-            <button data-type="move"   class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Pan</button>
-            <button id="deleteButton"  class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Delete</button>
-        </div>
+        class="fixed top-4 left-0 right-0 z-40 pointer-events-none">
+        <!-- Wrapper-->
+        <div class="mx-auto w-full max-w-xl px-4">
+            <!-- White Card -->
+            <div class="bg-white shadow-lg rounded-lg pointer-events-auto">
+                <div class="w-full flex items-center px-4 py-3 gap-4">
+                    <!-- Controls Group -->
+                    <div id="toolbar-controls" class="flex items-center gap-2 flex-wrap">
+                        <button data-type="select" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Select</button>
+                        <button data-type="move"   class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Pan</button>
+                        <button id="deleteButton"  class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Delete</button>
+                    </div>
 
-        <!-- Gap -->
-        <div class="mx-1 h-8 w-px bg-gray-300"></div>
+                    <div class="h-8 w-px bg-gray-300 hidden md:block"></div>
 
-        <!-- Group 2: Controls -->
-        <div class="flex items-center gap-1">
-            <button id="zoomOutBtn"  class="h-9 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-base leading-none font-bold">−</button>
-            <span id="zoomLevel"     class="text-sm font-medium w-[48px] text-center select-none">100%</span>
-            <button id="zoomInBtn"   class="h-9 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-base leading-none font-bold">+</button>
-            <button id="resetZoomBtn" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium">Reset</button>
-            <button id="centerBtn"    class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium">Center</button>
-        </div>
+                    <!-- Zoom Controls (hidden on mobile) -->
+                    <div class="hidden md:flex items-center gap-2">
+                        <button id="zoomOutBtn" class="h-9 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-base leading-none font-bold">−</button>
+                        <span id="zoomLevel" class="w-12 text-sm font-medium text-center select-none">100%</span>
+                        <button id="zoomInBtn"  class="h-9 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-base leading-none font-bold">+</button>
+                        <button id="resetZoomBtn" class="h-9 px-3 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-medium">Reset</button>
+                        <button id="centerBtn"    class="h-9 px-3 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-medium">Center</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    </div>
+
+
 
 
     <!-- Right Sidebar -->
@@ -204,7 +205,7 @@
         <div id="mobileBuildings" class="mobile-panel">
             <div class="bg-white p-4">
                 <h3 class="font-medium mb-4">Buildings</h3>
-                <!-- Reuse existing toolbar-buildings buttons -->
+                <!-- Building Controls -->
                 <div id="mobile-toolbar-buildings" class="grid grid-cols-2 gap-2 mb-4">
                     <!-- Content will be synced with desktop version -->
                 </div>
@@ -351,8 +352,21 @@
         document.addEventListener('DOMContentLoaded', () => {
             const desktopToolbar = document.getElementById('toolbar-buildings');
             const mobileToolbar = document.getElementById('mobile-toolbar-buildings');
+            const mobileToolbarControls = document.getElementById('mobile-toolbar-controls');
+            
+            // Sync building buttons
             mobileToolbar.innerHTML = desktopToolbar.innerHTML;
-
+            
+            // Sync control buttons event handling
+            mobileToolbarControls.addEventListener('click', handleToolbarClick);
+            document.getElementById('mobileDeleteButton').addEventListener('click', () => {
+                if (selectedEntity) {
+                    deleteSelectedEntity();
+                } else {
+                    alert('No entity selected to delete.');
+                }
+            });
+            
             // Update mobile counters
             const updateMobileCounters = () => {
                 document.getElementById('mobileFlagCounter').textContent = document.getElementById('flagCounter').textContent;

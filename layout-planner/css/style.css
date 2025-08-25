@@ -151,6 +151,16 @@ body.resizing {
         display: none;
     }
     #topControls {
-        right: 0;
+        margin-left: 0;
+        margin-right: 0 !important;
+    }
+    #toolbar-controls {
+        width: 100%;
+        justify-content: center;
+    }
+    #toolbar-controls button {
+        flex: 1;
+        min-width: 0;
+        padding: 0.5rem 0.25rem;
     }
 }
