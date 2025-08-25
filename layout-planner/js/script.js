@@ -1281,12 +1281,19 @@ function updateCityList() {
     });
     
     const cityList = document.getElementById('cityList');
+    const mobileCityList = document.getElementById('mobileCityList');
     const sortSelect = document.getElementById('citySort');
-    if (!cityList || !sortSelect) return;
+    const mobileSortSelect = document.getElementById('mobileCitySort');
+    
+    if (!cityList || !sortSelect || !mobileCityList || !mobileSortSelect) return;
 
+    // Sync sort options between desktop and mobile
+    mobileSortSelect.innerHTML = sortSelect.innerHTML;
+    mobileSortSelect.value = sortSelect.value;
+    
     const sortBy = sortSelect.value;
-    enablePopulateSortOptions(sortBy);
     cityList.innerHTML = '';
+    mobileCityList.innerHTML = '';
 
     let cities = entities.filter(e => e.type === 'city');
     const btIndex = sortBy === 'bt1' ? 0 : sortBy === 'bt2' ? 1 : null;
@@ -1320,12 +1327,12 @@ function updateCityList() {
     prioritized.sort(comparator);
     others.sort(comparator);
 
-    // Render prioritized cities first, then others
+    // Render prioritized cities first, then others for both lists
     [...prioritized, ...others].forEach(city => {
+        // Create desktop list item
         const li = document.createElement('li');
         li.className = 'flex items-center space-x-2 mb-2';
-
-        // City name input
+        
         const input = document.createElement('input');
         input.type = 'text';
         input.value = city.name || `City ${city.id}`;
@@ -1336,52 +1343,68 @@ function updateCityList() {
             city.name = input.value;
             redraw();
             markUnsavedChanges();
+            updateCityList(); // Update both lists
         });
         li.appendChild(input);
 
-        // Create BT bubbles next to the city name
-        city.marchTimes.forEach((time, i) => {
-            const key = `bt${i+1}`;
-            const isPriority = city.priorities && city.priorities[key];
-            const bubble = document.createElement('span');
-            bubble.textContent = `BT${i+1}: ${time}s`;
-            bubble.className = `bt-bubble inline-flex items-center justify-center px-2 py-1 text-xs leading-none rounded cursor-pointer min-w-[70px] ${
-            isPriority ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
-            }`;
-            bubble.addEventListener('click', () => {
-                city.priorities = city.priorities || {};
-                city.priorities[key] = !city.priorities[key];
-                if (city.priorities[key]) {
-                    // Get best candidate for swap
-                    const candidates = entities.filter(e => e.type === 'city' && !(e.priorities && e.priorities[key]));
-                    if (candidates.length) {
-                        let bestCity = candidates[0];
-                        let bestTime;
-                        if (sortBy === 'both') {
-                            bestTime = evaluateCombinedTime(bestCity);
-                        } else {
-                            bestTime = evaluateBTTime(bestCity, i);
-                        }
-                        candidates.forEach(c => {
-                            const t = sortBy === 'both' ? evaluateCombinedTime(c) : evaluateBTTime(c, i);
-                            if (t < bestTime) {
-                                bestTime = t;
-                                bestCity = c;
+        // Create mobile list item (clone of desktop)
+        const mli = li.cloneNode(true);
+        mli.querySelector('input').addEventListener('change', (e) => {
+            city.name = e.target.value;
+            redraw();
+            markUnsavedChanges();
+            updateCityList(); // Update both lists
+        });
+
+        // Add BT bubbles to both lists
+        [li, mli].forEach(listItem => {
+            city.marchTimes.forEach((time, i) => {
+                const key = `bt${i+1}`;
+                const isPriority = city.priorities && city.priorities[key];
+                const bubble = document.createElement('span');
+                bubble.textContent = `BT${i+1}: ${time}s`;
+                bubble.className = `bt-bubble inline-flex items-center justify-center px-2 py-1 text-xs leading-none rounded cursor-pointer min-w-[70px] ${
+                    isPriority ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
+                }`;
+                bubble.addEventListener('click', () => {
+                    city.priorities = city.priorities || {};
+                    city.priorities[key] = !city.priorities[key];
+                    if (city.priorities[key]) {
+                        const candidates = entities.filter(e => 
+                            e.type === 'city' && 
+                            !(e.priorities && e.priorities[key])
+                        );
+                        if (candidates.length) {
+                            let bestCity = candidates[0];
+                            let bestTime;
+                            if (sortBy === 'both') {
+                                bestTime = evaluateCombinedTime(bestCity);
+                            } else {
+                                bestTime = evaluateBTTime(bestCity, i);
                             }
-                        });
-                        // Swap coordinates
-                        [city.x, bestCity.x] = [bestCity.x, city.x];
-                        [city.y, bestCity.y] = [bestCity.y, city.y];
+                            candidates.forEach(c => {
+                                const t = sortBy === 'both' ? 
+                                    evaluateCombinedTime(c) : 
+                                    evaluateBTTime(c, i);
+                                if (t < bestTime) {
+                                    bestTime = t;
+                                    bestCity = c;
+                                }
+                            });
+                            [city.x, bestCity.x] = [bestCity.x, city.x];
+                            [city.y, bestCity.y] = [bestCity.y, city.y];
+                        }
                     }
-                }
-                redraw();
-                updateCityList();
-                markUnsavedChanges();
+                    redraw();
+                    updateCityList();
+                    markUnsavedChanges();
+                });
+                listItem.appendChild(bubble);
             });
-            li.appendChild(bubble);
         });
 
         cityList.appendChild(li);
+        mobileCityList.appendChild(mli);
     });
 }
 

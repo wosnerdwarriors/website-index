@@ -181,6 +181,115 @@
         </div>
     </div>
 
+    <!-- Mobile Bottom Navigation -->
+    <div id="mobileNav" class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+        <div class="flex justify-around">
+            <button onclick="toggleMobileSection('buildings')" class="flex-1 p-4 text-center">
+                <span class="block text-sm">Buildings</span>
+            </button>
+            <button onclick="toggleMobileSection('cities')" class="flex-1 p-4 text-center">
+                <span class="block text-sm">Cities</span>
+            </button>
+            <button onclick="toggleMobileSection('actions')" class="flex-1 p-4 text-center">
+                <span class="block text-sm">Actions</span>
+            </button>
+            <button onclick="toggleMobileSection('help')" class="flex-1 p-4 text-center">
+                <span class="block text-sm">Help</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Sliding Panels -->
+    <div id="mobilePanels" class="md:hidden">
+        <div id="mobileBuildings" class="mobile-panel">
+            <div class="bg-white p-4">
+                <h3 class="font-medium mb-4">Buildings</h3>
+                <!-- Reuse existing toolbar-buildings buttons -->
+                <div id="mobile-toolbar-buildings" class="grid grid-cols-2 gap-2 mb-4">
+                    <!-- Content will be synced with desktop version -->
+                </div>
+                <div class="text-sm p-3 bg-gray-100 rounded-lg text-center">
+                    <span>Flags: <span id="mobileFlagCounter" class="font-bold">0</span></span>
+                    <span class="mx-2">•</span>
+                    <span>Cities: <span id="mobileCityCounter" class="font-bold">0</span></span>
+                    <span class="mx-2">•</span>
+                    <span>BT: <span id="mobileBuildingCounter" class="font-bold">0</span></span>
+                    <span class="mx-2">•</span>
+                    <span>HQ: <span id="mobileHqCounter" class="font-bold">0</span></span>
+                    <span class="mx-2">•</span>
+                    <span>Nodes: <span id="mobileNodeCounter" class="font-bold">0</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobileCities" class="mobile-panel">
+            <div class="bg-white p-4">
+                <h3 class="font-medium mb-4">Cities</h3>
+                <div class="flex items-center gap-2 mb-4">
+                    <label for="mobileCitySort" class="text-sm font-medium">Sort by:</label>
+                    <select id="mobileCitySort" class="flex-1 text-sm border-2 border-gray-300 rounded-lg p-2"></select>
+                </div>
+                <ul id="mobileCityList" class="space-y-2">
+                    <!-- Content will be synced with desktop version -->
+                </ul>
+            </div>
+        </div>
+
+        <div id="mobileActions" class="mobile-panel">
+            <div class="bg-white p-4">
+                <h3 class="font-medium mb-4">Actions</h3>
+                <div class="space-y-2">
+                    <button onclick="downloadCanvasAsPNG()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Save as PNG</button>
+                    <button onclick="saveMap()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Generate Code</button>
+                    <button onclick="shareMap()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Copy Link</button>
+                    <textarea id="mobileMapData" rows="3" placeholder="Map code..." 
+                              class="w-full p-3 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:outline-none"></textarea>
+                    <button onclick="loadMap()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Load</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobileHelp" class="mobile-panel">
+            <div class="bg-white p-4">
+                <h3 class="font-medium mb-4">Help</h3>
+                <!-- Copy of desktop help content -->
+                <div class="text-sm space-y-3">
+                    <div>
+                        <p class="font-semibold text-blue-600 mb-2">Placing Objects</p>
+                        <p class="ml-2 text-gray-700">• Select an object type from toolbar</p>
+                        <p class="ml-2 text-gray-700">• Tap on grid to place</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-green-600 mb-2">Selection & Movement</p>
+                        <p class="ml-2 text-gray-700">• Choose "Select" → tap object</p>
+                        <p class="ml-2 text-gray-700">• Drag to move selected object</p>
+                        <p class="ml-2 text-gray-700">• Type to rename cities</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-purple-600 mb-2">Navigation</p>
+                        <p class="ml-2 text-gray-700">• Choose "Move" → drag to pan map</p>
+                        <p class="ml-2 text-gray-700">• Pinch to zoom (mobile)</p>
+                        <p class="ml-2 text-gray-700">• Mouse wheel: Zoom (desktop)</p>
+                        <p class="ml-2 text-gray-700">• Middle mouse: Pan (desktop)</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-red-600 mb-2">Deletion</p>
+                        <p class="ml-2 text-gray-700">• Select object → Delete button</p>
+                        <p class="ml-2 text-gray-700">• Or use Delete key (desktop)</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-gray-200">
+                        <p class="text-sm text-gray-500 text-center">
+                            Original author: 
+                            <a href="https://github.com/GFXSpeed" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">
+                                GFXSpeed
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Initialize sections expanded
         document.addEventListener('DOMContentLoaded', () => {
@@ -217,6 +326,51 @@
             content.classList.toggle('hidden');
             arrow.style.transform = content.classList.contains('hidden') ? 'rotate(180deg)' : '';
         }
+
+        // Add mobile panel toggle function
+        function toggleMobileSection(section) {
+            const panels = document.querySelectorAll('.mobile-panel');
+            panels.forEach(panel => {
+                if (panel.id === `mobile${section.charAt(0).toUpperCase() + section.slice(1)}`) {
+                    panel.style.display = 'block';
+                    // Use setTimeout to ensure display:block takes effect before adding active class
+                    setTimeout(() => panel.classList.toggle('active'), 10);
+                } else {
+                    panel.classList.remove('active');
+                    // Hide panel after transition
+                    setTimeout(() => {
+                        if (!panel.classList.contains('active')) {
+                            panel.style.display = 'none';
+                        }
+                    }, 300);
+                }
+            });
+        }
+
+        // Sync toolbar buttons
+        document.addEventListener('DOMContentLoaded', () => {
+            const desktopToolbar = document.getElementById('toolbar-buildings');
+            const mobileToolbar = document.getElementById('mobile-toolbar-buildings');
+            mobileToolbar.innerHTML = desktopToolbar.innerHTML;
+
+            // Update mobile counters
+            const updateMobileCounters = () => {
+                document.getElementById('mobileFlagCounter').textContent = document.getElementById('flagCounter').textContent;
+                document.getElementById('mobileCityCounter').textContent = document.getElementById('cityCounter').textContent;
+                document.getElementById('mobileBuildingCounter').textContent = document.getElementById('buildingCounter').textContent;
+                document.getElementById('mobileHqCounter').textContent = document.getElementById('hqCounter').textContent;
+                document.getElementById('mobileNodeCounter').textContent = document.getElementById('nodeCounter').textContent;
+            };
+            
+            // Observe changes in desktop counters
+            const observer = new MutationObserver(updateMobileCounters);
+            document.querySelectorAll('#flagCounter, #cityCounter, #buildingCounter, #hqCounter, #nodeCounter').forEach(counter => {
+                observer.observe(counter, { childList: true, characterData: true, subtree: true });
+            });
+            
+            // Initial update
+            updateMobileCounters();
+        });
     </script>
     
     <script src="/layout-planner/js/script.js"></script>
