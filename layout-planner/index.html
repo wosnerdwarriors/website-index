@@ -24,7 +24,7 @@
         <!-- Two Groups + Divider -->
         <div class="flex items-center px-8 py-3">
         <!-- Group 1: Tools -->
-        <div class="flex items-center gap-1">
+        <div id="toolbar-controls" class="flex items-center gap-1">
             <button data-type="select" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Select</button>
             <button data-type="move"   class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Pan</button>
             <button id="deleteButton"  class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Delete</button>
@@ -69,7 +69,7 @@
                         <span class="transform transition-transform" id="buildingsArrow">▼</span>
                     </button>
                     <div id="buildingsSection" class="p-4">
-                        <div class="grid grid-cols-2 gap-2 mb-4">
+                        <div id="toolbar-buildings" class="grid grid-cols-2 gap-2 mb-4">
                             <button data-type="flag" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Flag</button>
                             <button data-type="city" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">City</button>
                             <button data-type="building" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Trap</button>
