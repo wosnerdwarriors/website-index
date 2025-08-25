@@ -1331,7 +1331,7 @@ function updateCityList() {
         input.value = city.name || `City ${city.id}`;
         input.placeholder = `City ${city.id}`;
         input.className = 'border p-1 rounded touch-input';
-        input.style.width = '30ch';
+        input.style.width = '15ch';
         input.addEventListener('change', () => {
             city.name = input.value;
             redraw();

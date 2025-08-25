@@ -10,223 +10,273 @@
     <link rel="stylesheet" href="/layout-planner/css/style.css">
     <title>Alliance Layout Planner</title>
 </head>
-
-<body>
+<body class="overflow-hidden">
     <!-- Fullscreen Canvas -->
     <canvas id="layoutCanvas"></canvas>
     
-    <!-- Mobile Navigation Bar -->
-    <div id="mobileNavBar" class="mobile-nav-bar">
-        <button id="mobileToolsBtn" class="mobile-nav-btn">
-            <span class="mobile-nav-icon">🏠</span>
-            <span class="mobile-nav-text">Buildings</span>
-        </button>
-        <button id="mobileCitiesBtn" class="mobile-nav-btn">
-            <span class="mobile-nav-icon">🏘️</span>
-            <span class="mobile-nav-text">City List</span>
-        </button>
-        <button id="mobileActionsBtn" class="mobile-nav-btn">
-            <span class="mobile-nav-icon">💾</span>
-            <span class="mobile-nav-text">Save</span>
-        </button>
-        <button id="mobileHelpBtn" class="mobile-nav-btn">
-            <span class="mobile-nav-icon">❓</span>
-            <span class="mobile-nav-text">Help</span>
-        </button>
-    </div>
-    
-    <!-- Top Buildings Panel -->
-    <div id="buildingPanel" class="floating-panel">
-        <button class="panel-toggle" onclick="togglePanel('buildingPanel')">▼</button>
-        <h2 class="text-lg font-bold mb-3 text-center">Buildings</h2>
-        
-        <div class="flex flex-col items-center mb-3">
-            <input id="mapNameInput" type="text" placeholder="Map Name (optional)" class="border-2 border-gray-300 p-3 rounded-lg text-center w-full max-w-xs focus:border-blue-500 focus:outline-none" maxlength="30">
-            <div id="mapNameHint" class="text-center text-red-500 text-sm mt-1 hidden"></div>
+    <!-- Top Controls -->
+    <div id="topControls"
+        class="fixed top-4 left-0 z-40 flex justify-center pointer-events-none rounded-lg"
+        style="right: var(--sidebar-width, 0px);">
+    <!-- Weiße Karte -->
+    <div class="flex bg-white shadow-lg rounded-lg pointer-events-auto justify-center"
+        style="min-width: 500px; max-width: calc(100vw - var(--sidebar-width, 0px) - 2rem);">
+        <!-- Two Groups + Divider -->
+        <div class="flex items-center px-8 py-3">
+        <!-- Group 1: Tools -->
+        <div class="flex items-center gap-1">
+            <button data-type="select" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Select</button>
+            <button data-type="move"   class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Pan</button>
+            <button id="deleteButton"  class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium">Delete</button>
         </div>
-        
-        <!-- Buildings Section -->
-        <div class="mb-3">
-            <h3 class="text-sm font-semibold text-gray-700 mb-2 text-center">Buildings</h3>
-            <div id="toolbar-buildings">
-                <div class="grid grid-cols-2 gap-2">
-                    <button data-type="flag" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Flag</button>
-                    <button data-type="city" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">City</button>
-                    <button data-type="building" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Trap</button>
-                    <button data-type="hq" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">HQ</button>
-                    <button data-type="node" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Node</button>
-                    <button data-type="obstacle" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Obstacle</button>
+
+        <!-- Gap -->
+        <div class="mx-1 h-8 w-px bg-gray-300"></div>
+
+        <!-- Group 2: Controls -->
+        <div class="flex items-center gap-1">
+            <button id="zoomOutBtn"  class="h-9 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-base leading-none font-bold">−</button>
+            <span id="zoomLevel"     class="text-sm font-medium w-[48px] text-center select-none">100%</span>
+            <button id="zoomInBtn"   class="h-9 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-base leading-none font-bold">+</button>
+            <button id="resetZoomBtn" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium">Reset</button>
+            <button id="centerBtn"    class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium">Center</button>
+        </div>
+        </div>
+    </div>
+    </div>
+
+
+    <!-- Resizable Right Sidebar -->
+    <div id="rightSidebar" class="fixed right-0 top-0 h-full bg-white shadow-lg z-50 flex flex-col border-l border-gray-200" style="width: 320px; min-width: 280px;">
+        <!-- Resize Handle -->
+        <div id="sidebarResizer" class="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-blue-500 transition-colors"></div>
+
+        <!-- Main Content Area -->
+        <div class="flex flex-col h-full">
+            <!-- Top Section with Map Name -->
+            <div class="p-4 border-b">
+                <input id="mapNameInput" type="text" placeholder="Map Name (optional)" 
+                       class="w-full p-3 border-2 border-gray-300 rounded-lg text-center focus:border-blue-500 focus:outline-none" maxlength="30">
+                <div id="mapNameHint" class="text-center text-red-500 text-sm mt-1 hidden"></div>
+            </div>
+
+            <!-- Middle Section with Buildings and Cities -->
+            <div class="flex-1 overflow-y-auto">
+                <!-- Buildings Section -->
+                <div class="border-b">
+                    <button onclick="toggleSection('buildings')" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
+                        <span class="font-medium">Buildings</span>
+                        <span class="transform transition-transform" id="buildingsArrow">▼</span>
+                    </button>
+                    <div id="buildingsSection" class="p-4">
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <button data-type="flag" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Flag</button>
+                            <button data-type="city" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">City</button>
+                            <button data-type="building" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Trap</button>
+                            <button data-type="hq" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">HQ</button>
+                            <button data-type="node" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Node</button>
+                            <button data-type="obstacle" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Obstacle</button>
+                        </div>
+                        <div class="text-sm p-3 bg-gray-100 rounded-lg text-center">
+                            <span>Flags: <span id="flagCounter" class="font-bold">0</span></span>
+                            <span class="mx-2">•</span>
+                            <span>Cities: <span id="cityCounter" class="font-bold">0</span></span>
+                            <span class="mx-2">•</span>
+                            <span>BT: <span id="buildingCounter" class="font-bold">0</span></span>
+                            <span class="mx-2">•</span>
+                            <span>HQ: <span id="hqCounter" class="font-bold">0</span></span>
+                            <span class="mx-2">•</span>
+                            <span>Nodes: <span id="nodeCounter" class="font-bold">0</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cities Section -->
+                <div class="border-b">
+                    <button onclick="toggleSection('cities')" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
+                        <span class="font-medium">Cities</span>
+                        <span class="transform transition-transform" id="citiesArrow">▼</span>
+                    </button>
+                    <div id="citiesSection" class="flex-1 overflow-hidden flex flex-col">
+                        <div class="p-4 border-b">
+                            <div class="flex items-center gap-2">
+                                <label for="citySort" class="text-sm font-medium">Sort by:</label>
+                                <select id="citySort" class="flex-1 text-sm border-2 border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none"></select>
+                            </div>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-4">
+                            <ul id="cityList" class="space-y-2"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bottom Section with Actions and Help -->
+                <!-- Actions Section -->
+                <div>
+                    <button onclick="toggleBottomSection('actions')" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
+                        <span class="font-medium">Actions</span>
+                        <span class="transform transition-transform" id="actionsArrow">▼</span>
+                    </button>
+                    <div id="actionsSection" class="p-4 hidden">
+                        <div class="space-y-2">
+                            <button id="downloadButton" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Save as PNG</button>
+                            <button id="saveButton" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Generate Code</button>
+                            <button id="shareButton" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Copy Link</button>
+                            <button id="shortUrlButton" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Generate Short URL</button>
+                            <textarea id="mapData" rows="3" placeholder="Map code..." 
+                                      class="w-full p-3 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:outline-none"></textarea>
+                            <button id="loadButton" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Load</button>
+                            
+                            <div id="shortUrlContainer" class="mt-2 hidden">
+                                <input id="shortUrlOutput" type="text" readonly class="w-full p-3 border-2 border-gray-300 rounded-lg text-sm mb-2" />
+                                <button id="copyShortUrlButton" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium">Copy</button>
+                                <span id="shortUrlError" class="text-red-500 text-sm ml-2"></span>
+                            </div>
+                            <div id="copyMessage" class="hidden text-green-500 font-medium text-sm text-center">Copied!</div>
+                        </div>
+                    </div>
+                </div>
+            <div class="border-t mt-auto">
+                <!-- Help Section -->
+                <div class="border-b">
+                    <button onclick="toggleBottomSection('help')" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
+                        <span class="font-medium">Help</span>
+                        <span class="transform transition-transform" id="helpArrow">▼</span>
+                    </button>
+                    <div id="helpSection" class="p-4 hidden">
+                        <div class="text-sm space-y-3">
+                            <div>
+                                <p class="font-semibold text-blue-600 mb-2">Placing Objects</p>
+                                <p class="ml-2 text-gray-700">• Select an object type from toolbar</p>
+                                <p class="ml-2 text-gray-700">• Tap on grid to place</p>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-green-600 mb-2">Selection & Movement</p>
+                                <p class="ml-2 text-gray-700">• Choose "Select" → tap object</p>
+                                <p class="ml-2 text-gray-700">• Drag to move selected object</p>
+                                <p class="ml-2 text-gray-700">• Type to rename cities</p>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-purple-600 mb-2">Navigation</p>
+                                <p class="ml-2 text-gray-700">• Choose "Move" → drag to pan map</p>
+                                <p class="ml-2 text-gray-700">• Pinch to zoom (mobile)</p>
+                                <p class="ml-2 text-gray-700">• Mouse wheel: Zoom (desktop)</p>
+                                <p class="ml-2 text-gray-700">• Middle mouse: Pan (desktop)</p>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-red-600 mb-2">Deletion</p>
+                                <p class="ml-2 text-gray-700">• Select object → Delete button</p>
+                                <p class="ml-2 text-gray-700">• Or use Delete key (desktop)</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-gray-200">
+                                <p class="text-sm text-gray-500 text-center">
+                                    Original author: 
+                                    <a href="https://github.com/GFXSpeed" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">
+                                        GFXSpeed
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Counters -->
-        <div id="counters" class="text-sm p-3 bg-gray-100 rounded-lg text-center space-x-3">
-            <span>Flags: <span id="flagCounter" class="font-bold">0</span></span>
-            <span>Cities: <span id="cityCounter" class="font-bold">0</span></span>
-            <span>Bear Traps: <span id="buildingCounter" class="font-bold">0</span></span>
-            <span>HQs: <span id="hqCounter" class="font-bold">0</span></span>
-            <span>Nodes: <span id="nodeCounter" class="font-bold">0</span></span>
-        </div>
-    </div>
-    
-    <!-- Bottom Center Controls Panel -->
-    <div id="controlsPanel" class="floating-panel bottom-center-panel">
-        <div class="flex items-center gap-3 flex-wrap justify-center">
-            <!-- Controls -->
-            <div id="toolbar-controls" class="flex gap-2">
-                <button data-type="select" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Select</button>
-                <button data-type="move" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Move</button>
-                <button id="deleteButton" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Delete</button>
-            </div>
-            
-            <!-- Separator -->
-            <div class="w-px h-8 bg-gray-300 hidden md:block"></div>
-            
-            <!-- Unified Zoom Controls -->
-            <div id="zoomControls" class="zoom-controls">
-                <button id="zoomOutBtn" class="zoom-btn">−</button>
-                <span id="zoomLevel" class="zoom-display">100%</span>
-                <button id="zoomInBtn" class="zoom-btn">+</button>
-                <button id="resetZoomBtn" class="center-btn">Reset</button>
-                <button id="centerBtn" class="center-btn">Center</button>
-            </div>
-        </div>
     </div>
 
-    <!-- Right Actions Panel -->
-    <div id="actionsPanel" class="floating-panel">
-        <button class="panel-toggle" onclick="togglePanel('actionsPanel')">▼</button>
-        <h2 class="text-lg font-bold mb-3 text-center">Actions</h2>
-        
-        <div class="space-y-2">
-            <button id="downloadButton" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg w-full text-sm font-medium transition-all duration-200 min-h-[44px]">Save as PNG</button>
-            <button id="saveButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg w-full text-sm font-medium transition-all duration-200 min-h-[44px]">Generate Code</button>
-            <button id="shareButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg w-full text-sm font-medium transition-all duration-200 min-h-[44px]">Copy Link</button>
-            <button id="shortUrlButton" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg w-full text-sm font-medium transition-all duration-200 min-h-[44px]">Generate Short URL</button>
-            <textarea id="mapData" rows="3" placeholder="Map code..." class="w-full p-3 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:outline-none min-h-[44px]"></textarea>
-            <button id="loadButton" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-lg w-full text-sm font-medium transition-all duration-200 min-h-[44px]">Load</button>
-            <div id="shortUrlContainer" class="mt-2 hidden">
-                <input id="shortUrlOutput" type="text" readonly class="w-full p-3 border-2 border-gray-300 rounded-lg text-sm mb-2 min-h-[44px]" />
-                <button id="copyShortUrlButton" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px]">Copy</button>
-                <span id="shortUrlError" class="text-red-500 text-sm ml-2"></span>
-            </div>
-        </div>
-        
-        <div id="info" class="mt-3">
-            <span id="copyMessage" class="hidden text-green-500 font-medium text-sm">Copied!</span>
-        </div>
-    </div>
-
-    <!-- Bottom Cities Panel -->
-    <div id="citiesPanel" class="floating-panel">
-        <button class="panel-toggle" onclick="togglePanel('citiesPanel')" style="top: -12px; bottom: auto;">▼</button>
-        <h2 class="text-lg font-bold mb-3 text-center">Cities List</h2>
-        <div class="mb-3 flex items-center gap-2">
-            <label for="citySort" class="text-sm font-medium">Sort by:</label>
-            <select id="citySort" class="text-sm border-2 border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none min-h-[44px]"></select>
-        </div>
-        <ul id="cityList" class="space-y-2"></ul>
-    </div>
-
-    <!-- Help Panel -->
-    <div id="helpPanel" class="floating-panel">
-        <button class="panel-toggle" onclick="togglePanel('helpPanel')" style="top: -12px; bottom: auto;">▼</button>
-        <div class="flex items-center justify-between mb-3">
-            <h2 class="text-lg font-bold text-center flex-1">Help</h2>
-        </div>
-        <div class="text-sm space-y-3">
-            <div>
-                <p class="font-semibold text-blue-600 mb-2">Placing Objects</p>
-                <p class="ml-2 text-gray-700">• Select an object type from toolbar</p>
-                <p class="ml-2 text-gray-700">• Tap on grid to place</p>
-            </div>
-            <div>
-                <p class="font-semibold text-green-600 mb-2">Selection & Movement</p>
-                <p class="ml-2 text-gray-700">• Choose "Select" → tap object</p>
-                <p class="ml-2 text-gray-700">• Drag to move selected object</p>
-                <p class="ml-2 text-gray-700">• Type to rename cities</p>
-            </div>
-            <div>
-                <p class="font-semibold text-purple-600 mb-2">Navigation</p>
-                <p class="ml-2 text-gray-700">• Choose "Move" → drag to pan map</p>
-                <p class="ml-2 text-gray-700">• Pinch to zoom (mobile)</p>
-                <p class="ml-2 text-gray-700">• Mouse wheel: Zoom (desktop)</p>
-                <p class="ml-2 text-gray-700">• Middle mouse: Pan (desktop)</p>
-            </div>
-            <div>
-                <p class="font-semibold text-red-600 mb-2">Deletion</p>
-                <p class="ml-2 text-gray-700">• Select object → Delete button</p>
-                <p class="ml-2 text-gray-700">• Or use Delete key (desktop)</p>
-            </div>
-            <div class="mt-4 pt-3 border-t border-gray-200">
-                <p class="text-sm text-gray-500 text-center">
-                    Original author: 
-                    <a href="https://github.com/GFXSpeed" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">
-                        GFXSpeed
-                    </a>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <script src="/layout-planner/js/script.js"></script>
-    <script src="/js/navbar.js"></script>
-    
     <script>
-        function togglePanel(panelId) {
-            const panel = document.getElementById(panelId);
-            panel.classList.toggle('panel-collapsed');
+        // Initialize sections expanded
+        document.addEventListener('DOMContentLoaded', () => {
+            ['buildings', 'cities'].forEach(section => {
+                const content = document.getElementById(section + 'Section');
+                const arrow = document.getElementById(section + 'Arrow');
+                content.classList.remove('hidden');
+                arrow.style.transform = '';
+            });
+        });
+
+        // Unified section toggle function
+        function toggleSection(section) {
+            const content = document.getElementById(section + 'Section');
+            const arrow = document.getElementById(section + 'Arrow');
+            content.classList.toggle('hidden');
+            arrow.style.transform = content.classList.contains('hidden') ? 'rotate(180deg)' : '';
         }
-        
-        // Mobile navigation functionality
-        function toggleMobilePanel(panelId) {
-            // Hide all panels first
-            const panels = ['buildingPanel', 'actionsPanel', 'citiesPanel', 'helpPanel'];
-            panels.forEach(id => {
-                const panel = document.getElementById(id);
-                if (id !== panelId) {
-                    panel.classList.add('panel-collapsed');
+
+        function toggleBottomSection(section) {
+            const content = document.getElementById(section + 'Section');
+            const arrow = document.getElementById(section + 'Arrow');
+            
+            // Close other sections first
+            ['help', 'actions'].forEach(s => {
+                if (s !== section) {
+                    const otherContent = document.getElementById(s + 'Section');
+                    const otherArrow = document.getElementById(s + 'Arrow');
+                    otherContent.classList.add('hidden');
+                    otherArrow.style.transform = 'rotate(180deg)';
                 }
             });
             
-            // Toggle the selected panel
-            const targetPanel = document.getElementById(panelId);
-            targetPanel.classList.toggle('panel-collapsed');
+            content.classList.toggle('hidden');
+            arrow.style.transform = content.classList.contains('hidden') ? 'rotate(180deg)' : '';
         }
-        
-        // Function to check if we're on mobile
-        function isMobileDevice() {
-            return window.innerWidth <= 767;
-        }
-        
-        // Function to collapse all panels on mobile
-        function collapseAllPanelsOnMobile() {
-            if (isMobileDevice()) {
-                const panels = ['buildingPanel', 'actionsPanel', 'citiesPanel', 'helpPanel'];
-                panels.forEach(id => {
-                    const panel = document.getElementById(id);
-                    panel.classList.add('panel-collapsed');
-                });
+
+        function initSidebarResize() {
+            const sidebar = document.getElementById('rightSidebar');
+            const resizer = document.getElementById('sidebarResizer');
+            const minWidth = 280;
+            const maxWidth = window.innerWidth * 0.4; // 40% of window width
+
+            // Load saved width
+            const savedWidth = localStorage.getItem('sidebarWidth');
+            if (savedWidth) {
+                sidebar.style.width = `${Math.min(Math.max(minWidth, savedWidth), maxWidth)}px`;
             }
+
+            let isResizing = false;
+
+            resizer.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                document.body.style.cursor = 'ew-resize';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+
+                const newWidth = window.innerWidth - e.clientX;
+                if (newWidth >= minWidth && newWidth <= maxWidth) {
+                    sidebar.style.width = `${newWidth}px`;
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.cursor = '';
+                    // Save width
+                    localStorage.setItem('sidebarWidth', sidebar.offsetWidth);
+                }
+            });
+
+            // Update maxWidth on window resize
+            window.addEventListener('resize', () => {
+                const maxWidth = window.innerWidth * 0.4;
+                const currentWidth = sidebar.offsetWidth;
+                if (currentWidth > maxWidth) {
+                    sidebar.style.width = `${maxWidth}px`;
+                    localStorage.setItem('sidebarWidth', maxWidth);
+                }
+            });
         }
-        
-        // Initialize panels based on screen size
-        document.addEventListener('DOMContentLoaded', function() {
-            // Collapse all panels on mobile initially
-            collapseAllPanelsOnMobile();
-            
-            // Mobile navigation event listeners
-            document.getElementById('mobileToolsBtn').addEventListener('click', () => toggleMobilePanel('buildingPanel'));
-            document.getElementById('mobileActionsBtn').addEventListener('click', () => toggleMobilePanel('actionsPanel'));
-            document.getElementById('mobileCitiesBtn').addEventListener('click', () => toggleMobilePanel('citiesPanel'));
-            document.getElementById('mobileHelpBtn').addEventListener('click', () => toggleMobilePanel('helpPanel'));
-        });
-        
-        // Handle window resize to adjust panel states
-        window.addEventListener('resize', function() {
-            collapseAllPanelsOnMobile();
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initSidebarResize();
         });
     </script>
+    
+    <script src="/layout-planner/js/script.js"></script>
+    <script src="/js/navbar.js"></script>
 </body>
 </html>
