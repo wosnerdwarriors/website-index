@@ -20,21 +20,6 @@ body {
     display: block;
 }
 
-/* BT Bubble styles - can't easily replicate with Tailwind */
-.bt-bubble {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.25rem 0.5rem;
-    border-radius: 9999px;
-    background-color: #e2e8f0;
-    cursor: pointer;
-    font-size: 0.875rem;
-    margin-left: 0.5rem;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-}
-
 .bt-bubble.selected {
     background-color: #a3e635;
 }

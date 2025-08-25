@@ -1345,8 +1345,8 @@ function updateCityList() {
             const isPriority = city.priorities && city.priorities[key];
             const bubble = document.createElement('span');
             bubble.textContent = `BT${i+1}: ${time}s`;
-            bubble.className = `bt-bubble inline-block px-2 py-1 text-xs rounded cursor-pointer ${
-                isPriority ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
+            bubble.className = `bt-bubble inline-flex items-center justify-center px-2 py-1 text-xs leading-none rounded cursor-pointer min-w-[70px] ${
+            isPriority ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
             }`;
             bubble.addEventListener('click', () => {
                 city.priorities = city.priorities || {};
