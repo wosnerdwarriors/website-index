@@ -805,10 +805,22 @@ function handleToolbarClick(e) {
     if (e.target.dataset.type) {
         selectedType = e.target.dataset.type;
         // Update all toolbar buttons in both sections
-        document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button').forEach(button => 
-            button.classList.remove('bg-yellow-500', 'bg-yellow-600'));
+        document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button').forEach(button => {
+            button.classList.remove('bg-yellow-500', 'bg-yellow-600');
+            
+            // Restore original colors for non-selected buttons
+            if (button !== e.target) {
+                if (button.dataset.type === 'flag') button.classList.add('bg-blue-500');
+                if (button.dataset.type === 'city') button.classList.add('bg-blue-500');
+                if (button.dataset.type === 'building') button.classList.add('bg-blue-500');
+                if (button.dataset.type === 'node') button.classList.add('bg-blue-500');
+                if (button.dataset.type === 'hq') button.classList.add('bg-blue-500');
+                if (button.dataset.type === 'obstacle') button.classList.add('bg-blue-500');
+            }
+        });
+        
+        // Add yellow highlight to selected button while preserving original color
         e.target.classList.add('bg-yellow-500');
-        e.target.classList.remove('bg-blue-500', 'bg-gray-500', 'bg-purple-500');
         
         if ((selectedType === 'select' || selectedType === 'move') && ghostPreview) {
             ghostPreview = null;
