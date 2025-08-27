@@ -185,9 +185,12 @@ function drawEntities() {
     drawFlagAreas(flagAreas);
     drawFlagAreas(hqAreas);
 
+    // Combine flag areas and HQ areas for city positioning check
+    const allProtectedAreas = new Set([...flagAreas, ...hqAreas]);
+
     // Draw entities
     entities.forEach(entity => {
-        drawEntity(entity);
+        drawEntity(entity, allProtectedAreas);
         
         if (selectedEntity === entity) {
             drawSelectionHighlight(entity);
@@ -200,7 +203,7 @@ function drawEntities() {
     }
 }
 
-function drawEntity(entity) {
+function drawEntity(entity, protectedAreas) {
     ctx.save();
     
     const screen = diamondToScreen(entity.x, entity.y);
@@ -248,8 +251,15 @@ function drawEntity(entity) {
     }
     
     // Draw border around the entire entity
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-    ctx.lineWidth = Math.max(1, 2 * zoom);
+
+    // For cities outside protected areas, use red border; otherwise use black
+    if (entity.type === 'city' && !isCityInProtectedArea(entity, protectedAreas)) {
+        ctx.strokeStyle = 'rgba(255, 0, 0, 1.0)';
+        ctx.lineWidth = Math.max(2, 4 * zoom);
+    } else {
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)';
+        ctx.lineWidth = Math.max(1, 2 * zoom);
+    }
     
     if (entity.width === 1 && entity.height === 1) {
         // Single cell border
@@ -502,6 +512,25 @@ function markFlagArea(entity, areas, radiusSize = 3) {
             }
         }
     }
+}
+
+// Helper function to check if a city is within any flag's or HQ's area
+function isCityInProtectedArea(cityEntity, protectedAreas) {
+    // For a 2x2 city, check all 4 grid cells that the city occupies
+    for (let dx = 0; dx < cityEntity.width; dx++) {
+        for (let dy = 0; dy < cityEntity.height; dy++) {
+            const gridX = cityEntity.x + dx;
+            const gridY = cityEntity.y + dy;
+            
+            // If any cell of the city is NOT in a protected area (flag or HQ), the city is not well positioned
+            if (!protectedAreas.has(`${gridX},${gridY}`)) {
+                return false;
+            }
+        }
+    }
+    
+    // All cells of the city are within protected areas
+    return true;
 }
 
 function drawFlagAreas(areas, color = 'rgba(173, 216, 230, 0.3)') {
