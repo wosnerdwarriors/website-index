@@ -126,18 +126,21 @@ body.resizing {
     right: 0;
     background-color: white;
     transform: translateY(100%);
-    transition: transform 0.3s ease-out;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
     z-index: 40;
     max-height: 80vh;
     overflow-y: auto;
     border-top-left-radius: 1rem;
     border-top-right-radius: 1rem;
     box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
-    display: none;
+    visibility: hidden;
+    opacity: 0;
 }
 
 .mobile-panel.active {
     transform: translateY(0);
+    visibility: visible;
+    opacity: 1;
 }
 
 @media (min-width: 768px) {
