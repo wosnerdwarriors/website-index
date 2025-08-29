@@ -246,9 +246,15 @@
                     <button id="mobileDownloadButton" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Save as PNG</button>
                     <button id="mobileSaveButton" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Generate Code</button>
                     <button id="mobileShareButton" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Copy Link</button>
+                    <button id="mobileShortUrlButton" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Generate Short URL</button>
                     <textarea id="mobileMapData" rows="3" placeholder="Map code..." 
                               class="w-full p-3 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:outline-none"></textarea>
                     <button id="mobileLoadButton" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Load</button>
+                    <div id="mobileShortUrlContainer" class="mt-2 hidden">
+                        <input id="mobileShortUrlOutput" type="text" readonly class="w-full p-3 border-2 border-gray-300 rounded-lg text-sm mb-2" />
+                        <button id="mobileCopyShortUrlButton" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium">Copy</button>
+                        <span id="mobileShortUrlError" class="text-red-500 text-sm ml-2"></span>
+                    </div>
                     <div id="mobileCopyMessage" class="hidden text-green-500 font-medium text-sm text-center">Copied!</div>
                 </div>
             </div>

@@ -11,6 +11,11 @@ const saveButton = document.getElementById('saveButton');
 const loadButton = document.getElementById('loadButton');
 const mapData = document.getElementById('mapData');
 const copyMessage = document.getElementById('copyMessage');
+const shortUrlButton = document.getElementById('shortUrlButton');
+const copyShortUrlButton = document.getElementById('copyShortUrlButton');
+const shortUrlContainer = document.getElementById('shortUrlContainer');
+const shortUrlOutput = document.getElementById('shortUrlOutput');
+const shortUrlError = document.getElementById('shortUrlError');
 
 // ===== GRID CONFIGURATION =====
 const baseGridSize = 30;
@@ -52,14 +57,24 @@ let touchStartTime = 0;
 // ===== CANVAS MANAGEMENT =====
 // Initialize canvas size
 function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
     canvasWidth = window.innerWidth;
+    canvasHeight = window.innerHeight;
+    canvas.width = Math.round(canvasWidth * dpr);
+    canvas.height = Math.round(canvasHeight * dpr);
+    canvas.style.width = canvasWidth + 'px';
+    canvas.style.height = canvasHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
     canvasHeight = window.innerHeight;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     
-    // Center the grid
-    panX = canvasWidth / 2;
-    panY = canvasHeight / 2;
+    if (typeof window.__didInitialCenter === 'undefined') {
+        panX = canvasWidth / 2;
+        panY = canvasHeight / 2;
+        window.__didInitialCenter = true;
+    }
     
     redraw();
     updateZoomDisplay();
@@ -914,10 +929,10 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     // Add zoom control event listeners
-    document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
-    document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
-    document.getElementById('resetZoomBtn').addEventListener('click', resetZoom);
-    document.getElementById('centerBtn').addEventListener('click', centerMap);
+    document.getElementById('zoomInBtn')?.addEventListener('click', zoomIn);
+    document.getElementById('zoomOutBtn')?.addEventListener('click', zoomOut);
+    document.getElementById('resetZoomBtn')?.addEventListener('click', resetZoom);
+    document.getElementById('centerBtn')?.addEventListener('click', centerMap);
     
     // Sync map data between desktop and mobile textareas
     const mapDataInput = document.getElementById('mapData');
@@ -931,15 +946,75 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Event Listener for actions
+    document.querySelectorAll('[id$="saveButton"]').forEach(btn => 
+        btn.addEventListener('click', saveMap));
+        
+    document.querySelectorAll('[id$="loadButton"]').forEach(btn => 
+        btn.addEventListener('click', () => {
+            const dataInput = btn.previousElementSibling;
+            if (dataInput && dataInput.tagName === 'TEXTAREA' && dataInput.value) {
+                loadMap();
+            } else {
+                const altDataInput = document.getElementById(dataInput.id === 'mapData' ? 'mobileMapData' : 'mapData');
+                if (altDataInput && altDataInput.value) {
+                    loadMap();
+                } else {
+                    alert('Please enter map data first.');
+                }
+            }
+        }));
+
+    document.querySelectorAll('[id$="shareButton"]').forEach(btn => 
+        btn.addEventListener('click', shareMap));
+        
+    document.querySelectorAll('[id$="downloadButton"]').forEach(btn => 
+        btn.addEventListener('click', downloadCanvasAsPNG));
+
+    document.querySelectorAll('[id$="shortUrlButton"]').forEach(btn => 
+        btn.addEventListener('click', generateShortUrl));
+
+    // Some selectors or timing can miss mobile-specific IDs (case/ordering). Bind explicitly.
+    document.getElementById('shareButton')?.addEventListener('click', shareMap);
+    document.getElementById('mobileShareButton')?.addEventListener('click', shareMap);
+    
+    // Copy short url (desktop)
+    document.getElementById('copyShortUrlButton')?.addEventListener('click', () => {
+        const out = document.getElementById('shortUrlOutput');
+        if (out && out.value) {
+            navigator.clipboard?.writeText(out.value).then(() => {
+                const msg = document.getElementById('copyMessage');
+                if (msg) { msg.classList.remove('hidden'); setTimeout(()=>msg.classList.add('hidden'),2000); }
+            }).catch(()=>{ /* ignore */ });
+        }
+    });
+    
+    // Copy short url (mobile) - if mobile elements exist
+    document.getElementById('mobileCopyShortUrlButton')?.addEventListener('click', () => {
+        const out = document.getElementById('mobileShortUrlOutput');
+        if (out && out.value) {
+            navigator.clipboard?.writeText(out.value).then(() => {
+                const msg = document.getElementById('mobileCopyMessage') || document.getElementById('copyMessage');
+                if (msg) { msg.classList.remove('hidden'); setTimeout(()=>msg.classList.add('hidden'),2000); }
+            }).catch(()=>{ /* ignore */ });
+        }
+    });
+    // --- end mobile fixes ---
+    
     // Add action button event listeners for both desktop and mobile
     ['', 'mobile'].forEach(prefix => {
         const p = prefix ? prefix + '-' : '';
         document.getElementById(`${prefix}loadButton`)?.addEventListener('click', () => {
-            const mapDataInput = document.getElementById(`${prefix}mapData`);
-            if (mapDataInput && mapDataInput.value) {
+            const dataInput = document.getElementById(`${prefix}mapData`);
+            if (dataInput && dataInput.value) {
                 loadMap();
             } else {
-                alert('Please enter map data first.');
+                const altDataInput = document.getElementById(dataInput.id === 'mapData' ? 'mobileMapData' : 'mapData');
+                if (altDataInput && altDataInput.value) {
+                    loadMap();
+                } else {
+                    alert('Please enter map data first.');
+                }
             }
         });
         
@@ -947,7 +1022,7 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById(`${prefix}shareButton`)?.addEventListener('click', shareMap);
         document.getElementById(`${prefix}downloadButton`)?.addEventListener('click', downloadCanvasAsPNG);
     });
-
+    
     document.getElementById('deleteButton').addEventListener('click', () => {
         if (selectedEntity) {
             deleteSelectedEntity();
@@ -1013,96 +1088,137 @@ function shareMap() {
 }
 
 // Short URL feature: encapsulated in async IIFE to avoid race conditions and keep config/vars scoped
-const SHORT_URL_GENERATING_TEXT = 'Generating...';
+    const SHORT_URL_GENERATING_TEXT = 'Generating...';
 
-(async () => {
-    const shortUrlButton = document.getElementById('shortUrlButton');
-    const copyShortUrlButton = document.getElementById('copyShortUrlButton');
-    const shortUrlContainer = document.getElementById('shortUrlContainer');
-    const shortUrlOutput = document.getElementById('shortUrlOutput');
-    const shortUrlError = document.getElementById('shortUrlError');
+    (async () => {
+    	const shortUrlButton = document.getElementById('shortUrlButton');
+    	const mobileShortUrlButton = document.getElementById('mobileShortUrlButton');
+    	const copyShortUrlButton = document.getElementById('copyShortUrlButton');
+    	const mobileCopyShortUrlButton = document.getElementById('mobileCopyShortUrlButton');
+    	const shortUrlContainer = document.getElementById('shortUrlContainer');
+    	const mobileShortUrlContainer = document.getElementById('mobileShortUrlContainer');
+    	const shortUrlOutput = document.getElementById('shortUrlOutput');
+    	const mobileShortUrlOutput = document.getElementById('mobileShortUrlOutput');
+    	const shortUrlError = document.getElementById('shortUrlError');
+    	const mobileShortUrlError = document.getElementById('mobileShortUrlError');
 
-    // Default endpoints (will only be used if config.json fails to load)
-    const config = {
-        tinyurlApi: 'https://tinyurl.com/api-create.php',
-        tinyurlManual: 'https://tinyurl.com/app/'
-    };
+    	// simple default shortener endpoint (returns plain text)
+    	const config = {
+    		tinyurlApi: 'https://tinyurl.com/api-create.php',
+    		tinyurlManual: 'https://tinyurl.com/app/'
+    	};
 
-    let configLoaded = false;
-    try {
-        const response = await fetch('/config.json');
-        const loadedConfig = await response.json();
-        if (loadedConfig.endpoints && loadedConfig.endpoints.tinyurlApi && loadedConfig.endpoints.tinyurlManual) {
-            config.tinyurlApi = loadedConfig.endpoints.tinyurlApi;
-            config.tinyurlManual = loadedConfig.endpoints.tinyurlManual;
-            configLoaded = true;
-        } else {
-            showShortUrlConfigError('Short URL feature is unavailable: config.json is missing required endpoints.');
-        }
-    } catch (e) {
-        showShortUrlConfigError('Short URL feature is unavailable: config.json could not be loaded.');
-    }
+    	async function doShorten(longUrl) {
+    		// show both containers (desktop + mobile) and reset fields
+    		if (shortUrlContainer) shortUrlContainer.classList.remove('hidden');
+    		if (mobileShortUrlContainer) mobileShortUrlContainer.classList.remove('hidden');
+    		if (shortUrlOutput) shortUrlOutput.value = SHORT_URL_GENERATING_TEXT;
+    		if (mobileShortUrlOutput) mobileShortUrlOutput.value = SHORT_URL_GENERATING_TEXT;
+    		if (shortUrlError) shortUrlError.textContent = '';
+    		if (mobileShortUrlError) mobileShortUrlError.textContent = '';
 
-    function showShortUrlConfigError(message) {
-        if (shortUrlContainer) shortUrlContainer.classList.remove('hidden');
-        if (shortUrlOutput) shortUrlOutput.value = '';
-        if (shortUrlError) {
-            shortUrlError.textContent = message;
-            shortUrlError.classList.remove('hidden');
-        }
-        if (shortUrlButton) {
-            shortUrlButton.disabled = true;
-            shortUrlButton.classList.add('opacity-50', 'cursor-not-allowed');
-        }
-        if (copyShortUrlButton) {
-            copyShortUrlButton.disabled = true;
-            copyShortUrlButton.classList.add('opacity-50', 'cursor-not-allowed');
-        }
-    }
+    		// disable while working
+    		if (shortUrlButton) shortUrlButton.disabled = true;
+    		if (mobileShortUrlButton) mobileShortUrlButton.disabled = true;
 
-    if (!configLoaded) return;
+    		try {
+    			const controller = new AbortController();
+    			const timeout = setTimeout(() => controller.abort(), 10000);
+    			const resp = await fetch(`${config.tinyurlApi}?url=${encodeURIComponent(longUrl)}`, { signal: controller.signal });
+    			clearTimeout(timeout);
+    			if (!resp.ok) throw new Error(`Shortener API error ${resp.status}`);
+    			let text = await resp.text();
 
-    shortUrlButton.addEventListener('click', async function() {
-        const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName);
-        mapData.value = compressedMap;
-        const longUrl = getShareableUrl(entities, mapName);
-        shortUrlContainer.classList.remove('hidden');
-        shortUrlOutput.value = SHORT_URL_GENERATING_TEXT;
-        shortUrlError.textContent = '';
-        shortUrlButton.disabled = true;
-        try {
-            // Timeout logic
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
-            const response = await fetch(`${config.tinyurlApi}?url=${encodeURIComponent(longUrl)}`, {
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-            if (!response.ok) {
-                throw new Error(`TinyURL API error: ${response.status}`);
-            }
-            const shortUrl = await response.text();
-            if (!shortUrl.startsWith('http')) {
-                throw new Error('TinyURL returned invalid URL');
-            }
-            shortUrlOutput.value = shortUrl;
-            markChangesSaved();
-        } catch (error) {
-            console.error('Short URL generation failed:', error);
-            shortUrlOutput.value = '';
-            shortUrlError.textContent = 'Failed to generate. ';
-            const fallback = document.createElement('a');
-            fallback.href = `${config.tinyurlManual}?url=${encodeURIComponent(longUrl)}`;
-            fallback.target = '_blank';
-            fallback.rel = 'noopener noreferrer';
-            fallback.textContent = 'Try manually';
-            fallback.className = 'underline text-blue-600';
-            shortUrlError.appendChild(fallback);
-        } finally {
-            shortUrlButton.disabled = false;
-        }
-    });
+    			// some endpoints might return JSON - try parse
+    			try {
+    				const j = JSON.parse(text);
+    				if (j && (j.shortUrl || j.result || (j.data && j.data.tiny_url))) {
+    					text = j.shortUrl || j.result || j.data.tiny_url;
+    				}
+    			} catch (_) {}
+
+    			// set both outputs
+    			if (shortUrlOutput) shortUrlOutput.value = text;
+    			if (mobileShortUrlOutput) mobileShortUrlOutput.value = text;
+    			markChangesSaved();
+    		} catch (err) {
+    			console.warn('Short URL failed, falling back to long URL', err);
+    			const longFallback = longUrl;
+    			if (shortUrlOutput) shortUrlOutput.value = longFallback;
+    			if (mobileShortUrlOutput) mobileShortUrlOutput.value = longFallback;
+
+    			// show manual fallback links
+    			if (shortUrlError) {
+    				shortUrlError.textContent = 'Shortening failed. ';
+    				const a = document.createElement('a');
+    				a.href = `${config.tinyurlManual}?url=${encodeURIComponent(longFallback)}`;
+    				a.target = '_blank';
+    				a.rel = 'noopener noreferrer';
+    				a.textContent = 'Try manually';
+    				a.className = 'underline text-blue-600';
+    				shortUrlError.appendChild(a);
+    			}
+    			if (mobileShortUrlError) {
+    				mobileShortUrlError.textContent = 'Shortening failed. ';
+    				const a = document.createElement('a');
+    				a.href = `${config.tinyurlManual}?url=${encodeURIComponent(longFallback)}`;
+    				a.target = '_blank';
+    				a.rel = 'noopener noreferrer';
+    				a.textContent = 'Try manually';
+    				a.className = 'underline text-blue-600';
+    				mobileShortUrlError.appendChild(a);
+    			}
+    		} finally {
+    			if (shortUrlButton) shortUrlButton.disabled = false;
+    			if (mobileShortUrlButton) mobileShortUrlButton.disabled = false;
+    		}
+    	}
+
+    	// bind desktop button
+    	if (shortUrlButton) {
+    		shortUrlButton.addEventListener('click', async () => {
+    			const mapName = document.getElementById('mapNameInput')?.value || '';
+    			const compressed = compressMapWithName(entities, mapName);
+    			if (document.getElementById('mapData')) document.getElementById('mapData').value = compressed;
+    			const longUrl = getShareableUrl(entities, mapName);
+    			await doShorten(longUrl);
+    		});
+    	}
+
+    	// bind mobile button to same logic
+    	if (mobileShortUrlButton) {
+    		mobileShortUrlButton.addEventListener('click', async () => {
+    			const mapName = document.getElementById('mapNameInput')?.value || '';
+    			const compressed = compressMapWithName(entities, mapName);
+    			if (document.getElementById('mobileMapData')) document.getElementById('mobileMapData').value = compressed;
+    			const longUrl = getShareableUrl(entities, mapName);
+    			await doShorten(longUrl);
+    		});
+    	}
+
+    	// copy handlers for both outputs
+    	if (copyShortUrlButton && shortUrlOutput) {
+    		copyShortUrlButton.addEventListener('click', async () => {
+    			try {
+    				await navigator.clipboard.writeText(shortUrlOutput.value);
+    				shortUrlOutput.classList.add('bg-green-100');
+    				setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
+    			} catch (e) {
+    				if (shortUrlError) shortUrlError.textContent = 'Could not copy URL.';
+    			}
+    		});
+    	}
+    	if (mobileCopyShortUrlButton && mobileShortUrlOutput) {
+    		mobileCopyShortUrlButton.addEventListener('click', async () => {
+    			try {
+    				await navigator.clipboard.writeText(mobileShortUrlOutput.value);
+    				const msg = document.getElementById('mobileCopyMessage') || document.getElementById('copyMessage');
+    				if (msg) { msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), 2000); }
+    			} catch (e) {
+    				if (mobileShortUrlError) mobileShortUrlError.textContent = 'Could not copy URL.';
+    			}
+    		});
+    	}
 
     copyShortUrlButton.addEventListener('click', function() {
         const urlToCopy = shortUrlOutput.value;
@@ -1860,7 +1976,7 @@ function shareMap() {
                 console.error('Failed to copy text: ', err);
             });
         markChangesSaved();
-    } catch (e) {
+    } catch (e) {       
         console.error('Error sharing map:', e);
     }
 }
@@ -1999,3 +2115,224 @@ window.addEventListener('beforeunload', function(e) {
 // Initialize the application
 resizeCanvas();
 redraw();
+
+
+// ======= Enhanced Mobile Touch (pinch-zoom + one-finger pan) =======
+(function(){
+    let touchMode = null; // 'pan' | 'pinch' | null
+    let t0 = null, t1 = null;
+    let startPanX = 0, startPanY = 0;
+    let startZoom = 1;
+    let startDist = 0;
+    let lastCenter = {x: 0, y: 0};
+    let lastTapTime = 0;
+    let longPressTimer = null;
+    const LONG_PRESS_MS = 450;
+
+    function getTouches(e){
+        const rect = canvas.getBoundingClientRect();
+        const arr = Array.from(e.touches).map(t => ({x: t.clientX - rect.left, y: t.clientY - rect.top, id: t.identifier}));
+        return arr;
+    }
+
+    function dist(a,b){ const dx=a.x-b.x, dy=a.y-b.y; return Math.hypot(dx,dy); }
+    function mid(a,b){ return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 }; }
+
+    function clearLongPress(){ if (longPressTimer){ clearTimeout(longPressTimer); longPressTimer=null; }}
+
+    canvas.addEventListener('touchstart', (e)=>{
+        if (!e.target.closest('#layoutCanvas')) return;
+        e.preventDefault();
+        const touches = getTouches(e);
+
+        if (touches.length === 1){
+            // single-finger: either tap-to-place/select or drag-to-pan when in Move mode
+            t0 = touches[0];
+            touchMode = 'pan';
+            startPanX = panX;
+            startPanY = panY;
+
+            // long-press to delete selected entity (mobile shortcut)
+            clearLongPress();
+            longPressTimer = setTimeout(()=>{
+                // If something is selected, delete it
+                if (selectedEntity){
+                    deleteSelectedEntity();
+                }
+            }, LONG_PRESS_MS);
+
+            // double-tap to quick zoom in towards tap
+            const now = Date.now();
+            if (now - lastTapTime < 350){
+                const prevZoom = zoom;
+                const newZoom = Math.min(3, zoom * 1.35);
+                const dx = t0.x - panX;
+                const dy = t0.y - panY;
+                panX = t0.x - dx * (newZoom / prevZoom);
+                panY = t0.y - dy * (newZoom / prevZoom);
+                zoom = newZoom;
+                gridSize = baseGridSize * zoom;
+                redraw();
+                updateZoomDisplay();
+            }
+            lastTapTime = now;
+
+        } else if (touches.length >= 2){
+            // two-finger pinch
+            t0 = touches[0]; t1 = touches[1];
+            touchMode = 'pinch';
+            startZoom = zoom;
+            startDist = dist(t0, t1);
+            lastCenter = mid(t0, t1);
+        }
+    }, {passive:false});
+
+    canvas.addEventListener('touchmove', (e)=>{
+        if (!e.target.closest('#layoutCanvas')) return;
+        e.preventDefault();
+        const touches = getTouches(e);
+
+        if (touchMode === 'pan' && touches.length === 1 && t0){
+            clearLongPress();
+            const cur = touches[0];
+            // If toolbar mode is 'move' OR two-finger initially—pan the map
+            if (currentMode === 'move' || selectedType === 'move'){
+                panX = startPanX + (cur.x - t0.x);
+                panY = startPanY + (cur.y - t0.y);
+                redraw();
+            } else {
+                // show ghost preview while moving single finger
+                ghostPreview = { x: cur.x, y: cur.y, type: selectedType };
+                redraw();
+            }
+        } else if (touchMode === 'pinch' && touches.length >= 2){
+            const a = touches[0], b = touches[1];
+            const currDist = dist(a,b);
+            const factor = currDist / (startDist || 1);
+            const newZoom = Math.max(0.1, Math.min(3, startZoom * factor));
+
+            // Zoom around the pinch midpoint
+            const center = mid(a,b);
+            const dx = center.x - panX;
+            const dy = center.y - panY;
+            panX = center.x - dx * (newZoom / zoom);
+            panY = center.y - dy * (newZoom / zoom);
+            zoom = newZoom;
+            gridSize = baseGridSize * zoom;
+            redraw();
+            updateZoomDisplay();
+        }
+    }, {passive:false});
+
+    canvas.addEventListener('touchend', (e)=>{
+        if (!e.target.closest('#layoutCanvas')) return;
+        e.preventDefault();
+        const touches = getTouches(e);
+
+        clearLongPress();
+
+        if (touchMode === 'pan' && (!touches || touches.length === 0) && t0){
+            // Treat as tap if movement was very small
+            const dx = (e.changedTouches[0].clientX - (canvas.getBoundingClientRect().left + t0.x));
+            const dy = (e.changedTouches[0].clientY - (canvas.getBoundingClientRect().top + t0.y));
+            const moved = Math.hypot(dx,dy);
+            if (moved < 8){
+                // Trigger the same logic as a click on canvas (place/select)
+                const rect = canvas.getBoundingClientRect();
+                const x = e.changedTouches[0].clientX - rect.left;
+                const y = e.changedTouches[0].clientY - rect.top;
+                handleCanvasClick(x, y);
+            }
+        }
+
+        // reset
+        touchMode = null; t0 = null; t1 = null;
+    }, {passive:false});
+
+    // Helper: centralizes place/select logic reused by mouse & touch
+    if (typeof handleCanvasClick !== 'function'){
+        window.handleCanvasClick = function(x, y){
+            if (currentMode === 'select'){
+                selectEntityAt(x, y);
+            } else {
+                placeEntityAt(x, y);
+            }
+        };
+    }
+
+    // Prevent page bounce/scroll while interacting with canvas
+    document.addEventListener('touchmove', (e)=>{
+        if (e.target === canvas) e.preventDefault();
+    }, {passive:false});
+})();
+
+
+function deleteSelectedEntity(){
+    if (!selectedEntity) return;
+    const i = entities.indexOf(selectedEntity);
+    if (i>=0){ entities.splice(i,1); selectedEntity=null; redraw(); updateCounters(); markUnsavedChanges(); }
+}
+
+
+/*__MOBILE_BOTTOM_SHEET__*/
+(function(){
+    const panels = document.querySelectorAll('.mobile-panel');
+    panels.forEach(panel => {
+        let startY=0, curY=0, isDragging=false;
+        panel.addEventListener('touchstart', (e)=>{
+            startY = e.touches[0].clientY;
+            isDragging = true;
+        }, {passive:true});
+        panel.addEventListener('touchmove', (e)=>{
+            if(!isDragging) return;
+            curY = e.touches[0].clientY;
+            const delta = Math.max(0, curY - startY);
+            panel.style.transform = `translateY(${delta}px)`;
+        }, {passive:true});
+        panel.addEventListener('touchend', ()=>{
+            if(!isDragging) return;
+            const delta = Math.max(0, curY - startY);
+            const shouldClose = delta > 100;
+            panel.style.transform = '';
+            if (shouldClose){
+                panel.classList.remove('active');
+                setTimeout(()=>{ panel.style.display='none'; }, 300);
+            }
+            isDragging=false;
+        });
+    });
+
+    // Mirror desktop action buttons into mobile where needed
+    const mirrors = [
+        ['downloadButton','mobileDownloadButton'],
+        ['saveButton','mobileSaveButton'],
+        ['shareButton','mobileShareButton'],
+        ['shortUrlButton','mobileShortUrlButton'],
+        ['loadButton','mobileLoadButton'],
+    ];
+    mirrors.forEach(([deskId, mobId])=>{
+        const d = document.getElementById(deskId);
+        const m = document.getElementById(mobId);
+        if (d && m){
+            m.addEventListener('click', ()=> d.click());
+        }
+    });
+
+    // Keep code textarea in sync
+    const deskTA = document.getElementById('mapData');
+    const mobTA = document.getElementById('mobileMapData');
+    if (deskTA && mobTA){
+        const sync = (src, dst)=>{
+            src.addEventListener('input', ()=> { dst.value = src.value; });
+        };
+        sync(deskTA, mobTA); sync(mobTA, deskTA);
+    }
+
+    // Sync city sort dropdowns
+    const deskSort = document.getElementById('citySort');
+    const mobSort = document.getElementById('mobileCitySort');
+    if (deskSort && mobSort){
+        const reflect = (src, dst)=> src.addEventListener('change', ()=>{ dst.value = src.value; dst.dispatchEvent(new Event('change')); });
+        reflect(deskSort, mobSort); reflect(mobSort, deskSort);
+    }
+})();
