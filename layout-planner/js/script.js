@@ -115,11 +115,19 @@ function updateCounters() {
     const hqs = entities.filter(entity => entity.type === 'hq').length;
     const nodes = entities.filter(entity => entity.type === 'node').length;
 
+    // Update desktop counters
     flagCounter.textContent = flags;
     cityCounter.textContent = cities;
     buildingCounter.textContent = buildings;
     hqCounter.textContent = hqs;
     nodeCounter.textContent = nodes;
+
+    // Update mobile counters
+    document.getElementById('mobileFlagCounter').textContent = flags;
+    document.getElementById('mobileCityCounter').textContent = cities;
+    document.getElementById('mobileBuildingCounter').textContent = buildings;
+    document.getElementById('mobileHqCounter').textContent = hqs;
+    document.getElementById('mobileNodeCounter').textContent = nodes;
 }
 
 // ===== GRID RENDERING =====
@@ -829,16 +837,19 @@ function handleMouseUp(event) {
     }
 }
 
-// Function to handle toolbar clicks
+// Update this function to handle both desktop and mobile toolbars
 function handleToolbarClick(e) {
     if (e.target.dataset.type) {
         selectedType = e.target.dataset.type;
-        // Update all toolbar buttons in both sections
-        document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button').forEach(button => {
+        
+        // Remove highlighting from all buttons in both toolbars
+        document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button, #mobile-toolbar-buildings button').forEach(button => {
             button.classList.remove('bg-yellow-500', 'bg-yellow-600');
             
             // Restore original colors for non-selected buttons
-            if (button !== e.target) {
+            if (button.dataset.type === e.target.dataset.type) {
+                button.classList.add('bg-yellow-500');
+            } else {
                 if (button.dataset.type === 'flag') button.classList.add('bg-blue-500');
                 if (button.dataset.type === 'city') button.classList.add('bg-blue-500');
                 if (button.dataset.type === 'building') button.classList.add('bg-blue-500');
@@ -847,9 +858,6 @@ function handleToolbarClick(e) {
                 if (button.dataset.type === 'obstacle') button.classList.add('bg-blue-500');
             }
         });
-        
-        // Add yellow highlight to selected button while preserving original color
-        e.target.classList.add('bg-yellow-500');
         
         if ((selectedType === 'select' || selectedType === 'move') && ghostPreview) {
             ghostPreview = null;
@@ -895,29 +903,51 @@ window.addEventListener('DOMContentLoaded', () => {
     updateCityList();
     updateZoomDisplay();
     
-    // Unified zoom control event listeners
+    // Set up toolbar click handlers
+    document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button').forEach(button => {
+        button.addEventListener('click', handleToolbarClick);
+    });
+
+    // Set up mobile toolbar click handlers
+    document.querySelectorAll('#mobile-toolbar-buildings button').forEach(button => {
+        button.addEventListener('click', handleToolbarClick);
+    });
+
+    // Add zoom control event listeners
     document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
     document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
     document.getElementById('resetZoomBtn').addEventListener('click', resetZoom);
     document.getElementById('centerBtn').addEventListener('click', centerMap);
     
-    // Add event listeners for toolbar sections
-    const toolbarControls = document.getElementById('toolbar-controls');
-    const toolbarBuildings = document.getElementById('toolbar-buildings');
-    
-    if (toolbarControls) {
-        toolbarControls.addEventListener('click', handleToolbarClick);
+    // Sync map data between desktop and mobile textareas
+    const mapDataInput = document.getElementById('mapData');
+    const mobileMapData = document.getElementById('mobileMapData');
+    if (mapDataInput && mobileMapData) {
+        mapDataInput.addEventListener('input', () => {
+            mobileMapData.value = mapDataInput.value;
+        });
+        mobileMapData.addEventListener('input', () => {
+            mapDataInput.value = mobileMapData.value;
+        });
     }
-    
-    if (toolbarBuildings) {
-        toolbarBuildings.addEventListener('click', handleToolbarClick);
-    }
-    
-    // Button event listeners
-    document.getElementById('loadButton').addEventListener('click', loadMap);
-    document.getElementById('saveButton').addEventListener('click', saveMap);
-    document.getElementById('shareButton').addEventListener('click', shareMap);
-    document.getElementById('downloadButton').addEventListener('click', downloadCanvasAsPNG);
+
+    // Add action button event listeners for both desktop and mobile
+    ['', 'mobile'].forEach(prefix => {
+        const p = prefix ? prefix + '-' : '';
+        document.getElementById(`${prefix}loadButton`)?.addEventListener('click', () => {
+            const mapDataInput = document.getElementById(`${prefix}mapData`);
+            if (mapDataInput && mapDataInput.value) {
+                loadMap();
+            } else {
+                alert('Please enter map data first.');
+            }
+        });
+        
+        document.getElementById(`${prefix}saveButton`)?.addEventListener('click', saveMap);
+        document.getElementById(`${prefix}shareButton`)?.addEventListener('click', shareMap);
+        document.getElementById(`${prefix}downloadButton`)?.addEventListener('click', downloadCanvasAsPNG);
+    });
+
     document.getElementById('deleteButton').addEventListener('click', () => {
         if (selectedEntity) {
             deleteSelectedEntity();
@@ -925,8 +955,62 @@ window.addEventListener('DOMContentLoaded', () => {
             alert('No entity selected to delete.');
         }
     });
-    
 });
+
+// Update saveMap function to sync both textareas
+function saveMap() {
+    try {
+        const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
+        const mapDataInput = document.getElementById('mapData');
+        const mobileMapData = document.getElementById('mobileMapData');
+        
+        if (mapDataInput) mapDataInput.value = compressedMap;
+        if (mobileMapData) mobileMapData.value = compressedMap;
+        
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('mapData', compressedMap);
+        window.history.replaceState(null, '', newUrl);
+        markChangesSaved();
+    } catch (e) {
+        console.error('Error saving map:', e);
+    }
+}
+
+// Update shareMap function to support mobile copy message
+function shareMap() {
+    try {
+        const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
+        const mapDataInput = document.getElementById('mapData');
+        const mobileMapData = document.getElementById('mobileMapData');
+        
+        if (mapDataInput) mapDataInput.value = compressedMap;
+        if (mobileMapData) mobileMapData.value = compressedMap;
+        
+        const longUrl = getShareableUrl(entities, mapName);
+        window.history.replaceState(null, '', longUrl);
+
+        navigator.clipboard.writeText(longUrl)
+            .then(() => {
+                const copyMessage = document.getElementById('copyMessage');
+                const mobileCopyMessage = document.getElementById('mobileCopyMessage');
+                
+                [copyMessage, mobileCopyMessage].forEach(msg => {
+                    if (msg) {
+                        msg.classList.remove('hidden');
+                        setTimeout(() => msg.classList.add('hidden'), 2000);
+                    }
+                });
+            })
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        markChangesSaved();
+    } catch (e) {
+        console.error('Error sharing map:', e);
+    }
+}
 
 // Short URL feature: encapsulated in async IIFE to avoid race conditions and keep config/vars scoped
 const SHORT_URL_GENERATING_TEXT = 'Generating...';
@@ -1035,6 +1119,7 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
         }
     });
 })();
+
 
 // ===== MOBILE/TOUCH CONTROLS =====
 function updateZoomDisplay() {
@@ -1723,7 +1808,11 @@ function saveMap() {
     try {
         const mapName = document.getElementById('mapNameInput').value;
         const compressedMap = compressMapWithName(entities, mapName);
-        mapData.value = compressedMap;
+        const mapDataInput = document.getElementById('mapData');
+        const mobileMapData = document.getElementById('mobileMapData');
+        
+        if (mapDataInput) mapDataInput.value = compressedMap;
+        if (mobileMapData) mobileMapData.value = compressedMap;
         
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.set('mapData', compressedMap);
@@ -1746,16 +1835,26 @@ function shareMap() {
     try {
         const mapName = document.getElementById('mapNameInput').value;
         const compressedMap = compressMapWithName(entities, mapName);
-        mapData.value = compressedMap;
+        const mapDataInput = document.getElementById('mapData');
+        const mobileMapData = document.getElementById('mobileMapData');
+        
+        if (mapDataInput) mapDataInput.value = compressedMap;
+        if (mobileMapData) mobileMapData.value = compressedMap;
+        
         const longUrl = getShareableUrl(entities, mapName);
         window.history.replaceState(null, '', longUrl);
 
         navigator.clipboard.writeText(longUrl)
             .then(() => {
-                copyMessage.classList.remove('hidden');
-                setTimeout(() => {
-                    copyMessage.classList.add('hidden');
-                }, 2000);
+                const copyMessage = document.getElementById('copyMessage');
+                const mobileCopyMessage = document.getElementById('mobileCopyMessage');
+                
+                [copyMessage, mobileCopyMessage].forEach(msg => {
+                    if (msg) {
+                        msg.classList.remove('hidden');
+                        setTimeout(() => msg.classList.add('hidden'), 2000);
+                    }
+                });
             })
             .catch(err => {
                 console.error('Failed to copy text: ', err);
