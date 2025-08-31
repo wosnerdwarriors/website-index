@@ -44,9 +44,6 @@
         </div>
     </div>
 
-
-
-
     <!-- Right Sidebar -->
     <div id="rightSidebar" class="fixed right-0 top-0 h-full bg-white shadow-lg z-50 flex flex-col border-l border-gray-200" style="width: 320px;">
         <!-- Main Content Area -->
@@ -62,7 +59,7 @@
             <div class="flex-1 overflow-y-auto">
                 <!-- Buildings Section -->
                 <div class="border-b">
-                    <button onclick="toggleSection('buildings')" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
+                    <button data-section="buildings" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
                         <span class="font-medium">Buildings</span>
                         <span class="transform transition-transform" id="buildingsArrow">▼</span>
                     </button>
@@ -94,7 +91,7 @@
 
                 <!-- Cities Section -->
                 <div class="border-b">
-                    <button onclick="toggleSection('cities')" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
+                    <button data-section="cities" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
                         <span class="font-medium">Cities</span>
                         <span class="transform transition-transform" id="citiesArrow">▼</span>
                     </button>
@@ -115,7 +112,7 @@
             <!-- Bottom Section with Actions and Help -->
                 <!-- Actions Section -->
                 <div>
-                    <button onclick="toggleBottomSection('actions')" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
+                    <button data-bottom="actions" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
                         <span class="font-medium">Actions</span>
                         <span class="transform transition-transform" id="actionsArrow">▼</span>
                     </button>
@@ -141,7 +138,7 @@
             <div class="border-t mt-auto">
                 <!-- Help Section -->
                 <div class="border-b">
-                    <button onclick="toggleBottomSection('help')" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
+                    <button data-bottom="help" class="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100">
                         <span class="font-medium">Help</span>
                         <span class="transform transition-transform" id="helpArrow">▼</span>
                     </button>
@@ -188,16 +185,16 @@
     <!-- Mobile Bottom Navigation -->
     <div id="mobileNav" class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
         <div class="flex justify-around">
-            <button onclick="toggleMobileSection('buildings')" class="flex-1 p-4 text-center">
+            <button data-mobile="buildings" class="flex-1 p-4 text-center">
                 <span class="block text-sm">Buildings</span>
             </button>
-            <button onclick="toggleMobileSection('cities')" class="flex-1 p-4 text-center">
+            <button data-mobile="cities" class="flex-1 p-4 text-center">
                 <span class="block text-sm">Cities</span>
             </button>
-            <button onclick="toggleMobileSection('actions')" class="flex-1 p-4 text-center">
+            <button data-mobile="actions" class="flex-1 p-4 text-center">
                 <span class="block text-sm">Actions</span>
             </button>
-            <button onclick="toggleMobileSection('help')" class="flex-1 p-4 text-center">
+            <button data-mobile="help" class="flex-1 p-4 text-center">
                 <span class="block text-sm">Help</span>
             </button>
         </div>
@@ -347,6 +344,17 @@
                 // keep mobile header and attach desktop help content
                 mobileHelpWrapper.innerHTML = '<h3 class="font-medium mb-4">Help</h3>' + desktopHelp.innerHTML;
             }
+
+            // Event listeners declaratively
+            document.querySelectorAll('[data-section]').forEach(btn => {
+                btn.addEventListener('click', () => toggleSection(btn.dataset.section));
+            });
+            document.querySelectorAll('[data-bottom]').forEach(btn => {
+                btn.addEventListener('click', () => toggleBottomSection(btn.dataset.bottom));
+            });
+            document.querySelectorAll('[data-mobile]').forEach(btn => {
+                btn.addEventListener('click', () => toggleMobileSection(btn.dataset.mobile));
+            });
         });
     </script>
     

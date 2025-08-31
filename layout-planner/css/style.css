@@ -71,21 +71,21 @@ body {
 
 /* Toolbar button original colors */
 #toolbar-controls button[data-type="select"] {
-  background-color: #6b7280 !important;
+  background-color: #6b7280;
 }
 
 #toolbar-controls button[data-type="move"] {
-  background-color: #8b5cf6 !important;
+  background-color: #8b5cf6;
 }
 
 #toolbar-controls button#deleteButton {
-  background-color: #ef4444 !important;
+  background-color: #ef4444;
 }
 
 /* Selected state */
 #toolbar-controls button.bg-yellow-500,
 #toolbar-buildings button.bg-yellow-500 {
-  background-color: #eab308 !important;
+  background-color: #eab308;
 }
 
 /* Prevent text selection while resizing */

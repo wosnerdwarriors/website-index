@@ -907,11 +907,6 @@ canvas.addEventListener('mouseleave', () => {
     }
 });
 
-// Touch event listeners
-canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-
 window.addEventListener('DOMContentLoaded', () => {
     loadMapFromQuery();
     enablePopulateSortOptions('id');
@@ -947,34 +942,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event Listener for actions
-    document.querySelectorAll('[id$="saveButton"]').forEach(btn => 
-        btn.addEventListener('click', saveMap));
-        
-    document.querySelectorAll('[id$="loadButton"]').forEach(btn => 
-        btn.addEventListener('click', () => {
-            const dataInput = btn.previousElementSibling;
-            if (dataInput && dataInput.tagName === 'TEXTAREA' && dataInput.value) {
-                loadMap();
-            } else {
-                const altDataInput = document.getElementById(dataInput.id === 'mapData' ? 'mobileMapData' : 'mapData');
-                if (altDataInput && altDataInput.value) {
-                    loadMap();
-                } else {
-                    alert('Please enter map data first.');
-                }
-            }
-        }));
-
-    document.querySelectorAll('[id$="shareButton"]').forEach(btn => 
-        btn.addEventListener('click', shareMap));
-        
-    document.querySelectorAll('[id$="downloadButton"]').forEach(btn => 
-        btn.addEventListener('click', downloadCanvasAsPNG));
-
-    document.querySelectorAll('[id$="shortUrlButton"]').forEach(btn => 
-        btn.addEventListener('click', generateShortUrl));
-
-    // Some selectors or timing can miss mobile-specific IDs (case/ordering). Bind explicitly.
     document.getElementById('shareButton')?.addEventListener('click', shareMap);
     document.getElementById('mobileShareButton')?.addEventListener('click', shareMap);
     
@@ -999,7 +966,6 @@ window.addEventListener('DOMContentLoaded', () => {
             }).catch(()=>{ /* ignore */ });
         }
     });
-    // --- end mobile fixes ---
     
     // Add action button event listeners for both desktop and mobile
     ['', 'mobile'].forEach(prefix => {
@@ -1174,7 +1140,53 @@ function shareMap() {
     		}
     	}
 
-    	// bind desktop button
+    	// helper: show copy success for desktop + mobile
+    	function showCopySuccess() {
+    		// visual feedback on output field
+    		if (shortUrlOutput) {
+    			shortUrlOutput.classList.add('bg-green-100');
+    			setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
+    		}
+    		// show copy message(s)
+    		const desktopMsg = document.getElementById('copyMessage');
+    		const mobileMsg = document.getElementById('mobileCopyMessage');
+    		[desktopMsg, mobileMsg].forEach(msg => {
+    			if (msg) {
+    				msg.classList.remove('hidden');
+    				setTimeout(() => msg.classList.add('hidden'), 2000);
+    			}
+    		});
+    	}
+
+    	// robust copy helper with execCommand fallback
+    	async function tryCopyText(text) {
+    		if (!text) return false;
+    		// try Clipboard API
+    		if (navigator.clipboard && navigator.clipboard.writeText) {
+    			try {
+    				await navigator.clipboard.writeText(text);
+    				return true;
+    			} catch (e) {
+    				// continue to fallback
+    			}
+    		}
+    		// fallback: textarea + execCommand
+    		try {
+    			const ta = document.createElement('textarea');
+    			ta.value = text;
+    			ta.style.position = 'fixed';
+    			ta.style.left = '-9999px';
+    			document.body.appendChild(ta);
+    			ta.select();
+    			const ok = document.execCommand('copy');
+    			document.body.removeChild(ta);
+    			return !!ok;
+    		} catch (e) {
+    			return false;
+    		}
+    	}
+
+    	// bind desktop shortener button (unchanged)
     	if (shortUrlButton) {
     		shortUrlButton.addEventListener('click', async () => {
     			const mapName = document.getElementById('mapNameInput')?.value || '';
@@ -1185,7 +1197,7 @@ function shareMap() {
     		});
     	}
 
-    	// bind mobile button to same logic
+    	// bind mobile shortener button (unchanged)
     	if (mobileShortUrlButton) {
     		mobileShortUrlButton.addEventListener('click', async () => {
     			const mapName = document.getElementById('mapNameInput')?.value || '';
@@ -1196,45 +1208,33 @@ function shareMap() {
     		});
     	}
 
-    	// copy handlers for both outputs
     	if (copyShortUrlButton && shortUrlOutput) {
     		copyShortUrlButton.addEventListener('click', async () => {
-    			try {
-    				await navigator.clipboard.writeText(shortUrlOutput.value);
-    				shortUrlOutput.classList.add('bg-green-100');
-    				setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
-    			} catch (e) {
+    			const text = shortUrlOutput.value || '';
+    			const ok = await tryCopyText(text);
+    			if (ok) {
+    				showCopySuccess();
+    				if (shortUrlError) shortUrlError.textContent = '';
+    			} else {
     				if (shortUrlError) shortUrlError.textContent = 'Could not copy URL.';
     			}
     		});
     	}
+
     	if (mobileCopyShortUrlButton && mobileShortUrlOutput) {
     		mobileCopyShortUrlButton.addEventListener('click', async () => {
-    			try {
-    				await navigator.clipboard.writeText(mobileShortUrlOutput.value);
+    			const text = mobileShortUrlOutput.value || '';
+    			const ok = await tryCopyText(text);
+    			if (ok) {
     				const msg = document.getElementById('mobileCopyMessage') || document.getElementById('copyMessage');
     				if (msg) { msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), 2000); }
-    			} catch (e) {
+    				if (mobileShortUrlError) mobileShortUrlError.textContent = '';
+    			} else {
     				if (mobileShortUrlError) mobileShortUrlError.textContent = 'Could not copy URL.';
     			}
     		});
     	}
-
-    copyShortUrlButton.addEventListener('click', function() {
-        const urlToCopy = shortUrlOutput.value;
-        if (urlToCopy && urlToCopy !== SHORT_URL_GENERATING_TEXT) {
-            navigator.clipboard.writeText(urlToCopy)
-                .then(() => {
-                    shortUrlOutput.classList.add('bg-green-100');
-                    setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
-                })
-                .catch(err => {
-                    console.error('Failed to copy URL:', err);
-                    shortUrlError.textContent = 'Could not copy URL.';
-                });
-        }
-    });
-})();
+    })();
 
 
 // ===== MOBILE/TOUCH CONTROLS =====
@@ -1920,65 +1920,12 @@ function decompressMapWithName(combinedString) {
     return decompressMap(base64String);
 }
 
-function saveMap() {
-    try {
-        const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName);
-        const mapDataInput = document.getElementById('mapData');
-        const mobileMapData = document.getElementById('mobileMapData');
-        
-        if (mapDataInput) mapDataInput.value = compressedMap;
-        if (mobileMapData) mobileMapData.value = compressedMap;
-        
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('mapData', compressedMap);
-        window.history.replaceState(null, '', newUrl);
-        markChangesSaved();
-    } catch (e) {
-        console.error('Error saving map:', e);
-    }
-}
-
 // Pure helper to generate a shareable URL with provided map data and name
 function getShareableUrl(entitiesArg, mapNameArg) {
     const compressedMap = compressMapWithName(entitiesArg, mapNameArg);
     const newUrl = new URL(window.location.href);
     newUrl.searchParams.set('mapData', compressedMap);
     return newUrl.toString();
-}
-
-function shareMap() {
-    try {
-        const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName);
-        const mapDataInput = document.getElementById('mapData');
-        const mobileMapData = document.getElementById('mobileMapData');
-        
-        if (mapDataInput) mapDataInput.value = compressedMap;
-        if (mobileMapData) mobileMapData.value = compressedMap;
-        
-        const longUrl = getShareableUrl(entities, mapName);
-        window.history.replaceState(null, '', longUrl);
-
-        navigator.clipboard.writeText(longUrl)
-            .then(() => {
-                const copyMessage = document.getElementById('copyMessage');
-                const mobileCopyMessage = document.getElementById('mobileCopyMessage');
-                
-                [copyMessage, mobileCopyMessage].forEach(msg => {
-                    if (msg) {
-                        msg.classList.remove('hidden');
-                        setTimeout(() => msg.classList.add('hidden'), 2000);
-                    }
-                });
-            })
-            .catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-        markChangesSaved();
-    } catch (e) {       
-        console.error('Error sharing map:', e);
-    }
 }
 
 function loadMap() {
@@ -2111,12 +2058,6 @@ window.addEventListener('beforeunload', function(e) {
     }
 });
 
-// ===== APPLICATION INITIALIZATION =====
-// Initialize the application
-resizeCanvas();
-redraw();
-
-
 // ======= Enhanced Mobile Touch (pinch-zoom + one-finger pan) =======
 (function(){
     let touchMode = null; // 'pan' | 'pinch' | null
@@ -2196,13 +2137,13 @@ redraw();
             clearLongPress();
             const cur = touches[0];
             // If toolbar mode is 'move' OR two-finger initially—pan the map
-            if (currentMode === 'move' || selectedType === 'move'){
+            if (selectedType === 'move'){
                 panX = startPanX + (cur.x - t0.x);
                 panY = startPanY + (cur.y - t0.y);
                 redraw();
             } else {
                 // show ghost preview while moving single finger
-                ghostPreview = { x: cur.x, y: cur.y, type: selectedType };
+                updateGhostPreview(cur.x, cur.y);
                 redraw();
             }
         } else if (touchMode === 'pinch' && touches.length >= 2){
@@ -2241,7 +2182,7 @@ redraw();
                 const rect = canvas.getBoundingClientRect();
                 const x = e.changedTouches[0].clientX - rect.left;
                 const y = e.changedTouches[0].clientY - rect.top;
-                handleCanvasClick(x, y);
+                handleCanvasClick(x, y, { fromTouch: true });
             }
         }
 
@@ -2249,15 +2190,24 @@ redraw();
         touchMode = null; t0 = null; t1 = null;
     }, {passive:false});
 
-    // Helper: centralizes place/select logic reused by mouse & touch
-    if (typeof handleCanvasClick !== 'function'){
-        window.handleCanvasClick = function(x, y){
-            if (currentMode === 'select'){
-                selectEntityAt(x, y);
-            } else {
-                placeEntityAt(x, y);
-            }
-        };
+    // Centralized handler for canvas tap/click logic (used by both mouse & touch)
+    function handleCanvasClick(x, y, opts = {}) {
+        if (selectedType === 'select') {
+            // Simulate a selectEntity at (x, y)
+            const rect = canvas.getBoundingClientRect();
+            const event = { clientX: x + rect.left, clientY: y + rect.top };
+            selectEntity(event);
+        } else {
+            // Simulate an addEntity at (x, y)
+            const rect = canvas.getBoundingClientRect();
+            const event = { clientX: x + rect.left, clientY: y + rect.top };
+            addEntity(event);
+        }
+      // Remove GhostPreview after placement
+      if (opts.fromTouch) {
+        ghostPreview = null;
+        redraw();
+      }
     }
 
     // Prevent page bounce/scroll while interacting with canvas
@@ -2265,13 +2215,6 @@ redraw();
         if (e.target === canvas) e.preventDefault();
     }, {passive:false});
 })();
-
-
-function deleteSelectedEntity(){
-    if (!selectedEntity) return;
-    const i = entities.indexOf(selectedEntity);
-    if (i>=0){ entities.splice(i,1); selectedEntity=null; redraw(); updateCounters(); markUnsavedChanges(); }
-}
 
 
 /*__MOBILE_BOTTOM_SHEET__*/
@@ -2336,3 +2279,8 @@ function deleteSelectedEntity(){
         reflect(deskSort, mobSort); reflect(mobSort, deskSort);
     }
 })();
+
+// ===== APPLICATION INITIALIZATION =====
+// Initialize the application
+resizeCanvas();
+redraw();
