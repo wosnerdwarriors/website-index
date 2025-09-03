@@ -11,6 +11,11 @@ const saveButton = document.getElementById('saveButton');
 const loadButton = document.getElementById('loadButton');
 const mapData = document.getElementById('mapData');
 const copyMessage = document.getElementById('copyMessage');
+const shortUrlButton = document.getElementById('shortUrlButton');
+const copyShortUrlButton = document.getElementById('copyShortUrlButton');
+const shortUrlContainer = document.getElementById('shortUrlContainer');
+const shortUrlOutput = document.getElementById('shortUrlOutput');
+const shortUrlError = document.getElementById('shortUrlError');
 
 // ===== GRID CONFIGURATION =====
 const baseGridSize = 30;
@@ -39,19 +44,40 @@ let lastMouseY = 0;
 let hasUnsavedChanges = false;
 let ghostPreview = null;
 
+// ===== TOUCH/MOBILE SUPPORT =====
+let touchStartDistance = 0;
+let initialZoom = 1;
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartPanX = 0;
+let touchStartPanY = 0;
+let isTouching = false;
+let touchStartTime = 0;
+
 // ===== CANVAS MANAGEMENT =====
 // Initialize canvas size
 function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
     canvasWidth = window.innerWidth;
+    canvasHeight = window.innerHeight;
+    canvas.width = Math.round(canvasWidth * dpr);
+    canvas.height = Math.round(canvasHeight * dpr);
+    canvas.style.width = canvasWidth + 'px';
+    canvas.style.height = canvasHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
     canvasHeight = window.innerHeight;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     
-    // Center the grid
-    panX = canvasWidth / 2;
-    panY = canvasHeight / 2;
+    if (typeof window.__didInitialCenter === 'undefined') {
+        panX = canvasWidth / 2;
+        panY = canvasHeight / 2;
+        window.__didInitialCenter = true;
+    }
     
     redraw();
+    updateZoomDisplay();
 }
 
 // ===== COORDINATE CONVERSION =====
@@ -104,11 +130,19 @@ function updateCounters() {
     const hqs = entities.filter(entity => entity.type === 'hq').length;
     const nodes = entities.filter(entity => entity.type === 'node').length;
 
+    // Update desktop counters
     flagCounter.textContent = flags;
     cityCounter.textContent = cities;
     buildingCounter.textContent = buildings;
     hqCounter.textContent = hqs;
     nodeCounter.textContent = nodes;
+
+    // Update mobile counters
+    document.getElementById('mobileFlagCounter').textContent = flags;
+    document.getElementById('mobileCityCounter').textContent = cities;
+    document.getElementById('mobileBuildingCounter').textContent = buildings;
+    document.getElementById('mobileHqCounter').textContent = hqs;
+    document.getElementById('mobileNodeCounter').textContent = nodes;
 }
 
 // ===== GRID RENDERING =====
@@ -453,6 +487,7 @@ function drawSelectionHighlight(entity) {
     
     ctx.restore();
 }
+
 function calculateMarchTimes(city) {
     const times = [];
     bearTraps.forEach(trap => {
@@ -701,6 +736,53 @@ function handleWheel(event) {
     gridSize = baseGridSize * zoom;
     
     redraw();
+    updateZoomDisplay();
+}
+
+// Unified zoom controls
+function zoomIn() {
+    const newZoom = Math.min(3, zoom * 1.2);
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2;
+    const dx = centerX - panX;
+    const dy = centerY - panY;
+    
+    panX = centerX - dx * (newZoom / zoom);
+    panY = centerY - dy * (newZoom / zoom);
+    
+    zoom = newZoom;
+    gridSize = baseGridSize * zoom;
+    redraw();
+    updateZoomDisplay();
+}
+
+function zoomOut() {
+    const newZoom = Math.max(0.1, zoom * 0.8);
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2;
+    const dx = centerX - panX;
+    const dy = centerY - panY;
+    
+    panX = centerX - dx * (newZoom / zoom);
+    panY = centerY - dy * (newZoom / zoom);
+    
+    zoom = newZoom;
+    gridSize = baseGridSize * zoom;
+    redraw();
+    updateZoomDisplay();
+}
+
+function resetZoom() {
+    zoom = 1;
+    gridSize = baseGridSize;
+    redraw();
+    updateZoomDisplay();
+}
+
+function centerMap() {
+    panX = canvasWidth / 2;
+    panY = canvasHeight / 2;
+    redraw();
 }
 
 function handleMouseDown(event) {
@@ -722,6 +804,10 @@ function handleMouseDown(event) {
                 dragOffsetX = gridPos.x - selectedEntity.x;
                 dragOffsetY = gridPos.y - selectedEntity.y;
             }
+        } else if (selectedType === 'move') {
+            isPanning = true;
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
         } else {
             addEntity(event);
         }
@@ -750,8 +836,547 @@ function handleMouseMove(event) {
             redraw();
             markUnsavedChanges();
         }
-    } else if (selectedType && selectedType !== 'select') {
-        // Update ghost preview
+    } else {
+        updateGhostPreview(mouseX, mouseY);
+    }
+}
+
+function handleMouseUp(event) {
+    if (event.button === 1) {
+        isPanning = false;
+    } else if (event.button === 0) {
+        isDragging = false;
+        if (selectedType === 'move') {
+            isPanning = false;
+        }
+    }
+}
+
+// Update this function to handle both desktop and mobile toolbars
+function handleToolbarClick(e) {
+    if (e.target.dataset.type) {
+        selectedType = e.target.dataset.type;
+        
+        // Remove highlighting from all buttons in both toolbars
+        document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button, #mobile-toolbar-buildings button').forEach(button => {
+            button.classList.remove('bg-yellow-500', 'bg-yellow-600');
+            
+            // Restore original colors for non-selected buttons
+            if (button.dataset.type === e.target.dataset.type) {
+                button.classList.add('bg-yellow-500');
+            } else {
+                if (button.dataset.type === 'flag') button.classList.add('bg-blue-500');
+                if (button.dataset.type === 'city') button.classList.add('bg-blue-500');
+                if (button.dataset.type === 'building') button.classList.add('bg-blue-500');
+                if (button.dataset.type === 'node') button.classList.add('bg-blue-500');
+                if (button.dataset.type === 'hq') button.classList.add('bg-blue-500');
+                if (button.dataset.type === 'obstacle') button.classList.add('bg-blue-500');
+            }
+        });
+        
+        if ((selectedType === 'select' || selectedType === 'move') && ghostPreview) {
+            ghostPreview = null;
+            redraw();
+        }
+        
+        // Update cursor style
+        if (selectedType === 'move') {
+            canvas.style.cursor = 'move';
+        } else if (selectedType === 'select') {
+            canvas.style.cursor = 'pointer';
+        } else {
+            canvas.style.cursor = 'crosshair';
+        }
+    }
+}
+
+// ===== EVENT LISTENERS =====
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('keydown', handleKeyDown);
+
+canvas.addEventListener('wheel', handleWheel);
+canvas.addEventListener('mousedown', handleMouseDown);
+canvas.addEventListener('mousemove', handleMouseMove);
+canvas.addEventListener('mouseup', handleMouseUp);
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('mouseleave', () => {
+    // Clear ghost preview when mouse leaves canvas
+    if (ghostPreview) {
+        ghostPreview = null;
+        redraw();
+    }
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+    loadMapFromQuery();
+    enablePopulateSortOptions('id');
+    updateCityList();
+    updateZoomDisplay();
+    
+    // Set up toolbar click handlers
+    document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button').forEach(button => {
+        button.addEventListener('click', handleToolbarClick);
+    });
+
+    // Set up mobile toolbar click handlers
+    document.querySelectorAll('#mobile-toolbar-buildings button').forEach(button => {
+        button.addEventListener('click', handleToolbarClick);
+    });
+
+    // Add zoom control event listeners
+    document.getElementById('zoomInBtn')?.addEventListener('click', zoomIn);
+    document.getElementById('zoomOutBtn')?.addEventListener('click', zoomOut);
+    document.getElementById('resetZoomBtn')?.addEventListener('click', resetZoom);
+    document.getElementById('centerBtn')?.addEventListener('click', centerMap);
+    
+    // Sync map data between desktop and mobile textareas
+    const mapDataInput = document.getElementById('mapData');
+    const mobileMapData = document.getElementById('mobileMapData');
+    if (mapDataInput && mobileMapData) {
+        mapDataInput.addEventListener('input', () => {
+            mobileMapData.value = mapDataInput.value;
+        });
+        mobileMapData.addEventListener('input', () => {
+            mapDataInput.value = mobileMapData.value;
+        });
+    }
+
+    // Event Listener for actions
+    document.getElementById('shareButton')?.addEventListener('click', shareMap);
+    document.getElementById('mobileShareButton')?.addEventListener('click', shareMap);
+    
+    // Copy short url (desktop)
+    document.getElementById('copyShortUrlButton')?.addEventListener('click', () => {
+        const out = document.getElementById('shortUrlOutput');
+        if (out && out.value) {
+            navigator.clipboard?.writeText(out.value).then(() => {
+                const msg = document.getElementById('copyMessage');
+                if (msg) { msg.classList.remove('hidden'); setTimeout(()=>msg.classList.add('hidden'),2000); }
+            }).catch(()=>{ /* ignore */ });
+        }
+    });
+    
+    // Copy short url (mobile) - if mobile elements exist
+    document.getElementById('mobileCopyShortUrlButton')?.addEventListener('click', () => {
+        const out = document.getElementById('mobileShortUrlOutput');
+        if (out && out.value) {
+            navigator.clipboard?.writeText(out.value).then(() => {
+                const msg = document.getElementById('mobileCopyMessage') || document.getElementById('copyMessage');
+                if (msg) { msg.classList.remove('hidden'); setTimeout(()=>msg.classList.add('hidden'),2000); }
+            }).catch(()=>{ /* ignore */ });
+        }
+    });
+    
+    // Add action button event listeners for both desktop and mobile
+    ['', 'mobile'].forEach(prefix => {
+        const p = prefix ? prefix + '-' : '';
+        document.getElementById(`${prefix}loadButton`)?.addEventListener('click', () => {
+            const dataInput = document.getElementById(`${prefix}mapData`);
+            if (dataInput && dataInput.value) {
+                loadMap();
+            } else {
+                const altDataInput = document.getElementById(dataInput.id === 'mapData' ? 'mobileMapData' : 'mapData');
+                if (altDataInput && altDataInput.value) {
+                    loadMap();
+                } else {
+                    alert('Please enter map data first.');
+                }
+            }
+        });
+        
+        document.getElementById(`${prefix}saveButton`)?.addEventListener('click', saveMap);
+        document.getElementById(`${prefix}shareButton`)?.addEventListener('click', shareMap);
+        document.getElementById(`${prefix}downloadButton`)?.addEventListener('click', downloadCanvasAsPNG);
+    });
+    
+    document.getElementById('deleteButton').addEventListener('click', () => {
+        if (selectedEntity) {
+            deleteSelectedEntity();
+        } else {
+            alert('No entity selected to delete.');
+        }
+    });
+});
+
+// Update saveMap function to sync both textareas
+function saveMap() {
+    try {
+        const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
+        const mapDataInput = document.getElementById('mapData');
+        const mobileMapData = document.getElementById('mobileMapData');
+        
+        if (mapDataInput) mapDataInput.value = compressedMap;
+        if (mobileMapData) mobileMapData.value = compressedMap;
+        
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('mapData', compressedMap);
+        window.history.replaceState(null, '', newUrl);
+        markChangesSaved();
+    } catch (e) {
+        console.error('Error saving map:', e);
+    }
+}
+
+// Update shareMap function to support mobile copy message
+function shareMap() {
+    try {
+        const mapName = document.getElementById('mapNameInput').value;
+        const compressedMap = compressMapWithName(entities, mapName);
+        const mapDataInput = document.getElementById('mapData');
+        const mobileMapData = document.getElementById('mobileMapData');
+        
+        if (mapDataInput) mapDataInput.value = compressedMap;
+        if (mobileMapData) mobileMapData.value = compressedMap;
+        
+        const longUrl = getShareableUrl(entities, mapName);
+        window.history.replaceState(null, '', longUrl);
+
+        navigator.clipboard.writeText(longUrl)
+            .then(() => {
+                const copyMessage = document.getElementById('copyMessage');
+                const mobileCopyMessage = document.getElementById('mobileCopyMessage');
+                
+                [copyMessage, mobileCopyMessage].forEach(msg => {
+                    if (msg) {
+                        msg.classList.remove('hidden');
+                        setTimeout(() => msg.classList.add('hidden'), 2000);
+                    }
+                });
+            })
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        markChangesSaved();
+    } catch (e) {
+        console.error('Error sharing map:', e);
+    }
+}
+
+// Short URL feature: encapsulated in async IIFE to avoid race conditions and keep config/vars scoped
+    const SHORT_URL_GENERATING_TEXT = 'Generating...';
+
+    (async () => {
+    	const shortUrlButton = document.getElementById('shortUrlButton');
+    	const mobileShortUrlButton = document.getElementById('mobileShortUrlButton');
+    	const copyShortUrlButton = document.getElementById('copyShortUrlButton');
+    	const mobileCopyShortUrlButton = document.getElementById('mobileCopyShortUrlButton');
+    	const shortUrlContainer = document.getElementById('shortUrlContainer');
+    	const mobileShortUrlContainer = document.getElementById('mobileShortUrlContainer');
+    	const shortUrlOutput = document.getElementById('shortUrlOutput');
+    	const mobileShortUrlOutput = document.getElementById('mobileShortUrlOutput');
+    	const shortUrlError = document.getElementById('shortUrlError');
+    	const mobileShortUrlError = document.getElementById('mobileShortUrlError');
+
+    	// simple default shortener endpoint (returns plain text)
+    	const config = {
+    		tinyurlApi: 'https://tinyurl.com/api-create.php',
+    		tinyurlManual: 'https://tinyurl.com/app/'
+    	};
+
+    	async function doShorten(longUrl) {
+    		// show both containers (desktop + mobile) and reset fields
+    		if (shortUrlContainer) shortUrlContainer.classList.remove('hidden');
+    		if (mobileShortUrlContainer) mobileShortUrlContainer.classList.remove('hidden');
+    		if (shortUrlOutput) shortUrlOutput.value = SHORT_URL_GENERATING_TEXT;
+    		if (mobileShortUrlOutput) mobileShortUrlOutput.value = SHORT_URL_GENERATING_TEXT;
+    		if (shortUrlError) shortUrlError.textContent = '';
+    		if (mobileShortUrlError) mobileShortUrlError.textContent = '';
+
+    		// disable while working
+    		if (shortUrlButton) shortUrlButton.disabled = true;
+    		if (mobileShortUrlButton) mobileShortUrlButton.disabled = true;
+
+    		try {
+    			const controller = new AbortController();
+    			const timeout = setTimeout(() => controller.abort(), 10000);
+    			const resp = await fetch(`${config.tinyurlApi}?url=${encodeURIComponent(longUrl)}`, { signal: controller.signal });
+    			clearTimeout(timeout);
+    			if (!resp.ok) throw new Error(`Shortener API error ${resp.status}`);
+    			let text = await resp.text();
+
+    			// some endpoints might return JSON - try parse
+    			try {
+    				const j = JSON.parse(text);
+    				if (j && (j.shortUrl || j.result || (j.data && j.data.tiny_url))) {
+    					text = j.shortUrl || j.result || j.data.tiny_url;
+    				}
+    			} catch (_) {}
+
+    			// set both outputs
+    			if (shortUrlOutput) shortUrlOutput.value = text;
+    			if (mobileShortUrlOutput) mobileShortUrlOutput.value = text;
+    			markChangesSaved();
+    		} catch (err) {
+    			console.warn('Short URL failed, falling back to long URL', err);
+    			const longFallback = longUrl;
+    			if (shortUrlOutput) shortUrlOutput.value = longFallback;
+    			if (mobileShortUrlOutput) mobileShortUrlOutput.value = longFallback;
+
+    			// show manual fallback links
+    			if (shortUrlError) {
+    				shortUrlError.textContent = 'Shortening failed. ';
+    				const a = document.createElement('a');
+    				a.href = `${config.tinyurlManual}?url=${encodeURIComponent(longFallback)}`;
+    				a.target = '_blank';
+    				a.rel = 'noopener noreferrer';
+    				a.textContent = 'Try manually';
+    				a.className = 'underline text-blue-600';
+    				shortUrlError.appendChild(a);
+    			}
+    			if (mobileShortUrlError) {
+    				mobileShortUrlError.textContent = 'Shortening failed. ';
+    				const a = document.createElement('a');
+    				a.href = `${config.tinyurlManual}?url=${encodeURIComponent(longFallback)}`;
+    				a.target = '_blank';
+    				a.rel = 'noopener noreferrer';
+    				a.textContent = 'Try manually';
+    				a.className = 'underline text-blue-600';
+    				mobileShortUrlError.appendChild(a);
+    			}
+    		} finally {
+    			if (shortUrlButton) shortUrlButton.disabled = false;
+    			if (mobileShortUrlButton) mobileShortUrlButton.disabled = false;
+    		}
+    	}
+
+    	// helper: show copy success for desktop + mobile
+    	function showCopySuccess() {
+    		// visual feedback on output field
+    		if (shortUrlOutput) {
+    			shortUrlOutput.classList.add('bg-green-100');
+    			setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
+    		}
+    		// show copy message(s)
+    		const desktopMsg = document.getElementById('copyMessage');
+    		const mobileMsg = document.getElementById('mobileCopyMessage');
+    		[desktopMsg, mobileMsg].forEach(msg => {
+    			if (msg) {
+    				msg.classList.remove('hidden');
+    				setTimeout(() => msg.classList.add('hidden'), 2000);
+    			}
+    		});
+    	}
+
+    	// robust copy helper with execCommand fallback
+    	async function tryCopyText(text) {
+    		if (!text) return false;
+    		// try Clipboard API
+    		if (navigator.clipboard && navigator.clipboard.writeText) {
+    			try {
+    				await navigator.clipboard.writeText(text);
+    				return true;
+    			} catch (e) {
+    				// continue to fallback
+    			}
+    		}
+    		// fallback: textarea + execCommand
+    		try {
+    			const ta = document.createElement('textarea');
+    			ta.value = text;
+    			ta.style.position = 'fixed';
+    			ta.style.left = '-9999px';
+    			document.body.appendChild(ta);
+    			ta.select();
+    			const ok = document.execCommand('copy');
+    			document.body.removeChild(ta);
+    			return !!ok;
+    		} catch (e) {
+    			return false;
+    		}
+    	}
+
+    	// bind desktop shortener button (unchanged)
+    	if (shortUrlButton) {
+    		shortUrlButton.addEventListener('click', async () => {
+    			const mapName = document.getElementById('mapNameInput')?.value || '';
+    			const compressed = compressMapWithName(entities, mapName);
+    			if (document.getElementById('mapData')) document.getElementById('mapData').value = compressed;
+    			const longUrl = getShareableUrl(entities, mapName);
+    			await doShorten(longUrl);
+    		});
+    	}
+
+    	// bind mobile shortener button (unchanged)
+    	if (mobileShortUrlButton) {
+    		mobileShortUrlButton.addEventListener('click', async () => {
+    			const mapName = document.getElementById('mapNameInput')?.value || '';
+    			const compressed = compressMapWithName(entities, mapName);
+    			if (document.getElementById('mobileMapData')) document.getElementById('mobileMapData').value = compressed;
+    			const longUrl = getShareableUrl(entities, mapName);
+    			await doShorten(longUrl);
+    		});
+    	}
+
+    	if (copyShortUrlButton && shortUrlOutput) {
+    		copyShortUrlButton.addEventListener('click', async () => {
+    			const text = shortUrlOutput.value || '';
+    			const ok = await tryCopyText(text);
+    			if (ok) {
+    				showCopySuccess();
+    				if (shortUrlError) shortUrlError.textContent = '';
+    			} else {
+    				if (shortUrlError) shortUrlError.textContent = 'Could not copy URL.';
+    			}
+    		});
+    	}
+
+    	if (mobileCopyShortUrlButton && mobileShortUrlOutput) {
+    		mobileCopyShortUrlButton.addEventListener('click', async () => {
+    			const text = mobileShortUrlOutput.value || '';
+    			const ok = await tryCopyText(text);
+    			if (ok) {
+    				const msg = document.getElementById('mobileCopyMessage') || document.getElementById('copyMessage');
+    				if (msg) { msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), 2000); }
+    				if (mobileShortUrlError) mobileShortUrlError.textContent = '';
+    			} else {
+    				if (mobileShortUrlError) mobileShortUrlError.textContent = 'Could not copy URL.';
+    			}
+    		});
+    	}
+    })();
+
+
+// ===== MOBILE/TOUCH CONTROLS =====
+function updateZoomDisplay() {
+    const zoomLevel = document.getElementById('zoomLevel');
+    const zoomPercentage = Math.round(zoom * 100) + '%';
+    
+    if (zoomLevel) {
+        zoomLevel.textContent = zoomPercentage;
+    }
+}
+
+function handleTouchStart(event) {
+    event.preventDefault();
+    isTouching = true;
+    touchStartTime = Date.now();
+    
+    const touches = event.touches;
+    
+    if (touches.length === 1) {
+        // Single touch
+        const rect = canvas.getBoundingClientRect();
+        touchStartX = touches[0].clientX - rect.left;
+        touchStartY = touches[0].clientY - rect.top;
+        touchStartPanX = panX;
+        touchStartPanY = panY;
+        
+        if (selectedType === 'select') {
+            selectEntity({ clientX: touches[0].clientX, clientY: touches[0].clientY });
+            if (selectedEntity) {
+                isDragging = true;
+                const gridPos = screenToDiamond(touchStartX, touchStartY);
+                dragOffsetX = gridPos.x - selectedEntity.x;
+                dragOffsetY = gridPos.y - selectedEntity.y;
+            }
+        } else if (selectedType === 'move') {
+            isPanning = true;
+        }
+    } else if (touches.length === 2) {
+        // Two finger touch for pinch zoom
+        const touch1 = touches[0];
+        const touch2 = touches[1];
+        touchStartDistance = Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+        initialZoom = zoom;
+        
+        // Center point between fingers
+        const rect = canvas.getBoundingClientRect();
+        touchStartX = ((touch1.clientX + touch2.clientX) / 2) - rect.left;
+        touchStartY = ((touch1.clientY + touch2.clientY) / 2) - rect.top;
+    }
+}
+
+function handleTouchMove(event) {
+    event.preventDefault();
+    const touches = event.touches;
+    
+    if (touches.length === 1 && isTouching) {
+        const rect = canvas.getBoundingClientRect();
+        const currentX = touches[0].clientX - rect.left;
+        const currentY = touches[0].clientY - rect.top;
+        
+        if (isDragging && selectedEntity) {
+            // Move selected entity
+            const gridPos = screenToDiamond(currentX, currentY);
+            const newX = gridPos.x - dragOffsetX;
+            const newY = gridPos.y - dragOffsetY;
+            
+            if (isPositionValid(newX, newY, selectedEntity)) {
+                selectedEntity.x = newX;
+                selectedEntity.y = newY;
+                redraw();
+                markUnsavedChanges();
+            }
+        } else if (isPanning || selectedType === 'move') {
+            // Pan the map
+            panX = touchStartPanX + (currentX - touchStartX);
+            panY = touchStartPanY + (currentY - touchStartY);
+            redraw();
+        } else if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
+            // Update ghost preview
+            updateGhostPreview(currentX, currentY);
+        }
+    } else if (touches.length === 2) {
+        // Pinch zoom
+        const touch1 = touches[0];
+        const touch2 = touches[1];
+        const currentDistance = Math.sqrt(
+            Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+        
+        if (touchStartDistance > 0) {
+            const zoomFactor = currentDistance / touchStartDistance;
+            const newZoom = Math.max(0.1, Math.min(3, initialZoom * zoomFactor));
+            
+            // Zoom towards the center point between fingers
+            const dx = touchStartX - panX;
+            const dy = touchStartY - panY;
+            
+            panX = touchStartX - dx * (newZoom / zoom);
+            panY = touchStartY - dy * (newZoom / zoom);
+            
+            zoom = newZoom;
+            gridSize = baseGridSize * zoom;
+            
+            redraw();
+            updateZoomDisplay();
+        }
+    }
+}
+
+function handleTouchEnd(event) {
+    event.preventDefault();
+    const touchDuration = Date.now() - touchStartTime;
+    
+    if (event.touches.length === 0) {
+        isTouching = false;
+        
+        // Check for tap (short touch duration and minimal movement)
+        if (touchDuration < 300 && !isDragging && !isPanning) {
+            const rect = canvas.getBoundingClientRect();
+            const tapEvent = {
+                clientX: event.changedTouches[0].clientX,
+                clientY: event.changedTouches[0].clientY
+            };
+            
+            if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
+                addEntity(tapEvent);
+            }
+        }
+        
+        isDragging = false;
+        isPanning = false;
+        touchStartDistance = 0;
+    }
+}
+
+function updateGhostPreview(mouseX, mouseY) {
+    if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
         const gridPos = screenToDiamond(mouseX, mouseY);
         const x = gridPos.x;
         const y = gridPos.y;
@@ -768,11 +1393,9 @@ function handleMouseMove(event) {
             height = 3;
         }
 
-        // Create a temporary entity object for validation
         const tempEntity = { x, y, width, height, type: selectedType };
         const validPosition = isPositionValid(x, y, tempEntity);
 
-        // Only show ghost if position is valid
         if (validPosition) {
             ghostPreview = { x, y, width, height, type: selectedType };
         } else {
@@ -780,20 +1403,6 @@ function handleMouseMove(event) {
         }
         
         redraw();
-    } else {
-        // Clear ghost preview when not in placement mode
-        if (ghostPreview) {
-            ghostPreview = null;
-            redraw();
-        }
-    }
-}
-
-function handleMouseUp(event) {
-    if (event.button === 1) {
-        isPanning = false;
-    } else if (event.button === 0) {
-        isDragging = false;
     }
 }
 
@@ -902,12 +1511,19 @@ function updateCityList() {
     });
     
     const cityList = document.getElementById('cityList');
+    const mobileCityList = document.getElementById('mobileCityList');
     const sortSelect = document.getElementById('citySort');
-    if (!cityList || !sortSelect) return;
+    const mobileSortSelect = document.getElementById('mobileCitySort');
+    
+    if (!cityList || !sortSelect || !mobileCityList || !mobileSortSelect) return;
 
+    // Sync sort options between desktop and mobile
+    mobileSortSelect.innerHTML = sortSelect.innerHTML;
+    mobileSortSelect.value = sortSelect.value;
+    
     const sortBy = sortSelect.value;
-    enablePopulateSortOptions(sortBy);
     cityList.innerHTML = '';
+    mobileCityList.innerHTML = '';
 
     let cities = entities.filter(e => e.type === 'city');
     const btIndex = sortBy === 'bt1' ? 0 : sortBy === 'bt2' ? 1 : null;
@@ -941,68 +1557,84 @@ function updateCityList() {
     prioritized.sort(comparator);
     others.sort(comparator);
 
-    // Render prioritized cities first, then others
+    // Render prioritized cities first, then others for both lists
     [...prioritized, ...others].forEach(city => {
+        // Create desktop list item
         const li = document.createElement('li');
         li.className = 'flex items-center space-x-2 mb-2';
-
-        // City name input
+        
         const input = document.createElement('input');
         input.type = 'text';
         input.value = city.name || `City ${city.id}`;
         input.placeholder = `City ${city.id}`;
-        input.className = 'border p-1 rounded';
-        input.style.width = '30ch';
+        input.className = 'border p-1 rounded touch-input';
+        input.style.width = '15ch';
         input.addEventListener('change', () => {
             city.name = input.value;
             redraw();
             markUnsavedChanges();
+            updateCityList(); // Update both lists
         });
         li.appendChild(input);
 
-        // Create BT bubbles next to the city name
-        city.marchTimes.forEach((time, i) => {
-            const key = `bt${i+1}`;
-            const isPriority = city.priorities && city.priorities[key];
-            const bubble = document.createElement('span');
-            bubble.textContent = `BT${i+1}: ${time}s`;
-            bubble.className = `bt-bubble inline-block px-2 py-1 text-xs rounded cursor-pointer ${
-                isPriority ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
-            }`;
-            bubble.addEventListener('click', () => {
-                city.priorities = city.priorities || {};
-                city.priorities[key] = !city.priorities[key];
-                if (city.priorities[key]) {
-                    // Get best candidate for swap
-                    const candidates = entities.filter(e => e.type === 'city' && !(e.priorities && e.priorities[key]));
-                    if (candidates.length) {
-                        let bestCity = candidates[0];
-                        let bestTime;
-                        if (sortBy === 'both') {
-                            bestTime = evaluateCombinedTime(bestCity);
-                        } else {
-                            bestTime = evaluateBTTime(bestCity, i);
-                        }
-                        candidates.forEach(c => {
-                            const t = sortBy === 'both' ? evaluateCombinedTime(c) : evaluateBTTime(c, i);
-                            if (t < bestTime) {
-                                bestTime = t;
-                                bestCity = c;
+        // Create mobile list item (clone of desktop)
+        const mli = li.cloneNode(true);
+        mli.querySelector('input').addEventListener('change', (e) => {
+            city.name = e.target.value;
+            redraw();
+            markUnsavedChanges();
+            updateCityList(); // Update both lists
+        });
+
+        // Add BT bubbles to both lists
+        [li, mli].forEach(listItem => {
+            city.marchTimes.forEach((time, i) => {
+                const key = `bt${i+1}`;
+                const isPriority = city.priorities && city.priorities[key];
+                const bubble = document.createElement('span');
+                bubble.textContent = `BT${i+1}: ${time}s`;
+                bubble.className = `bt-bubble inline-flex items-center justify-center px-2 py-1 text-xs leading-none rounded cursor-pointer min-w-[70px] ${
+                    isPriority ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
+                }`;
+                bubble.addEventListener('click', () => {
+                    city.priorities = city.priorities || {};
+                    city.priorities[key] = !city.priorities[key];
+                    if (city.priorities[key]) {
+                        const candidates = entities.filter(e => 
+                            e.type === 'city' && 
+                            !(e.priorities && e.priorities[key])
+                        );
+                        if (candidates.length) {
+                            let bestCity = candidates[0];
+                            let bestTime;
+                            if (sortBy === 'both') {
+                                bestTime = evaluateCombinedTime(bestCity);
+                            } else {
+                                bestTime = evaluateBTTime(bestCity, i);
                             }
-                        });
-                        // Swap coordinates
-                        [city.x, bestCity.x] = [bestCity.x, city.x];
-                        [city.y, bestCity.y] = [bestCity.y, city.y];
+                            candidates.forEach(c => {
+                                const t = sortBy === 'both' ? 
+                                    evaluateCombinedTime(c) : 
+                                    evaluateBTTime(c, i);
+                                if (t < bestTime) {
+                                    bestTime = t;
+                                    bestCity = c;
+                                }
+                            });
+                            [city.x, bestCity.x] = [bestCity.x, city.x];
+                            [city.y, bestCity.y] = [bestCity.y, city.y];
+                        }
                     }
-                }
-                redraw();
-                updateCityList();
-                markUnsavedChanges();
+                    redraw();
+                    updateCityList();
+                    markUnsavedChanges();
+                });
+                listItem.appendChild(bubble);
             });
-            li.appendChild(bubble);
         });
 
         cityList.appendChild(li);
+        mobileCityList.appendChild(mli);
     });
 }
 
@@ -1288,51 +1920,12 @@ function decompressMapWithName(combinedString) {
     return decompressMap(base64String);
 }
 
-function saveMap() {
-    try {
-        const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName);
-        mapData.value = compressedMap;
-        
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('mapData', compressedMap);
-        window.history.replaceState(null, '', newUrl);
-        markChangesSaved();
-    } catch (e) {
-        console.error('Error saving map:', e);
-    }
-}
-
 // Pure helper to generate a shareable URL with provided map data and name
 function getShareableUrl(entitiesArg, mapNameArg) {
     const compressedMap = compressMapWithName(entitiesArg, mapNameArg);
     const newUrl = new URL(window.location.href);
     newUrl.searchParams.set('mapData', compressedMap);
     return newUrl.toString();
-}
-
-function shareMap() {
-    try {
-        const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName);
-        mapData.value = compressedMap;
-        const longUrl = getShareableUrl(entities, mapName);
-        window.history.replaceState(null, '', longUrl);
-
-        navigator.clipboard.writeText(longUrl)
-            .then(() => {
-                copyMessage.classList.remove('hidden');
-                setTimeout(() => {
-                    copyMessage.classList.add('hidden');
-                }, 2000);
-            })
-            .catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-        markChangesSaved();
-    } catch (e) {
-        console.error('Error sharing map:', e);
-    }
 }
 
 function loadMap() {
@@ -1443,167 +2036,6 @@ function evaluateCombinedTime(city) {
     return bt1 + bt2;
 }
 
-// ===== EVENT LISTENERS =====
-// Event Listeners
-window.addEventListener('resize', resizeCanvas);
-window.addEventListener('DOMContentLoaded', () => {
-    loadMapFromQuery();
-    enablePopulateSortOptions('id');
-    updateCityList();
-});
-window.addEventListener('keydown', handleKeyDown);
-
-canvas.addEventListener('wheel', handleWheel);
-canvas.addEventListener('mousedown', handleMouseDown);
-canvas.addEventListener('mousemove', handleMouseMove);
-canvas.addEventListener('mouseup', handleMouseUp);
-canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-canvas.addEventListener('mouseleave', () => {
-    // Clear ghost preview when mouse leaves canvas
-    if (ghostPreview) {
-        ghostPreview = null;
-        redraw();
-    }
-});
-
-toolbar.addEventListener('click', (e) => {
-    if (e.target.dataset.type) {
-        selectedType = e.target.dataset.type;
-        document.querySelectorAll('#toolbar button').forEach(button => 
-            button.classList.remove('bg-yellow-500', 'bg-yellow-600'));
-        e.target.classList.add('bg-yellow-500');
-        e.target.classList.remove('bg-blue-500', 'bg-gray-500');
-        
-        if (selectedType === 'select' && ghostPreview) {
-            ghostPreview = null;
-            redraw();
-        }
-    }
-});
-
-document.getElementById('deleteButton').addEventListener('click', () => {
-    if (selectedEntity) {
-        deleteSelectedEntity();
-    } else {
-        alert('No entity selected to delete.');
-    }
-});
-
-document.getElementById('downloadButton').addEventListener('click', downloadCanvasAsPNG);
-document.getElementById('saveButton').addEventListener('click', saveMap);
-document.getElementById('loadButton').addEventListener('click', loadMap);
-document.getElementById('shareButton').addEventListener('click', shareMap);
-
-// Short URL feature: encapsulated in async IIFE to avoid race conditions and keep config/vars scoped
-const SHORT_URL_GENERATING_TEXT = 'Generating...';
-
-(async () => {
-    const shortUrlButton = document.getElementById('shortUrlButton');
-    const copyShortUrlButton = document.getElementById('copyShortUrlButton');
-    const shortUrlContainer = document.getElementById('shortUrlContainer');
-    const shortUrlOutput = document.getElementById('shortUrlOutput');
-    const shortUrlError = document.getElementById('shortUrlError');
-
-    // Default endpoints (will only be used if config.json fails to load)
-    const config = {
-        tinyurlApi: 'https://tinyurl.com/api-create.php',
-        tinyurlManual: 'https://tinyurl.com/app/'
-    };
-
-    let configLoaded = false;
-    try {
-        const response = await fetch('/config.json');
-        const loadedConfig = await response.json();
-        if (loadedConfig.endpoints && loadedConfig.endpoints.tinyurlApi && loadedConfig.endpoints.tinyurlManual) {
-            config.tinyurlApi = loadedConfig.endpoints.tinyurlApi;
-            config.tinyurlManual = loadedConfig.endpoints.tinyurlManual;
-            configLoaded = true;
-        } else {
-            showShortUrlConfigError('Short URL feature is unavailable: config.json is missing required endpoints.');
-        }
-    } catch (e) {
-        showShortUrlConfigError('Short URL feature is unavailable: config.json could not be loaded.');
-    }
-
-    function showShortUrlConfigError(message) {
-        if (shortUrlContainer) shortUrlContainer.classList.remove('hidden');
-        if (shortUrlOutput) shortUrlOutput.value = '';
-        if (shortUrlError) {
-            shortUrlError.textContent = message;
-            shortUrlError.classList.remove('hidden');
-        }
-        if (shortUrlButton) {
-            shortUrlButton.disabled = true;
-            shortUrlButton.classList.add('opacity-50', 'cursor-not-allowed');
-        }
-        if (copyShortUrlButton) {
-            copyShortUrlButton.disabled = true;
-            copyShortUrlButton.classList.add('opacity-50', 'cursor-not-allowed');
-        }
-    }
-
-    if (!configLoaded) return;
-
-    shortUrlButton.addEventListener('click', async function() {
-        const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName);
-        mapData.value = compressedMap;
-        const longUrl = getShareableUrl(entities, mapName);
-        shortUrlContainer.classList.remove('hidden');
-        shortUrlOutput.value = SHORT_URL_GENERATING_TEXT;
-        shortUrlError.textContent = '';
-        shortUrlButton.disabled = true;
-        try {
-            // Timeout logic
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
-            const response = await fetch(`${config.tinyurlApi}?url=${encodeURIComponent(longUrl)}`, {
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-            if (!response.ok) {
-                throw new Error(`TinyURL API error: ${response.status}`);
-            }
-            const shortUrl = await response.text();
-            if (!shortUrl.startsWith('http')) {
-                throw new Error('TinyURL returned invalid URL');
-            }
-            shortUrlOutput.value = shortUrl;
-            markChangesSaved();
-        } catch (error) {
-            console.error('Short URL generation failed:', error);
-            shortUrlOutput.value = '';
-            shortUrlError.textContent = 'Failed to generate. ';
-            const fallback = document.createElement('a');
-            fallback.href = `${config.tinyurlManual}?url=${encodeURIComponent(longUrl)}`;
-            fallback.target = '_blank';
-            fallback.rel = 'noopener noreferrer';
-            fallback.textContent = 'Try manually';
-            fallback.className = 'underline text-blue-600';
-            shortUrlError.appendChild(fallback);
-        } finally {
-            shortUrlButton.disabled = false;
-        }
-    });
-
-    copyShortUrlButton.addEventListener('click', function() {
-        const urlToCopy = shortUrlOutput.value;
-        if (urlToCopy && urlToCopy !== SHORT_URL_GENERATING_TEXT) {
-            navigator.clipboard.writeText(urlToCopy)
-                .then(() => {
-                    shortUrlOutput.classList.add('bg-green-100');
-                    setTimeout(() => shortUrlOutput.classList.remove('bg-green-100'), 1000);
-                })
-                .catch(err => {
-                    console.error('Failed to copy URL:', err);
-                    shortUrlError.textContent = 'Could not copy URL.';
-                });
-        }
-    });
-})();
-
-// (Removed duplicate global shortUrlButton and copyShortUrlButton event listeners; now handled inside the IIFE only)
-
 // Map name validation
 document.getElementById("mapNameInput").addEventListener("input", function() {
     const value = this.value;
@@ -1625,6 +2057,228 @@ window.addEventListener('beforeunload', function(e) {
         return message;
     }
 });
+
+// ======= Enhanced Mobile Touch (pinch-zoom + one-finger pan) =======
+(function(){
+    let touchMode = null; // 'pan' | 'pinch' | null
+    let t0 = null, t1 = null;
+    let startPanX = 0, startPanY = 0;
+    let startZoom = 1;
+    let startDist = 0;
+    let lastCenter = {x: 0, y: 0};
+    let lastTapTime = 0;
+    let longPressTimer = null;
+    const LONG_PRESS_MS = 450;
+
+    function getTouches(e){
+        const rect = canvas.getBoundingClientRect();
+        const arr = Array.from(e.touches).map(t => ({x: t.clientX - rect.left, y: t.clientY - rect.top, id: t.identifier}));
+        return arr;
+    }
+
+    function dist(a,b){ const dx=a.x-b.x, dy=a.y-b.y; return Math.hypot(dx,dy); }
+    function mid(a,b){ return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 }; }
+
+    function clearLongPress(){ if (longPressTimer){ clearTimeout(longPressTimer); longPressTimer=null; }}
+
+    canvas.addEventListener('touchstart', (e)=>{
+        if (!e.target.closest('#layoutCanvas')) return;
+        e.preventDefault();
+        const touches = getTouches(e);
+
+        if (touches.length === 1){
+            // single-finger: either tap-to-place/select or drag-to-pan when in Move mode
+            t0 = touches[0];
+            touchMode = 'pan';
+            startPanX = panX;
+            startPanY = panY;
+
+            // long-press to delete selected entity (mobile shortcut)
+            clearLongPress();
+            longPressTimer = setTimeout(()=>{
+                // If something is selected, delete it
+                if (selectedEntity){
+                    deleteSelectedEntity();
+                }
+            }, LONG_PRESS_MS);
+
+            // double-tap to quick zoom in towards tap
+            const now = Date.now();
+            if (now - lastTapTime < 350){
+                const prevZoom = zoom;
+                const newZoom = Math.min(3, zoom * 1.35);
+                const dx = t0.x - panX;
+                const dy = t0.y - panY;
+                panX = t0.x - dx * (newZoom / prevZoom);
+                panY = t0.y - dy * (newZoom / prevZoom);
+                zoom = newZoom;
+                gridSize = baseGridSize * zoom;
+                redraw();
+                updateZoomDisplay();
+            }
+            lastTapTime = now;
+
+        } else if (touches.length >= 2){
+            // two-finger pinch
+            t0 = touches[0]; t1 = touches[1];
+            touchMode = 'pinch';
+            startZoom = zoom;
+            startDist = dist(t0, t1);
+            lastCenter = mid(t0, t1);
+        }
+    }, {passive:false});
+
+    canvas.addEventListener('touchmove', (e)=>{
+        if (!e.target.closest('#layoutCanvas')) return;
+        e.preventDefault();
+        const touches = getTouches(e);
+
+        if (touchMode === 'pan' && touches.length === 1 && t0){
+            clearLongPress();
+            const cur = touches[0];
+            // If toolbar mode is 'move' OR two-finger initially—pan the map
+            if (selectedType === 'move'){
+                panX = startPanX + (cur.x - t0.x);
+                panY = startPanY + (cur.y - t0.y);
+                redraw();
+            } else {
+                // show ghost preview while moving single finger
+                updateGhostPreview(cur.x, cur.y);
+                redraw();
+            }
+        } else if (touchMode === 'pinch' && touches.length >= 2){
+            const a = touches[0], b = touches[1];
+            const currDist = dist(a,b);
+            const factor = currDist / (startDist || 1);
+            const newZoom = Math.max(0.1, Math.min(3, startZoom * factor));
+
+            // Zoom around the pinch midpoint
+            const center = mid(a,b);
+            const dx = center.x - panX;
+            const dy = center.y - panY;
+            panX = center.x - dx * (newZoom / zoom);
+            panY = center.y - dy * (newZoom / zoom);
+            zoom = newZoom;
+            gridSize = baseGridSize * zoom;
+            redraw();
+            updateZoomDisplay();
+        }
+    }, {passive:false});
+
+    canvas.addEventListener('touchend', (e)=>{
+        if (!e.target.closest('#layoutCanvas')) return;
+        e.preventDefault();
+        const touches = getTouches(e);
+
+        clearLongPress();
+
+        if (touchMode === 'pan' && (!touches || touches.length === 0) && t0){
+            // Treat as tap if movement was very small
+            const dx = (e.changedTouches[0].clientX - (canvas.getBoundingClientRect().left + t0.x));
+            const dy = (e.changedTouches[0].clientY - (canvas.getBoundingClientRect().top + t0.y));
+            const moved = Math.hypot(dx,dy);
+            if (moved < 8){
+                // Trigger the same logic as a click on canvas (place/select)
+                const rect = canvas.getBoundingClientRect();
+                const x = e.changedTouches[0].clientX - rect.left;
+                const y = e.changedTouches[0].clientY - rect.top;
+                handleCanvasClick(x, y, { fromTouch: true });
+            }
+        }
+
+        // reset
+        touchMode = null; t0 = null; t1 = null;
+    }, {passive:false});
+
+    // Centralized handler for canvas tap/click logic (used by both mouse & touch)
+    function handleCanvasClick(x, y, opts = {}) {
+        if (selectedType === 'select') {
+            // Simulate a selectEntity at (x, y)
+            const rect = canvas.getBoundingClientRect();
+            const event = { clientX: x + rect.left, clientY: y + rect.top };
+            selectEntity(event);
+        } else {
+            // Simulate an addEntity at (x, y)
+            const rect = canvas.getBoundingClientRect();
+            const event = { clientX: x + rect.left, clientY: y + rect.top };
+            addEntity(event);
+        }
+      // Remove GhostPreview after placement
+      if (opts.fromTouch) {
+        ghostPreview = null;
+        redraw();
+      }
+    }
+
+    // Prevent page bounce/scroll while interacting with canvas
+    document.addEventListener('touchmove', (e)=>{
+        if (e.target === canvas) e.preventDefault();
+    }, {passive:false});
+})();
+
+
+/*__MOBILE_BOTTOM_SHEET__*/
+(function(){
+    const panels = document.querySelectorAll('.mobile-panel');
+    panels.forEach(panel => {
+        let startY=0, curY=0, isDragging=false;
+        panel.addEventListener('touchstart', (e)=>{
+            startY = e.touches[0].clientY;
+            isDragging = true;
+        }, {passive:true});
+        panel.addEventListener('touchmove', (e)=>{
+            if(!isDragging) return;
+            curY = e.touches[0].clientY;
+            const delta = Math.max(0, curY - startY);
+            panel.style.transform = `translateY(${delta}px)`;
+        }, {passive:true});
+        panel.addEventListener('touchend', ()=>{
+            if(!isDragging) return;
+            const delta = Math.max(0, curY - startY);
+            const shouldClose = delta > 100;
+            panel.style.transform = '';
+            if (shouldClose){
+                panel.classList.remove('active');
+                setTimeout(()=>{ panel.style.display='none'; }, 300);
+            }
+            isDragging=false;
+        });
+    });
+
+    // Mirror desktop action buttons into mobile where needed
+    const mirrors = [
+        ['downloadButton','mobileDownloadButton'],
+        ['saveButton','mobileSaveButton'],
+        ['shareButton','mobileShareButton'],
+        ['shortUrlButton','mobileShortUrlButton'],
+        ['loadButton','mobileLoadButton'],
+    ];
+    mirrors.forEach(([deskId, mobId])=>{
+        const d = document.getElementById(deskId);
+        const m = document.getElementById(mobId);
+        if (d && m){
+            m.addEventListener('click', ()=> d.click());
+        }
+    });
+
+    // Keep code textarea in sync
+    const deskTA = document.getElementById('mapData');
+    const mobTA = document.getElementById('mobileMapData');
+    if (deskTA && mobTA){
+        const sync = (src, dst)=>{
+            src.addEventListener('input', ()=> { dst.value = src.value; });
+        };
+        sync(deskTA, mobTA); sync(mobTA, deskTA);
+    }
+
+    // Sync city sort dropdowns
+    const deskSort = document.getElementById('citySort');
+    const mobSort = document.getElementById('mobileCitySort');
+    if (deskSort && mobSort){
+        const reflect = (src, dst)=> src.addEventListener('change', ()=>{ dst.value = src.value; dst.dispatchEvent(new Event('change')); });
+        reflect(deskSort, mobSort); reflect(mobSort, deskSort);
+    }
+})();
 
 // ===== APPLICATION INITIALIZATION =====
 // Initialize the application
