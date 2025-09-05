@@ -1201,7 +1201,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 const m2 = document.querySelector('[citySettingsButtons="m2"]');
                 [d2, m2].forEach(b => {
                     if (!b) return;
-                    b.classList.toggle('bg-blue-600', waveMode);
+                    b.classList.toggle('bg-yellow-500', waveMode);
                     b.classList.toggle('text-white',  waveMode);
                 });
                 redraw();
@@ -1215,7 +1215,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 const anchorInputContainer = document.getElementById('anchorInputContainer');
                 [d3, m3].forEach(b => {
                     if (!b) return;
-                    b.classList.toggle('bg-indigo-600', showCoords);
+                    b.classList.toggle('bg-yellow-500', showCoords);
                     b.classList.toggle('text-white',    showCoords);
                 });
                 document.getElementById('setAnchorBtn').addEventListener('click', () => {
