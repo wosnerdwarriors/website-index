@@ -673,10 +673,6 @@ function setCoordAnchor(x, y){
     redraw();
 }
 
-function anchorScreen() {
-    return { x: canvasWidth/2, y: canvasHeight/2 };
-}
-
 // middle of the grid in diamond coords
 function anchorGridCell() {
     return { x: 0, y: 0 };
