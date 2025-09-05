@@ -655,26 +655,26 @@ function getWaveRing(city) {
 }
 
 function getWaveColorForCity(city) {
-  const ring = getWaveRing(city);
-  if (ring == null) return city.color;
-  return wavePalette[ring % wavePalette.length];
+    const ring = getWaveRing(city);
+    if (ring == null) return city.color;
+    return wavePalette[ring % wavePalette.length];
 }
 
 function clamp1200(n){ return Math.max(0, Math.min(1199, n|0)); }
 
 function parseCoordInput(s){
-  if (!s) return null;
-  const m = String(s).trim().match(/^(\d{1,4})\s*[:;,]\s*(\d{1,4})$/);
-  if (!m) return null;
-  return { x: clamp1200(+m[1]), y: clamp1200(+m[2]) };
+    if (!s) return null;
+    const m = String(s).trim().match(/^(\d{1,4})\s*[:;,]\s*(\d{1,4})$/);
+    if (!m) return null;
+    return { x: clamp1200(+m[1]), y: clamp1200(+m[2]) };
 }
 function setCoordAnchor(x, y){
-  coordAnchor = { x: clamp1200(x), y: clamp1200(y) };
-  redraw();
+    coordAnchor = { x: clamp1200(x), y: clamp1200(y) };
+    redraw();
 }
 
 function anchorScreen() {
-  return { x: canvasWidth/2, y: canvasHeight/2 };
+    return { x: canvasWidth/2, y: canvasHeight/2 };
 }
 
 // middle of the grid in diamond coords
@@ -684,13 +684,13 @@ function anchorGridCell() {
 
 // city x/y coords in 0..1199, relative to anchor
 function coordForCity(city) {
-  const mid = anchorGridCell();
-  const dx = city.x - mid.x;
-  const dy = city.y - mid.y;
-  return {
-    x: clamp1200(coordAnchor.x + dy),
-    y: clamp1200(coordAnchor.y + dx)
-  };
+    const mid = anchorGridCell();
+    const dx = city.x - mid.x;
+    const dy = city.y - mid.y;
+    return {
+        x: clamp1200(coordAnchor.x + dy),
+        y: clamp1200(coordAnchor.y + dx)
+    };
 }
 
 function drawAnchorSymbol() {
