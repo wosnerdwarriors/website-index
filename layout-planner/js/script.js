@@ -427,7 +427,7 @@ function drawCityDetails(city, screen) {
         ctx.textBaseline = 'top';
         ctx.fillStyle = 'black';
         ctx.fillText(`${c.x}:${c.y}`, screen.x, screen.y + fs*0.8);
-        }
+    }
 
 }
 
