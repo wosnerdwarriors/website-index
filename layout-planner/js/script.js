@@ -801,6 +801,11 @@ function addEntity(event) {
             cityCounterId++;
         }
         const newEntity = { x, y, width, height, color, type: selectedType, id };
+
+        if (selectedType === 'city' && !newEntity.name) {
+            newEntity.name = `City ${id}`;
+        }
+
         entities.push(newEntity);
         if (selectedType === 'building') {
             bearTraps.push(newEntity);
@@ -1073,6 +1078,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Event Listener for actions
     document.getElementById('shareButton')?.addEventListener('click', shareMap);
     document.getElementById('mobileShareButton')?.addEventListener('click', shareMap);
+    document.getElementById('saveAsCSVButton')?.addEventListener('click', () => exportPlayerNamesCSV({ onlyNamed: false }));
     
     // Copy short url (desktop)
     document.getElementById('copyShortUrlButton')?.addEventListener('click', () => {
@@ -1156,6 +1162,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
         redraw();
     }
+
+    const csvInput = document.getElementById('playersCsvInput');
+    if (csvInput){
+        csvInput.addEventListener('change', async (e)=>{
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const text = await file.text();
+            importPlayerNamesCSV(text);
+            csvInput.value = '';
+        });
+    }
     
     // Add handlers for city settings buttons (P1 = clock toggle)
     document.querySelectorAll('[citySettingsButtons]').forEach(btn => {
@@ -1214,6 +1231,11 @@ window.addEventListener('DOMContentLoaded', () => {
                     anchorInputContainer.classList.toggle('hidden', !showCoords);
                 }           
                 redraw();
+            }
+
+            // P4: Load CSV
+            if (key.endsWith('4')) {
+                document.getElementById('playersCsvInput')?.click();
             }
         });
     });
@@ -1456,7 +1478,6 @@ function shareMap() {
     		});
     	}
     })();
-
 
 // ===== MOBILE/TOUCH CONTROLS =====
 function updateZoomDisplay() {
@@ -2208,7 +2229,7 @@ function loadMap() {
             if (entity.type === "city") {
                 entity.id = cityId;
                 if (!entity.name) {
-                    entity.name = `${cityId}`;
+                    entity.name = `City ${cityId}`;
                 }
                 cityId++;
             }
@@ -2318,6 +2339,200 @@ window.addEventListener('beforeunload', function(e) {
         return message;
     }
 });
+
+// ======= UTILS – Player import/export =======
+// This works for city names and their coordinates. 
+// With a few changes we could export the entire building list
+
+// is "City 1/2/3 ..."?
+function isDefaultCityName(name){
+    return /^city\s*\d+$/i.test(String(name||'').trim());
+}
+
+// number conversion
+function num(v){ const n = +v; return Number.isFinite(n) ? n : null; }
+
+// split CSV into fields (handles quoted commas)
+function splitCsvLine(line){
+    const out = [];
+    let cur = '', inQ = false;
+    for (let i=0; i<line.length; i++){
+        const ch = line[i];
+        if (ch === '"'){
+        if (inQ && line[i+1] === '"'){ cur += '"'; i++; }
+        else inQ = !inQ;
+        } else if (ch === ',' && !inQ){
+        out.push(cur); cur = '';
+        } else {
+        cur += ch;
+        }
+    }
+    out.push(cur);
+    return out;
+}
+
+// find a free spot in the grid for a new entity of given size
+// spiral search from anchorGridCell or 0,0
+// respects isPositionValid if defined
+function findFreeGridSpot(width=2, height=2){
+    const start = anchorGridCell ? anchorGridCell() : { x:0, y:0 };
+    const maxR = Math.max(gridCols||50, gridRows||50);
+    for (let r=0; r<=maxR; r++){
+        for (let dx=-r; dx<=r; dx++){
+        for (let dy=-r; dy<=r; dy++){
+            if (Math.max(Math.abs(dx),Math.abs(dy)) !== r) continue;
+            const x = start.x + dx, y = start.y + dy;
+            const candidate = { x, y, width, height };
+            if (typeof isPositionValid !== 'function' || isPositionValid(x,y,candidate)) {
+            return { x, y };
+            }
+        }
+        }
+    }
+    return start;
+}
+
+// Game world coord -> grid top-left coord
+// width,height = z.B. 2x2 for cities
+function worldCoordToGrid(world, width=2, height=2){
+  const mid = anchorGridCell ? anchorGridCell() : {x:0, y:0};
+  const wx = clamp1200 ? clamp1200(world.x) : world.x|0;
+  const wy = clamp1200 ? clamp1200(world.y) : world.y|0;
+
+  // reverse of coordForCity function
+  const tipX = mid.x + (wy - coordAnchor.y);
+  const tipY = mid.y + (wx - coordAnchor.x);
+
+  return { x: tipX - (width - 1), y: tipY - (height - 1) };
+}
+
+// Import: name[,x,y] while x and y are optional
+// 1) Existing "City N" cities are RENAMED only.
+// 2) Only when no default cities remain, new 2x2 cities are created.
+// 3) Provided x,y are by default used ONLY for new cities.
+//    -> with option { moveDefaultCities:true } you can also move existing default cities,
+//       I used this for for testing, might not be the best idea for normal use 
+function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
+  const lines = String(text).split(/\r?\n/).filter(l => l.trim().length);
+  if (!lines.length) return;
+
+  const headers = splitCsvLine(lines[0]).map(h => h.trim().toLowerCase());
+  const idx = k => headers.indexOf(k);
+
+  const iName = idx('name');
+  const iX    = idx('x');
+  const iY    = idx('y');
+
+  if (iName === -1) {
+    alert('CSV braucht mindestens eine Spalte "name".');
+    return;
+  }
+
+  // load CSV
+  const rows = [];
+  for (let i = 1; i < lines.length; i++){
+    const cols = splitCsvLine(lines[i]);
+    const name = (cols[iName] || '').trim();
+    if (!name) continue;
+    const x = (iX !== -1) ? num(cols[iX]) : null;
+    const y = (iY !== -1) ? num(cols[iY]) : null;
+    rows.push({ name, x, y });
+  }
+  if (!rows.length) return;
+
+  // 1) Collect default cities (rename only)
+  const defaultCities = entities
+    .filter(e => e.type === 'city' && isDefaultCityName(e.name))
+    .sort((a,b) => (a.id||0) - (b.id||0));
+
+  let r = 0;
+
+  while (r < rows.length && defaultCities.length){
+    const city = defaultCities.shift();
+    const rec  = rows[r];
+
+    // only rename
+    city.name = rec.name;
+
+    // only move if explicitly allowed
+    if (moveDefaultCities && Number.isFinite(rec.x) && Number.isFinite(rec.y)) {
+      const width = city.width || 2, height = city.height || 2;
+      const g = worldCoordToGrid({ x: rec.x, y: rec.y }, width, height);
+      const ok = (typeof isPositionValid !== 'function') ||
+                 isPositionValid(g.x, g.y, { x:g.x, y:g.y, width, height });
+      if (ok) { city.x = g.x; city.y = g.y; }
+    }
+
+    r++;
+  }
+  
+  // 2) Für übrig gebliebene Namen neue Städte anlegen
+  for (; r < rows.length; r++){
+    const rec = rows[r];
+    const width = 2, height = 2;
+
+    // Get target position (x,y only for new cities)
+    let gx, gy;
+    if (Number.isFinite(rec.x) && Number.isFinite(rec.y)) {
+      const g = worldCoordToGrid({ x: rec.x, y: rec.y }, width, height);
+      if (typeof isPositionValid !== 'function' || isPositionValid(g.x, g.y, { x:g.x, y:g.y, width, height })) {
+        gx = g.x; gy = g.y;
+      }
+    }
+    if (!Number.isFinite(gx) || !Number.isFinite(gy)) {
+      const spot = findFreeGridSpot(width, height);
+      gx = spot.x; gy = spot.y;
+    }
+
+    entities.push({
+      type: 'city',
+      id: (typeof cityCounterId !== 'undefined' ? cityCounterId++ : undefined),
+      name: rec.name,
+      x: gx, y: gy,
+      width, height,
+      color: (typeof getRandomColor === 'function' ? getRandomColor() : 'rgb(200,200,200)')
+    });
+  }
+
+  try { redraw(); } catch(_) {}
+  try { updateCounters(); } catch(_) {}
+  try { updateCityList(); } catch(_) {}
+  try { markUnsavedChanges(); } catch(_) {}
+}
+
+
+/* =========================
+   EXPORT: name,x,y  (coordinates, lower corner)
+   - x,y = coordForCity(city)
+   - onlyNamed=true -> skips "City N" - only used for testing
+========================= */
+function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
+  const rows = ['name,x,y'];
+
+  const cities = entities
+    .filter(e => e.type === 'city')
+    .sort((a,b) => (a.id||0) - (b.id||0));
+
+  for (const c of cities) {
+    const rawName = (c.name && c.name.trim()) ? c.name.trim() : `City ${c.id ?? ''}`.trim();
+    if (onlyNamed && isDefaultCityName(rawName)) continue;
+
+    const world = coordForCity(c);
+    const safeName = `"${rawName.replace(/"/g,'""')}"`;
+    rows.push([safeName, world.x, world.y].join(','));
+  }
+
+  const csv = rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'layout.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 // ======= Enhanced Mobile Touch (pinch-zoom + one-finger pan) =======
 (function(){
@@ -2510,6 +2725,7 @@ window.addEventListener('beforeunload', function(e) {
     const mirrors = [
         ['downloadButton','mobileDownloadButton'],
         ['saveButton','mobileSaveButton'],
+        ['saveAsCSVButton','mobileSaveAsCSVButton'],
         ['shareButton','mobileShareButton'],
         ['shortUrlButton','mobileShortUrlButton'],
         ['loadButton','mobileLoadButton'],
