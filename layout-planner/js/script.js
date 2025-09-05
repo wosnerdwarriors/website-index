@@ -2501,10 +2501,10 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
     });
   }
 
-  try { redraw(); } catch(_) {}
-  try { updateCounters(); } catch(_) {}
-  try { updateCityList(); } catch(_) {}
-  try { markUnsavedChanges(); } catch(_) {}
+  try { redraw(); } catch(e) { console.error("Redraw failed:", e); }  
+  try { updateCounters(); } catch(e) { console.error("Update counters failed:", e); }  
+  try { updateCityList(); } catch(e) { console.error("Update city list failed:", e); }  
+  try { markUnsavedChanges(); } catch(e) { console.error("Marking unsaved changes failed:", e); } 
 }
 
 
