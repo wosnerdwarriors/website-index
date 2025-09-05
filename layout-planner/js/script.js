@@ -2117,30 +2117,64 @@ function sanitizeMapName(name) {
     return name.replace(/[^a-zA-Z0-9 \-_]/g, '').substring(0, 30);
 }
 
-function compressMapWithName(entities, mapName) {
+function compressMapWithName(entities, mapName, anchor = coordAnchor) {
     let base64String = compressMap(entities);
+
+    const parts = [base64String];
+
     if (mapName && mapName.trim() !== '') {
-        const sanitized = sanitizeMapName(mapName);
-        base64String += "||" + sanitized;
+        parts.push("n=" + sanitizeMapName(mapName));
     }
-    return base64String;
+
+    if (anchor && Number.isFinite(anchor.x) && Number.isFinite(anchor.y)) {
+        parts.push("a=" + clamp1200(anchor.x) + ":" + clamp1200(anchor.y));
+    }
+
+    return parts.join("||");
 }
 
+
 function decompressMapWithName(combinedString) {
+    // Returns: { entities, mapName?, anchor? }
+    const out = { entities: [], mapName: "", anchor: null };
+
+    if (!combinedString || typeof combinedString !== 'string') {
+        return out;
+    }
+
+    const parts = combinedString.split("||");
+    const base64String = parts.shift();
     let mapName = "";
-    let base64String = combinedString;
-    const marker = "||";
-    if (combinedString.includes(marker)) {
-        const parts = combinedString.split(marker);
-        base64String = parts[0];
-        mapName = parts[1];
-        const mapNameInput = document.getElementById('mapNameInput');
-        if (mapNameInput) {
-            mapNameInput.value = mapName;
+    let anchor  = null;
+
+    for (const seg of parts) {
+        if (seg.startsWith("n=")) {
+            mapName = seg.slice(2);
+        } else if (seg.startsWith("a=")) {
+            const m = seg.slice(2).match(/^(\d{1,4})[:;,](\d{1,4})$/);
+            if (m) {
+                anchor = { x: clamp1200(+m[1]), y: clamp1200(+m[2]) };
+            }
+        } else {
+            // Legacy support: if no prefix, treat as name
+            if (!mapName) mapName = seg;
         }
     }
-    return decompressMap(base64String);
+
+    const entities = decompressMap(base64String);
+
+    if (mapName) {
+        const mapNameInput = document.getElementById('mapNameInput');
+        if (mapNameInput) mapNameInput.value = mapName;
+    }
+
+    out.entities = entities;
+    if (anchor) out.anchor = anchor;
+    out.mapName = mapName;
+
+    return out;
 }
+
 
 // Pure helper to generate a shareable URL with provided map data and name
 function getShareableUrl(entitiesArg, mapNameArg) {
@@ -2153,7 +2187,9 @@ function getShareableUrl(entitiesArg, mapNameArg) {
 function loadMap() {
     try {
         const compressedMap = mapData.value;
-        const loadedEntities = decompressMapWithName(compressedMap);
+        const loaded = decompressMapWithName(compressedMap);
+        const loadedEntities = Array.isArray(loaded) ? loaded : loaded.entities || [];
+
         entities.length = 0;
         bearTraps.length = 0;
 
@@ -2163,6 +2199,10 @@ function loadMap() {
                 bearTraps.push(entity);
             }
         });
+
+        if (!Array.isArray(loaded) && loaded.anchor) {
+            coordAnchor = { x: clamp1200(loaded.anchor.x), y: clamp1200(loaded.anchor.y) };
+        }
 
         let cityId = 1;
         entities.forEach(entity => {
@@ -2174,7 +2214,6 @@ function loadMap() {
                 cityId++;
             }
         });
-
         cityCounterId = cityId;
 
         redraw();
@@ -2186,6 +2225,7 @@ function loadMap() {
         console.error(e);
     }
 }
+
 
 function loadMapFromQuery() {
     const urlParams = new URLSearchParams(window.location.search);
