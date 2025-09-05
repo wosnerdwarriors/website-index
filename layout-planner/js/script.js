@@ -1078,7 +1078,16 @@ window.addEventListener('DOMContentLoaded', () => {
     // Event Listener for actions
     document.getElementById('shareButton')?.addEventListener('click', shareMap);
     document.getElementById('mobileShareButton')?.addEventListener('click', shareMap);
+    document.getElementById('setAnchorBtn')?.addEventListener('click', handleSetAnchor);
     document.getElementById('saveAsCSVButton')?.addEventListener('click', () => exportPlayerNamesCSV({ onlyNamed: false }));
+
+    // QOL - Set anchor on Enter key in input field
+    document.getElementById('anchorInput')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSetAnchor();
+        }
+    });
     
     // Copy short url (desktop)
     document.getElementById('copyShortUrlButton')?.addEventListener('click', () => {
@@ -1163,6 +1172,18 @@ window.addEventListener('DOMContentLoaded', () => {
         redraw();
     }
 
+    function handleSetAnchor() {
+        const input = document.getElementById('anchorInput');
+        if (!input) return;
+        const val = input.value;
+        const pt = parseCoordInput(val);
+        if (pt) {
+            setCoordAnchor(pt.x, pt.y);
+        } else {
+            alert('Invalid format or out of bounds 0..1199');
+        }
+        }
+
     const csvInput = document.getElementById('playersCsvInput');
     if (csvInput){
         csvInput.addEventListener('change', async (e)=>{
@@ -1217,19 +1238,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     if (!b) return;
                     b.classList.toggle('bg-yellow-500', showCoords);
                     b.classList.toggle('text-white',    showCoords);
-                });
-                document.getElementById('setAnchorBtn').addEventListener('click', () => {
-                const val = document.getElementById('anchorInput').value;
-                const pt = parseCoordInput(val);
-                if (pt) {
-                    setCoordAnchor(pt.x, pt.y);
-                } else {
-                    alert('Invalid format or out of bounds 0..1199');
-                }
-                });
-                if (anchorInputContainer) {
-                    anchorInputContainer.classList.toggle('hidden', !showCoords);
-                }           
+                });        
                 redraw();
             }
 
