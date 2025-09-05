@@ -8,6 +8,7 @@
     <meta property="og:url" content="https://wosnerds.com/layout-planner/index.html">
     <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
     <link rel="stylesheet" href="/layout-planner/css/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
     <title>Alliance Layout Planner</title>
 </head>
 <body class="overflow-hidden">
@@ -97,6 +98,37 @@
                     </button>
                     <div id="citiesSection" class="flex-1 overflow-hidden flex flex-col">
                         <div class="p-4 border-b">
+                            <!-- Additional settings -->
+                            <div id="citySettingsButtons" class="flex justify-end gap-2 mb-3">
+                                <!-- P1 = Clock toggle: toggles march times visibility on the canvas -->
+                                <button citySettingsButtons="1" id="toggleMarchtime" title="Marchtimes on/off" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
+                                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">schedule</span>
+                                </button>
+                                <!-- P2 = Wavemode toggle: toggles wave mode visibility on the canvas -->
+                                 <button citySettingsButtons="2" title="Wavemode on/off" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
+                                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">airwave</span>
+                                </button>
+
+                                <!-- P3 = Toggle coordinates -->
+                                <button citySettingsButtons="3" title="Toggle coordinates" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
+                                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">grid_on</span>
+                                </button>
+                                
+                                <!-- P4 = Import Players -->
+                                <button citySettingsButtons="4" title="Import Players" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
+                                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">import_contacts</span>
+                                    WIP
+                                </button>
+                            </div>
+
+                            <div id="anchorInputContainer" class="hidden mt-2 flex justify-end gap-2">
+                                <input id="anchorInput" type="text" placeholder="x:y" 
+                                        class="w-24 p-1 border rounded text-sm" />
+                                <button id="setAnchorBtn" class="px-2 py-1 bg-blue-500 text-white text-xs rounded">
+                                    Set
+                                </button>
+                            </div>
+
                             <div class="flex items-center gap-2">
                                 <label for="citySort" class="text-sm font-medium">Sort by:</label>
                                 <select id="citySort" class="flex-1 text-sm border-2 border-gray-300 rounded-lg p-2 focus:border-blue-500 focus:outline-none"></select>
@@ -226,6 +258,30 @@
         <div id="mobileCities" class="mobile-panel">
             <div class="bg-white p-4">
                 <h3 class="font-medium mb-4">Cities</h3>
+                <!-- Additional setttings -->
+                <div id="mobileCitySettingsButtons" class="flex justify-end gap-2 mb-3">
+                    <!-- P1 = Clock toggle: toggles march times visibility on the canvas -->
+                    <button citySettingsButtons="m1" id="placeholder-clock-mobile" title="Marchtimes on/off" class="px-2 py-2 text-sm rounded bg-gray-100 hover:bg-gray-200">
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;line-height:1">schedule</span>
+                    </button>
+                    
+                    <!-- P2 = Wavemode toggle: toggles wave mode visibility on the canvas -->
+                    <button citySettingsButtons="m2" title="Wavemode on/off" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">airwave</span>
+                    </button>
+                    
+                    <!-- P3 = Toggle coordinates -->
+                    <button citySettingsButtons="m3" title="Toggle coordinates" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">grid_on</span>
+                    </button>
+                    
+                    <!-- P4 = Import Players -->
+                    <button citySettingsButtons="m4" title="Import Players" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
+                                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">import_contacts</span>
+                                    WIP
+                    </button>                     
+                </div>
+
                 <div class="flex items-center gap-2 mb-4">
                     <label for="mobileCitySort" class="text-sm font-medium">Sort by:</label>
                     <select id="mobileCitySort" class="flex-1 text-sm border-2 border-gray-300 rounded-lg p-2"></select>

@@ -43,6 +43,21 @@ let lastMouseX = 0;
 let lastMouseY = 0;
 let hasUnsavedChanges = false;
 let ghostPreview = null;
+let showMarchTimes = true;
+let waveMode = false;
+let showCoords = false;
+let coordAnchor = { x: 600, y: 600 };
+
+// ==== WAVE COLORS ====
+const wavePalette = [
+  '#60a5fa', // blue-400
+  '#34d399', // emerald-400
+  '#f59e0b', // amber-500
+  '#a78bfa', // violet-400
+  '#f472b6', // pink-400
+  '#84cc16', // lime-500
+  '#2dd4bf'  // teal-400
+];
 
 // ===== TOUCH/MOBILE SUPPORT =====
 let touchStartDistance = 0;
@@ -189,7 +204,6 @@ function drawDiamondGrid() {
     ctx.beginPath();
     ctx.arc(panX, panY, 8 * zoom, 0, 2 * Math.PI);
     ctx.fill();
-    
     ctx.restore();
 }
 
@@ -232,7 +246,9 @@ function drawEntity(entity, protectedAreas) {
     const screen = diamondToScreen(entity.x, entity.y);
     const currentGridSize = gridSize * zoom;
     
-    ctx.fillStyle = entity.color;
+    ctx.fillStyle = (waveMode && entity.type === 'city')
+    ? getWaveColorForCity(entity)
+    : entity.color;
     
     // Draw entity based on its actual size (width x height)
     if (entity.width === 1 && entity.height === 1) {
@@ -393,12 +409,26 @@ function drawCityDetails(city, screen) {
     const label = city.name || `City ${city.id}`;
     ctx.fillText(label, screen.x, screen.y + baseOffset);
     
-    // Draw march times to bear traps
-    const marchTimes = calculateMarchTimes(city);
-    marchTimes.forEach((time, index) => {
-        const yOffset = baseOffset + (index + 1) * currentGridSize * 0.25;
-        ctx.fillText(`BT${index + 1}: ${time}s`, screen.x, screen.y + yOffset);
-    });
+    // Draw march times only if enabled
+    if (showMarchTimes) {
+        const marchTimes = calculateMarchTimes(city);
+        marchTimes.forEach((time, index) => {
+            const yOffset = baseOffset + (index + 1) * currentGridSize * 0.25;
+            ctx.fillText(`BT${index + 1}: ${time}s`, screen.x, screen.y + yOffset);
+        });
+    }
+
+    // ---- City-Koordinate relativ zum Anker anzeigen ----
+    if (showCoords) {
+        const c = coordForCity(city);
+        const fs = Math.max(6, Math.min(14, gridSize * zoom * 0.22));
+        ctx.font = `${fs}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = 'black';
+        ctx.fillText(`${c.x}:${c.y}`, screen.x, screen.y + fs*0.8);
+        }
+
 }
 
 function drawBearTrapDetails(trap, screen) {
@@ -595,6 +625,105 @@ function isColorTooDark(color) {
     return brightness < 128; 
 }
 
+function getWaveRing(city) {
+  if (!bearTraps.length) return null;
+
+  // City-Center
+  const cx = city.x + city.width  / 2 - 0.5;
+  const cy = city.y + city.height / 2 - 0.5;
+
+  let best = Infinity;
+
+  for (const t of bearTraps) {
+    // Trap-Center + "Halfheight/width" in cells
+    const tx = t.x + t.width  / 2 - 0.5;
+    const ty = t.y + t.height / 2 - 0.5;
+    const rx = (t.width  - 1) / 2;
+    const ry = (t.height - 1) / 2;
+
+    // (Trap-Center - City-Center) - (Halfheight/width)
+    const dxOut = Math.max(Math.abs(cx - tx) - rx, 0);
+    const dyOut = Math.max(Math.abs(cy - ty) - ry, 0);
+
+    // All neighbors – including diagonals – are considered part of the same wave
+    // => Chebyshev-Distance to rectangle
+    const ring = Math.max(Math.ceil(dxOut), Math.ceil(dyOut)) + 1;
+
+    if (ring < best) best = ring;
+  }
+  return best; // 1 = next to bt, 2 = next row, etc.
+}
+
+function getWaveColorForCity(city) {
+  const ring = getWaveRing(city);
+  if (ring == null) return city.color;
+  return wavePalette[ring % wavePalette.length];
+}
+
+function clamp1200(n){ return Math.max(0, Math.min(1199, n|0)); }
+
+function parseCoordInput(s){
+  if (!s) return null;
+  const m = String(s).trim().match(/^(\d{1,4})\s*[:;,]\s*(\d{1,4})$/);
+  if (!m) return null;
+  return { x: clamp1200(+m[1]), y: clamp1200(+m[2]) };
+}
+function setCoordAnchor(x, y){
+  coordAnchor = { x: clamp1200(x), y: clamp1200(y) };
+  redraw();
+}
+
+function anchorScreen() {
+  return { x: canvasWidth/2, y: canvasHeight/2 };
+}
+
+// middle of the grid in diamond coords
+function anchorGridCell() {
+    return { x: 0, y: 0 };
+}
+
+// city x/y coords in 0..1199, relative to anchor
+function coordForCity(city) {
+  const mid = anchorGridCell();
+  const dx = city.x - mid.x;
+  const dy = city.y - mid.y;
+  return {
+    x: clamp1200(coordAnchor.x + dy),
+    y: clamp1200(coordAnchor.y + dx)
+  };
+}
+
+function drawAnchorSymbol() {
+    if (!showCoords) return;
+
+    const midCell   = anchorGridCell();
+    const midCenter = diamondToScreen(midCell.x, midCell.y);
+    const s  = gridSize * zoom * 0.9;
+    const fs = Math.max(14, gridSize * zoom * 0.7);
+
+    ctx.save();
+
+    ctx.font = `${fs}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillText("⚓", midCenter.x, midCenter.y);
+
+    // blauer Diamond, sehr dezent
+    ctx.strokeStyle = 'rgba(0, 255, 0, 0.2)';
+    ctx.lineWidth = Math.max(1, 2 * zoom);
+    ctx.beginPath();
+    ctx.moveTo(midCenter.x,           midCenter.y - s * 0.5);
+    ctx.lineTo(midCenter.x + s * 0.5, midCenter.y);
+    ctx.lineTo(midCenter.x,           midCenter.y + s * 0.5);
+    ctx.lineTo(midCenter.x - s * 0.5, midCenter.y);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+
 // ===== ENTITY PLACEMENT =====
 function addEntity(event) {
     if (!selectedType || selectedType === 'select') return;
@@ -690,6 +819,7 @@ function addEntity(event) {
 function redraw() {
     drawDiamondGrid();
     drawEntities();
+    drawAnchorSymbol();
 }
 
 function selectEntity(event) {
@@ -995,6 +1125,98 @@ window.addEventListener('DOMContentLoaded', () => {
         } else {
             alert('No entity selected to delete.');
         }
+    });
+
+
+    function setCityLabelMode(mode) {
+        // mode: "march", "coords", "none"
+        showMarchTimes = (mode === "march");
+        showCoords     = (mode === "coords");
+
+        const p1 = document.querySelector('[citySettingsButtons="1"]');
+        const m1 = document.querySelector('[citySettingsButtons="m1"]');
+        const p3 = document.querySelector('[citySettingsButtons="3"]');
+        const m3 = document.querySelector('[citySettingsButtons="m3"]');
+        const anchorInputContainer = document.getElementById('anchorInputContainer');
+
+        // Reset all
+        [p1, m1, p3, m3].forEach(b => {
+            if (b) b.classList.remove('bg-yellow-500','bg-indigo-600','text-white');
+        });
+
+        if (mode === "march") {
+            [p1, m1].forEach(b => b?.classList.add('bg-yellow-500','text-white'));
+        }
+        if (mode === "coords") {
+            [p3, m3].forEach(b => b?.classList.add('bg-indigo-600','text-white'));
+        }
+
+        if (anchorInputContainer) {
+            anchorInputContainer.classList.toggle('hidden', mode !== "coords");
+        }
+
+        redraw();
+    }
+    
+    // Add handlers for city settings buttons (P1 = clock toggle)
+    document.querySelectorAll('[citySettingsButtons]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const key = btn.getAttribute('citySettingsButtons') || '';
+
+            // P1: Toggle Marchtimes
+            if (key.endsWith('1')) {
+                setCityLabelMode(showMarchTimes ? "none" : "march");
+                // update desktop + mobile button visuals
+                const desktopBtn = document.querySelector('[citySettingsButtons="1"]');
+                const mobileBtn = document.querySelector('[citySettingsButtons="m1"]');
+                [desktopBtn, mobileBtn].forEach(b => {
+                    if (!b) return;
+                    // toggle an "active" look when marchtimes are hidden
+                    b.classList.toggle('bg-yellow-500', !showMarchTimes);
+                    b.classList.toggle('text-white', !showMarchTimes);
+                });
+                redraw();
+            }
+
+            // P2: Wavemode
+            if (key.endsWith('2')) {
+                waveMode = !waveMode;
+                const d2 = document.querySelector('[citySettingsButtons="2"]');
+                const m2 = document.querySelector('[citySettingsButtons="m2"]');
+                [d2, m2].forEach(b => {
+                    if (!b) return;
+                    b.classList.toggle('bg-blue-600', waveMode);
+                    b.classList.toggle('text-white',  waveMode);
+                });
+                redraw();
+            }
+
+            // P3: Show Coords
+            if (key.endsWith('3')) {
+                setCityLabelMode(showCoords ? "none" : "coords");
+                const d3 = document.querySelector('[citySettingsButtons="3"]');
+                const m3 = document.querySelector('[citySettingsButtons="m3"]');
+                const anchorInputContainer = document.getElementById('anchorInputContainer');
+                [d3, m3].forEach(b => {
+                    if (!b) return;
+                    b.classList.toggle('bg-indigo-600', showCoords);
+                    b.classList.toggle('text-white',    showCoords);
+                });
+                document.getElementById('setAnchorBtn').addEventListener('click', () => {
+                const val = document.getElementById('anchorInput').value;
+                const pt = parseCoordInput(val);
+                if (pt) {
+                    setCoordAnchor(pt.x, pt.y);
+                } else {
+                    alert('Invalid format or out of bounds 0..1199');
+                }
+                });
+                if (anchorInputContainer) {
+                    anchorInputContainer.classList.toggle('hidden', !showCoords);
+                }           
+                redraw();
+            }
+        });
     });
 });
 
