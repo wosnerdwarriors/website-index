@@ -418,7 +418,7 @@ function drawCityDetails(city, screen) {
         });
     }
 
-    // ---- City-Koordinate relativ zum Anker anzeigen ----
+    // ---- Show city coordinates relative to anchor ----  
     if (showCoords) {
         const c = coordForCity(city);
         const fs = Math.max(6, Math.min(14, gridSize * zoom * 0.22));
@@ -707,8 +707,6 @@ function drawAnchorSymbol() {
     ctx.textBaseline = 'middle';
     ctx.fillStyle = 'rgba(255,255,255,0.4)';
     ctx.fillText("⚓", midCenter.x, midCenter.y);
-
-    // blauer Diamond, sehr dezent
     ctx.strokeStyle = 'rgba(0, 255, 0, 0.2)';
     ctx.lineWidth = Math.max(1, 2 * zoom);
     ctx.beginPath();
@@ -2402,7 +2400,7 @@ function findFreeGridSpot(width=2, height=2){
 }
 
 // Game world coord -> grid top-left coord
-// width,height = z.B. 2x2 for cities
+// width,height = e.g. 2x2 for cities
 function worldCoordToGrid(world, width=2, height=2){
   const mid = anchorGridCell ? anchorGridCell() : {x:0, y:0};
   const wx = clamp1200 ? clamp1200(world.x) : world.x|0;
@@ -2433,7 +2431,7 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
   const iY    = idx('y');
 
   if (iName === -1) {
-    alert('CSV braucht mindestens eine Spalte "name".');
+    alert('CSV must have at least a "name" column.');
     return;
   }
 
