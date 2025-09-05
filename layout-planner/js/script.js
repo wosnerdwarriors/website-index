@@ -43,6 +43,21 @@ let lastMouseX = 0;
 let lastMouseY = 0;
 let hasUnsavedChanges = false;
 let ghostPreview = null;
+let showMarchTimes = true;
+let waveMode = false;
+let showCoords = false;
+let coordAnchor = { x: 600, y: 600 };
+
+// ==== WAVE COLORS ====
+const wavePalette = [
+  '#60a5fa', // blue-400
+  '#34d399', // emerald-400
+  '#f59e0b', // amber-500
+  '#a78bfa', // violet-400
+  '#f472b6', // pink-400
+  '#84cc16', // lime-500
+  '#2dd4bf'  // teal-400
+];
 
 // ===== TOUCH/MOBILE SUPPORT =====
 let touchStartDistance = 0;
@@ -189,7 +204,6 @@ function drawDiamondGrid() {
     ctx.beginPath();
     ctx.arc(panX, panY, 8 * zoom, 0, 2 * Math.PI);
     ctx.fill();
-    
     ctx.restore();
 }
 
@@ -232,7 +246,9 @@ function drawEntity(entity, protectedAreas) {
     const screen = diamondToScreen(entity.x, entity.y);
     const currentGridSize = gridSize * zoom;
     
-    ctx.fillStyle = entity.color;
+    ctx.fillStyle = (waveMode && entity.type === 'city')
+    ? getWaveColorForCity(entity)
+    : entity.color;
     
     // Draw entity based on its actual size (width x height)
     if (entity.width === 1 && entity.height === 1) {
@@ -393,12 +409,26 @@ function drawCityDetails(city, screen) {
     const label = city.name || `City ${city.id}`;
     ctx.fillText(label, screen.x, screen.y + baseOffset);
     
-    // Draw march times to bear traps
-    const marchTimes = calculateMarchTimes(city);
-    marchTimes.forEach((time, index) => {
-        const yOffset = baseOffset + (index + 1) * currentGridSize * 0.25;
-        ctx.fillText(`BT${index + 1}: ${time}s`, screen.x, screen.y + yOffset);
-    });
+    // Draw march times only if enabled
+    if (showMarchTimes) {
+        const marchTimes = calculateMarchTimes(city);
+        marchTimes.forEach((time, index) => {
+            const yOffset = baseOffset + (index + 1) * currentGridSize * 0.25;
+            ctx.fillText(`BT${index + 1}: ${time}s`, screen.x, screen.y + yOffset);
+        });
+    }
+
+    // ---- Show city coordinates relative to anchor ----  
+    if (showCoords) {
+        const c = coordForCity(city);
+        const fs = Math.max(6, Math.min(14, gridSize * zoom * 0.22));
+        ctx.font = `${fs}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = 'black';
+        ctx.fillText(`${c.x}:${c.y}`, screen.x, screen.y + fs*0.8);
+    }
+
 }
 
 function drawBearTrapDetails(trap, screen) {
@@ -595,6 +625,102 @@ function isColorTooDark(color) {
     return brightness < 128; 
 }
 
+function getWaveRing(city) {
+  if (!bearTraps.length) return null;
+
+  // City-Center
+  const cx = city.x + city.width  / 2 - 0.5;
+  const cy = city.y + city.height / 2 - 0.5;
+
+  let best = Infinity;
+
+  for (const t of bearTraps) {
+    // Trap-Center + "Halfheight/width" in cells
+    const tx = t.x + t.width  / 2 - 0.5;
+    const ty = t.y + t.height / 2 - 0.5;
+    const rx = (t.width  - 1) / 2;
+    const ry = (t.height - 1) / 2;
+
+    // (Trap-Center - City-Center) - (Halfheight/width)
+    const dxOut = Math.max(Math.abs(cx - tx) - rx, 0);
+    const dyOut = Math.max(Math.abs(cy - ty) - ry, 0);
+
+    // All neighbors – including diagonals – are considered part of the same wave
+    // => Chebyshev-Distance to rectangle
+    const ring = Math.max(Math.ceil(dxOut), Math.ceil(dyOut)) + 1;
+
+    if (ring < best) best = ring;
+  }
+  return best; // 1 = next to bt, 2 = next row, etc.
+}
+
+function getWaveColorForCity(city) {
+    const ring = getWaveRing(city);
+    if (ring == null) return city.color;
+    return wavePalette[ring % wavePalette.length];
+}
+
+function clamp1200(n){ return Math.max(0, Math.min(1199, n|0)); }
+
+function parseCoordInput(s){
+    if (!s) return null;
+    const m = String(s).trim().match(/^(\d{1,4})\s*[:;,]\s*(\d{1,4})$/);
+    if (!m) return null;
+    return { x: clamp1200(+m[1]), y: clamp1200(+m[2]) };
+}
+function setCoordAnchor(x, y){
+    coordAnchor = { x: clamp1200(x), y: clamp1200(y) };
+    redraw();
+}
+
+// middle of the grid in diamond coords
+function anchorGridCell() {
+    return { x: 0, y: 0 };
+}
+
+// city x/y coords in 0..1199, relative to anchor
+function coordForCity(city) {
+    const tipX = city.x + city.width - 1;
+    const tipY = city.y + city.height -1;
+    const mid = anchorGridCell();
+    const dx = tipX - mid.x;
+    const dy = tipY - mid.y;
+
+    return {
+        x: clamp1200(coordAnchor.x + dy),
+        y: clamp1200(coordAnchor.y + dx)
+    };
+}
+
+function drawAnchorSymbol() {
+    if (!showCoords) return;
+
+    const midCell   = anchorGridCell();
+    const midCenter = diamondToScreen(midCell.x, midCell.y);
+    const s  = gridSize * zoom * 0.9;
+    const fs = Math.max(14, gridSize * zoom * 0.7);
+
+    ctx.save();
+
+    ctx.font = `${fs}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillText("⚓", midCenter.x, midCenter.y);
+    ctx.strokeStyle = 'rgba(0, 255, 0, 0.2)';
+    ctx.lineWidth = Math.max(1, 2 * zoom);
+    ctx.beginPath();
+    ctx.moveTo(midCenter.x,           midCenter.y - s * 0.5);
+    ctx.lineTo(midCenter.x + s * 0.5, midCenter.y);
+    ctx.lineTo(midCenter.x,           midCenter.y + s * 0.5);
+    ctx.lineTo(midCenter.x - s * 0.5, midCenter.y);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+
 // ===== ENTITY PLACEMENT =====
 function addEntity(event) {
     if (!selectedType || selectedType === 'select') return;
@@ -673,6 +799,11 @@ function addEntity(event) {
             cityCounterId++;
         }
         const newEntity = { x, y, width, height, color, type: selectedType, id };
+
+        if (selectedType === 'city' && !newEntity.name) {
+            newEntity.name = `City ${id}`;
+        }
+
         entities.push(newEntity);
         if (selectedType === 'building') {
             bearTraps.push(newEntity);
@@ -690,6 +821,7 @@ function addEntity(event) {
 function redraw() {
     drawDiamondGrid();
     drawEntities();
+    drawAnchorSymbol();
 }
 
 function selectEntity(event) {
@@ -944,6 +1076,16 @@ window.addEventListener('DOMContentLoaded', () => {
     // Event Listener for actions
     document.getElementById('shareButton')?.addEventListener('click', shareMap);
     document.getElementById('mobileShareButton')?.addEventListener('click', shareMap);
+    document.getElementById('setAnchorBtn')?.addEventListener('click', handleSetAnchor);
+    document.getElementById('saveAsCSVButton')?.addEventListener('click', () => exportPlayerNamesCSV({ onlyNamed: false }));
+
+    // QOL - Set anchor on Enter key in input field
+    document.getElementById('anchorInput')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSetAnchor();
+        }
+    });
     
     // Copy short url (desktop)
     document.getElementById('copyShortUrlButton')?.addEventListener('click', () => {
@@ -995,6 +1137,114 @@ window.addEventListener('DOMContentLoaded', () => {
         } else {
             alert('No entity selected to delete.');
         }
+    });
+
+
+    function setCityLabelMode(mode) {
+        // mode: "march", "coords", "none"
+        showMarchTimes = (mode === "march");
+        showCoords     = (mode === "coords");
+
+        const p1 = document.querySelector('[citySettingsButtons="1"]');
+        const m1 = document.querySelector('[citySettingsButtons="m1"]');
+        const p3 = document.querySelector('[citySettingsButtons="3"]');
+        const m3 = document.querySelector('[citySettingsButtons="m3"]');
+        const anchorInputContainer = document.getElementById('anchorInputContainer');
+
+        // Reset all
+        [p1, m1, p3, m3].forEach(b => {
+            if (b) b.classList.remove('bg-yellow-500','bg-indigo-600','text-white');
+        });
+
+        if (mode === "march") {
+            [p1, m1].forEach(b => b?.classList.add('bg-yellow-500','text-white'));
+        }
+        if (mode === "coords") {
+            [p3, m3].forEach(b => b?.classList.add('bg-indigo-600','text-white'));
+        }
+
+        if (anchorInputContainer) {
+            anchorInputContainer.classList.toggle('hidden', mode !== "coords");
+        }
+
+        redraw();
+    }
+
+    function handleSetAnchor() {
+        const input = document.getElementById('anchorInput');
+        if (!input) return;
+        const val = input.value;
+        const pt = parseCoordInput(val);
+        if (pt) {
+            setCoordAnchor(pt.x, pt.y);
+        } else {
+            alert('Invalid format or out of bounds 0..1199');
+        }
+        }
+
+    const csvInput = document.getElementById('playersCsvInput');
+    if (csvInput){
+        csvInput.addEventListener('change', async (e)=>{
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const text = await file.text();
+            importPlayerNamesCSV(text);
+            csvInput.value = '';
+        });
+    }
+    
+    // Add handlers for city settings buttons (P1 = clock toggle)
+    document.querySelectorAll('[citySettingsButtons]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const key = btn.getAttribute('citySettingsButtons') || '';
+
+            // P1: Toggle Marchtimes
+            if (key.endsWith('1')) {
+                setCityLabelMode(showMarchTimes ? "none" : "march");
+                // update desktop + mobile button visuals
+                const desktopBtn = document.querySelector('[citySettingsButtons="1"]');
+                const mobileBtn = document.querySelector('[citySettingsButtons="m1"]');
+                [desktopBtn, mobileBtn].forEach(b => {
+                    if (!b) return;
+                    // toggle an "active" look when marchtimes are hidden
+                    b.classList.toggle('bg-yellow-500', !showMarchTimes);
+                    b.classList.toggle('text-white', !showMarchTimes);
+                });
+                redraw();
+            }
+
+            // P2: Wavemode
+            if (key.endsWith('2')) {
+                waveMode = !waveMode;
+                const d2 = document.querySelector('[citySettingsButtons="2"]');
+                const m2 = document.querySelector('[citySettingsButtons="m2"]');
+                [d2, m2].forEach(b => {
+                    if (!b) return;
+                    b.classList.toggle('bg-yellow-500', waveMode);
+                    b.classList.toggle('text-white',  waveMode);
+                });
+                redraw();
+            }
+
+            // P3: Show Coords
+            if (key.endsWith('3')) {
+                setCityLabelMode(showCoords ? "none" : "coords");
+                const d3 = document.querySelector('[citySettingsButtons="3"]');
+                const m3 = document.querySelector('[citySettingsButtons="m3"]');
+                const anchorInputContainer = document.getElementById('anchorInputContainer');
+                [d3, m3].forEach(b => {
+                    if (!b) return;
+                    b.classList.toggle('bg-yellow-500', showCoords);
+                    b.classList.toggle('text-white',    showCoords);
+                });        
+                redraw();
+            }
+
+            // P4: Load CSV
+            if (key.endsWith('4')) {
+                document.getElementById('playersCsvInput')?.click();
+            }
+        });
     });
 });
 
@@ -1235,7 +1485,6 @@ function shareMap() {
     		});
     	}
     })();
-
 
 // ===== MOBILE/TOUCH CONTROLS =====
 function updateZoomDisplay() {
@@ -1895,30 +2144,64 @@ function sanitizeMapName(name) {
     return name.replace(/[^a-zA-Z0-9 \-_]/g, '').substring(0, 30);
 }
 
-function compressMapWithName(entities, mapName) {
+function compressMapWithName(entities, mapName, anchor = coordAnchor) {
     let base64String = compressMap(entities);
+
+    const parts = [base64String];
+
     if (mapName && mapName.trim() !== '') {
-        const sanitized = sanitizeMapName(mapName);
-        base64String += "||" + sanitized;
+        parts.push("n=" + sanitizeMapName(mapName));
     }
-    return base64String;
+
+    if (anchor && Number.isFinite(anchor.x) && Number.isFinite(anchor.y)) {
+        parts.push("a=" + clamp1200(anchor.x) + ":" + clamp1200(anchor.y));
+    }
+
+    return parts.join("||");
 }
 
+
 function decompressMapWithName(combinedString) {
+    // Returns: { entities, mapName?, anchor? }
+    const out = { entities: [], mapName: "", anchor: null };
+
+    if (!combinedString || typeof combinedString !== 'string') {
+        return out;
+    }
+
+    const parts = combinedString.split("||");
+    const base64String = parts.shift();
     let mapName = "";
-    let base64String = combinedString;
-    const marker = "||";
-    if (combinedString.includes(marker)) {
-        const parts = combinedString.split(marker);
-        base64String = parts[0];
-        mapName = parts[1];
-        const mapNameInput = document.getElementById('mapNameInput');
-        if (mapNameInput) {
-            mapNameInput.value = mapName;
+    let anchor  = null;
+
+    for (const seg of parts) {
+        if (seg.startsWith("n=")) {
+            mapName = seg.slice(2);
+        } else if (seg.startsWith("a=")) {
+            const m = seg.slice(2).match(/^(\d{1,4})[:;,](\d{1,4})$/);
+            if (m) {
+                anchor = { x: clamp1200(+m[1]), y: clamp1200(+m[2]) };
+            }
+        } else {
+            // Legacy support: if no prefix, treat as name
+            if (!mapName) mapName = seg;
         }
     }
-    return decompressMap(base64String);
+
+    const entities = decompressMap(base64String);
+
+    if (mapName) {
+        const mapNameInput = document.getElementById('mapNameInput');
+        if (mapNameInput) mapNameInput.value = mapName;
+    }
+
+    out.entities = entities;
+    if (anchor) out.anchor = anchor;
+    out.mapName = mapName;
+
+    return out;
 }
+
 
 // Pure helper to generate a shareable URL with provided map data and name
 function getShareableUrl(entitiesArg, mapNameArg) {
@@ -1931,7 +2214,9 @@ function getShareableUrl(entitiesArg, mapNameArg) {
 function loadMap() {
     try {
         const compressedMap = mapData.value;
-        const loadedEntities = decompressMapWithName(compressedMap);
+        const loaded = decompressMapWithName(compressedMap);
+        const loadedEntities = Array.isArray(loaded) ? loaded : loaded.entities || [];
+
         entities.length = 0;
         bearTraps.length = 0;
 
@@ -1942,17 +2227,20 @@ function loadMap() {
             }
         });
 
+        if (!Array.isArray(loaded) && loaded.anchor) {
+            coordAnchor = { x: clamp1200(loaded.anchor.x), y: clamp1200(loaded.anchor.y) };
+        }
+
         let cityId = 1;
         entities.forEach(entity => {
             if (entity.type === "city") {
                 entity.id = cityId;
                 if (!entity.name) {
-                    entity.name = `${cityId}`;
+                    entity.name = `City ${cityId}`;
                 }
                 cityId++;
             }
         });
-
         cityCounterId = cityId;
 
         redraw();
@@ -1964,6 +2252,7 @@ function loadMap() {
         console.error(e);
     }
 }
+
 
 function loadMapFromQuery() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -2057,6 +2346,200 @@ window.addEventListener('beforeunload', function(e) {
         return message;
     }
 });
+
+// ======= UTILS – Player import/export =======
+// This works for city names and their coordinates. 
+// With a few changes we could export the entire building list
+
+// is "City 1/2/3 ..."?
+function isDefaultCityName(name){
+    return /^city\s*\d+$/i.test(String(name||'').trim());
+}
+
+// number conversion
+function num(v){ const n = +v; return Number.isFinite(n) ? n : null; }
+
+// split CSV into fields (handles quoted commas)
+function splitCsvLine(line){
+    const out = [];
+    let cur = '', inQ = false;
+    for (let i=0; i<line.length; i++){
+        const ch = line[i];
+        if (ch === '"'){
+        if (inQ && line[i+1] === '"'){ cur += '"'; i++; }
+        else inQ = !inQ;
+        } else if (ch === ',' && !inQ){
+        out.push(cur); cur = '';
+        } else {
+        cur += ch;
+        }
+    }
+    out.push(cur);
+    return out;
+}
+
+// find a free spot in the grid for a new entity of given size
+// spiral search from anchorGridCell or 0,0
+// respects isPositionValid if defined
+function findFreeGridSpot(width=2, height=2){
+    const start = anchorGridCell ? anchorGridCell() : { x:0, y:0 };
+    const maxR = Math.max(gridCols||50, gridRows||50);
+    for (let r=0; r<=maxR; r++){
+        for (let dx=-r; dx<=r; dx++){
+        for (let dy=-r; dy<=r; dy++){
+            if (Math.max(Math.abs(dx),Math.abs(dy)) !== r) continue;
+            const x = start.x + dx, y = start.y + dy;
+            const candidate = { x, y, width, height };
+            if (typeof isPositionValid !== 'function' || isPositionValid(x,y,candidate)) {
+            return { x, y };
+            }
+        }
+        }
+    }
+    return start;
+}
+
+// Game world coord -> grid top-left coord
+// width,height = e.g. 2x2 for cities
+function worldCoordToGrid(world, width=2, height=2){
+  const mid = anchorGridCell ? anchorGridCell() : {x:0, y:0};
+  const wx = clamp1200 ? clamp1200(world.x) : world.x|0;
+  const wy = clamp1200 ? clamp1200(world.y) : world.y|0;
+
+  // reverse of coordForCity function
+  const tipX = mid.x + (wy - coordAnchor.y);
+  const tipY = mid.y + (wx - coordAnchor.x);
+
+  return { x: tipX - (width - 1), y: tipY - (height - 1) };
+}
+
+// Import: name[,x,y] while x and y are optional
+// 1) Existing "City N" cities are RENAMED only.
+// 2) Only when no default cities remain, new 2x2 cities are created.
+// 3) Provided x,y are by default used ONLY for new cities.
+//    -> with option { moveDefaultCities:true } you can also move existing default cities,
+//       I used this for for testing, might not be the best idea for normal use 
+function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
+  const lines = String(text).split(/\r?\n/).filter(l => l.trim().length);
+  if (!lines.length) return;
+
+  const headers = splitCsvLine(lines[0]).map(h => h.trim().toLowerCase());
+  const idx = k => headers.indexOf(k);
+
+  const iName = idx('name');
+  const iX    = idx('x');
+  const iY    = idx('y');
+
+  if (iName === -1) {
+    alert('CSV must have at least a "name" column.');
+    return;
+  }
+
+  // load CSV
+  const rows = [];
+  for (let i = 1; i < lines.length; i++){
+    const cols = splitCsvLine(lines[i]);
+    const name = (cols[iName] || '').trim();
+    if (!name) continue;
+    const x = (iX !== -1) ? num(cols[iX]) : null;
+    const y = (iY !== -1) ? num(cols[iY]) : null;
+    rows.push({ name, x, y });
+  }
+  if (!rows.length) return;
+
+  // 1) Collect default cities (rename only)
+  const defaultCities = entities
+    .filter(e => e.type === 'city' && isDefaultCityName(e.name))
+    .sort((a,b) => (a.id||0) - (b.id||0));
+
+  let r = 0;
+
+  while (r < rows.length && defaultCities.length){
+    const city = defaultCities.shift();
+    const rec  = rows[r];
+
+    // only rename
+    city.name = rec.name;
+
+    // only move if explicitly allowed
+    if (moveDefaultCities && Number.isFinite(rec.x) && Number.isFinite(rec.y)) {
+      const width = city.width || 2, height = city.height || 2;
+      const g = worldCoordToGrid({ x: rec.x, y: rec.y }, width, height);
+      const ok = (typeof isPositionValid !== 'function') ||
+                 isPositionValid(g.x, g.y, { x:g.x, y:g.y, width, height });
+      if (ok) { city.x = g.x; city.y = g.y; }
+    }
+
+    r++;
+  }
+  
+  // 2) Für übrig gebliebene Namen neue Städte anlegen
+  for (; r < rows.length; r++){
+    const rec = rows[r];
+    const width = 2, height = 2;
+
+    // Get target position (x,y only for new cities)
+    let gx, gy;
+    if (Number.isFinite(rec.x) && Number.isFinite(rec.y)) {
+      const g = worldCoordToGrid({ x: rec.x, y: rec.y }, width, height);
+      if (typeof isPositionValid !== 'function' || isPositionValid(g.x, g.y, { x:g.x, y:g.y, width, height })) {
+        gx = g.x; gy = g.y;
+      }
+    }
+    if (!Number.isFinite(gx) || !Number.isFinite(gy)) {
+      const spot = findFreeGridSpot(width, height);
+      gx = spot.x; gy = spot.y;
+    }
+
+    entities.push({
+      type: 'city',
+      id: (typeof cityCounterId !== 'undefined' ? cityCounterId++ : undefined),
+      name: rec.name,
+      x: gx, y: gy,
+      width, height,
+      color: (typeof getRandomColor === 'function' ? getRandomColor() : 'rgb(200,200,200)')
+    });
+  }
+
+  try { redraw(); } catch(e) { console.error("Redraw failed:", e); }  
+  try { updateCounters(); } catch(e) { console.error("Update counters failed:", e); }  
+  try { updateCityList(); } catch(e) { console.error("Update city list failed:", e); }  
+  try { markUnsavedChanges(); } catch(e) { console.error("Marking unsaved changes failed:", e); } 
+}
+
+
+/* =========================
+   EXPORT: name,x,y  (coordinates, lower corner)
+   - x,y = coordForCity(city)
+   - onlyNamed=true -> skips "City N" - only used for testing
+========================= */
+function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
+  const rows = ['name,x,y'];
+
+  const cities = entities
+    .filter(e => e.type === 'city')
+    .sort((a,b) => (a.id||0) - (b.id||0));
+
+  for (const c of cities) {
+    const rawName = (c.name && c.name.trim()) ? c.name.trim() : `City ${c.id ?? ''}`.trim();
+    if (onlyNamed && isDefaultCityName(rawName)) continue;
+
+    const world = coordForCity(c);
+    const safeName = `"${rawName.replace(/"/g,'""')}"`;
+    rows.push([safeName, world.x, world.y].join(','));
+  }
+
+  const csv = rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'layout.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 // ======= Enhanced Mobile Touch (pinch-zoom + one-finger pan) =======
 (function(){
@@ -2249,6 +2732,7 @@ window.addEventListener('beforeunload', function(e) {
     const mirrors = [
         ['downloadButton','mobileDownloadButton'],
         ['saveButton','mobileSaveButton'],
+        ['saveAsCSVButton','mobileSaveAsCSVButton'],
         ['shareButton','mobileShareButton'],
         ['shortUrlButton','mobileShortUrlButton'],
         ['loadButton','mobileLoadButton'],
