@@ -680,9 +680,12 @@ function anchorGridCell() {
 
 // city x/y coords in 0..1199, relative to anchor
 function coordForCity(city) {
+    const tipX = city.x + city.width - 1;
+    const tipY = city.y + city.height -1;
     const mid = anchorGridCell();
-    const dx = city.x - mid.x;
-    const dy = city.y - mid.y;
+    const dx = tipX - mid.x;
+    const dy = tipY - mid.y;
+
     return {
         x: clamp1200(coordAnchor.x + dy),
         y: clamp1200(coordAnchor.y + dx)
