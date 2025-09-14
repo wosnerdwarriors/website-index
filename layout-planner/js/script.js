@@ -663,11 +663,22 @@ function getWaveColorForCity(city) {
 function clamp1200(n){ return Math.max(0, Math.min(1199, n|0)); }
 
 function parseCoordInput(s){
-    if (!s) return null;
-    const m = String(s).trim().match(/^(\d{1,4})\s*[:;,]\s*(\d{1,4})$/);
-    if (!m) return null;
-    return { x: clamp1200(+m[1]), y: clamp1200(+m[2]) };
+  if (!s) return null;
+
+  // numbers fullwidth ０-９: U+FF10 - U+FF19
+  const toAscii = str => String(str)
+    .replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFF10 + 0x30))
+    .replace(/[：；，]/g, m => ({'：':':','；':';','，':','}[m]));
+
+  const norm = toAscii(String(s).trim())
+    .replace(/\s+/g, ':'); // also allow "600 600"
+
+  const m = norm.match(/^(\d{1,4})\s*[:;,]\s*(\d{1,4})$/);
+  if (!m) return null;
+
+  return { x: clamp1200(+m[1]), y: clamp1200(+m[2]) };
 }
+
 function setCoordAnchor(x, y){
     coordAnchor = { x: clamp1200(x), y: clamp1200(y) };
     redraw();
