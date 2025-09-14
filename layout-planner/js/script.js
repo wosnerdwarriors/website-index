@@ -1183,6 +1183,9 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleSetAnchor(e) {
+        e?.preventDefault();
+        e?.stopPropagation();
+        
         const desktopInput = document.getElementById('anchorInput');
         const mobileInput  = document.getElementById('mobileAnchorInput');
         const preferMobile = e?.currentTarget?.id === 'mobileSetAnchorBtn';
