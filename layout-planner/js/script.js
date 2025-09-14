@@ -1077,14 +1077,17 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('shareButton')?.addEventListener('click', shareMap);
     document.getElementById('mobileShareButton')?.addEventListener('click', shareMap);
     document.getElementById('setAnchorBtn')?.addEventListener('click', handleSetAnchor);
+    document.getElementById('mobileSetAnchorBtn')?.addEventListener('click', handleSetAnchor);
     document.getElementById('saveAsCSVButton')?.addEventListener('click', () => exportPlayerNamesCSV({ onlyNamed: false }));
 
     // QOL - Set anchor on Enter key in input field
-    document.getElementById('anchorInput')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSetAnchor();
-        }
+    ['anchorInput','mobileAnchorInput'].forEach(id => {
+        document.getElementById(id)?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSetAnchor();
+            }
+        });
     });
     
     // Copy short url (desktop)
@@ -1149,7 +1152,6 @@ window.addEventListener('DOMContentLoaded', () => {
         const m1 = document.querySelector('[citySettingsButtons="m1"]');
         const p3 = document.querySelector('[citySettingsButtons="3"]');
         const m3 = document.querySelector('[citySettingsButtons="m3"]');
-        const anchorInputContainer = document.getElementById('anchorInputContainer');
 
         // Reset all
         [p1, m1, p3, m3].forEach(b => {
@@ -1163,24 +1165,31 @@ window.addEventListener('DOMContentLoaded', () => {
             [p3, m3].forEach(b => b?.classList.add('bg-indigo-600','text-white'));
         }
 
-        if (anchorInputContainer) {
-            anchorInputContainer.classList.toggle('hidden', mode !== "coords");
-        }
+        document.querySelectorAll('#anchorInputContainer, #mobileAnchorInputContainer')
+          .forEach(el => el.classList.toggle('hidden', mode !== "coords"));
 
         redraw();
     }
 
-    function handleSetAnchor() {
-        const input = document.getElementById('anchorInput');
-        if (!input) return;
-        const val = input.value;
+    function handleSetAnchor(e) {
+        const desktopInput = document.getElementById('anchorInput');
+        const mobileInput  = document.getElementById('mobileAnchorInput');
+        const preferMobile = e?.currentTarget?.id === 'mobileSetAnchorBtn';
+        const primary   = preferMobile ? mobileInput : desktopInput;
+        const secondary = preferMobile ? desktopInput : mobileInput;
+
+        let val = (primary?.value || '').trim();
+        if (!val) val = (secondary?.value || '').trim();
+
         const pt = parseCoordInput(val);
         if (pt) {
             setCoordAnchor(pt.x, pt.y);
         } else {
             alert('Invalid format or out of bounds 0..1199');
         }
-        }
+    }
+
+
 
     const csvInput = document.getElementById('playersCsvInput');
     if (csvInput){
@@ -2736,6 +2745,7 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
         ['shareButton','mobileShareButton'],
         ['shortUrlButton','mobileShortUrlButton'],
         ['loadButton','mobileLoadButton'],
+        ['anchorButton','mobileAnchorButton'],
     ];
     mirrors.forEach(([deskId, mobId])=>{
         const d = document.getElementById(deskId);

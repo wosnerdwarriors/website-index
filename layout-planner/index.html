@@ -280,7 +280,16 @@
                     <button citySettingsButtons="m4" title="Import Players" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
                         <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">import_contacts</span>
                         <input type="file" id="mobilePlayersCsvInput" accept=".csv,text/csv" class="hidden" />
-                    </button>                     
+                    </button>
+
+                    <div id="mobileAnchorInputContainer" class="hidden mt-2 flex justify-end gap-2">
+                        <input id="mobileAnchorInput" type="text" placeholder="x:y" 
+                                class="w-24 p-1 border rounded text-sm" />
+                        <button id="mobileSetAnchorBtn" class="px-2 py-1 bg-blue-500 text-white text-xs rounded">
+                            Set
+                        </button>
+                    </div>
+
                 </div>
 
                 <div class="flex items-center gap-2 mb-4">
