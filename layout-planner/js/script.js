@@ -47,6 +47,9 @@ let showMarchTimes = true;
 let waveMode = false;
 let showCoords = false;
 let coordAnchor = { x: 600, y: 600 };
+let anchorBlinkActive = false;
+let anchorBlinkOn     = false;
+let anchorBlinkTimer  = null; 
 
 // ==== WAVE COLORS ====
 const wavePalette = [
@@ -700,20 +703,38 @@ function drawAnchorSymbol() {
     const s  = gridSize * zoom * 0.9;
     const fs = Math.max(14, gridSize * zoom * 0.7);
 
-    ctx.save();
+    // --- Alpha ---
+    let alpha = 0.4;
+    if (anchorBlinkActive) {
+        alpha = anchorBlinkOn ? 1.0 : 0.4;
+    }
 
+    // --- Scale-Faktor ---
+    let scale = 1.0;
+    if (anchorBlinkActive) {
+        scale = anchorBlinkOn ? 1.5 : 1.0;
+    }
+
+    ctx.save();
+    ctx.globalAlpha = alpha
+    ctx.translate(midCenter.x, midCenter.y);
+    ctx.scale(scale, scale);
+
+    // ⚓ Symbol
     ctx.font = `${fs}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.fillText("⚓", midCenter.x, midCenter.y);
-    ctx.strokeStyle = 'rgba(0, 255, 0, 0.2)';
-    ctx.lineWidth = Math.max(1, 2 * zoom);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "white";
+    ctx.fillText("⚓", 0, 0);
+
+    // Frame
+    ctx.strokeStyle = "rgba(0,255,0,0.5)";
+    ctx.lineWidth = Math.max(2, 4 * zoom) / scale;
     ctx.beginPath();
-    ctx.moveTo(midCenter.x,           midCenter.y - s * 0.5);
-    ctx.lineTo(midCenter.x + s * 0.5, midCenter.y);
-    ctx.lineTo(midCenter.x,           midCenter.y + s * 0.5);
-    ctx.lineTo(midCenter.x - s * 0.5, midCenter.y);
+    ctx.moveTo(0, -s * 0.5);
+    ctx.lineTo(s * 0.5, 0);
+    ctx.lineTo(0,  s * 0.5);
+    ctx.lineTo(-s * 0.5, 0);
     ctx.closePath();
     ctx.stroke();
 
@@ -1079,13 +1100,33 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('setAnchorBtn')?.addEventListener('click', handleSetAnchor);
     document.getElementById('saveAsCSVButton')?.addEventListener('click', () => exportPlayerNamesCSV({ onlyNamed: false }));
 
-    // QOL - Set anchor on Enter key in input field
-    document.getElementById('anchorInput')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
+    // QOL - Set anchor on Enter key in input field + blinking anchor symbol while focused
+    const anchorInput = document.getElementById('anchorInput');
+
+    if (anchorInput) {
+        anchorInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
             e.preventDefault();
             handleSetAnchor();
         }
-    });
+        });
+
+        anchorInput.addEventListener('focus', () => {
+        if (anchorBlinkTimer) return;
+        anchorBlinkActive = true;
+        anchorBlinkTimer  = setInterval(() => {
+            anchorBlinkOn = !anchorBlinkOn;
+            redraw();
+        }, 400);
+        });
+
+        anchorInput.addEventListener('blur', () => {
+        anchorBlinkActive = false;
+        anchorBlinkOn     = false;
+        if (anchorBlinkTimer) { clearInterval(anchorBlinkTimer); anchorBlinkTimer = null; }
+        redraw();
+        });
+    }
     
     // Copy short url (desktop)
     document.getElementById('copyShortUrlButton')?.addEventListener('click', () => {

@@ -122,12 +122,17 @@
                             </div>
 
                             <div id="anchorInputContainer" class="hidden mt-2 flex justify-end gap-2">
-                                <input id="anchorInput" type="text" placeholder="x:y" 
-                                        class="w-24 p-1 border rounded text-sm" />
-                                <button id="setAnchorBtn" class="px-2 py-1 bg-blue-500 text-white text-xs rounded">
-                                    Set
-                                </button>
+                                <div class="relative">
+                                    <!-- der Puls liegt exakt über dem Input -->
+                                    <div id="anchorPulse"
+                                        class="hidden pointer-events-none absolute -inset-1 rounded-lg
+                                                ring-2 ring-emerald-400/60 animate-ping"></div>
+                                    <input id="anchorInput" type="text" placeholder="x:y"
+                                        class="w-24 p-1 border rounded text-sm focus:outline-none" />
+                                </div>
+                                <button id="setAnchorBtn" class="px-2 py-1 bg-blue-500 text-white text-xs rounded">Set</button>
                             </div>
+
 
                             <div class="flex items-center gap-2">
                                 <label for="citySort" class="text-sm font-medium">Sort by:</label>
