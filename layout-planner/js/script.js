@@ -1096,7 +1096,7 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById(id)?.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                handleSetAnchor();
+                handleSetAnchor(e);
             }
         });
     });
@@ -1182,26 +1182,30 @@ window.addEventListener('DOMContentLoaded', () => {
         redraw();
     }
 
-    function handleSetAnchor(e) {
-        e?.preventDefault();
-        e?.stopPropagation();
+    function handleSetAnchor(e) {  
+        e?.preventDefault();  
+        e?.stopPropagation();  
         
-        const desktopInput = document.getElementById('anchorInput');
-        const mobileInput  = document.getElementById('mobileAnchorInput');
-        const preferMobile = e?.currentTarget?.id === 'mobileSetAnchorBtn';
-        const primary   = preferMobile ? mobileInput : desktopInput;
-        const secondary = preferMobile ? desktopInput : mobileInput;
+        const desktopInput = document.getElementById('anchorInput');  
+        const mobileInput  = document.getElementById('mobileAnchorInput');  
 
-        let val = (primary?.value || '').trim();
-        if (!val) val = (secondary?.value || '').trim();
+        // Prioritize input based on the event source ID (works for buttons and inputs)  
+        const eventSourceId = e?.currentTarget?.id || '';  
+        const isMobileAction = eventSourceId.includes('mobile');  
+        
+        const primary   = isMobileAction ? mobileInput : desktopInput;  
+        const secondary = isMobileAction ? desktopInput : mobileInput;  
 
-        const pt = parseCoordInput(val);
-        if (pt) {
-            setCoordAnchor(pt.x, pt.y);
-        } else {
-            alert('Invalid format or out of bounds 0..1199');
-        }
-    }
+        let val = (primary?.value || '').trim();  
+        if (!val) val = (secondary?.value || '').trim();  
+
+        const pt = parseCoordInput(val);  
+        if (pt) {  
+            setCoordAnchor(pt.x, pt.y);  
+        } else {  
+            alert('Invalid format or out of bounds 0..1199');  
+        }  
+    } 
 
 
 
