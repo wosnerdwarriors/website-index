@@ -16,6 +16,8 @@ const copyShortUrlButton = document.getElementById('copyShortUrlButton');
 const shortUrlContainer = document.getElementById('shortUrlContainer');
 const shortUrlOutput = document.getElementById('shortUrlOutput');
 const shortUrlError = document.getElementById('shortUrlError');
+const deleteButton = document.getElementById('deleteButton');
+const clearButton = document.getElementById('clearButton');
 
 // ===== GRID CONFIGURATION =====
 const baseGridSize = 30;
@@ -26,8 +28,8 @@ let panY = 0;
 let canvasWidth, canvasHeight;
 
 // Diamond grid dimensions
-const gridCols = 20;
-const gridRows = 20;
+const gridCols = 30;
+const gridRows = 30;
 
 // ===== GAME STATE =====
 const entities = [];
@@ -43,6 +45,7 @@ let lastMouseX = 0;
 let lastMouseY = 0;
 let hasUnsavedChanges = false;
 let ghostPreview = null;
+let territoryPreview = null;
 let showMarchTimes = true;
 let waveMode = false;
 let showCoords = false;
@@ -98,12 +101,13 @@ function resizeCanvas() {
 // ===== COORDINATE CONVERSION =====
 // Convert screen coordinates to diamond grid coordinates
 function screenToDiamond(screenX, screenY) {
-    const offsetX = (screenX - panX) / zoom;
-    const offsetY = (screenY - panY) / zoom;
-    
+    const currentGridSize = baseGridSize * zoom;
+    const offsetX = screenX - panX;
+    const offsetY = screenY - panY;
+
     // Convert to diamond grid system
-    const diamondX = (offsetX + offsetY) / gridSize;
-    const diamondY = (offsetY - offsetX) / gridSize;
+    const diamondX = (offsetX / (currentGridSize * 0.5) + offsetY / (currentGridSize * 0.5)) * 0.5;
+    const diamondY = (offsetY / (currentGridSize * 0.5) - offsetX / (currentGridSize * 0.5)) * 0.5;
     
     return {
         x: Math.floor(diamondX),
@@ -112,28 +116,30 @@ function screenToDiamond(screenX, screenY) {
 }
 
 // Convert diamond grid coordinates to screen coordinates (center of diamond cell)
-function diamondToScreen(gridX, gridY) {
+function diamondToScreen(gridX, gridY, pX, pY, z) {
+    const currentGridSize = baseGridSize * z;
     // Add 0.5 to center the objects within the diamond cells
     const centerX = gridX + 0.5;
     const centerY = gridY + 0.5;
     
-    const offsetX = (centerX - centerY) * gridSize * 0.5;
-    const offsetY = (centerX + centerY) * gridSize * 0.5;
+    const offsetX = (centerX - centerY) * currentGridSize * 0.5;
+    const offsetY = (centerX + centerY) * currentGridSize * 0.5;
     
     return {
-        x: offsetX * zoom + panX,
-        y: offsetY * zoom + panY
+        x: offsetX + pX,
+        y: offsetY + pY
     };
 }
 
 // Convert diamond grid coordinates to screen coordinates (corner of diamond cell)
-function diamondToScreenCorner(gridX, gridY) {
-    const offsetX = (gridX - gridY) * gridSize * 0.5;
-    const offsetY = (gridX + gridY) * gridSize * 0.5;
+function diamondToScreenCorner(gridX, gridY, pX, pY, z) {
+    const currentGridSize = baseGridSize * z;
+    const offsetX = (gridX - gridY) * currentGridSize * 0.5;
+    const offsetY = (gridX + gridY) * currentGridSize * 0.5;
     
     return {
-        x: offsetX * zoom + panX,
-        y: offsetY * zoom + panY
+        x: offsetX + pX,
+        y: offsetY + pY
     };
 }
 
@@ -161,54 +167,54 @@ function updateCounters() {
 }
 
 // ===== GRID RENDERING =====
-function drawDiamondGrid() {
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+function drawDiamondGrid(context, pX, pY, z) {
+    const w = context.canvas.width;
+    const h = context.canvas.height;
+    context.clearRect(0, 0, w, h);
     
     // Create gradient background
-    const gradient = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight);
+    const gradient = context.createLinearGradient(0, 0, w, h);
     gradient.addColorStop(0, '#667eea');
     gradient.addColorStop(1, '#764ba2');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, w, h);
     
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.lineWidth = 1;
-    
-    const currentGridSize = gridSize * zoom;
+    context.save();
+    context.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    context.lineWidth = 1;
     
     // Draw diamond grid lines
     for (let x = -gridCols; x <= gridCols; x++) {
         for (let y = -gridRows; y <= gridRows; y++) {
-            const screen = diamondToScreenCorner(x, y);
-            const screen2 = diamondToScreenCorner(x + 1, y);
-            const screen3 = diamondToScreenCorner(x, y + 1);
+            const screen = diamondToScreenCorner(x, y, pX, pY, z);
+            const screen2 = diamondToScreenCorner(x + 1, y, pX, pY, z);
+            const screen3 = diamondToScreenCorner(x, y + 1, pX, pY, z);
             
-            if (screen.x > -100 && screen.x < canvasWidth + 100 && 
-                screen.y > -100 && screen.y < canvasHeight + 100) {
+            if (screen.x > -100 && screen.x < w + 100 && 
+                screen.y > -100 && screen.y < h + 100) {
                 
                 // Draw grid cell as diamond
-                ctx.beginPath();
-                ctx.moveTo(screen.x, screen.y);
-                ctx.lineTo(screen2.x, screen2.y);
-                ctx.lineTo(diamondToScreenCorner(x + 1, y + 1).x, diamondToScreenCorner(x + 1, y + 1).y);
-                ctx.lineTo(screen3.x, screen3.y);
-                ctx.closePath();
-                ctx.stroke();
+                context.beginPath();
+                context.moveTo(screen.x, screen.y);
+                context.lineTo(screen2.x, screen2.y);
+                context.lineTo(diamondToScreenCorner(x + 1, y + 1, pX, pY, z).x, diamondToScreenCorner(x + 1, y + 1, pX, pY, z).y);
+                context.lineTo(screen3.x, screen3.y);
+                context.closePath();
+                context.stroke();
             }
         }
     }
     
     // Draw center marker
-    ctx.fillStyle = 'rgba(255, 100, 100, 0.8)';
-    ctx.beginPath();
-    ctx.arc(panX, panY, 8 * zoom, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.restore();
+    context.fillStyle = 'rgba(255, 100, 100, 0.8)';
+    context.beginPath();
+    context.arc(pX, pY, 8 * z, 0, 2 * Math.PI);
+    context.fill();
+    context.restore();
 }
 
 // ===== ENTITY RENDERING =====
-function drawEntities() {
+function drawEntities(context, pX, pY, z) {
     // Draw flag areas first
     const flagAreas = new Set();
     const hqAreas = new Set();
@@ -219,34 +225,38 @@ function drawEntities() {
             markFlagArea(entity, hqAreas, 6);
         }
     });
-    drawFlagAreas(flagAreas);
-    drawFlagAreas(hqAreas);
+     // Make existing areas slightly more transparent to let the preview stand out
+    drawFlagAreas(context, pX, pY, z, flagAreas);
+    drawFlagAreas(context, pX, pY, z, hqAreas);
+
+    // Draw the territory preview for the building being placed
+    drawTerritoryPreview(context, pX, pY, z, territoryPreview);
 
     // Combine flag areas and HQ areas for city positioning check
     const allProtectedAreas = new Set([...flagAreas, ...hqAreas]);
 
     // Draw entities
     entities.forEach(entity => {
-        drawEntity(entity, allProtectedAreas);
+        drawEntity(context, pX, pY, z, entity, allProtectedAreas);
         
         if (selectedEntity === entity) {
-            drawSelectionHighlight(entity);
+            drawSelectionHighlight(context, pX, pY, z, entity);
         }
     });
     
     // Draw ghost preview if applicable
     if (ghostPreview) {
-        drawGhostEntity(ghostPreview);
+        drawGhostEntity(context, pX, pY, z, ghostPreview);
     }
 }
 
-function drawEntity(entity, protectedAreas) {
-    ctx.save();
+function drawEntity(context, pX, pY, z, entity, protectedAreas) {
+    context.save();
     
-    const screen = diamondToScreen(entity.x, entity.y);
-    const currentGridSize = gridSize * zoom;
+    const screen = diamondToScreen(entity.x, entity.y, pX, pY, z);
+    const currentGridSize = baseGridSize * z;
     
-    ctx.fillStyle = (waveMode && entity.type === 'city')
+    context.fillStyle = (waveMode && entity.type === 'city')
     ? getWaveColorForCity(entity)
     : entity.color;
     
@@ -254,13 +264,13 @@ function drawEntity(entity, protectedAreas) {
     if (entity.width === 1 && entity.height === 1) {
         // Flag: 1x1 - single diamond cell
         const fillSize = currentGridSize * 0.9;
-        ctx.beginPath();
-        ctx.moveTo(screen.x, screen.y - fillSize * 0.5);
-        ctx.lineTo(screen.x + fillSize * 0.5, screen.y);
-        ctx.lineTo(screen.x, screen.y + fillSize * 0.5);
-        ctx.lineTo(screen.x - fillSize * 0.5, screen.y);
-        ctx.closePath();
-        ctx.fill();
+        context.beginPath();
+        context.moveTo(screen.x, screen.y - fillSize * 0.5);
+        context.lineTo(screen.x + fillSize * 0.5, screen.y);
+        context.lineTo(screen.x, screen.y + fillSize * 0.5);
+        context.lineTo(screen.x - fillSize * 0.5, screen.y);
+        context.closePath();
+        context.fill();
     } else {
         // City (2x2) or Bear Trap (3x3)
         // Calculate all corner points for the entire entity area
@@ -269,253 +279,253 @@ function drawEntity(entity, protectedAreas) {
         // Get all grid cell corners that form the outer boundary
         for (let dx = 0; dx <= entity.width; dx++) {
             for (let dy = 0; dy <= entity.height; dy++) {
-                const corner = diamondToScreenCorner(entity.x + dx, entity.y + dy);
+                const corner = diamondToScreenCorner(entity.x + dx, entity.y + dy, pX, pY, z);
                 corners.push({ x: corner.x, y: corner.y, gridX: entity.x + dx, gridY: entity.y + dy });
             }
         }
         
         // Draw the filled area using the outer boundary
-        const topLeft = diamondToScreenCorner(entity.x, entity.y);
-        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y);
-        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height);
-        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height);
+        const topLeft = diamondToScreenCorner(entity.x, entity.y, pX, pY, z);
+        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y, pX, pY, z);
+        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height, pX, pY, z);
+        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height, pX, pY, z);
         
-        ctx.beginPath();
-        ctx.moveTo(topLeft.x, topLeft.y);
-        ctx.lineTo(topRight.x, topRight.y);
-        ctx.lineTo(bottomRight.x, bottomRight.y);
-        ctx.lineTo(bottomLeft.x, bottomLeft.y);
-        ctx.closePath();
-        ctx.fill();
+        context.beginPath();
+        context.moveTo(topLeft.x, topLeft.y);
+        context.lineTo(topRight.x, topRight.y);
+        context.lineTo(bottomRight.x, bottomRight.y);
+        context.lineTo(bottomLeft.x, bottomLeft.y);
+        context.closePath();
+        context.fill();
     }
     
     // Draw border around the entire entity
 
     // For cities outside protected areas, use red border; otherwise use black
     if (entity.type === 'city' && !isCityInProtectedArea(entity, protectedAreas)) {
-        ctx.strokeStyle = 'rgba(255, 0, 0, 1.0)';
-        ctx.lineWidth = Math.max(2, 4 * zoom);
+        context.strokeStyle = 'rgba(255, 0, 0, 1.0)';
+        context.lineWidth = Math.max(2, 4 * z);
     } else {
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)';
-        ctx.lineWidth = Math.max(1, 2 * zoom);
+        context.strokeStyle = 'rgba(0, 0, 0, 0.9)';
+        context.lineWidth = Math.max(1, 2 * z);
     }
     
     if (entity.width === 1 && entity.height === 1) {
         // Single cell border
         const fillSize = currentGridSize * 0.9;
-        ctx.beginPath();
-        ctx.moveTo(screen.x, screen.y - fillSize * 0.5);
-        ctx.lineTo(screen.x + fillSize * 0.5, screen.y);
-        ctx.lineTo(screen.x, screen.y + fillSize * 0.5);
-        ctx.lineTo(screen.x - fillSize * 0.5, screen.y);
-        ctx.closePath();
-        ctx.stroke();
+        context.beginPath();
+        context.moveTo(screen.x, screen.y - fillSize * 0.5);
+        context.lineTo(screen.x + fillSize * 0.5, screen.y);
+        context.lineTo(screen.x, screen.y + fillSize * 0.5);
+        context.lineTo(screen.x - fillSize * 0.5, screen.y);
+        context.closePath();
+        context.stroke();
     } else {
         // Multi-cell border - draw outline around entire entity using corner coordinates
-        const topLeft = diamondToScreenCorner(entity.x, entity.y);
-        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y);
-        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height);
-        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height);
+        const topLeft = diamondToScreenCorner(entity.x, entity.y, pX, pY, z);
+        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y, pX, pY, z);
+        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height, pX, pY, z);
+        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height, pX, pY, z);
         
-        ctx.beginPath();
-        ctx.moveTo(topLeft.x, topLeft.y);
-        ctx.lineTo(topRight.x, topRight.y);
-        ctx.lineTo(bottomRight.x, bottomRight.y);
-        ctx.lineTo(bottomLeft.x, bottomLeft.y);
-        ctx.closePath();
-        ctx.stroke();
+        context.beginPath();
+        context.moveTo(topLeft.x, topLeft.y);
+        context.lineTo(topRight.x, topRight.y);
+        context.lineTo(bottomRight.x, bottomRight.y);
+        context.lineTo(bottomLeft.x, bottomLeft.y);
+        context.closePath();
+        context.stroke();
     }
     
     // Draw labels in center of entity
-    const centerScreen = diamondToScreen(entity.x + entity.width/2 - 0.5, entity.y + entity.height/2 - 0.5);
+    const centerScreen = diamondToScreen(entity.x + entity.width/2 - 0.5, entity.y + entity.height/2 - 0.5, pX, pY, z);
     if (entity.type === 'city') {
-        drawCityDetails(entity, centerScreen);
+        drawCityDetails(context, z, entity, centerScreen);
     } else if (entity.type === 'building') {
-        drawBearTrapDetails(entity, centerScreen);
+        drawBearTrapDetails(context, z, entity, centerScreen);
     } else if (entity.type === 'hq') {
-        drawHQDetails(entity, centerScreen);
+        drawHQDetails(context, z, entity, centerScreen);
     } else if (entity.type === 'node') {
-        drawNodeDetails(entity, centerScreen);
+        drawNodeDetails(context, z, entity, centerScreen);
     } else if (entity.type === 'obstacle') {
-        drawObstacleDetails(entity, centerScreen);
+        drawObstacleDetails(context, z, entity, centerScreen);
     }
     
-    ctx.restore();
+    context.restore();
 }
 
-function drawGhostEntity(entity) {
-    ctx.save();
+function drawGhostEntity(context, pX, pY, z, entity) {
+    context.save();
     
-    const screen = diamondToScreen(entity.x, entity.y);
-    const currentGridSize = gridSize * zoom;
+    const screen = diamondToScreen(entity.x, entity.y, pX, pY, z);
+    const currentGridSize = baseGridSize * z;
     
     // Helper function to draw the entity path
     const drawEntityPath = () => {
         if (entity.width === 1 && entity.height === 1) {
             // Single cell path
             const fillSize = currentGridSize * 0.9;
-            ctx.beginPath();
-            ctx.moveTo(screen.x, screen.y - fillSize * 0.5);
-            ctx.lineTo(screen.x + fillSize * 0.5, screen.y);
-            ctx.lineTo(screen.x, screen.y + fillSize * 0.5);
-            ctx.lineTo(screen.x - fillSize * 0.5, screen.y);
-            ctx.closePath();
+            context.beginPath();
+            context.moveTo(screen.x, screen.y - fillSize * 0.5);
+            context.lineTo(screen.x + fillSize * 0.5, screen.y);
+            context.lineTo(screen.x, screen.y + fillSize * 0.5);
+            context.lineTo(screen.x - fillSize * 0.5, screen.y);
+            context.closePath();
         } else {
             // Multi-cell path
-            const topLeft = diamondToScreenCorner(entity.x, entity.y);
-            const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y);
-            const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height);
-            const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height);
+            const topLeft = diamondToScreenCorner(entity.x, entity.y, pX, pY, z);
+            const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y, pX, pY, z);
+            const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height, pX, pY, z);
+            const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height, pX, pY, z);
             
-            ctx.beginPath();
-            ctx.moveTo(topLeft.x, topLeft.y);
-            ctx.lineTo(topRight.x, topRight.y);
-            ctx.lineTo(bottomRight.x, bottomRight.y);
-            ctx.lineTo(bottomLeft.x, bottomLeft.y);
-            ctx.closePath();
+            context.beginPath();
+            context.moveTo(topLeft.x, topLeft.y);
+            context.lineTo(topRight.x, topRight.y);
+            context.lineTo(bottomRight.x, bottomRight.y);
+            context.lineTo(bottomLeft.x, bottomLeft.y);
+            context.closePath();
         }
     };
     
     // Fill the ghost entity
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle = '#888888';
+    context.globalAlpha = 0.5;
+    context.fillStyle = '#888888';
     drawEntityPath();
-    ctx.fill();
+    context.fill();
     
     // Draw dashed border for ghost
-    ctx.globalAlpha = 0.8;
-    ctx.strokeStyle = '#666666';
-    ctx.lineWidth = Math.max(1, 2 * zoom);
-    ctx.setLineDash([3 * zoom, 3 * zoom]);
+    context.globalAlpha = 0.8;
+    context.strokeStyle = '#666666';
+    context.lineWidth = Math.max(1, 2 * z);
+    context.setLineDash([3 * z, 3 * z]);
     drawEntityPath();
-    ctx.stroke();
+    context.stroke();
     
-    ctx.restore();
+    context.restore();
 }
 
-function drawCityDetails(city, screen) {
-    ctx.fillStyle = 'black';
+function drawCityDetails(context, z, city, screen) {
+    context.fillStyle = 'black';
     
     // Scale font size, with minimum and maximum limits
-    const currentGridSize = gridSize * zoom;
+    const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(6, Math.min(16, currentGridSize * 0.25));
-    ctx.font = `${baseFontSize}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    context.font = `${baseFontSize}px Arial`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
     
     // Shift text upward to accommodate multiple bear trap times
     const baseOffset = -currentGridSize * 0.2;
     
     const label = city.name || `City ${city.id}`;
-    ctx.fillText(label, screen.x, screen.y + baseOffset);
+    context.fillText(label, screen.x, screen.y + baseOffset);
     
     // Draw march times only if enabled
     if (showMarchTimes) {
         const marchTimes = calculateMarchTimes(city);
         marchTimes.forEach((time, index) => {
             const yOffset = baseOffset + (index + 1) * currentGridSize * 0.25;
-            ctx.fillText(`BT${index + 1}: ${time}s`, screen.x, screen.y + yOffset);
+            context.fillText(`BT${index + 1}: ${time}s`, screen.x, screen.y + yOffset);
         });
     }
 
     // ---- Show city coordinates relative to anchor ----  
     if (showCoords) {
         const c = coordForCity(city);
-        const fs = Math.max(6, Math.min(14, gridSize * zoom * 0.22));
-        ctx.font = `${fs}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = 'black';
-        ctx.fillText(`${c.x}:${c.y}`, screen.x, screen.y + fs*0.8);
+        const fs = Math.max(6, Math.min(14, baseGridSize * z * 0.22));
+        context.font = `${fs}px Arial`;
+        context.textAlign = 'center';
+        context.textBaseline = 'top';
+        context.fillStyle = 'black';
+        context.fillText(`${c.x}:${c.y}`, screen.x, screen.y + fs*0.8);
     }
 
 }
 
-function drawBearTrapDetails(trap, screen) {
-    ctx.fillStyle = 'white';
+function drawBearTrapDetails(context, z, trap, screen) {
+    context.fillStyle = 'white';
     
-    const currentGridSize = gridSize * zoom;
+    const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
-    ctx.font = `${baseFontSize}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    context.font = `${baseFontSize}px Arial`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
     
     const trapIndex = bearTraps.indexOf(trap) + 1;
-    ctx.fillText(`BT${trapIndex}`, screen.x, screen.y);
+    context.fillText(`BT${trapIndex}`, screen.x, screen.y);
 }
 
-function drawHQDetails(hq, screen) {
-    ctx.fillStyle = 'white';
+function drawHQDetails(context, z, hq, screen) {
+    context.fillStyle = 'white';
     
-    const currentGridSize = gridSize * zoom;
+    const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
-    ctx.font = `${baseFontSize}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    context.font = `${baseFontSize}px Arial`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
     
-    ctx.fillText('HQ', screen.x, screen.y);
+    context.fillText('HQ', screen.x, screen.y);
 }
 
-function drawNodeDetails(node, screen) {
-    ctx.fillStyle = 'white';
+function drawNodeDetails(context, z, node, screen) {
+    context.fillStyle = 'white';
     
-    const currentGridSize = gridSize * zoom;
+    const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(6, Math.min(18, currentGridSize * 0.25));
-    ctx.font = `${baseFontSize}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    context.font = `${baseFontSize}px Arial`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
     
-    ctx.fillText('NODE', screen.x, screen.y);
+    context.fillText('NODE', screen.x, screen.y);
 }
 
-function drawObstacleDetails(obstacle, screen) {
-    ctx.fillStyle = 'white';
+function drawObstacleDetails(context, z, obstacle, screen) {
+    context.fillStyle = 'white';
     
     // Scale font size with both grid size and zoom, with minimum and maximum limits  
-    const currentGridSize = gridSize * zoom;
+    const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(4, Math.min(12, currentGridSize * 0.2));
-    ctx.font = `${baseFontSize}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    context.font = `${baseFontSize}px Arial`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
 }
 
-function drawSelectionHighlight(entity) {
-    const currentGridSize = gridSize * zoom;
+function drawSelectionHighlight(context, pX, pY, z, entity) {
+    const currentGridSize = baseGridSize * z;
     
-    ctx.save();
-    ctx.strokeStyle = '#ffff00';
-    ctx.lineWidth = Math.max(2, 4 * zoom);
-    ctx.setLineDash([5 * zoom, 5 * zoom]);
+    context.save();
+    context.strokeStyle = '#ffff00';
+    context.lineWidth = Math.max(2, 4 * z);
+    context.setLineDash([5 * z, 5 * z]);
     
     if (entity.width === 1 && entity.height === 1) {
         // Single cell highlight
-        const screen = diamondToScreen(entity.x, entity.y);
+        const screen = diamondToScreen(entity.x, entity.y, pX, pY, z);
         const size = currentGridSize * 1.0;
         
-        ctx.beginPath();
-        ctx.moveTo(screen.x, screen.y - size * 0.5);
-        ctx.lineTo(screen.x + size * 0.5, screen.y);
-        ctx.lineTo(screen.x, screen.y + size * 0.5);
-        ctx.lineTo(screen.x - size * 0.5, screen.y);
-        ctx.closePath();
-        ctx.stroke();
+        context.beginPath();
+        context.moveTo(screen.x, screen.y - size * 0.5);
+        context.lineTo(screen.x + size * 0.5, screen.y);
+        context.lineTo(screen.x, screen.y + size * 0.5);
+        context.lineTo(screen.x - size * 0.5, screen.y);
+        context.closePath();
+        context.stroke();
     } else {
         // Multi-cell highlight - draw outline around entire entity using corner coordinates
-        const topLeft = diamondToScreenCorner(entity.x, entity.y);
-        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y);
-        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height);
-        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height);
+        const topLeft = diamondToScreenCorner(entity.x, entity.y, pX, pY, z);
+        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y, pX, pY, z);
+        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height, pX, pY, z);
+        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height, pX, pY, z);
         
-        ctx.beginPath();
-        ctx.moveTo(topLeft.x, topLeft.y);
-        ctx.lineTo(topRight.x, topRight.y);
-        ctx.lineTo(bottomRight.x, bottomRight.y);
-        ctx.lineTo(bottomLeft.x, bottomLeft.y);
-        ctx.closePath();
-        ctx.stroke();
+        context.beginPath();
+        context.moveTo(topLeft.x, topLeft.y);
+        context.lineTo(topRight.x, topRight.y);
+        context.lineTo(bottomRight.x, bottomRight.y);
+        context.lineTo(bottomLeft.x, bottomLeft.y);
+        context.closePath();
+        context.stroke();
     }
     
-    ctx.restore();
+    context.restore();
 }
 
 function calculateMarchTimes(city) {
@@ -586,26 +596,32 @@ function isCityInProtectedArea(cityEntity, protectedAreas) {
     return true;
 }
 
-function drawFlagAreas(areas, color = 'rgba(173, 216, 230, 0.3)') {
-    ctx.save();
-    ctx.fillStyle = color;
+function drawFlagAreas(context, pX, pY, z, areas, color = 'rgba(173, 216, 230, 0.3)') {
+    context.save();
+    context.fillStyle = color;
     
     areas.forEach(coord => {
         const [x, y] = coord.split(',').map(Number);
-        const screen = diamondToScreen(x, y);
-        const currentGridSize = gridSize * zoom;
+        const screen = diamondToScreen(x, y, pX, pY, z);
+        const currentGridSize = baseGridSize * z;
         const fillSize = currentGridSize * 0.9;
         
-        ctx.beginPath();
-        ctx.moveTo(screen.x, screen.y - fillSize * 0.5);
-        ctx.lineTo(screen.x + fillSize * 0.5, screen.y);
-        ctx.lineTo(screen.x, screen.y + fillSize * 0.5);
-        ctx.lineTo(screen.x - fillSize * 0.5, screen.y);
-        ctx.closePath();
-        ctx.fill();
+        context.beginPath();
+        context.moveTo(screen.x, screen.y - fillSize * 0.5);
+        context.lineTo(screen.x + fillSize * 0.5, screen.y);
+        context.lineTo(screen.x, screen.y + fillSize * 0.5);
+        context.lineTo(screen.x - fillSize * 0.5, screen.y);
+        context.closePath();
+        context.fill();
     });
     
-    ctx.restore();
+    context.restore();
+}
+
+function drawTerritoryPreview(context, pX, pY, z, areas) {
+    if (!areas) return;
+    // Use a distinct color for the preview
+    drawFlagAreas(context, pX, pY, z, areas, 'rgba(96, 194, 226, 0.3)');
 }
 
 function getRandomColor() {
@@ -681,7 +697,7 @@ function anchorGridCell() {
 // city x/y coords in 0..1199, relative to anchor
 function coordForCity(city) {
     const tipX = city.x + city.width - 1;
-    const tipY = city.y + city.height -1;
+    const tipY = city.y + city.height - 1;
     const mid = anchorGridCell();
     const dx = tipX - mid.x;
     const dy = tipY - mid.y;
@@ -692,32 +708,32 @@ function coordForCity(city) {
     };
 }
 
-function drawAnchorSymbol() {
+function drawAnchorSymbol(context, pX, pY, z) {
     if (!showCoords) return;
 
     const midCell   = anchorGridCell();
-    const midCenter = diamondToScreen(midCell.x, midCell.y);
-    const s  = gridSize * zoom * 0.9;
-    const fs = Math.max(14, gridSize * zoom * 0.7);
+    const midCenter = diamondToScreen(midCell.x, midCell.y, pX, pY, z);
+    const s  = baseGridSize * z * 0.9;
+    const fs = Math.max(14, baseGridSize * z * 0.7);
 
-    ctx.save();
+    context.save();
 
-    ctx.font = `${fs}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.fillText("⚓", midCenter.x, midCenter.y);
-    ctx.strokeStyle = 'rgba(0, 255, 0, 0.2)';
-    ctx.lineWidth = Math.max(1, 2 * zoom);
-    ctx.beginPath();
-    ctx.moveTo(midCenter.x,           midCenter.y - s * 0.5);
-    ctx.lineTo(midCenter.x + s * 0.5, midCenter.y);
-    ctx.lineTo(midCenter.x,           midCenter.y + s * 0.5);
-    ctx.lineTo(midCenter.x - s * 0.5, midCenter.y);
-    ctx.closePath();
-    ctx.stroke();
+    context.font = `${fs}px Arial`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillStyle = 'rgba(255,255,255,0.4)';
+    context.fillText("⚓", midCenter.x, midCenter.y);
+    context.strokeStyle = 'rgba(0, 255, 0, 0.2)';
+    context.lineWidth = Math.max(1, 2 * z);
+    context.beginPath();
+    context.moveTo(midCenter.x,           midCenter.y - s * 0.5);
+    context.lineTo(midCenter.x + s * 0.5, midCenter.y);
+    context.lineTo(midCenter.x,           midCenter.y + s * 0.5);
+    context.lineTo(midCenter.x - s * 0.5, midCenter.y);
+    context.closePath();
+    context.stroke();
 
-    ctx.restore();
+    context.restore();
 }
 
 
@@ -764,41 +780,13 @@ function addEntity(event) {
         height = 1;
     }
 
-    // Check for overlapping entities
-    const overlapping = entities.some(entity => {
-        return (
-            x < entity.x + entity.width &&
-            x + width > entity.x &&
-            y < entity.y + entity.height &&
-            y + height > entity.y
-        );
-    });
-
-    // Additional check: prevent placing non-obstacle objects on obstacles
-    if (selectedType !== 'obstacle') {
-        const hasObstacleConflict = entities.some(entity => {
-            if (entity.type !== 'obstacle') return false;
-            return (
-                x < entity.x + entity.width &&
-                x + width > entity.x &&
-                y < entity.y + entity.height &&
-                y + height > entity.y
-            );
-        });
-        
-        if (hasObstacleConflict) {
-            // Optional: Show visual feedback
-            console.log('Cannot place object on obstacle area');
-            return;
-        }
-    }
-
-    if (!overlapping && x >= -gridCols && x + width <= gridCols && y >= -gridRows && y + height <= gridRows) {
+    const newEntityTemplate = { x, y, width, height, type: selectedType };
+    if (isPositionValid(x, y, newEntityTemplate)) {
         if (selectedType === 'city') {
             id = cityCounterId;
             cityCounterId++;
         }
-        const newEntity = { x, y, width, height, color, type: selectedType, id };
+        const newEntity = { ...newEntityTemplate, color, id };
 
         if (selectedType === 'city' && !newEntity.name) {
             newEntity.name = `City ${id}`;
@@ -819,9 +807,9 @@ function addEntity(event) {
 }
 
 function redraw() {
-    drawDiamondGrid();
-    drawEntities();
-    drawAnchorSymbol();
+    drawDiamondGrid(ctx, panX, panY, zoom);
+    drawEntities(ctx, panX, panY, zoom);
+    drawAnchorSymbol(ctx, panX, panY, zoom);
 }
 
 function selectEntity(event) {
@@ -833,7 +821,7 @@ function selectEntity(event) {
     
     const gridPos = screenToDiamond(mouseX, mouseY);
 
-    selectedEntity = entities.find(entity => {
+    const clickedEntity = entities.find(entity => {
         return (
             gridPos.x >= entity.x &&
             gridPos.x < entity.x + entity.width &&
@@ -841,6 +829,12 @@ function selectEntity(event) {
             gridPos.y < entity.y + entity.height
         );
     });
+
+    if (clickedEntity) {
+        selectedEntity = clickedEntity;
+    } else {
+        selectedEntity = null;
+    }
 
     redraw();
 }
@@ -988,6 +982,7 @@ function handleMouseUp(event) {
 function handleToolbarClick(e) {
     if (e.target.dataset.type) {
         selectedType = e.target.dataset.type;
+        selectedEntity = null; // Deselect any entity when changing tools
         
         // Remove highlighting from all buttons in both toolbars
         document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button, #mobile-toolbar-buildings button').forEach(button => {
@@ -1008,8 +1003,8 @@ function handleToolbarClick(e) {
         
         if ((selectedType === 'select' || selectedType === 'move') && ghostPreview) {
             ghostPreview = null;
-            redraw();
         }
+        redraw(); // Redraw to remove selection highlight
         
         // Update cursor style
         if (selectedType === 'move') {
@@ -1035,6 +1030,7 @@ canvas.addEventListener('mouseleave', () => {
     // Clear ghost preview when mouse leaves canvas
     if (ghostPreview) {
         ghostPreview = null;
+        territoryPreview = null;
         redraw();
     }
 });
@@ -1131,14 +1127,28 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById(`${prefix}downloadButton`)?.addEventListener('click', downloadCanvasAsPNG);
     });
     
-    document.getElementById('deleteButton').addEventListener('click', () => {
+    deleteButton.addEventListener('click', () => {
         if (selectedEntity) {
             deleteSelectedEntity();
         } else {
             alert('No entity selected to delete.');
         }
     });
-
+    
+    // Clear the entire map
+    clearButton.addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear the entire map? This cannot be undone.')) {
+            entities.length = 0;
+            bearTraps.length = 0;
+            cityCounterId = 1;
+            selectedEntity = null;
+            
+            redraw();
+            updateCounters();
+            updateCityList();
+            markUnsavedChanges();
+        }
+    });
 
     function setCityLabelMode(mode) {
         // mode: "march", "coords", "none"
@@ -1250,6 +1260,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // Update saveMap function to sync both textareas
 function saveMap() {
+    if (entities.length === 0) {
+        alert("The map is empty. Add some buildings before generating the code.");
+        return;
+    }
     try {
         const mapName = document.getElementById('mapNameInput').value;
         const compressedMap = compressMapWithName(entities, mapName);
@@ -1270,6 +1284,10 @@ function saveMap() {
 
 // Update shareMap function to support mobile copy message
 function shareMap() {
+    if (entities.length === 0) {
+        alert("The map is empty. Add some buildings before sharing.");
+        return;
+    }
     try {
         const mapName = document.getElementById('mapNameInput').value;
         const compressedMap = compressMapWithName(entities, mapName);
@@ -1439,6 +1457,10 @@ function shareMap() {
     	// bind desktop shortener button (unchanged)
     	if (shortUrlButton) {
     		shortUrlButton.addEventListener('click', async () => {
+                if (entities.length === 0) {
+                    alert("The map is empty. Add some buildings before generating a short URL.");
+                    return;
+                }
     			const mapName = document.getElementById('mapNameInput')?.value || '';
     			const compressed = compressMapWithName(entities, mapName);
     			if (document.getElementById('mapData')) document.getElementById('mapData').value = compressed;
@@ -1450,6 +1472,10 @@ function shareMap() {
     	// bind mobile shortener button (unchanged)
     	if (mobileShortUrlButton) {
     		mobileShortUrlButton.addEventListener('click', async () => {
+                if (entities.length === 0) {
+                    alert("The map is empty. Add some buildings before generating a short URL.");
+                    return;
+                }
     			const mapName = document.getElementById('mapNameInput')?.value || '';
     			const compressed = compressMapWithName(entities, mapName);
     			if (document.getElementById('mobileMapData')) document.getElementById('mobileMapData').value = compressed;
@@ -1625,6 +1651,8 @@ function handleTouchEnd(event) {
 }
 
 function updateGhostPreview(mouseX, mouseY) {
+    territoryPreview = null;
+
     if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
         const gridPos = screenToDiamond(mouseX, mouseY);
         const x = gridPos.x;
@@ -1647,6 +1675,14 @@ function updateGhostPreview(mouseX, mouseY) {
 
         if (validPosition) {
             ghostPreview = { x, y, width, height, type: selectedType };
+
+            // If the selected building is a flag or HQ, calculate its territory for preview
+            if (selectedType === 'flag' || selectedType === 'hq') {
+                const radius = selectedType === 'flag' ? 3 : 6;
+                const previewArea = new Set();
+                markFlagArea(ghostPreview, previewArea, radius);
+                territoryPreview = previewArea;
+            }
         } else {
             ghostPreview = null;
         }
@@ -1656,8 +1692,8 @@ function updateGhostPreview(mouseX, mouseY) {
 }
 
 function isPositionValid(newX, newY, entity) {
-    if (newX < -gridCols || newX + entity.width > gridCols || 
-        newY < -gridRows || newY + entity.height > gridRows) {
+    if (newX < -gridCols || newX + entity.width > gridCols + 1 || 
+        newY < -gridRows || newY + entity.height > gridRows + 1) {
         return false;
     }
     
@@ -2264,9 +2300,64 @@ function loadMapFromQuery() {
 }
 
 function downloadCanvasAsPNG() {
+    // 1. Find the bounding box of all entities
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
+    if (entities.length === 0) {
+        // If empty, use the grid boundaries
+        minX = -gridCols;
+        maxX = gridCols;
+        minY = -gridRows;
+        maxY = gridRows;
+    } else {
+        // Otherwise, use the entity boundaries
+        entities.forEach(entity => {
+            minX = Math.min(minX, entity.x);
+            maxX = Math.max(maxX, entity.x + entity.width);
+            minY = Math.min(minY, entity.y);
+            maxY = Math.max(maxY, entity.y + entity.height);
+        });
+    }
+
+    // 2. Create an off-screen canvas
+    const offscreenCanvas = document.createElement('canvas');
+    const offscreenCtx = offscreenCanvas.getContext('2d');
+
+    // 3. Calculate the required canvas size
+    const padding = 60; // Add some padding around the entities
+    
+    // Calculate the corners of the bounding box in screen coordinates at zoom 1
+    const topLeft = diamondToScreenCorner(minX, minY, 0, 0, 1);
+    const topRight = diamondToScreenCorner(maxX, minY, 0, 0, 1);
+    const bottomLeft = diamondToScreenCorner(minX, maxY, 0, 0, 1);
+    const bottomRight = diamondToScreenCorner(maxX, maxY, 0, 0, 1);
+
+    const screenMinX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+    const screenMaxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+    const screenMinY = Math.min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+    const screenMaxY = Math.max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+
+    const requiredWidth = screenMaxX - screenMinX + padding * 2;
+    const requiredHeight = screenMaxY - screenMinY + padding * 2;
+
+    offscreenCanvas.width = requiredWidth;
+    offscreenCanvas.height = requiredHeight;
+
+    // 4. Calculate new pan values to center the content
+    const exportPanX = -screenMinX + padding;
+    const exportPanY = -screenMinY + padding;
+    const exportZoom = 1;
+
+    // 5. Redraw everything on the off-screen canvas
+    drawDiamondGrid(offscreenCtx, exportPanX, exportPanY, exportZoom);
+    drawEntities(offscreenCtx, exportPanX, exportPanY, exportZoom);
+    drawAnchorSymbol(offscreenCtx, exportPanX, exportPanY, exportZoom);
+
+    // 6. Trigger download
     const link = document.createElement('a');
-    link.download = 'layout.png';
-    link.href = canvas.toDataURL('image/png');
+    const mapName = document.getElementById('mapNameInput').value.trim();
+    link.download = mapName ? `${sanitizeMapName(mapName)}.png` : 'layout.png';
+    link.href = offscreenCanvas.toDataURL('image/png');
     link.click();
 }
 
@@ -2514,6 +2605,10 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
    - onlyNamed=true -> skips "City N" - only used for testing
 ========================= */
 function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
+  if (entities.length === 0) {
+    alert("The map is empty. Add some buildings before exporting to CSV.");
+    return;
+  }
   const rows = ['name,x,y'];
 
   const cities = entities
@@ -2534,7 +2629,8 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url;
-  a.download = 'layout.csv';
+  const mapName = document.getElementById('mapNameInput').value.trim();
+  a.download = mapName ? `${sanitizeMapName(mapName)}.csv` : 'layout.csv';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
