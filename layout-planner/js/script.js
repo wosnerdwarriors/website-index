@@ -106,8 +106,8 @@ function screenToDiamond(screenX, screenY) {
     const offsetY = screenY - panY;
 
     // Convert to diamond grid system
-    const diamondX = (offsetX / (currentGridSize * 0.5) + offsetY / (currentGridSize * 0.5)) * 0.5;
-    const diamondY = (offsetY / (currentGridSize * 0.5) - offsetX / (currentGridSize * 0.5)) * 0.5;
+    const diamondX = (offsetX + offsetY) / currentGridSize;
+    const diamondY = (offsetY - offsetX) / currentGridSize;
     
     return {
         x: Math.floor(diamondX),
@@ -1258,12 +1258,18 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+function preventActionOnEmptyMap(actionText) {
+    if (entities.length === 0) {
+        alert(`The map is empty. Add some buildings before ${actionText}.`);
+        return true; // Action should be prevented
+    }
+    return false;
+}
+
 // Update saveMap function to sync both textareas
 function saveMap() {
-    if (entities.length === 0) {
-        alert("The map is empty. Add some buildings before generating the code.");
-        return;
-    }
+    if (preventActionOnEmptyMap("generating the code")) return;
+
     try {
         const mapName = document.getElementById('mapNameInput').value;
         const compressedMap = compressMapWithName(entities, mapName);
@@ -1284,10 +1290,7 @@ function saveMap() {
 
 // Update shareMap function to support mobile copy message
 function shareMap() {
-    if (entities.length === 0) {
-        alert("The map is empty. Add some buildings before sharing.");
-        return;
-    }
+    if (preventActionOnEmptyMap("sharing")) return;
     try {
         const mapName = document.getElementById('mapNameInput').value;
         const compressedMap = compressMapWithName(entities, mapName);
@@ -1457,10 +1460,7 @@ function shareMap() {
     	// bind desktop shortener button (unchanged)
     	if (shortUrlButton) {
     		shortUrlButton.addEventListener('click', async () => {
-                if (entities.length === 0) {
-                    alert("The map is empty. Add some buildings before generating a short URL.");
-                    return;
-                }
+                if (preventActionOnEmptyMap("generating a short URL")) return;
     			const mapName = document.getElementById('mapNameInput')?.value || '';
     			const compressed = compressMapWithName(entities, mapName);
     			if (document.getElementById('mapData')) document.getElementById('mapData').value = compressed;
@@ -1472,10 +1472,7 @@ function shareMap() {
     	// bind mobile shortener button (unchanged)
     	if (mobileShortUrlButton) {
     		mobileShortUrlButton.addEventListener('click', async () => {
-                if (entities.length === 0) {
-                    alert("The map is empty. Add some buildings before generating a short URL.");
-                    return;
-                }
+                if (preventActionOnEmptyMap("generating a short URL")) return;
     			const mapName = document.getElementById('mapNameInput')?.value || '';
     			const compressed = compressMapWithName(entities, mapName);
     			if (document.getElementById('mobileMapData')) document.getElementById('mobileMapData').value = compressed;
@@ -2605,10 +2602,7 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
    - onlyNamed=true -> skips "City N" - only used for testing
 ========================= */
 function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
-  if (entities.length === 0) {
-    alert("The map is empty. Add some buildings before exporting to CSV.");
-    return;
-  }
+  if (preventActionOnEmptyMap("exporting to CSV")) return;
   const rows = ['name,x,y'];
 
   const cities = entities
