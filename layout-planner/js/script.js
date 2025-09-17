@@ -703,8 +703,8 @@ function coordForCity(city) {
     const dy = tipY - mid.y;
 
     return {
-        x: clamp1200(coordAnchor.x + dy),
-        y: clamp1200(coordAnchor.y + dx)
+        x: clamp1200(coordAnchor.x - dy),
+        y: clamp1200(coordAnchor.y - dx)
     };
 }
 
