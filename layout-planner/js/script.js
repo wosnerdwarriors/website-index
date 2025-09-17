@@ -2763,7 +2763,6 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
         ['shareButton','mobileShareButton'],
         ['shortUrlButton','mobileShortUrlButton'],
         ['loadButton','mobileLoadButton'],
-        ['anchorButton','mobileAnchorButton'],
     ];
     mirrors.forEach(([deskId, mobId])=>{
         const d = document.getElementById(deskId);
