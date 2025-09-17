@@ -160,10 +160,13 @@ body.resizing {
     #toolbar-controls {
         width: 100%;
         justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
     }
     #toolbar-controls button {
-        flex: 1;
-        min-width: 0;
-        padding: 0.5rem 0.25rem;
+        flex: 0 0 auto;
+        min-width: max-content;
+        padding: 0.5rem 0.75rem;
+        line-height: 1.25rem;
     }
 }
