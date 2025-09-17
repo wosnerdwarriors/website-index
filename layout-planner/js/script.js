@@ -1740,6 +1740,7 @@ function handleKeyDown(event) {
 
     if (event.key === 'Delete') {
         deleteSelectedEntity();
+        return;
     }
 
     // Movement with arrow keys
