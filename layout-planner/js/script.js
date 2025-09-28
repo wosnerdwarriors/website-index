@@ -1201,40 +1201,23 @@ window.addEventListener('DOMContentLoaded', () => {
         const buf = await file.arrayBuffer();
         const bytes = new Uint8Array(buf);
 
-        // UTF-8 BOM?
-        const hasUTF8BOM = bytes.length >= 3 &&
-        bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF;
-
-        // Try to decode as UTF-8 first
-        let text;
-        try {
-            text = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
-        } catch {
-            text = '';
-        }
-
-        if (hasUTF8BOM && text.charCodeAt(0) === 0xFEFF) {
-        text = text.slice(1);
-        }
+        // UTF-8 decode, remove BOM
+        let text = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
 
         // mojibake -> Windows-1252/Latin-1 fallback
-        const looksBroken = /Ã.|Â.|�/.test(text) && !hasUTF8BOM;
+        const looksBroken = /Ã.|Â.|�/.test(text);
         if (looksBroken) {
-            try {
-                text = new TextDecoder('windows-1252', { fatal: false }).decode(bytes);
-            } catch {
-                // latin1 fallback
-                let s = '';
-                for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-                text = s;
+        try {
+            text = new TextDecoder('windows-1252').decode(bytes);
+        } catch {
+            // naive Latin-1 Fallback
+            text = String.fromCharCode(...bytes);
             }
         }
-
-        text = text.replace(/\r\n?/g, '\n');
-
+        
         importPlayerNamesCSV(text);
         csvInput.value = '';
-    });
+        });
     }
     
     // Add handlers for city settings buttons (P1 = clock toggle)
@@ -1973,11 +1956,38 @@ function renumberCities() {
 
 // Helper
 function needsUtf8(str) {
+    if (str.length > 254) return true;
     for (const ch of str) {
-        if (ch.codePointAt(0) > 0xFF) return true; // non Latin-1?
+        if (ch.codePointAt(0) > 0xFF) return true;
     }
     return false;
 }
+
+// Checks if we can read bitCount bits from bitstr starting at offset
+function canReadBits(bitstr, offset, bitCount) {
+    return offset + bitCount <= bitstr.length;
+}
+
+  // Reads a 32-bit unsigned integer
+function readUInt(bitstr, offset, len) {
+    if (!canReadBits(bitstr, offset, len)) return { ok: false };
+    const value = parseInt(bitstr.slice(offset, offset + len), 2);
+    return { ok: true, value, next: offset + len };
+}
+
+// Reads byteCount bytes from offset and returns them as a Uint8Array
+function readBytesFromBitString(bitstr, offset, byteCount) {
+    const bitsNeeded = byteCount * 8;
+    if (!canReadBits(bitstr, offset, bitsNeeded)) return { ok: false };
+    const bytes = new Uint8Array(byteCount);
+    for (let k = 0; k < byteCount; k++) {
+        const start = offset + k * 8;
+        bytes[k] = parseInt(bitstr.slice(start, start + 8), 2);
+    }
+    return { ok: true, bytes, next: offset + bitsNeeded };
+}
+
+const _utf8Decoder = new TextDecoder("utf-8"); // reuse for efficiency
 
 function bytesToBitString(bytes) {
     let s = "";
@@ -2019,7 +2029,7 @@ function compressMap(entities) {
             bitString += bytesToBitString(utf8);
         } else {
             // Legacy compatible: 1 byte per character
-            const len = Math.min(name.length, 255); // if > 255, you'd choose UTF-8 above
+            const len = Math.min(name.length, 254); // if > 254, you'd choose UTF-8 above
             bitString += len.toString(2).padStart(8, "0");
             for (let i = 0; i < len; i++) {
             const code = name.charCodeAt(i) & 0xFF;
@@ -2175,68 +2185,89 @@ function decompressNew(binaryString) {
     while (i + 23 <= binaryString.length) {
         const typeBits = binaryString.slice(i, i + 3);
         i += 3;
-        const xBits = binaryString.slice(i, i + 10); i += 10;
-        const yBits = binaryString.slice(i, i + 10); i += 10;
 
-        const type = typeBits === "000" ? "flag" :
-                    typeBits === "001" ? "city" : 
-                    typeBits === "010" ? "building" : 
-                    typeBits === "011" ? "node" : 
-                    typeBits === "101" ? "hq" : "obstacle";
+        const xBits = binaryString.slice(i, i + 10);
+        i += 10;
+
+        const yBits = binaryString.slice(i, i + 10);
+        i += 10;
+
+        const type =
+        typeBits === "000" ? "flag" :
+        typeBits === "001" ? "city" :
+        typeBits === "010" ? "building" :
+        typeBits === "011" ? "node" :
+        typeBits === "101" ? "hq" : "obstacle";
 
         const storageX = parseInt(xBits, 2);
         const storageY = parseInt(yBits, 2);
         const x = storageX - gridCols;
         const y = storageY - gridRows;
 
-        let entity = { x, y, type };
+        const entity = { x, y, type };
 
         if (type === "flag") {
-        entity.width = 1; entity.height = 1; entity.color = "gray";
+        entity.width = 1;
+        entity.height = 1;
+        entity.color = "gray";
         } else if (type === "city") {
-        entity.width = 2; entity.height = 2; entity.color = getRandomColor();
+        entity.width = 2;
+        entity.height = 2;
+        entity.color = getRandomColor();
 
-        if (i + 8 > binaryString.length) break;
-        const lenByte = parseInt(binaryString.slice(i, i + 8), 2);
-        i += 8;
+        // read length byte (legacy length or 255 marker)
+        const lenByteRes = readUInt(binaryString, i, 8);
+        if (!lenByteRes.ok) break;
+        const lenByte = lenByteRes.value;
+        i = lenByteRes.next;
 
         if (lenByte === 255) {
-            // UTF-8 Name
-            if (i + 16 > binaryString.length) break;
-            const byteLen = parseInt(binaryString.slice(i, i + 16), 2);
-            i += 16;
+            // UTF-8 name: 16-bit byte length + bytes
+            const len16Res = readUInt(binaryString, i, 16);
+            if (!len16Res.ok) break;
+            const byteLen = len16Res.value;
+            i = len16Res.next;
 
-            if (i + byteLen * 8 > binaryString.length) break;
-            const arr = new Uint8Array(byteLen);
-            for (let k = 0; k < byteLen; k++) {
-            arr[k] = parseInt(binaryString.slice(i + k * 8, i + k * 8 + 8), 2);
-            }
-            i += byteLen * 8;
-            entity.name = new TextDecoder("utf-8").decode(arr);
+            const bytesRes = readBytesFromBitString(binaryString, i, byteLen);
+            if (!bytesRes.ok) break;
+            i = bytesRes.next;
+
+            entity.name = _utf8Decoder.decode(bytesRes.bytes);
         } else {
-            // Legacy Name
-            const bytes = [];
-            if (i + lenByte * 8 > binaryString.length) break;
-            for (let k = 0; k < lenByte; k++) {
-            bytes.push(parseInt(binaryString.slice(i + k * 8, i + k * 8 + 8), 2));
+            // Legacy name: lenByte latin-1 bytes
+            const bytesRes = readBytesFromBitString(binaryString, i, lenByte);
+            if (!bytesRes.ok) break;
+            i = bytesRes.next;
+
+            const arr = bytesRes.bytes;
+            let name = "";
+            for (let k = 0; k < arr.length; k++) {
+            name += String.fromCharCode(arr[k]);
             }
-            i += lenByte * 8;
-            entity.name = String.fromCharCode(...bytes);
+            entity.name = name;
         }
         } else if (type === "building") {
-        entity.width = 3; entity.height = 3; entity.color = "black";
+        entity.width = 3;
+        entity.height = 3;
+        entity.color = "black";
         } else if (type === "hq") {
-        entity.width = 3; entity.height = 3; entity.color = "darkgoldenrod";
+        entity.width = 3;
+        entity.height = 3;
+        entity.color = "darkgoldenrod";
         } else if (type === "node") {
-        entity.width = 3; entity.height = 3; entity.color = "darkgreen";
+        entity.width = 3;
+        entity.height = 3;
+        entity.color = "darkgreen";
         } else if (type === "obstacle") {
-        entity.width = 1; entity.height = 1; entity.color = "#8B0000";
+        entity.width = 1;
+        entity.height = 1;
+        entity.color = "#8B0000";
         }
 
         entities.push(entity);
     }
 
-    return entities;
+  return entities;
 }
 
 function sanitizeMapName(name) {
