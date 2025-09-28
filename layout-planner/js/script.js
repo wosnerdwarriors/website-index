@@ -1978,14 +1978,14 @@ function compressMap(entities) {
         const name = entity.name || `City ${entity.id}`;
 
         if (needsUtf8(name)) {
-            // Neuer Modus: Marker 255 (11111111), dann 16-bit Byte-Länge, dann UTF-8 Bytes
+            // New mode: marker 255 (11111111), then 16-bit byte length, then UTF-8 bytes
             const utf8 = new TextEncoder().encode(name);
             bitString += "11111111"; // 255
             bitString += utf8.length.toString(2).padStart(16, "0");
             bitString += bytesToBitString(utf8);
         } else {
-            // Legacy-kompatibel: 1 Byte pro Zeichen
-            const len = Math.min(name.length, 255); // falls >255, würdest du oben UTF-8 wählen
+            // Legacy compatible: 1 byte per character
+            const len = Math.min(name.length, 255); // if > 255, you'd choose UTF-8 above
             bitString += len.toString(2).padStart(8, "0");
             for (let i = 0; i < len; i++) {
             const code = name.charCodeAt(i) & 0xFF;
