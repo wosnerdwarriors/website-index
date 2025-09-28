@@ -1194,13 +1194,47 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const csvInput = document.getElementById('playersCsvInput');
     if (csvInput){
-        csvInput.addEventListener('change', async (e)=>{
-            const file = e.target.files?.[0];
-            if (!file) return;
-            const text = await file.text();
-            importPlayerNamesCSV(text);
-            csvInput.value = '';
-        });
+    csvInput.addEventListener('change', async (e)=>{
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const buf = await file.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+
+        // UTF-8 BOM?
+        const hasUTF8BOM = bytes.length >= 3 &&
+        bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF;
+
+        // Try to decode as UTF-8 first
+        let text;
+        try {
+            text = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+        } catch {
+            text = '';
+        }
+
+        if (hasUTF8BOM && text.charCodeAt(0) === 0xFEFF) {
+        text = text.slice(1);
+        }
+
+        // mojibake -> Windows-1252/Latin-1 fallback
+        const looksBroken = /Ã.|Â.|�/.test(text) && !hasUTF8BOM;
+        if (looksBroken) {
+            try {
+                text = new TextDecoder('windows-1252', { fatal: false }).decode(bytes);
+            } catch {
+                // latin1 fallback
+                let s = '';
+                for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+                text = s;
+            }
+        }
+
+        text = text.replace(/\r\n?/g, '\n');
+
+        importPlayerNamesCSV(text);
+        csvInput.value = '';
+    });
     }
     
     // Add handlers for city settings buttons (P1 = clock toggle)
@@ -2651,7 +2685,8 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
   }
 
   const csv = rows.join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const BOM = '\uFEFF'; // UTF-8 BOM
+  const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url;
