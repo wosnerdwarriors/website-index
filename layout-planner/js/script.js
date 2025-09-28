@@ -46,10 +46,10 @@ let lastMouseY = 0;
 let hasUnsavedChanges = false;
 let ghostPreview = null;
 let territoryPreview = null;
-let showMarchTimes = true;
+let cityLabelMode = "march";  // "march", "coords", "none"
 let waveMode = false;
-let showCoords = false;
 let coordAnchor = { x: 600, y: 600 };
+
 
 // ==== WAVE COLORS ====
 const wavePalette = [
@@ -420,7 +420,7 @@ function drawCityDetails(context, z, city, screen) {
     context.fillText(label, screen.x, screen.y + baseOffset);
     
     // Draw march times only if enabled
-    if (showMarchTimes) {
+    if (cityLabelMode === 'march') {
         const marchTimes = calculateMarchTimes(city);
         marchTimes.forEach((time, index) => {
             const yOffset = baseOffset + (index + 1) * currentGridSize * 0.25;
@@ -429,7 +429,7 @@ function drawCityDetails(context, z, city, screen) {
     }
 
     // ---- Show city coordinates relative to anchor ----  
-    if (showCoords) {
+    if (cityLabelMode === 'coords') {
         const c = coordForCity(city);
         const fs = Math.max(6, Math.min(14, baseGridSize * z * 0.22));
         context.font = `${fs}px Arial`;
@@ -709,7 +709,7 @@ function coordForCity(city) {
 }
 
 function drawAnchorSymbol(context, pX, pY, z) {
-    if (!showCoords) return;
+    if (cityLabelMode !== 'coords') return;
 
     const midCell   = anchorGridCell();
     const midCenter = diamondToScreen(midCell.x, midCell.y, pX, pY, z);
@@ -1017,6 +1017,48 @@ function handleToolbarClick(e) {
     }
 }
 
+// ===== SET/RENDER GUI BUTTONS =====
+function setCityLabelMode(mode) {
+    // mode: "march", "coords", "none"
+	cityLabelMode = mode
+    const p1 = document.querySelector('[citySettingsButtons="1"]');
+    const m1 = document.querySelector('[citySettingsButtons="m1"]');
+    const p3 = document.querySelector('[citySettingsButtons="3"]');
+    const m3 = document.querySelector('[citySettingsButtons="m3"]');
+    const anchorInputContainer = document.getElementById('anchorInputContainer');
+
+    // Reset all
+    [p1, m1, p3, m3].forEach(b => {
+        if (b) b.classList.remove('bg-yellow-500', 'bg-indigo-600', 'text-white');
+    });
+
+    if (mode === "march") {
+        [p1, m1].forEach(b => b?.classList.add('bg-yellow-500', 'text-white'));
+    }
+    if (mode === "coords") {
+        [p3, m3].forEach(b => b?.classList.add('bg-indigo-600', 'text-white'));
+    }
+
+    if (anchorInputContainer) {
+        anchorInputContainer.classList.toggle('hidden', mode !== "coords");
+    }
+
+    redraw();
+}
+
+function setWaveMode(_waveMode) {
+    waveMode = _waveMode
+    
+    const d2 = document.querySelector('[citySettingsButtons="2"]');
+    const m2 = document.querySelector('[citySettingsButtons="m2"]');
+    [d2, m2].forEach(b => {
+        if (!b) return;
+        b.classList.toggle('bg-yellow-500', waveMode);
+        b.classList.toggle('text-white', waveMode);
+    });
+    redraw();
+}
+
 // ===== EVENT LISTENERS =====
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('keydown', handleKeyDown);
@@ -1150,36 +1192,6 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function setCityLabelMode(mode) {
-        // mode: "march", "coords", "none"
-        showMarchTimes = (mode === "march");
-        showCoords     = (mode === "coords");
-
-        const p1 = document.querySelector('[citySettingsButtons="1"]');
-        const m1 = document.querySelector('[citySettingsButtons="m1"]');
-        const p3 = document.querySelector('[citySettingsButtons="3"]');
-        const m3 = document.querySelector('[citySettingsButtons="m3"]');
-        const anchorInputContainer = document.getElementById('anchorInputContainer');
-
-        // Reset all
-        [p1, m1, p3, m3].forEach(b => {
-            if (b) b.classList.remove('bg-yellow-500','bg-indigo-600','text-white');
-        });
-
-        if (mode === "march") {
-            [p1, m1].forEach(b => b?.classList.add('bg-yellow-500','text-white'));
-        }
-        if (mode === "coords") {
-            [p3, m3].forEach(b => b?.classList.add('bg-indigo-600','text-white'));
-        }
-
-        if (anchorInputContainer) {
-            anchorInputContainer.classList.toggle('hidden', mode !== "coords");
-        }
-
-        redraw();
-    }
-
     function handleSetAnchor() {
         const input = document.getElementById('anchorInput');
         if (!input) return;
@@ -1210,44 +1222,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
             // P1: Toggle Marchtimes
             if (key.endsWith('1')) {
-                setCityLabelMode(showMarchTimes ? "none" : "march");
-                // update desktop + mobile button visuals
-                const desktopBtn = document.querySelector('[citySettingsButtons="1"]');
-                const mobileBtn = document.querySelector('[citySettingsButtons="m1"]');
-                [desktopBtn, mobileBtn].forEach(b => {
-                    if (!b) return;
-                    // toggle an "active" look when marchtimes are hidden
-                    b.classList.toggle('bg-yellow-500', !showMarchTimes);
-                    b.classList.toggle('text-white', !showMarchTimes);
-                });
-                redraw();
+                setCityLabelMode(cityLabelMode === "march" ? "none" : "march");
             }
 
             // P2: Wavemode
             if (key.endsWith('2')) {
-                waveMode = !waveMode;
-                const d2 = document.querySelector('[citySettingsButtons="2"]');
-                const m2 = document.querySelector('[citySettingsButtons="m2"]');
-                [d2, m2].forEach(b => {
-                    if (!b) return;
-                    b.classList.toggle('bg-yellow-500', waveMode);
-                    b.classList.toggle('text-white',  waveMode);
-                });
-                redraw();
+                setWaveMode(!waveMode);
             }
 
             // P3: Show Coords
             if (key.endsWith('3')) {
-                setCityLabelMode(showCoords ? "none" : "coords");
-                const d3 = document.querySelector('[citySettingsButtons="3"]');
-                const m3 = document.querySelector('[citySettingsButtons="m3"]');
-                const anchorInputContainer = document.getElementById('anchorInputContainer');
-                [d3, m3].forEach(b => {
-                    if (!b) return;
-                    b.classList.toggle('bg-yellow-500', showCoords);
-                    b.classList.toggle('text-white',    showCoords);
-                });        
-                redraw();
+                setCityLabelMode(cityLabelMode === "coords" ? "none" : "coords");
             }
 
             // P4: Load CSV
@@ -2178,7 +2163,7 @@ function sanitizeMapName(name) {
     return name.replace(/[^a-zA-Z0-9 \-_]/g, '').substring(0, 30);
 }
 
-function compressMapWithName(entities, mapName, anchor = coordAnchor) {
+function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode = waveMode, _cityLabelMode = cityLabelMode) {
     let base64String = compressMap(entities);
 
     const parts = [base64String];
@@ -2191,13 +2176,16 @@ function compressMapWithName(entities, mapName, anchor = coordAnchor) {
         parts.push("a=" + clamp1200(anchor.x) + ":" + clamp1200(anchor.y));
     }
 
+    parts.push("w=" + (_waveMode ? "1" : "0"));
+    parts.push("m=" + _cityLabelMode);
+
     return parts.join("||");
 }
 
 
 function decompressMapWithName(combinedString) {
-    // Returns: { entities, mapName?, anchor? }
-    const out = { entities: [], mapName: "", anchor: null };
+    // Returns: { entities, mapName?, anchor?, waveMode?, cityLabelMode? }
+    const out = { entities: [], mapName: "", anchor: null, waveMode: null, cityLabelMode: null };
 
     if (!combinedString || typeof combinedString !== 'string') {
         return out;
@@ -2216,11 +2204,20 @@ function decompressMapWithName(combinedString) {
             if (m) {
                 anchor = { x: clamp1200(+m[1]), y: clamp1200(+m[2]) };
             }
+        } else if (seg.startsWith("w=")) {
+            out.waveMode = Boolean(seg.slice(2));
+        } else if (seg.startsWith("m=")) {
+        	mode = seg.slice(2).trim().toLowerCase();
+        	if (!['march', 'coords', 'none'].includes(mode)) {
+        	    mode = 'march';
+        	}
+            out.cityLabelMode = mode
         } else {
             // Legacy support: if no prefix, treat as name
             if (!mapName) mapName = seg;
         }
     }
+
 
     const entities = decompressMap(base64String);
 
@@ -2261,8 +2258,13 @@ function loadMap() {
             }
         });
 
-        if (!Array.isArray(loaded) && loaded.anchor) {
-            coordAnchor = { x: clamp1200(loaded.anchor.x), y: clamp1200(loaded.anchor.y) };
+        if (!Array.isArray(loaded)) {
+            if (loaded.anchor) {
+                coordAnchor = { x: clamp1200(loaded.anchor.x), y: clamp1200(loaded.anchor.y) };
+            }
+            
+            setWaveMode(loaded.waveMode);
+            setCityLabelMode(loaded.cityLabelMode);
         }
 
         let cityId = 1;
