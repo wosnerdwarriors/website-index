@@ -1020,7 +1020,7 @@ function handleToolbarClick(e) {
 // ===== SET/RENDER GUI BUTTONS =====
 function setCityLabelMode(mode) {
     // mode: "march", "coords", "none"
-	cityLabelMode = mode
+    cityLabelMode = mode
     const p1 = document.querySelector('[citySettingsButtons="1"]');
     const m1 = document.querySelector('[citySettingsButtons="m1"]');
     const p3 = document.querySelector('[citySettingsButtons="3"]');
