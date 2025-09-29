@@ -1059,6 +1059,18 @@ function setWaveMode(_waveMode) {
     redraw();
 }
 
+function setAnchorInput(anchor) {
+    if (anchor) {
+        setCoordAnchor(anchor.x, anchor.y)
+        const anchorInput = document.getElementById('anchorInput');
+        if (anchorInput) anchorInput.value = anchor.x + ':' + anchor.y; 
+    } 
+}
+
+// initialize text field with default
+setAnchorInput(coordAnchor);
+
+
 // ===== EVENT LISTENERS =====
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('keydown', handleKeyDown);
@@ -2193,17 +2205,13 @@ function decompressMapWithName(combinedString) {
 
     const parts = combinedString.split("||");
     const base64String = parts.shift();
-    let mapName = "";
-    let anchor  = null;
 
     for (const seg of parts) {
         if (seg.startsWith("n=")) {
-            mapName = seg.slice(2);
+            out.mapName = seg.slice(2);
         } else if (seg.startsWith("a=")) {
-            const m = seg.slice(2).match(/^(\d{1,4})[:;,](\d{1,4})$/);
-            if (m) {
-                anchor = { x: clamp1200(+m[1]), y: clamp1200(+m[2]) };
-            }
+        	const s = seg.slice(2)
+        	out.anchor = parseCoordInput(s)
         } else if (seg.startsWith("w=")) {
             out.waveMode = Boolean(seg.slice(2));
         } else if (seg.startsWith("m=")) {
@@ -2214,21 +2222,16 @@ function decompressMapWithName(combinedString) {
             out.cityLabelMode = mode
         } else {
             // Legacy support: if no prefix, treat as name
-            if (!mapName) mapName = seg;
+            if (!out.mapName) out.mapName = seg;
         }
     }
+    
+    out.entities = decompressMap(base64String);
 
-
-    const entities = decompressMap(base64String);
-
-    if (mapName) {
+    if (out.mapName) {
         const mapNameInput = document.getElementById('mapNameInput');
-        if (mapNameInput) mapNameInput.value = mapName;
+        if (mapNameInput) mapNameInput.value = out.mapName;
     }
-
-    out.entities = entities;
-    if (anchor) out.anchor = anchor;
-    out.mapName = mapName;
 
     return out;
 }
@@ -2259,10 +2262,7 @@ function loadMap() {
         });
 
         if (!Array.isArray(loaded)) {
-            if (loaded.anchor) {
-                coordAnchor = { x: clamp1200(loaded.anchor.x), y: clamp1200(loaded.anchor.y) };
-            }
-            
+            setAnchorInput(loaded.anchor)
             setWaveMode(loaded.waveMode);
             setCityLabelMode(loaded.cityLabelMode);
         }
