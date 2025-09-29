@@ -2215,11 +2215,11 @@ function decompressMapWithName(combinedString) {
         } else if (seg.startsWith("w=")) {
             out.waveMode = seg.slice(2) === '1';
         } else if (seg.startsWith("m=")) {
-        	mode = seg.slice(2).trim().toLowerCase();
-        	if (!['march', 'coords', 'none'].includes(mode)) {
-        	    mode = 'march';
-        	}
-            out.cityLabelMode = mode
+            let mode = seg.slice(2).trim().toLowerCase();
+            if (!['march', 'coords', 'none'].includes(mode)) {
+                mode = 'march';
+            }
+            out.cityLabelMode = mode;
         } else {
             // Legacy support: if no prefix, treat as name
             if (!out.mapName) out.mapName = seg;
