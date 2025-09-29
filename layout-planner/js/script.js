@@ -2213,7 +2213,7 @@ function decompressMapWithName(combinedString) {
         	const s = seg.slice(2)
         	out.anchor = parseCoordInput(s)
         } else if (seg.startsWith("w=")) {
-            out.waveMode = Boolean(seg.slice(2));
+            out.waveMode = seg.slice(2) === '1';
         } else if (seg.startsWith("m=")) {
         	mode = seg.slice(2).trim().toLowerCase();
         	if (!['march', 'coords', 'none'].includes(mode)) {
