@@ -33,6 +33,7 @@ const gridRows = 30;
 
 // ===== GAME STATE =====
 const entities = [];
+const defaultCityLabelMode = "march";
 let selectedType = null;
 let selectedEntity = null;
 let cityCounterId = 1;
@@ -46,7 +47,7 @@ let lastMouseY = 0;
 let hasUnsavedChanges = false;
 let ghostPreview = null;
 let territoryPreview = null;
-let cityLabelMode = "march";  // "march", "coords", "none"
+let cityLabelMode = defaultCityLabelMode;  // "march", "coords", "none"
 let waveMode = false;
 let coordAnchor = { x: 600, y: 600 };
 
@@ -1018,7 +1019,7 @@ function handleToolbarClick(e) {
 }
 
 // ===== SET/RENDER GUI BUTTONS =====
-function setCityLabelMode(mode) {
+function setCityLabelMode(mode = defaultCityLabelMode) {
     // mode: "march", "coords", "none"
     cityLabelMode = mode
     const p1 = document.querySelector('[citySettingsButtons="1"]');
@@ -1094,6 +1095,7 @@ window.addEventListener('DOMContentLoaded', () => {
     enablePopulateSortOptions('id');
     updateCityList();
     updateZoomDisplay();
+    setCityLabelMode();
     
     // Set up toolbar click handlers
     document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button').forEach(button => {
@@ -2217,7 +2219,7 @@ function decompressMapWithName(combinedString) {
         } else if (seg.startsWith("m=")) {
             let mode = seg.slice(2).trim().toLowerCase();
             if (!['march', 'coords', 'none'].includes(mode)) {
-                mode = 'march';
+                mode = defaultCityLabelMode;
             }
             out.cityLabelMode = mode;
         } else {
