@@ -34,6 +34,7 @@ const gridRows = 30;
 // ===== GAME STATE =====
 const entities = [];
 const defaultCityLabelMode = "march";
+const defaultWaveMode = false;
 let selectedType = null;
 let selectedEntity = null;
 let cityCounterId = 1;
@@ -48,7 +49,7 @@ let hasUnsavedChanges = false;
 let ghostPreview = null;
 let territoryPreview = null;
 let cityLabelMode = defaultCityLabelMode;  // "march", "coords", "none"
-let waveMode = false;
+let waveMode = defaultWaveMode;
 let coordAnchor = { x: 600, y: 600 };
 
 
@@ -1021,7 +1022,7 @@ function handleToolbarClick(e) {
 // ===== SET/RENDER GUI BUTTONS =====
 function setCityLabelMode(mode = defaultCityLabelMode) {
     // mode: "march", "coords", "none"
-    cityLabelMode = mode
+    cityLabelMode = mode || defaultCityLabelMode;
     const p1 = document.querySelector('[citySettingsButtons="1"]');
     const m1 = document.querySelector('[citySettingsButtons="m1"]');
     const p3 = document.querySelector('[citySettingsButtons="3"]');
@@ -1033,22 +1034,22 @@ function setCityLabelMode(mode = defaultCityLabelMode) {
         if (b) b.classList.remove('bg-yellow-500', 'bg-indigo-600', 'text-white');
     });
 
-    if (mode === "march") {
+    if (cityLabelMode === "march") {
         [p1, m1].forEach(b => b?.classList.add('bg-yellow-500', 'text-white'));
     }
-    if (mode === "coords") {
+    if (cityLabelMode === "coords") {
         [p3, m3].forEach(b => b?.classList.add('bg-indigo-600', 'text-white'));
     }
 
     if (anchorInputContainer) {
-        anchorInputContainer.classList.toggle('hidden', mode !== "coords");
+        anchorInputContainer.classList.toggle('hidden', cityLabelMode !== "coords");
     }
 
     redraw();
 }
 
-function setWaveMode(_waveMode) {
-    waveMode = _waveMode
+function setWaveMode(_waveMode = defaultWaveMode) {
+    waveMode = _waveMode || defaultWaveMode;
     
     const d2 = document.querySelector('[citySettingsButtons="2"]');
     const m2 = document.querySelector('[citySettingsButtons="m2"]');
