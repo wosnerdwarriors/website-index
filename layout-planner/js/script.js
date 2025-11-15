@@ -2597,8 +2597,8 @@ function worldCoordToGrid(world, width=2, height=2){
   const wy = clamp1200 ? clamp1200(world.y) : world.y|0;
 
   // reverse of coordForCity function
-  const tipX = mid.x + (wy - coordAnchor.y);
-  const tipY = mid.y + (wx - coordAnchor.x);
+  const tipX = mid.x + (coordAnchor.y - wy);
+  const tipY = mid.y + (coordAnchor.x - wx);
 
   return { x: tipX - (width - 1), y: tipY - (height - 1) };
 }
