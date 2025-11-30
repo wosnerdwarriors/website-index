@@ -1731,7 +1731,7 @@ function handleKeyDown(event) {
             return;
         }
     } catch (e) {
-        // ignore
+        console.error('Error in undo/redo keyboard shortcut handler:', e);
     }
 
     if (!selectedEntity) return;
@@ -2391,6 +2391,13 @@ function markUnsavedChanges() {
 
 function markChangesSaved() {
     hasUnsavedChanges = false;
+    try {
+        // Record a snapshot representing the saved state
+        lastSavedSnapshot = (typeof snapshotState === 'function') ? snapshotState() : null;
+    } catch (e) {
+        console.error('Failed to create saved state snapshot:', e);
+        lastSavedSnapshot = null;
+    }
     updatePageTitle();
 }
 
@@ -2886,10 +2893,15 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
 const HISTORY_LIMIT = 200;
 let history = [];
 let historyIndex = -1; // points to current state in history
+// Snapshot of the last saved state (stringified snapshot); used to determine "unsaved" status
+let lastSavedSnapshot = null;
 
 function snapshotState() {
     // create a deep copy of entities
-    const entitiesCopy = entities.map(e => JSON.parse(JSON.stringify(e)));
+    // Prefer structuredClone when available (handles more types and is faster)
+    const entitiesCopy = (typeof structuredClone === 'function')
+        ? structuredClone(entities)
+        : entities.map(e => JSON.parse(JSON.stringify(e)));
     return JSON.stringify({ entities: entitiesCopy, cityCounterId });
 }
 
@@ -2906,7 +2918,19 @@ function applySnapshot(snapshot) {
         redraw();
         updateCounters();
         updateCityList();
-        markUnsavedChanges();
+        // Update unsaved-state: compare current state to last saved snapshot when available
+        try {
+            const currentSnapshot = snapshotState();
+            if (lastSavedSnapshot === null) {
+                // If we don't have a saved snapshot, don't modify existing hasUnsavedChanges
+            } else {
+                hasUnsavedChanges = (currentSnapshot !== lastSavedSnapshot);
+                updatePageTitle();
+            }
+        } catch (err) {
+            // If snapshotting fails, leave hasUnsavedChanges unchanged but log for debugging
+            console.error('Error comparing snapshots in applySnapshot:', err);
+        }
     } catch (err) {
         console.error('Failed to apply snapshot:', err);
     }
@@ -2918,7 +2942,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('redoButton')?.addEventListener('click', () => redo());
     updateUndoRedoButtons();
     // Push initial snapshot (reflects any pre-loaded map)
-    try { pushHistory(); } catch (e) { /* ignore */ }
+    try { pushHistory(); } catch (e) { console.error('Failed to create initial history snapshot:', e); }
 });
 
 function updateUndoRedoButtons() {
