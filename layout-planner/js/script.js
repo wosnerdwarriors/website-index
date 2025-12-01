@@ -801,6 +801,7 @@ function addEntity(event) {
         redraw();
         updateCounters();
         markUnsavedChanges();
+        pushHistory();
 
         if (selectedType === 'city' || selectedType === 'building') {
             updateCityList();
@@ -973,7 +974,11 @@ function handleMouseUp(event) {
     if (event.button === 1) {
         isPanning = false;
     } else if (event.button === 0) {
-        isDragging = false;
+        // If we finished dragging an entity, snapshot the new state
+        if (isDragging) {
+            isDragging = false;
+            pushHistory();
+        }
         if (selectedType === 'move') {
             isPanning = false;
         }
@@ -1194,7 +1199,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // Clear the entire map
     clearButton.addEventListener('click', () => {
-        if (confirm('Are you sure you want to clear the entire map? This cannot be undone.')) {
+        if (confirm('Are you sure you want to clear the entire map?')) {
             entities.length = 0;
             bearTraps.length = 0;
             cityCounterId = 1;
@@ -1204,6 +1209,7 @@ window.addEventListener('DOMContentLoaded', () => {
             updateCounters();
             updateCityList();
             markUnsavedChanges();
+            pushHistory();
         }
     });
 
@@ -1727,6 +1733,24 @@ function isPositionValid(newX, newY, entity) {
 }
 
 function handleKeyDown(event) {
+    // Global Undo/Redo: Ctrl/Cmd+Z, Ctrl/Cmd+Y, Ctrl/Cmd+Shift+Z
+    try {
+        const isMac = navigator.platform.toUpperCase().includes('MAC');
+        const modKey = isMac ? event.metaKey : event.ctrlKey;
+        if (modKey && event.key && event.key.toLowerCase() === 'z') {
+            event.preventDefault();
+            if (event.shiftKey) redo(); else undo();
+            return;
+        }
+        if (modKey && event.key && event.key.toLowerCase() === 'y') {
+            event.preventDefault();
+            redo();
+            return;
+        }
+    } catch (e) {
+        console.error('Error in undo/redo keyboard shortcut handler:', e);
+    }
+
     if (!selectedEntity) return;
 
     if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)) {
@@ -1801,6 +1825,7 @@ function deleteSelectedEntity() {
         updateCounters();
         updateCityList();
         markUnsavedChanges();
+        pushHistory();
     }
 }
 
@@ -2473,6 +2498,13 @@ function markUnsavedChanges() {
 
 function markChangesSaved() {
     hasUnsavedChanges = false;
+    try {
+        // Record a snapshot representing the saved state
+        lastSavedSnapshot = (typeof snapshotState === 'function') ? snapshotState() : null;
+    } catch (e) {
+        console.error('Failed to create saved state snapshot:', e);
+        lastSavedSnapshot = null;
+    }
     updatePageTitle();
 }
 
@@ -2962,6 +2994,103 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
         reflect(deskSort, mobSort); reflect(mobSort, deskSort);
     }
 })();
+
+
+// ===== HISTORY (UNDO/REDO) =====
+// Snapshot-based history 
+const HISTORY_LIMIT = 200;
+let history = [];
+let historyIndex = -1; // points to current state in history
+// Snapshot of the last saved state (stringified snapshot); used to determine "unsaved" status
+let lastSavedSnapshot = null;
+
+function snapshotState() {
+    // create a deep copy of entities
+    // Prefer structuredClone when available (handles more types and is faster)
+    const entitiesCopy = (typeof structuredClone === 'function')
+        ? structuredClone(entities)
+        : entities.map(e => JSON.parse(JSON.stringify(e)));
+    return JSON.stringify({ entities: entitiesCopy, cityCounterId });
+}
+
+function applySnapshot(snapshot) {
+    try {
+        const state = JSON.parse(snapshot);
+        // Replace entities array contents
+        entities.length = 0;
+        state.entities.forEach(e => entities.push(e));
+        // Reconstruct derived arrays
+        bearTraps = entities.filter(e => e.type === 'building');
+        cityCounterId = state.cityCounterId || 1;
+        selectedEntity = null;
+        redraw();
+        updateCounters();
+        updateCityList();
+        // Update unsaved-state: compare current state to last saved snapshot when available
+        try {
+            const currentSnapshot = snapshotState();
+            if (lastSavedSnapshot === null) {
+                // If we don't have a saved snapshot, don't modify existing hasUnsavedChanges
+            } else {
+                hasUnsavedChanges = (currentSnapshot !== lastSavedSnapshot);
+                updatePageTitle();
+            }
+        } catch (err) {
+            // If snapshotting fails, leave hasUnsavedChanges unchanged but log for debugging
+            console.error('Error comparing snapshots in applySnapshot:', err);
+        }
+    } catch (err) {
+        console.error('Failed to apply snapshot:', err);
+    }
+}
+
+// Wire up Undo/Redo buttons and create an initial history snapshot once DOM is ready.
+window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('undoButton')?.addEventListener('click', () => undo());
+    document.getElementById('redoButton')?.addEventListener('click', () => redo());
+    updateUndoRedoButtons();
+    // Push initial snapshot (reflects any pre-loaded map)
+    try { pushHistory(); } catch (e) { console.error('Failed to create initial history snapshot:', e); }
+});
+
+function updateUndoRedoButtons() {
+    const undoBtn = document.getElementById('undoButton');
+    const redoBtn = document.getElementById('redoButton');
+    if (undoBtn) undoBtn.disabled = historyIndex <= 0;
+    if (redoBtn) redoBtn.disabled = historyIndex >= history.length - 1 || history.length === 0;
+}
+
+function pushHistory() {
+    try {
+        const snap = snapshotState();
+        // If we've undone some steps and then make a new change, drop forward history
+        if (historyIndex < history.length - 1) {
+            history = history.slice(0, historyIndex + 1);
+        }
+        history.push(snap);
+        if (history.length > HISTORY_LIMIT) {
+            history.shift();
+        }
+        historyIndex = history.length - 1;
+        updateUndoRedoButtons();
+    } catch (err) {
+        console.error('pushHistory error', err);
+    }
+}
+
+function undo() {
+    if (historyIndex <= 0) return;
+    historyIndex -= 1;
+    applySnapshot(history[historyIndex]);
+    updateUndoRedoButtons();
+}
+
+function redo() {
+    if (historyIndex >= history.length - 1) return;
+    historyIndex += 1;
+    applySnapshot(history[historyIndex]);
+    updateUndoRedoButtons();
+}
 
 // ===== APPLICATION INITIALIZATION =====
 // Initialize the application
