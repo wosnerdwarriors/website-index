@@ -1227,12 +1227,29 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const csvInput = document.getElementById('playersCsvInput');
     if (csvInput){
-        csvInput.addEventListener('change', async (e)=>{
-            const file = e.target.files?.[0];
-            if (!file) return;
-            const text = await file.text();
-            importPlayerNamesCSV(text);
-            csvInput.value = '';
+    csvInput.addEventListener('change', async (e)=>{
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const buf = await file.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+
+        // UTF-8 decode, remove BOM
+        let text = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+
+        // mojibake -> Windows-1252/Latin-1 fallback
+        const looksBroken = /Ã.|Â.|�/.test(text);
+        if (looksBroken) {
+        try {
+            text = new TextDecoder('windows-1252').decode(bytes);
+        } catch {
+            // naive Latin-1 Fallback
+            text = String.fromCharCode(...bytes);
+            }
+        }
+        
+        importPlayerNamesCSV(text);
+        csvInput.value = '';
         });
     }
     
@@ -1825,8 +1842,14 @@ function updateCityList() {
     
     if (!cityList || !sortSelect || !mobileCityList || !mobileSortSelect) return;
 
-    // Sync sort options between desktop and mobile
-    mobileSortSelect.innerHTML = sortSelect.innerHTML;
+    // Sync sort options between desktop and mobile by cloning option nodes
+    while (mobileSortSelect.firstChild) mobileSortSelect.removeChild(mobileSortSelect.firstChild);
+    Array.from(sortSelect.options).forEach(opt => {
+        const newOpt = document.createElement('option');
+        newOpt.value = opt.value;
+        newOpt.textContent = opt.textContent;
+        mobileSortSelect.appendChild(newOpt);
+    });
     mobileSortSelect.value = sortSelect.value;
     
     const sortBy = sortSelect.value;
@@ -1961,47 +1984,100 @@ function renumberCities() {
 }
 
 // ===== DATA PERSISTENCE =====
+
+// Helper
+function needsUtf8(str) {
+    if (str.length > 254) return true;
+    for (const ch of str) {
+        if (ch.codePointAt(0) > 0xFF) return true;
+    }
+    return false;
+}
+
+// Checks if we can read bitCount bits from bitstr starting at offset
+function canReadBits(bitstr, offset, bitCount) {
+    return offset + bitCount <= bitstr.length;
+}
+
+  // Reads a 32-bit unsigned integer
+function readUInt(bitstr, offset, len) {
+    if (!canReadBits(bitstr, offset, len)) return { ok: false };
+    const value = parseInt(bitstr.slice(offset, offset + len), 2);
+    return { ok: true, value, next: offset + len };
+}
+
+// Reads byteCount bytes from offset and returns them as a Uint8Array
+function readBytesFromBitString(bitstr, offset, byteCount) {
+    const bitsNeeded = byteCount * 8;
+    if (!canReadBits(bitstr, offset, bitsNeeded)) return { ok: false };
+    const bytes = new Uint8Array(byteCount);
+    for (let k = 0; k < byteCount; k++) {
+        const start = offset + k * 8;
+        bytes[k] = parseInt(bitstr.slice(start, start + 8), 2);
+    }
+    return { ok: true, bytes, next: offset + bitsNeeded };
+}
+
+const _utf8Decoder = new TextDecoder("utf-8"); // reuse for efficiency
+
+function bytesToBitString(bytes) {
+    let s = "";
+    for (let i = 0; i < bytes.length; i++) s += bytes[i].toString(2).padStart(8, "0");
+    return s;
+}
+
+function readBitsAsInt(bits, offset, len) {
+    if (offset + len > bits.length) return null;
+    return parseInt(bits.slice(offset, offset + len), 2);
+}
+
 // Compression and decompression functions
 function compressMap(entities) {
     let bitString = "";
 
     entities.forEach(entity => {
         const type = entity.type === "flag" ? "000" :
-                     entity.type === "city" ? "001" : 
-                     entity.type === "building" ? "010" : 
-                     entity.type === "node" ? "011" : 
-                     entity.type === "hq" ? "101" :
-                     "100"; // obstacle = "100"
-        
-        // Convert grid coordinates to positive values for storage
+                    entity.type === "city" ? "001" : 
+                    entity.type === "building" ? "010" : 
+                    entity.type === "node" ? "011" : 
+                    entity.type === "hq" ? "101" : "100"; // obstacle
+
         const storageX = entity.x + gridCols;
         const storageY = entity.y + gridRows;
-        
         const x = storageX.toString(2).padStart(10, "0");
         const y = storageY.toString(2).padStart(10, "0");
 
         bitString += type + x + y;
 
         if (entity.type === "city") {
-            const name = entity.name || `City ${entity.id}`;
-            const nameLength = name.length;
-            const nameLengthBin = nameLength.toString(2).padStart(8, "0");
-            bitString += nameLengthBin;
-            for (let i = 0; i < name.length; i++) {
-                const charBin = name.charCodeAt(i).toString(2).padStart(8, "0");
-                bitString += charBin;
+        const name = entity.name || `City ${entity.id}`;
+
+        if (needsUtf8(name)) {
+            // New mode: marker 255 (11111111), then 16-bit byte length, then UTF-8 bytes
+            const utf8 = new TextEncoder().encode(name);
+            bitString += "11111111"; // 255
+            bitString += utf8.length.toString(2).padStart(16, "0");
+            bitString += bytesToBitString(utf8);
+        } else {
+            // Legacy compatible: 1 byte per character
+            const len = Math.min(name.length, 254); // if > 254, you'd choose UTF-8 above
+            bitString += len.toString(2).padStart(8, "0");
+            for (let i = 0; i < len; i++) {
+            const code = name.charCodeAt(i) & 0xFF;
+            bitString += code.toString(2).padStart(8, "0");
             }
+        }
         }
     });
 
     if (bitString.length % 8 !== 0) {
-        const padding = "0".repeat(8 - (bitString.length % 8));
-        bitString += padding;
+        bitString += "0".repeat(8 - (bitString.length % 8));
     }
 
     const binaryArray = bitString.match(/.{1,8}/g).map(byte => parseInt(byte, 2));
     return btoa(String.fromCharCode(...binaryArray));
 }
+
 
 function decompressMap(base64) {
     const binaryString = atob(base64)
@@ -2032,14 +2108,13 @@ function detectLegacyFormat(binaryString) {
     while (i + 22 <= totalBits) {
         const typeBits = binaryString.slice(i, i + 2);
         i += 2;
-        i += 20; // Skip x and y coordinates
-        
-        if (typeBits === "01") { // city in legacy format
-            if (i + 8 > totalBits) break;
-            const nameLengthBits = binaryString.slice(i, i + 8);
-            i += 8;
-            const nameLength = parseInt(nameLengthBits, 2);
-            i += nameLength * 8;
+        i += 20; // x,y
+
+        if (typeBits === "01") { // city legacy
+        if (i + 8 > totalBits) break;
+        const nameLen = parseInt(binaryString.slice(i, i + 8), 2);
+        i += 8 + nameLen * 8;
+        if (i > totalBits) break;
         }
         entities22++;
     }
@@ -2049,14 +2124,21 @@ function detectLegacyFormat(binaryString) {
     while (i + 23 <= totalBits) {
         const typeBits = binaryString.slice(i, i + 3);
         i += 3;
-        i += 20;
-        
-        if (typeBits === "001") { // city in new format
-            if (i + 8 > totalBits) break;
-            const nameLengthBits = binaryString.slice(i, i + 8);
-            i += 8;
-            const nameLength = parseInt(nameLengthBits, 2);
-            i += nameLength * 8;
+        i += 20; // x,y
+
+        if (typeBits === "001") { // city new
+        if (i + 8 > totalBits) break;
+        const lenByte = parseInt(binaryString.slice(i, i + 8), 2);
+        i += 8;
+
+        if (lenByte === 255) {
+            if (i + 16 > totalBits) break;
+            const byteLen = parseInt(binaryString.slice(i, i + 16), 2);
+            i += 16 + byteLen * 8;
+        } else {
+            i += lenByte * 8;
+        }
+        if (i > totalBits) break;
         }
         entities23++;
     }
@@ -2134,69 +2216,89 @@ function decompressNew(binaryString) {
     while (i + 23 <= binaryString.length) {
         const typeBits = binaryString.slice(i, i + 3);
         i += 3;
+
         const xBits = binaryString.slice(i, i + 10);
         i += 10;
+
         const yBits = binaryString.slice(i, i + 10);
         i += 10;
 
-        const type = typeBits === "000" ? "flag" :
-                     typeBits === "001" ? "city" : 
-                     typeBits === "010" ? "building" : 
-                     typeBits === "011" ? "node" : 
-                     typeBits === "101" ? "hq" : "obstacle";
-        
-        // Convert back from storage coordinates
+        const type =
+        typeBits === "000" ? "flag" :
+        typeBits === "001" ? "city" :
+        typeBits === "010" ? "building" :
+        typeBits === "011" ? "node" :
+        typeBits === "101" ? "hq" : "obstacle";
+
         const storageX = parseInt(xBits, 2);
         const storageY = parseInt(yBits, 2);
         const x = storageX - gridCols;
         const y = storageY - gridRows;
 
-        let entity = { x, y, type };
+        const entity = { x, y, type };
 
         if (type === "flag") {
-            entity.width = 1;
-            entity.height = 1;
-            entity.color = "gray";
+        entity.width = 1;
+        entity.height = 1;
+        entity.color = "gray";
         } else if (type === "city") {
-            entity.width = 2;
-            entity.height = 2;
-            entity.color = getRandomColor();
+        entity.width = 2;
+        entity.height = 2;
+        entity.color = getRandomColor();
 
-            if (i + 8 > binaryString.length) break;
-            const nameLengthBits = binaryString.slice(i, i + 8);
-            i += 8;
-            const nameLength = parseInt(nameLengthBits, 2);
+        // read length byte (legacy length or 255 marker)
+        const lenByteRes = readUInt(binaryString, i, 8);
+        if (!lenByteRes.ok) break;
+        const lenByte = lenByteRes.value;
+        i = lenByteRes.next;
 
+        if (lenByte === 255) {
+            // UTF-8 name: 16-bit byte length + bytes
+            const len16Res = readUInt(binaryString, i, 16);
+            if (!len16Res.ok) break;
+            const byteLen = len16Res.value;
+            i = len16Res.next;
+
+            const bytesRes = readBytesFromBitString(binaryString, i, byteLen);
+            if (!bytesRes.ok) break;
+            i = bytesRes.next;
+
+            entity.name = _utf8Decoder.decode(bytesRes.bytes);
+        } else {
+            // Legacy name: lenByte latin-1 bytes
+            const bytesRes = readBytesFromBitString(binaryString, i, lenByte);
+            if (!bytesRes.ok) break;
+            i = bytesRes.next;
+
+            const arr = bytesRes.bytes;
             let name = "";
-            for (let j = 0; j < nameLength; j++) {
-                if (i + 8 > binaryString.length) break;
-                const charBits = binaryString.slice(i, i + 8);
-                i += 8;
-                name += String.fromCharCode(parseInt(charBits, 2));
+            for (let k = 0; k < arr.length; k++) {
+            name += String.fromCharCode(arr[k]);
             }
             entity.name = name;
+        }
         } else if (type === "building") {
-            entity.width = 3;
-            entity.height = 3;
-            entity.color = "black";
+        entity.width = 3;
+        entity.height = 3;
+        entity.color = "black";
         } else if (type === "hq") {
-            entity.width = 3;
-            entity.height = 3;
-            entity.color = "darkgoldenrod";
+        entity.width = 3;
+        entity.height = 3;
+        entity.color = "darkgoldenrod";
         } else if (type === "node") {
-            entity.width = 3;
-            entity.height = 3;
-            entity.color = "darkgreen";
+        entity.width = 3;
+        entity.height = 3;
+        entity.color = "darkgreen";
         } else if (type === "obstacle") {
-            entity.width = 1;
-            entity.height = 1;
-            entity.color = "#8B0000";
+        entity.width = 1;
+        entity.height = 1;
+        entity.color = "#8B0000";
         }
 
         entities.push(entity);
     }
 
-    return entities;
+  return entities;
 }
 
 function sanitizeMapName(name) {
@@ -2533,8 +2635,8 @@ function worldCoordToGrid(world, width=2, height=2){
   const wy = clamp1200 ? clamp1200(world.y) : world.y|0;
 
   // reverse of coordForCity function
-  const tipX = mid.x + (wy - coordAnchor.y);
-  const tipY = mid.y + (wx - coordAnchor.x);
+  const tipX = mid.x + (coordAnchor.y - wy);
+  const tipY = mid.y + (coordAnchor.x - wx);
 
   return { x: tipX - (width - 1), y: tipY - (height - 1) };
 }
@@ -2657,7 +2759,8 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
   }
 
   const csv = rows.join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const BOM = '\uFEFF'; // UTF-8 BOM
+  const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url;

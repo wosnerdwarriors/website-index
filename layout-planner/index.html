@@ -404,7 +404,19 @@
             const mobileHelpWrapper = mobileHelpPanel?.querySelector('.bg-white');
             if (desktopHelp && mobileHelpWrapper) {
                 // keep mobile header and attach desktop help content
-                mobileHelpWrapper.innerHTML = '<h3 class="font-medium mb-4">Help</h3>' + desktopHelp.innerHTML;
+                // Avoid using innerHTML with mixed content; clone nodes instead to prevent
+                // any accidental interpretation of HTML from the source node.
+                // Clear existing content
+                while (mobileHelpWrapper.firstChild) mobileHelpWrapper.removeChild(mobileHelpWrapper.firstChild);
+                // Add header
+                const h3 = document.createElement('h3');
+                h3.className = 'font-medium mb-4';
+                h3.textContent = 'Help';
+                mobileHelpWrapper.appendChild(h3);
+                // Clone the desktop help children (deep clone)
+                Array.from(desktopHelp.childNodes).forEach(node => {
+                    mobileHelpWrapper.appendChild(node.cloneNode(true));
+                });
             }
 
             // Event listeners declaratively
