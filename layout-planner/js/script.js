@@ -1817,8 +1817,14 @@ function updateCityList() {
     
     if (!cityList || !sortSelect || !mobileCityList || !mobileSortSelect) return;
 
-    // Sync sort options between desktop and mobile
-    mobileSortSelect.innerHTML = sortSelect.innerHTML;
+    // Sync sort options between desktop and mobile by cloning option nodes
+    while (mobileSortSelect.firstChild) mobileSortSelect.removeChild(mobileSortSelect.firstChild);
+    Array.from(sortSelect.options).forEach(opt => {
+        const newOpt = document.createElement('option');
+        newOpt.value = opt.value;
+        newOpt.textContent = opt.textContent;
+        mobileSortSelect.appendChild(newOpt);
+    });
     mobileSortSelect.value = sortSelect.value;
     
     const sortBy = sortSelect.value;
