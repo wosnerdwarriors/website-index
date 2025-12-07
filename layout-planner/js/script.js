@@ -1534,7 +1534,6 @@ function preventActionOnEmptyMap(actionText) {
 // Update saveMap function to sync both textareas
 function saveMap() {
     if (preventActionOnEmptyMap("generating the code")) return;
-    console.log(">>> saveMap() – entities before compressMap", entities.map(e => e.type, e => e.name));
 
     try {
         const mapName = document.getElementById('mapNameInput').value;
@@ -2676,7 +2675,6 @@ function loadMap() {
         const loaded = decompressMapWithName(compressedMap);
         const loadedEntities = Array.isArray(loaded) ? loaded : loaded.entities || [];
 
-        console.log("<<< loadMap() – entities after decompress", loadedEntities.map(e => e.type, e => e.name));
         entities.length = 0;
         bearTraps.length = 0;
 
