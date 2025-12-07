@@ -2312,7 +2312,7 @@ function compressMap(entities) {
         bitString += type + x + y;
 
         if (entity.type === "city") {
-        const name = entity.name || `City ${entity.id}`;
+            const name = entity.name || `City ${entity.id} || 1}`;
 
         if (needsUtf8(name)) {
             // New mode: marker 255 (11111111), then 16-bit byte length, then UTF-8 bytes
