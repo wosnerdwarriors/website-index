@@ -51,6 +51,9 @@ let territoryPreview = null;
 let cityLabelMode = defaultCityLabelMode;  // "march", "coords", "none"
 let waveMode = defaultWaveMode;
 let coordAnchor = { x: 600, y: 600 };
+let mapMode = 'base'; // 'base' or 'castle' (add island?)
+const castleReservedSize = 12; // Size of the reserved castle area
+const castleRedzoneThickness = 8; // Thickness of the redzone ring around the reserved area
 
 
 // ==== WAVE COLORS ====
@@ -212,6 +215,44 @@ function drawDiamondGrid(context, pX, pY, z) {
     context.beginPath();
     context.arc(pX, pY, 8 * z, 0, 2 * Math.PI);
     context.fill();
+    // If castle mode is enabled, draw the redzone ring and reserved central area
+    drawRedZoneArea(context, pX, pY, z);
+    drawCastleReservedArea(context, pX, pY, z);
+    context.restore();
+}
+
+// Draw the redzone ring around the reserved castle area
+function drawRedZoneArea(context, pX, pY, z) {
+    if (mapMode !== 'castle') return;
+    const mid = anchorGridCell();
+    context.save();
+    context.fillStyle = 'rgba(255, 80, 80, 0.12)';
+    context.strokeStyle = 'rgba(255,80,80,0.25)';
+    context.lineWidth = Math.max(1, 1 * z);
+
+    const halfReserved = Math.floor(castleReservedSize / 2);
+    const outerHalf = halfReserved + castleRedzoneThickness;
+
+    // draw all cells from mid-outerHalf..mid+outerHalf-1, but skip the inner reserved area
+    for (let x = mid.x - outerHalf; x <= mid.x + outerHalf - 1; x++) {
+        for (let y = mid.y - outerHalf; y <= mid.y + outerHalf - 1; y++) {
+            const inInner = (x >= mid.x - halfReserved && x <= mid.x + halfReserved - 1 && y >= mid.y - halfReserved && y <= mid.y + halfReserved - 1);
+            if (inInner) continue; // skip reserved area
+
+            const corner = diamondToScreenCorner(x, y, pX, pY, z);
+            const p2 = diamondToScreenCorner(x + 1, y, pX, pY, z);
+            const p3 = diamondToScreenCorner(x + 1, y + 1, pX, pY, z);
+            const p4 = diamondToScreenCorner(x, y + 1, pX, pY, z);
+            context.beginPath();
+            context.moveTo(corner.x, corner.y);
+            context.lineTo(p2.x, p2.y);
+            context.lineTo(p3.x, p3.y);
+            context.lineTo(p4.x, p4.y);
+            context.closePath();
+            context.fill();
+        }
+    }
+
     context.restore();
 }
 
@@ -304,7 +345,8 @@ function drawEntity(context, pX, pY, z, entity, protectedAreas) {
     // Draw border around the entire entity
 
     // For cities outside protected areas, use red border; otherwise use black
-    if (entity.type === 'city' && !isCityInProtectedArea(entity, protectedAreas)) {
+    // NOTE: in castle mode we skip this check to avoid showing red warning borders
+    if (entity.type === 'city' && mapMode !== 'castle' && !isCityInProtectedArea(entity, protectedAreas)) {
         context.strokeStyle = 'rgba(255, 0, 0, 1.0)';
         context.lineWidth = Math.max(2, 4 * z);
     } else {
@@ -342,6 +384,23 @@ function drawEntity(context, pX, pY, z, entity, protectedAreas) {
     const centerScreen = diamondToScreen(entity.x + entity.width/2 - 0.5, entity.y + entity.height/2 - 0.5, pX, pY, z);
     if (entity.type === 'city') {
         drawCityDetails(context, z, entity, centerScreen);
+    } else if (entity.type === 'castle') {
+        // draw castle label
+        context.fillStyle = 'white';
+        const currentGridSize = baseGridSize * z;
+        const baseFontSize = Math.max(10, Math.min(24, currentGridSize * 0.25));
+        context.font = `${baseFontSize}px Arial`;
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(entity.name || 'Castle', centerScreen.x, centerScreen.y);
+    } else if (entity.type === 'turret') {
+        context.fillStyle = 'white';
+        const currentGridSize = baseGridSize * z;
+        const baseFontSize = Math.max(8, Math.min(18, currentGridSize * 0.2));
+        context.font = `${baseFontSize}px Arial`;
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(entity.name || 'Turret', centerScreen.x, centerScreen.y);
     } else if (entity.type === 'building') {
         drawBearTrapDetails(context, z, entity, centerScreen);
     } else if (entity.type === 'hq') {
@@ -439,6 +498,14 @@ function drawCityDetails(context, z, city, screen) {
         context.textBaseline = 'top';
         context.fillStyle = 'black';
         context.fillText(`${c.x}:${c.y}`, screen.x, screen.y + fs*0.8);
+    }
+
+    // In Castle mode, show march time to Castle based on ring distance from castle edge
+    if (mapMode === 'castle') {
+        const castle = entities.find(e => e.type === 'castle');
+        if (castle) {
+             // TODO: ADD MARCH TIME LOGIC
+        }
     }
 
 }
@@ -927,7 +994,7 @@ function handleMouseDown(event) {
     } else if (event.button === 0) { // Left mouse button
         if (selectedType === 'select') {
             selectEntity(event);
-            if (selectedEntity) {
+            if (selectedEntity && !selectedEntity.locked) {
                 isDragging = true;
                 const gridPos = screenToDiamond(mouseX, mouseY);
                 dragOffsetX = gridPos.x - selectedEntity.x;
@@ -987,6 +1054,12 @@ function handleMouseUp(event) {
 
 // Update this function to handle both desktop and mobile toolbars
 function handleToolbarClick(e) {
+    // Handle map-mode toggles (e.g. Castle)
+    if (e.target.dataset.mode) {
+        setMapMode(e.target.dataset.mode);
+        return;
+    }
+
     if (e.target.dataset.type) {
         selectedType = e.target.dataset.type;
         selectedEntity = null; // Deselect any entity when changing tools
@@ -1066,6 +1139,133 @@ function setWaveMode(_waveMode = defaultWaveMode) {
     redraw();
 }
 
+// Set the current map mode. Supported modes: 'base', 'castle'
+function setMapMode(mode = 'base') {
+    mapMode = mode || 'base';
+
+    // Update button visuals in both toolbars (desktop + mobile)
+    document.querySelectorAll('[data-mode]').forEach(b => {
+        b.classList.remove('bg-yellow-500', 'text-white');
+        if (b.dataset.mode === mapMode) {
+            b.classList.add('bg-yellow-500', 'text-white');
+        } else {
+            b.classList.add('bg-gray-200');
+        }
+    });
+
+    // If entering castle mode, set the coord anchor to 599:599 and ensure entities
+    if (mapMode === 'castle') {
+        try { setAnchorInput({ x: 599, y: 599 }); } catch (e) { setCoordAnchor(599, 599); }
+        ensureCastleEntities();
+        // when entering castle mode, automatically show coordinates on cities
+        setCityLabelMode('coords');
+    } else {
+        // leaving castle mode -> remove the locked castle/turret entities
+        removeCastleEntities();
+    }
+    // Sync dropdown if present
+    const sel = document.getElementById('mapModeSelect');
+    if (sel) sel.value = mapMode;
+
+    redraw();
+}
+
+// Draw the reserved castle area around the anchor cell
+function drawCastleReservedArea(context, pX, pY, z) {
+    if (mapMode !== 'castle') return;
+
+    const mid = anchorGridCell();
+    context.save();
+    context.fillStyle = 'rgba(200, 50, 50, 0.25)';
+    context.strokeStyle = 'rgba(200,50,50,0.6)';
+    context.lineWidth = Math.max(1, 2 * z);
+    const half = Math.floor(castleReservedSize / 2);
+    for (let x = mid.x - half; x <= mid.x + half - 1; x++) {
+        for (let y = mid.y - half; y <= mid.y + half - 1; y++) {
+            // draw diamond cell
+            const corner = diamondToScreenCorner(x, y, pX, pY, z);
+            const p2 = diamondToScreenCorner(x + 1, y, pX, pY, z);
+            const p3 = diamondToScreenCorner(x + 1, y + 1, pX, pY, z);
+            const p4 = diamondToScreenCorner(x, y + 1, pX, pY, z);
+            context.beginPath();
+            context.moveTo(corner.x, corner.y);
+            context.lineTo(p2.x, p2.y);
+            context.lineTo(p3.x, p3.y);
+            context.lineTo(p4.x, p4.y);
+            context.closePath();
+            context.fill();
+            context.stroke();
+        }
+    }
+
+    context.restore();
+}
+
+// Ensure the central Castle and four Turrets exist (locked) when castle mode is active
+function ensureCastleEntities() {
+    const mid = anchorGridCell();
+    const half = Math.floor(castleReservedSize / 2);
+    const startX = mid.x - half;
+    const endX = mid.x + half - 1;
+    const startY = mid.y - half;
+    const endY = mid.y + half - 1;
+
+    // Check if castle already present
+    const existingCastle = entities.find(e => e.type === 'castle');
+    if (!existingCastle) {
+        // Place 8x8 Castle centered in reserved area
+        const castleSize = 6;
+        const castleHalf = Math.floor(castleSize / 2);
+        const castleX = mid.x - castleHalf;
+        const castleY = mid.y - castleHalf;
+        const castle = {
+            x: castleX,
+            y: castleY,
+            width: castleSize,
+            height: castleSize,
+            type: 'castle',
+            color: '#912900cc',
+            name: 'Castle',
+            locked: true
+        };
+        entities.push(castle);
+    }
+
+    // Turrets positions: north, east, south, west — 2x2 adjacent to reserved area
+    const turrets = [
+        { name: 'North Turret', x: mid.x - 6, y: startY + 0 },
+        { name: 'East Turret',  x: endX - 1,  y: mid.y - 6 },
+        { name: 'South Turret', x: mid.x + 4, y: endY -1  },
+        { name: 'West Turret',  x: startX + 0, y: mid.y + 4 }
+    ];
+
+    for (const t of turrets) {
+        const exists = entities.find(e => e.type === 'turret' && e.name === t.name);
+        if (!exists) {
+            entities.push({ x: t.x, y: t.y, width: 2, height: 2, type: 'turret', color: '#882222', name: t.name, locked: true });
+        }
+    }
+
+    updateCounters();
+    redraw();
+    pushHistory();
+}
+
+function removeCastleEntities() {
+    let changed = false;
+    for (let i = entities.length - 1; i >= 0; i--) {
+        if (entities[i].type === 'castle' || entities[i].type === 'turret') {
+            entities.splice(i, 1);
+            changed = true;
+        }
+    }
+    if (changed) {
+        updateCounters();
+        redraw();
+        pushHistory();
+    }
+}
+
 function setAnchorInput(anchor) {
     if (anchor) {
         setCoordAnchor(anchor.x, anchor.y)
@@ -1112,6 +1312,19 @@ window.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#mobile-toolbar-buildings button').forEach(button => {
         button.addEventListener('click', handleToolbarClick);
     });
+
+    // Initialize map mode button visuals
+    setMapMode(mapMode);
+
+    // Wire the map mode dropdown under the map name
+    const mapModeSelect = document.getElementById('mapModeSelect');
+    if (mapModeSelect) {
+        // set initial value
+        mapModeSelect.value = mapMode;
+        mapModeSelect.addEventListener('change', (e) => {
+            setMapMode(e.target.value);
+        });
+    }
 
     // Add zoom control event listeners
     document.getElementById('zoomInBtn')?.addEventListener('click', zoomIn);
@@ -1197,14 +1410,19 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Clear the entire map
+    // Clear the entire map but preserve locked entities (e.g., castle/turrets)
     clearButton.addEventListener('click', () => {
         if (confirm('Are you sure you want to clear the entire map?')) {
+            // Keep entities that are locked (locked: true) and remove the rest
+            const lockedEntities = entities.filter(e => e && e.locked);
             entities.length = 0;
+            for (const e of lockedEntities) entities.push(e);
+
+            // Clear bear traps and reset city counter and selection
             bearTraps.length = 0;
             cityCounterId = 1;
             selectedEntity = null;
-            
+
             redraw();
             updateCounters();
             updateCityList();
@@ -1295,7 +1513,7 @@ function saveMap() {
 
     try {
         const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName);
+        const compressedMap = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode);
         const mapDataInput = document.getElementById('mapData');
         const mobileMapData = document.getElementById('mobileMapData');
         
@@ -1316,7 +1534,7 @@ function shareMap() {
     if (preventActionOnEmptyMap("sharing")) return;
     try {
         const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName);
+        const compressedMap = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode);
         const mapDataInput = document.getElementById('mapData');
         const mobileMapData = document.getElementById('mobileMapData');
         
@@ -1485,9 +1703,9 @@ function shareMap() {
     		shortUrlButton.addEventListener('click', async () => {
                 if (preventActionOnEmptyMap("generating a short URL")) return;
     			const mapName = document.getElementById('mapNameInput')?.value || '';
-    			const compressed = compressMapWithName(entities, mapName);
-    			if (document.getElementById('mapData')) document.getElementById('mapData').value = compressed;
-    			const longUrl = getShareableUrl(entities, mapName);
+                const compressed = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode);
+                if (document.getElementById('mapData')) document.getElementById('mapData').value = compressed;
+                const longUrl = getShareableUrl(entities, mapName);
     			await doShorten(longUrl);
     		});
     	}
@@ -1497,9 +1715,9 @@ function shareMap() {
     		mobileShortUrlButton.addEventListener('click', async () => {
                 if (preventActionOnEmptyMap("generating a short URL")) return;
     			const mapName = document.getElementById('mapNameInput')?.value || '';
-    			const compressed = compressMapWithName(entities, mapName);
-    			if (document.getElementById('mobileMapData')) document.getElementById('mobileMapData').value = compressed;
-    			const longUrl = getShareableUrl(entities, mapName);
+                const compressed = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode);
+                if (document.getElementById('mobileMapData')) document.getElementById('mobileMapData').value = compressed;
+                const longUrl = getShareableUrl(entities, mapName);
     			await doShorten(longUrl);
     		});
     	}
@@ -1716,6 +1934,42 @@ function isPositionValid(newX, newY, entity) {
         newY < -gridRows || newY + entity.height > gridRows + 1) {
         return false;
     }
+
+    // In castle mode, disallow placing/moving ANY part of an entity inside the reserved center
+    if (mapMode === 'castle') {
+        const mid = anchorGridCell();
+        const half = Math.floor(castleReservedSize / 2);
+        const startX = mid.x - half;
+        const endX = mid.x + half - 1;
+        const startY = mid.y - half;
+        const endY = mid.y + half - 1;
+        for (let dx = 0; dx < entity.width; dx++) {
+            for (let dy = 0; dy < entity.height; dy++) {
+                const cx = newX + dx;
+                const cy = newY + dy;
+                if (cx >= startX && cx <= endX && cy >= startY && cy <= endY) return false;
+            }
+        }
+        // Also enforce redzone rules: building allowed, but flags are forbidden inside the redzone ring
+        const outerHalf = half + castleRedzoneThickness;
+        const redStartX = mid.x - outerHalf;
+        const redEndX = mid.x + outerHalf - 1;
+        const redStartY = mid.y - outerHalf;
+        const redEndY = mid.y + outerHalf - 1;
+        // For flags, disallow placement anywhere inside redzone (but building/city allowed)
+        if (entity.type === 'flag') {
+            for (let dx = 0; dx < entity.width; dx++) {
+                for (let dy = 0; dy < entity.height; dy++) {
+                    const cx = newX + dx;
+                    const cy = newY + dy;
+                    // If inside outer box but not in inner reserved (i.e., within ring), forbid
+                    const inOuter = (cx >= redStartX && cx <= redEndX && cy >= redStartY && cy <= redEndY);
+                    const inInner = (cx >= startX && cx <= endX && cy >= startY && cy <= endY);
+                    if (inOuter && !inInner) return false;
+                }
+            }
+        }
+    }
     
     for (let other of entities) {
         if (other !== entity) {
@@ -1808,6 +2062,8 @@ function handleKeyDown(event) {
 
 function deleteSelectedEntity() {
     if (!selectedEntity) return;
+    // Do not allow deleting locked entities (castle/turret)
+    if (selectedEntity.locked) return;
     
     const index = entities.indexOf(selectedEntity);
     if (index !== -1) {
@@ -2305,7 +2561,7 @@ function sanitizeMapName(name) {
     return name.replace(/[^a-zA-Z0-9 \-_]/g, '').substring(0, 30);
 }
 
-function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode = waveMode, _cityLabelMode = cityLabelMode) {
+function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode = waveMode, _cityLabelMode = cityLabelMode, _mapMode = mapMode) {
     let base64String = compressMap(entities);
 
     const parts = [base64String];
@@ -2320,6 +2576,7 @@ function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode 
 
     parts.push("w=" + (_waveMode ? "1" : "0"));
     parts.push("m=" + _cityLabelMode);
+    parts.push("mode=" + (_mapMode === 'castle' ? 'c' : 'b')); // 'b' = base, 'c' = castle
 
     return parts.join("||");
 }
@@ -2350,6 +2607,8 @@ function decompressMapWithName(combinedString) {
                 mode = defaultCityLabelMode;
             }
             out.cityLabelMode = mode;
+        } else if (seg.startsWith("mode=")) {
+            out.mapMode = seg.slice(5).trim().toLowerCase();
         } else {
             // Legacy support: if no prefix, treat as name
             if (!out.mapName) out.mapName = seg;
@@ -2363,13 +2622,18 @@ function decompressMapWithName(combinedString) {
         if (mapNameInput) mapNameInput.value = out.mapName;
     }
 
+    if (out.mapMode) {
+        // normalize
+        out.mapMode = out.mapMode === 'c' ? 'castle' : 'base';
+    }
+
     return out;
 }
 
 
 // Pure helper to generate a shareable URL with provided map data and name
 function getShareableUrl(entitiesArg, mapNameArg) {
-    const compressedMap = compressMapWithName(entitiesArg, mapNameArg);
+    const compressedMap = compressMapWithName(entitiesArg, mapNameArg, coordAnchor, waveMode, cityLabelMode, mapMode);
     const newUrl = new URL(window.location.href);
     newUrl.searchParams.set('mapData', compressedMap);
     return newUrl.toString();
@@ -2395,6 +2659,7 @@ function loadMap() {
             setAnchorInput(loaded.anchor)
             setWaveMode(loaded.waveMode);
             setCityLabelMode(loaded.cityLabelMode);
+            setMapMode(loaded.mapMode || 'base'); // 'base' as default if no mapmode was saved
         }
 
         let cityId = 1;
