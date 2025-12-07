@@ -2292,6 +2292,11 @@ function compressMap(entities) {
     let bitString = "";
 
     entities.forEach(entity => {
+        // skip castle and turret entities (will be generated due mode switch)
+        if (entity.type === 'castle' || entity.type === 'turret') {
+            return;
+        }
+
         const type = entity.type === "flag" ? "000" :
                     entity.type === "city" ? "001" : 
                     entity.type === "building" ? "010" : 
