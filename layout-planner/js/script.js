@@ -483,10 +483,18 @@ function drawCityDetails(context, z, city, screen) {
     // Draw march times only if enabled
     if (cityLabelMode === 'march') {
         const marchTimes = calculateMarchTimes(city);
-        marchTimes.forEach((time, index) => {
-            const yOffset = baseOffset + (index + 1) * currentGridSize * 0.25;
-            context.fillText(`BT${index + 1}: ${time}s`, screen.x, screen.y + yOffset);
-        });
+
+        if (mapMode === 'castle') {
+            if (marchTimes.length > 0) {
+                const yOffset = baseOffset + currentGridSize * 0.25;
+                context.fillText(`${marchTimes[0]}s`, screen.x, screen.y + yOffset);
+            }
+        } else {
+            marchTimes.forEach((time, index) => {
+                const yOffset = baseOffset + (index + 1) * currentGridSize * 0.25;
+                context.fillText(`BT${index + 1}: ${time}s`, screen.x, screen.y + yOffset);
+            });
+        }
     }
 
     // ---- Show city coordinates relative to anchor ----  
@@ -498,14 +506,6 @@ function drawCityDetails(context, z, city, screen) {
         context.textBaseline = 'top';
         context.fillStyle = 'black';
         context.fillText(`${c.x}:${c.y}`, screen.x, screen.y + fs*0.8);
-    }
-
-    // In Castle mode, show march time to Castle based on ring distance from castle edge
-    if (mapMode === 'castle') {
-        const castle = entities.find(e => e.type === 'castle');
-        if (castle) {
-             // TODO: ADD MARCH TIME LOGIC
-        }
     }
 
 }
@@ -598,14 +598,39 @@ function drawSelectionHighlight(context, pX, pY, z, entity) {
 }
 
 function calculateMarchTimes(city) {
+    // Castle time at 25% speed bonus
+    if (mapMode === 'castle') {
+        const castle = entities.find(e => e.type === 'castle');
+        if (!castle) return [];
+
+        // Center of the city and the castle
+        const cityCenterX   = city.x   + city.width  / 2 - 0.5;
+        const cityCenterY   = city.y   + city.height / 2 - 0.5;
+        const castleCenterX = castle.x + castle.width  / 2 - 0.5;
+        const castleCenterY = castle.y + castle.height / 2 - 0.5;
+
+        const dx = castleCenterX - cityCenterX;
+        const dy = castleCenterY - cityCenterY;
+
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Constants for march time calculation, based on IKKEREKI3's python calculation
+        const A = 4.2813;
+        const B = 6.079;
+
+        const time25 = Math.round(A * distance + B);
+
+        return [time25];
+    }
+
+    // Beartap times
     const times = [];
     bearTraps.forEach(trap => {
-        // Calculate center points of both entities
         const cityCenterX = city.x + city.width / 2 - 0.5;
         const cityCenterY = city.y + city.height / 2 - 0.5;
         const trapCenterX = trap.x + trap.width / 2 - 0.5;
         const trapCenterY = trap.y + trap.height / 2 - 0.5;
-        
+
         const distance = Math.sqrt(
             Math.pow(trapCenterX - cityCenterX, 2) +
             Math.pow(trapCenterY - cityCenterY, 2)
@@ -615,6 +640,7 @@ function calculateMarchTimes(city) {
     });
     return times;
 }
+
 
 function markFlagArea(entity, areas, radiusSize = 3) {
     let centerX, centerY;
