@@ -2204,7 +2204,8 @@ function updateCityList() {
                 const key = `bt${i+1}`;
                 const isPriority = city.priorities && city.priorities[key];
                 const bubble = document.createElement('span');
-                bubble.textContent = `BT${i+1}: ${time}s`;
+                const labelPrefix = mapMode === 'castle' ? 'Castle' : `BT${i+1}`;
+                bubble.textContent = `${labelPrefix}: ${time}s`;
                 bubble.className = `bt-bubble inline-flex items-center justify-center px-2 py-1 text-xs leading-none rounded cursor-pointer min-w-[70px] ${
                     isPriority ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
                 }`;
