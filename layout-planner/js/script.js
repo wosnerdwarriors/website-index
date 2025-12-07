@@ -1183,8 +1183,6 @@ function setMapMode(mode = 'base') {
     if (mapMode === 'castle') {
         try { setAnchorInput({ x: 599, y: 599 }); } catch (e) { setCoordAnchor(599, 599); }
         ensureCastleEntities();
-        // when entering castle mode, automatically show coordinates on cities
-        setCityLabelMode('coords');
     } else {
         // leaving castle mode -> remove the locked castle/turret entities
         removeCastleEntities();
