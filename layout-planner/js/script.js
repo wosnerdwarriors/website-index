@@ -618,9 +618,9 @@ function calculateMarchTimes(city) {
 
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        const time25 = Math.round(MARCH_TIME_FACTOR_A * distance + MARCH_TIME_FACTOR_B);
+        const marchSpeedAt25Marchspeed = Math.round(MARCH_TIME_FACTOR_A * distance + MARCH_TIME_FACTOR_B);
 
-        return [time25];
+        return [marchSpeedAt25Marchspeed];
     }
 
     // Beartap times
