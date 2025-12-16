@@ -1993,6 +1993,25 @@ function isPositionValid(newX, newY, entity) {
                 }
             }
         }
+        // Disallow HQs, similiar to flags
+        if (entity.type === 'hq') {
+            const HQRadius = 6;
+            const centerX = newX + Math.floor(entity.width / 2);
+            const centerY = newY + Math.floor(entity.height / 2);
+            const effectiveRadius = HQRadius + Math.floor(entity.width / 2);
+
+            for (let cx = centerX - effectiveRadius; cx <= centerX + effectiveRadius; cx++) {
+                for (let cy = centerY - effectiveRadius; cy <= centerY + effectiveRadius; cy++) {
+                    // If cell is inside the inner reserved area -> forbid
+                    const inInner = (cx >= startX && cx <= endX && cy >= startY && cy <= endY);
+                    if (inInner) return false;
+
+                    // If cell is inside the outer redzone ring (outer box but not inner) -> forbid
+                    const inOuter = (cx >= redStartX && cx <= redEndX && cy >= redStartY && cy <= redEndY);
+                    if (inOuter && !inInner) return false;
+                }
+            }
+        }
     }
     
     for (let other of entities) {
