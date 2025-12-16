@@ -600,6 +600,10 @@ function drawSelectionHighlight(context, pX, pY, z, entity) {
 function calculateMarchTimes(city) {
     // Castle time at 25% speed bonus
     if (mapMode === 'castle') {
+        // Constants for march time calculation, based on IKKEREKI3's python calculation
+        const MARCH_TIME_FACTOR_A = 4.2813;
+        const MARCH_TIME_FACTOR_B = 6.079;
+
         const castle = entities.find(e => e.type === 'castle');
         if (!castle) return [];
 
@@ -614,11 +618,7 @@ function calculateMarchTimes(city) {
 
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Constants for march time calculation, based on IKKEREKI3's python calculation
-        const A = 4.2813;
-        const B = 6.079;
-
-        const time25 = Math.round(A * distance + B);
+        const time25 = Math.round(MARCH_TIME_FACTOR_A * distance + MARCH_TIME_FACTOR_B);
 
         return [time25];
     }
