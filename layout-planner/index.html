@@ -65,6 +65,9 @@
                         <option value="castle">Castle</option>
                     </select>
                 </div>
+                    <div id="marchtimeHint" class="mt-2 text-center text-xs text-gray-600 px-3 hidden">
+                    Note: In <strong>Castle</strong> mode march times are calculated using a 25% march speed bonus (no pets, with facilities).
+                    </div>
             </div>
 
             <!-- Middle Section with Buildings and Cities -->
@@ -425,6 +428,20 @@
                     mobileHelpWrapper.appendChild(node.cloneNode(true));
                 });
             }
+
+            // Show the marchtime hint only when Castle mode is selected
+            const mapModeSelect = document.getElementById('mapModeSelect');
+            const marchtimeHint = document.getElementById('marchtimeHint');
+            function updateMarchtimeHint() {
+                if (!mapModeSelect || !marchtimeHint) return;
+                if (mapModeSelect.value === 'castle') {
+                    marchtimeHint.classList.remove('hidden');
+                } else {
+                    marchtimeHint.classList.add('hidden');
+                }
+            }
+            updateMarchtimeHint();
+            if (mapModeSelect) mapModeSelect.addEventListener('change', updateMarchtimeHint);
 
             // Event listeners declaratively
             document.querySelectorAll('[data-section]').forEach(btn => {
