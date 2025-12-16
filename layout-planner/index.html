@@ -58,6 +58,16 @@
                 <input id="mapNameInput" type="text" placeholder="Map Name (optional)" 
                        class="w-full p-3 border-2 border-gray-300 rounded-lg text-center focus:border-blue-500 focus:outline-none" maxlength="30">
                 <div id="mapNameHint" class="text-center text-red-500 text-sm mt-1 hidden"></div>
+                <div class="mt-3 flex items-center justify-center gap-2">
+                    <label for="mapModeSelect" class="text-sm font-medium">Mode:</label>
+                    <select id="mapModeSelect" class="p-2 border-2 border-gray-300 rounded-lg text-sm">
+                        <option value="base">Base</option>
+                        <option value="castle">Castle</option>
+                    </select>
+                </div>
+                    <div id="marchtimeHint" class="mt-2 text-center text-xs text-gray-600 px-3 hidden">
+                    Note: In <strong>Castle</strong> mode march times are calculated using a 25% march speed bonus (no pets, with facilities).
+                    </div>
             </div>
 
             <!-- Middle Section with Buildings and Cities -->
@@ -418,6 +428,20 @@
                     mobileHelpWrapper.appendChild(node.cloneNode(true));
                 });
             }
+
+            // Show the marchtime hint only when Castle mode is selected
+            const mapModeSelect = document.getElementById('mapModeSelect');
+            const marchtimeHint = document.getElementById('marchtimeHint');
+            function updateMarchtimeHint() {
+                if (!mapModeSelect || !marchtimeHint) return;
+                if (mapModeSelect.value === 'castle') {
+                    marchtimeHint.classList.remove('hidden');
+                } else {
+                    marchtimeHint.classList.add('hidden');
+                }
+            }
+            updateMarchtimeHint();
+            if (mapModeSelect) mapModeSelect.addEventListener('change', updateMarchtimeHint);
 
             // Event listeners declaratively
             document.querySelectorAll('[data-section]').forEach(btn => {
