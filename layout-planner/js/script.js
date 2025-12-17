@@ -854,8 +854,8 @@ function addEntity(event) {
         width = 2;
         height = 2;
     } else if (selectedType === 'building') {
-        if (bearTraps.length >= 2) {
-            alert('You can only place up to 2 Bear Traps.');
+        if (bearTraps.length >= 3) {
+            alert('You can only place up to 3 Bear Traps.');
             return;
         }
         color = 'black';
