@@ -475,7 +475,7 @@ function drawCityDetails(context, z, city, screen) {
     context.textBaseline = 'middle';
     
     // Shift text upward to accommodate multiple bear trap times
-    const baseOffset = -currentGridSize * 0.2;
+    const baseOffset = -currentGridSize * 0.29;
     
     const label = city.name || `City ${city.id}`;
     context.fillText(label, screen.x, screen.y + baseOffset);
