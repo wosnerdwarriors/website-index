@@ -475,7 +475,7 @@ function drawCityDetails(context, z, city, screen) {
     context.textBaseline = 'middle';
     
     // Shift text upward to accommodate multiple bear trap times
-    const baseOffset = -currentGridSize * 0.2;
+    const baseOffset = -currentGridSize * 0.29;
     
     const label = city.name || `City ${city.id}`;
     context.fillText(label, screen.x, screen.y + baseOffset);
@@ -854,8 +854,8 @@ function addEntity(event) {
         width = 2;
         height = 2;
     } else if (selectedType === 'building') {
-        if (bearTraps.length >= 2) {
-            alert('You can only place up to 2 Bear Traps.');
+        if (bearTraps.length >= 3) {
+            alert('You can only place up to 3 Bear Traps.');
             return;
         }
         color = 'black';
