@@ -39,6 +39,21 @@ let selectedType = null;
 let selectedEntity = null;
 let cityCounterId = 1;
 let bearTraps = [];
+let enemyZones = []; // Array for enemy zones (max 3)
+let cityTeams = {}; // Store team assignments for cities: {cityId: teamIndex}
+let customTeams = []; // Dynamic array of teams: [{name: 'Team A', color: '#3B82F6'}, ...]
+let showTeamsInBase = false;
+
+// Initialize with default teams
+function initializeDefaultTeams() {
+    if (customTeams.length === 0) {
+        customTeams = [
+            {name: 'Main Team', color: '#3B82F6'},  // Blue
+            {name: 'Counters', color: '#EF4444'},  // Red
+        ];
+    }
+}
+
 let isDragging = false;
 let isPanning = false;
 let dragOffsetX = 0;
@@ -299,9 +314,15 @@ function drawEntity(context, pX, pY, z, entity, protectedAreas) {
     const screen = diamondToScreen(entity.x, entity.y, pX, pY, z);
     const currentGridSize = baseGridSize * z;
     
-    context.fillStyle = (waveMode && entity.type === 'city')
-    ? getWaveColorForCity(entity)
-    : entity.color;
+    
+    if (entity.type === 'city') {
+        const teamIndex = cityTeams[entity.id];
+        const teamColor = (teamIndex !== undefined && customTeams[teamIndex]) ? customTeams[teamIndex].color : entity.color;
+        context.fillStyle = waveMode ? getWaveColorForCity(entity) : teamColor;
+    } else {
+        context.fillStyle = entity.color;
+    }
+
     
     // Draw entity based on its actual size (width x height)
     if (entity.width === 1 && entity.height === 1) {
@@ -409,6 +430,8 @@ function drawEntity(context, pX, pY, z, entity, protectedAreas) {
         drawNodeDetails(context, z, entity, centerScreen);
     } else if (entity.type === 'obstacle') {
         drawObstacleDetails(context, z, entity, centerScreen);
+    } else if (entity.type === 'enemyzone') {
+        drawEnemyZoneDetails(context, z, entity, centerScreen);
     }
     
     context.restore();
@@ -465,6 +488,7 @@ function drawGhostEntity(context, pX, pY, z, entity) {
 }
 
 function drawCityDetails(context, z, city, screen) {
+    // Text is always black for readability
     context.fillStyle = 'black';
     
     // Scale font size, with minimum and maximum limits
@@ -557,6 +581,17 @@ function drawObstacleDetails(context, z, obstacle, screen) {
     context.textAlign = 'center';
     context.textBaseline = 'middle';
 }
+
+function drawEnemyZoneDetails(context, z, zone, screen) {
+    context.fillStyle = 'white';
+    const currentGridSize = baseGridSize * z;
+    const baseFontSize = Math.max(10, Math.min(24, currentGridSize * 0.25));
+    context.font = `${baseFontSize}px Arial`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText('ENEMIES STATE', screen.x, screen.y);
+}
+
 
 function drawSelectionHighlight(context, pX, pY, z, entity) {
     const currentGridSize = baseGridSize * z;
@@ -873,6 +908,18 @@ function addEntity(event) {
         color = '#8B0000';
         width = 1;
         height = 1;
+    } else if (selectedType === 'enemyzone') {
+        if (mapMode !== 'castle') {
+            alert('Enemy zones can only be placed in Castle mode.');
+            return;
+        }
+        if (enemyZones.length >= 3) {
+            alert('You can only place up to 3 Enemy Zones.');
+            return;
+        }
+        color = 'black';
+        width = 12;
+        height = 12;
     }
 
     const newEntityTemplate = { x, y, width, height, type: selectedType };
@@ -890,6 +937,8 @@ function addEntity(event) {
         entities.push(newEntity);
         if (selectedType === 'building') {
             bearTraps.push(newEntity);
+        } else if (selectedType === 'enemyzone') {
+            enemyZones.push(newEntity);
         }
         redraw();
         updateCounters();
@@ -1179,6 +1228,9 @@ function setMapMode(mode = 'base') {
         }
     });
 
+    updateEnemyZoneButtonVisibility();
+    updateTeamControlsVisibility();
+
     // If entering castle mode, set the coord anchor to 599:599 and ensure entities
     if (mapMode === 'castle') {
         try { setAnchorInput({ x: 599, y: 599 }); } catch (e) { setCoordAnchor(599, 599); }
@@ -1190,8 +1242,55 @@ function setMapMode(mode = 'base') {
     // Sync dropdown if present
     const sel = document.getElementById('mapModeSelect');
     if (sel) sel.value = mapMode;
+    const mobileSel = document.getElementById('mobileMapModeSelect');
+    if (mobileSel) mobileSel.value = mapMode;
 
     redraw();
+    updateCityList();
+}
+
+function updateEnemyZoneButtonVisibility() {
+    const show = mapMode === 'castle';
+    document.querySelectorAll('[data-type="enemyzone"]').forEach(button => {
+        button.classList.toggle('hidden', !show);
+        button.disabled = !show;
+        if (!show) {
+            button.setAttribute('aria-hidden', 'true');
+            button.setAttribute('tabindex', '-1');
+        } else {
+            button.removeAttribute('aria-hidden');
+            button.removeAttribute('tabindex');
+        }
+    });
+
+    if (!show && selectedType === 'enemyzone') {
+        const selectButton = document.querySelector('[data-type="select"]');
+        if (selectButton) {
+            selectButton.click();
+        } else {
+            selectedType = 'select';
+        }
+    }
+}
+
+function updateTeamControlsVisibility() {
+    const showTeams = mapMode === 'castle' || showTeamsInBase;
+    const teamSection = document.getElementById('teamManagementSection');
+    if (teamSection) {
+        teamSection.classList.toggle('hidden', !showTeams);
+    }
+    const mobileTeamActions = document.getElementById('mobileTeamActions');
+    if (mobileTeamActions) {
+        mobileTeamActions.classList.toggle('hidden', !showTeams);
+    }
+    const showToggle = mapMode === 'base';
+    document.querySelectorAll('[citySettingsButtons="5"], [citySettingsButtons="m5"]').forEach(btn => {
+        btn.classList.toggle('hidden', !showToggle);
+        btn.classList.toggle('bg-yellow-500', showTeamsInBase);
+        btn.classList.toggle('text-white', showTeamsInBase);
+    });
+    const current = document.getElementById('citySort')?.value || 'id';
+    enablePopulateSortOptions(current);
 }
 
 // Draw the reserved castle area around the anchor cell
@@ -1303,6 +1402,130 @@ setAnchorInput(coordAnchor);
 
 
 // ===== EVENT LISTENERS =====
+
+// ========== TEAM MANAGEMENT FUNCTIONS ==========
+
+function openTeamModal() {
+    const modal = document.getElementById('teamModal');
+    const nameInput = document.getElementById('teamNameInput');
+    const colorInput = document.getElementById('teamColorInput');
+    const hexInput = document.getElementById('teamColorHex');
+    if (!modal || !nameInput || !colorInput || !hexInput) return;
+
+    const defaultName = `Team ${customTeams.length + 1}`;
+    const defaultColor = '#3B82F6';
+    nameInput.value = defaultName;
+    colorInput.value = defaultColor;
+    hexInput.value = defaultColor;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => nameInput.focus(), 0);
+}
+
+function closeTeamModal() {
+    const modal = document.getElementById('teamModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function saveTeamFromModal() {
+    const nameInput = document.getElementById('teamNameInput');
+    const colorInput = document.getElementById('teamColorInput');
+    const hexInput = document.getElementById('teamColorHex');
+    if (!nameInput || !colorInput || !hexInput) return;
+
+    const name = (nameInput.value || '').trim() || `Team ${customTeams.length + 1}`;
+    let color = (hexInput.value || '').trim();
+    if (!/^#([0-9a-fA-F]{3}){1,2}$/.test(color)) {
+        color = colorInput.value || '#3B82F6';
+    }
+
+    customTeams.push({ name, color });
+    updateTeamsUI();
+    markUnsavedChanges();
+    closeTeamModal();
+}
+
+function createNewTeam() {
+    openTeamModal();
+}
+
+function deleteTeam(index) {
+    if (confirm(`Delete ${customTeams[index].name}?`)) {
+        // Remove team assignments for this team
+        Object.keys(cityTeams).forEach(cityId => {
+            if (cityTeams[cityId] === index) {
+                delete cityTeams[cityId];
+            } else if (cityTeams[cityId] > index) {
+                cityTeams[cityId]--; // Shift down indices
+            }
+        });
+
+        customTeams.splice(index, 1);
+        updateTeamsUI();
+        redraw();
+        markUnsavedChanges();
+    }
+}
+
+function assignCityToTeam(city, teamIndex) {
+    if (city && city.id !== undefined) {
+        if (teamIndex === -1) {
+            delete cityTeams[city.id];
+        } else {
+            cityTeams[city.id] = teamIndex;
+        }
+        updateCityList();
+        redraw();
+        markUnsavedChanges();
+    }
+}
+
+function updateTeamsUI() {
+    const container = document.getElementById('teamsContainer');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    customTeams.forEach((team, index) => {
+        const teamEl = document.createElement('div');
+        teamEl.className = 'flex items-center justify-between p-2 bg-gray-50 rounded mb-2';
+        const teamInfo = document.createElement('div');
+        teamInfo.className = 'flex items-center gap-2';
+
+        const colorBox = document.createElement('div');
+        colorBox.className = 'w-4 h-4 rounded';
+        const safeColor = typeof team.color === 'string' && /^#([0-9a-fA-F]{3}){1,2}$/.test(team.color)
+            ? team.color
+            : '#9ca3af';
+        colorBox.style.backgroundColor = safeColor;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'text-sm font-medium';
+        nameSpan.textContent = team.name || 'Team';
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'text-red-500 hover:text-red-700 text-xs';
+        deleteButton.textContent = '✕';
+        deleteButton.addEventListener('click', () => deleteTeam(index));
+
+        teamInfo.appendChild(colorBox);
+        teamInfo.appendChild(nameSpan);
+        teamEl.appendChild(teamInfo);
+        teamEl.appendChild(deleteButton);
+        container.appendChild(teamEl);
+    });
+}
+
+// Call this on load
+window.addEventListener('DOMContentLoaded', () => {
+    initializeDefaultTeams();
+    updateTeamsUI();
+});
+
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('keydown', handleKeyDown);
 
@@ -1349,6 +1572,13 @@ window.addEventListener('DOMContentLoaded', () => {
             setMapMode(e.target.value);
         });
     }
+    const mobileMapModeSelect = document.getElementById('mobileMapModeSelect');
+    if (mobileMapModeSelect) {
+        mobileMapModeSelect.value = mapMode;
+        mobileMapModeSelect.addEventListener('change', (e) => {
+            setMapMode(e.target.value);
+        });
+    }
 
     // Add zoom control event listeners
     document.getElementById('zoomInBtn')?.addEventListener('click', zoomIn);
@@ -1372,7 +1602,53 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('shareButton')?.addEventListener('click', shareMap);
     document.getElementById('mobileShareButton')?.addEventListener('click', shareMap);
     document.getElementById('setAnchorBtn')?.addEventListener('click', handleSetAnchor);
+    document.getElementById('createNewTeamBtn')?.addEventListener('click', createNewTeam);
+    document.getElementById('createNewTeamBtnMobile')?.addEventListener('click', createNewTeam);
     document.getElementById('saveAsCSVButton')?.addEventListener('click', () => exportPlayerNamesCSV({ onlyNamed: false }));
+
+    // Team modal wiring
+    const teamModal = document.getElementById('teamModal');
+    const teamModalClose = document.getElementById('teamModalClose');
+    const teamModalCancel = document.getElementById('teamModalCancel');
+    const teamModalSave = document.getElementById('teamModalSave');
+    const teamNameInput = document.getElementById('teamNameInput');
+    const teamColorInput = document.getElementById('teamColorInput');
+    const teamColorHex = document.getElementById('teamColorHex');
+
+    teamModalClose?.addEventListener('click', closeTeamModal);
+    teamModalCancel?.addEventListener('click', closeTeamModal);
+    teamModalSave?.addEventListener('click', saveTeamFromModal);
+    teamModal?.addEventListener('click', (e) => {
+        if (e.target === teamModal) closeTeamModal();
+    });
+
+    teamColorInput?.addEventListener('input', () => {
+        if (teamColorHex) teamColorHex.value = teamColorInput.value;
+    });
+    teamColorHex?.addEventListener('input', () => {
+        const val = teamColorHex.value.trim();
+        if (/^#([0-9a-fA-F]{3}){1,2}$/.test(val) && teamColorInput) {
+            teamColorInput.value = val;
+        }
+    });
+    teamNameInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveTeamFromModal();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            closeTeamModal();
+        }
+    });
+    teamColorHex?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveTeamFromModal();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            closeTeamModal();
+        }
+    });
 
     // QOL - Set anchor on Enter key in input field
     document.getElementById('anchorInput')?.addEventListener('keydown', (e) => {
@@ -1442,8 +1718,9 @@ window.addEventListener('DOMContentLoaded', () => {
             entities.length = 0;
             for (const e of lockedEntities) entities.push(e);
 
-            // Clear bear traps and reset city counter and selection
+            // Clear bear traps, enemy zones and reset city counter and selection
             bearTraps.length = 0;
+            enemyZones.length = 0;
             cityCounterId = 1;
             selectedEntity = null;
 
@@ -1518,6 +1795,13 @@ window.addEventListener('DOMContentLoaded', () => {
             // P4: Load CSV
             if (key.endsWith('4')) {
                 document.getElementById('playersCsvInput')?.click();
+            }
+            // P5: Show teams in base
+            if (key.endsWith('5')) {
+                if (mapMode !== 'base') return;
+                showTeamsInBase = !showTeamsInBase;
+                updateTeamControlsVisibility();
+                updateCityList();
             }
         });
     });
@@ -1924,6 +2208,9 @@ function updateGhostPreview(mouseX, mouseY) {
         if (selectedType === 'flag' || selectedType === 'obstacle') {
             width = 1;
             height = 1;
+        } else if (selectedType === 'enemyzone') {
+            width = 12;
+            height = 12;
         } else if (selectedType === 'city') {
             width = 2;
             height = 2;
@@ -2116,6 +2403,9 @@ function deleteSelectedEntity() {
         } else if (selectedEntity.type === 'building') {
             bearTraps = bearTraps.filter(trap => trap !== selectedEntity);
             entities.splice(index, 1);
+        } else if (selectedEntity.type === 'enemyzone') {
+            enemyZones = enemyZones.filter(zone => zone !== selectedEntity);
+            entities.splice(index, 1);
         } else {
             entities.splice(index, 1);
         }
@@ -2130,15 +2420,15 @@ function deleteSelectedEntity() {
 
 function updateCityList() {
     // Get march times for all cities
-    entities.filter(e => e.type === 'city').forEach(city => { 
-        city.marchTimes = calculateMarchTimes(city); 
+    entities.filter(e => e.type === 'city').forEach(city => {
+        city.marchTimes = calculateMarchTimes(city);
     });
-    
+
     const cityList = document.getElementById('cityList');
     const mobileCityList = document.getElementById('mobileCityList');
     const sortSelect = document.getElementById('citySort');
     const mobileSortSelect = document.getElementById('mobileCitySort');
-    
+
     if (!cityList || !sortSelect || !mobileCityList || !mobileSortSelect) return;
 
     // Sync sort options between desktop and mobile by cloning option nodes
@@ -2150,20 +2440,24 @@ function updateCityList() {
         mobileSortSelect.appendChild(newOpt);
     });
     mobileSortSelect.value = sortSelect.value;
-    
-    const sortBy = sortSelect.value;
+
+    let sortBy = sortSelect.value;
+    if (mapMode !== 'castle' && sortBy === 'team') {
+        sortBy = 'id';
+    }
+
     cityList.innerHTML = '';
     mobileCityList.innerHTML = '';
 
-    let cities = entities.filter(e => e.type === 'city');
+    const cities = entities.filter(e => e.type === 'city');
     const btIndex = sortBy === 'bt1' ? 0 : sortBy === 'bt2' ? 1 : null;
 
     // Separate prioritized
     const prioritized = btIndex !== null
-        ? cities.filter(c => c.priorities && c.priorities[`bt${btIndex+1}`])
+        ? cities.filter(c => c.priorities && c.priorities[`bt${btIndex + 1}`])
         : [];
     const others = btIndex !== null
-        ? cities.filter(c => !(c.priorities && c.priorities[`bt${btIndex+1}`]))
+        ? cities.filter(c => !(c.priorities && c.priorities[`bt${btIndex + 1}`]))
         : cities;
 
     // Comparator for sorting
@@ -2173,6 +2467,16 @@ function updateCityList() {
                 return (a.name || `City ${a.id}`)
                     .toLowerCase()
                     .localeCompare((b.name || `City ${b.id}`).toLowerCase());
+            case 'team': {
+                const teamA = cityTeams[a.id] !== undefined ? cityTeams[a.id] : Infinity;
+                const teamB = cityTeams[b.id] !== undefined ? cityTeams[b.id] : Infinity;
+                if (teamA === teamB) {
+                    return (a.name || `City ${a.id}`)
+                        .toLowerCase()
+                        .localeCompare((b.name || `City ${b.id}`).toLowerCase());
+                }
+                return teamA - teamB;
+            }
             case 'bt1':
                 return evaluateBTTime(a, 0) - evaluateBTTime(b, 0);
             case 'bt2':
@@ -2180,19 +2484,17 @@ function updateCityList() {
             case 'both':
                 return evaluateCombinedTime(a) - evaluateCombinedTime(b);
             default:
-                return a.id - b.id;
+                return (a.id || 0) - (b.id || 0);
         }
     };
 
     prioritized.sort(comparator);
     others.sort(comparator);
 
-    // Render prioritized cities first, then others for both lists
-    [...prioritized, ...others].forEach(city => {
-        // Create desktop list item
+    const buildCityItem = (city) => {
         const li = document.createElement('li');
         li.className = 'flex items-center space-x-2 mb-2';
-        
+
         const input = document.createElement('input');
         input.type = 'text';
         input.value = city.name || `City ${city.id}`;
@@ -2203,69 +2505,86 @@ function updateCityList() {
             city.name = input.value;
             redraw();
             markUnsavedChanges();
-            updateCityList(); // Update both lists
+            updateCityList();
         });
         li.appendChild(input);
 
-        // Create mobile list item (clone of desktop)
-        const mli = li.cloneNode(true);
-        mli.querySelector('input').addEventListener('change', (e) => {
-            city.name = e.target.value;
-            redraw();
-            markUnsavedChanges();
-            updateCityList(); // Update both lists
-        });
+        if (mapMode === 'castle' || showTeamsInBase) {
+            const teamSelect = document.createElement('select');
+            teamSelect.className = 'text-xs border rounded px-2 py-1';
+            teamSelect.style.minWidth = '80px';
 
-        // Add BT bubbles to both lists
-        [li, mli].forEach(listItem => {
-            city.marchTimes.forEach((time, i) => {
-                const key = `bt${i+1}`;
-                const isPriority = city.priorities && city.priorities[key];
-                const bubble = document.createElement('span');
-                const labelPrefix = mapMode === 'castle' ? 'Castle' : `BT${i+1}`;
-                bubble.textContent = `${labelPrefix}: ${time}s`;
-                bubble.className = `bt-bubble inline-flex items-center justify-center px-2 py-1 text-xs leading-none rounded cursor-pointer min-w-[70px] ${
-                    isPriority ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
-                }`;
-                bubble.addEventListener('click', () => {
-                    city.priorities = city.priorities || {};
-                    city.priorities[key] = !city.priorities[key];
-                    if (city.priorities[key]) {
-                        const candidates = entities.filter(e => 
-                            e.type === 'city' && 
-                            !(e.priorities && e.priorities[key])
-                        );
-                        if (candidates.length) {
-                            let bestCity = candidates[0];
-                            let bestTime;
-                            if (sortBy === 'both') {
-                                bestTime = evaluateCombinedTime(bestCity);
-                            } else {
-                                bestTime = evaluateBTTime(bestCity, i);
-                            }
-                            candidates.forEach(c => {
-                                const t = sortBy === 'both' ? 
-                                    evaluateCombinedTime(c) : 
-                                    evaluateBTTime(c, i);
-                                if (t < bestTime) {
-                                    bestTime = t;
-                                    bestCity = c;
-                                }
-                            });
-                            [city.x, bestCity.x] = [bestCity.x, city.x];
-                            [city.y, bestCity.y] = [bestCity.y, city.y];
-                        }
-                    }
-                    redraw();
-                    updateCityList();
-                    markUnsavedChanges();
-                });
-                listItem.appendChild(bubble);
+            const noTeamOption = document.createElement('option');
+            noTeamOption.value = '-1';
+            noTeamOption.textContent = 'No Team';
+            teamSelect.appendChild(noTeamOption);
+
+            customTeams.forEach((team, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = team.name;
+                option.style.color = team.color;
+                teamSelect.appendChild(option);
             });
+
+            teamSelect.value = cityTeams[city.id] !== undefined ? cityTeams[city.id] : '-1';
+            teamSelect.addEventListener('change', () => {
+                const teamIndex = parseInt(teamSelect.value);
+                assignCityToTeam(city, teamIndex);
+            });
+
+            li.appendChild(teamSelect);
+        }
+
+        city.marchTimes.forEach((time, i) => {
+            const key = `bt${i + 1}`;
+            const isPriority = city.priorities && city.priorities[key];
+            const bubble = document.createElement('span');
+            const labelPrefix = mapMode === 'castle' ? 'Castle' : `BT${i + 1}`;
+            bubble.textContent = `${labelPrefix}: ${time}s`;
+            bubble.className = `bt-bubble inline-flex items-center justify-center px-2 py-1 text-xs leading-none rounded cursor-pointer min-w-[70px] ${
+                isPriority ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
+            }`;
+            bubble.addEventListener('click', () => {
+                city.priorities = city.priorities || {};
+                city.priorities[key] = !city.priorities[key];
+                if (city.priorities[key]) {
+                    const candidates = entities.filter(e =>
+                        e.type === 'city' &&
+                        !(e.priorities && e.priorities[key])
+                    );
+                    if (candidates.length) {
+                        let bestCity = candidates[0];
+                        let bestTime = sortBy === 'both'
+                            ? evaluateCombinedTime(bestCity)
+                            : evaluateBTTime(bestCity, i);
+                        candidates.forEach(c => {
+                            const t = sortBy === 'both'
+                                ? evaluateCombinedTime(c)
+                                : evaluateBTTime(c, i);
+                            if (t < bestTime) {
+                                bestTime = t;
+                                bestCity = c;
+                            }
+                        });
+                        [city.x, bestCity.x] = [bestCity.x, city.x];
+                        [city.y, bestCity.y] = [bestCity.y, city.y];
+                    }
+                }
+                redraw();
+                updateCityList();
+                markUnsavedChanges();
+            });
+            li.appendChild(bubble);
         });
 
-        cityList.appendChild(li);
-        mobileCityList.appendChild(mli);
+        return li;
+    };
+
+    // Render prioritized cities first, then others for both lists
+    [...prioritized, ...others].forEach(city => {
+        cityList.appendChild(buildCityItem(city));
+        mobileCityList.appendChild(buildCityItem(city));
     });
 }
 
@@ -2345,7 +2664,9 @@ function compressMap(entities) {
                     entity.type === "city" ? "001" : 
                     entity.type === "building" ? "010" : 
                     entity.type === "node" ? "011" : 
-                    entity.type === "hq" ? "101" : "100"; // obstacle
+                    entity.type === "hq" ? "101" : 
+                    entity.type === "enemyzone" ? "110" :
+                    "100"; // obstacle
 
         const storageX = entity.x + gridCols;
         const storageY = entity.y + gridRows;
@@ -2533,7 +2854,9 @@ function decompressNew(binaryString) {
         typeBits === "001" ? "city" :
         typeBits === "010" ? "building" :
         typeBits === "011" ? "node" :
-        typeBits === "101" ? "hq" : "obstacle";
+        typeBits === "101" ? "hq" :
+        typeBits === "110" ? "enemyzone" :
+        "obstacle";
 
         const storageX = parseInt(xBits, 2);
         const storageY = parseInt(yBits, 2);
@@ -2594,6 +2917,10 @@ function decompressNew(binaryString) {
         entity.width = 3;
         entity.height = 3;
         entity.color = "darkgreen";
+        } else if (type === "enemyzone") {
+        entity.width = 12;
+        entity.height = 12;
+        entity.color = "black";
         } else if (type === "obstacle") {
         entity.width = 1;
         entity.height = 1;
@@ -2626,14 +2953,15 @@ function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode 
     parts.push("w=" + (_waveMode ? "1" : "0"));
     parts.push("m=" + _cityLabelMode);
     parts.push("mode=" + (_mapMode === 'castle' ? 'c' : 'b')); // 'b' = base, 'c' = castle
+    parts.push("teams=" + encodeURIComponent(JSON.stringify({assignments: cityTeams, list: customTeams})));
 
     return parts.join("||");
 }
 
 
 function decompressMapWithName(combinedString) {
-    // Returns: { entities, mapName?, anchor?, waveMode?, cityLabelMode? }
-    const out = { entities: [], mapName: "", anchor: null, waveMode: null, cityLabelMode: null };
+    // Returns: { entities, mapName?, anchor?, waveMode?, cityLabelMode?, teams? }
+    const out = { entities: [], mapName: "", anchor: null, waveMode: null, cityLabelMode: null, teams: null };
 
     if (!combinedString || typeof combinedString !== 'string') {
         return out;
@@ -2658,6 +2986,13 @@ function decompressMapWithName(combinedString) {
             out.cityLabelMode = mode;
         } else if (seg.startsWith("mode=")) {
             out.mapMode = seg.slice(5).trim().toLowerCase();
+        } else if (seg.startsWith("teams=")) {
+            try {
+                const raw = decodeURIComponent(seg.slice(6));
+                out.teams = JSON.parse(raw);
+            } catch (e) {
+                console.warn('Failed to parse teams data from map code', e);
+            }
         } else {
             // Legacy support: if no prefix, treat as name
             if (!out.mapName) out.mapName = seg;
@@ -2696,19 +3031,43 @@ function loadMap() {
 
         entities.length = 0;
         bearTraps.length = 0;
+        enemyZones.length = 0;
 
         loadedEntities.forEach(entity => {
             entities.push(entity);
             if (entity.type === "building") {
                 bearTraps.push(entity);
+            } else if (entity.type === "enemyzone") {
+                enemyZones.push(entity);
             }
         });
 
         if (!Array.isArray(loaded)) {
-            setAnchorInput(loaded.anchor)
+            setAnchorInput(loaded.anchor);
             setWaveMode(loaded.waveMode);
             setCityLabelMode(loaded.cityLabelMode);
-            setMapMode(loaded.mapMode || 'base'); // 'base' as default if no mapmode was saved
+            setMapMode(loaded.mapMode || 'castle'); // 'base' as default if no mapmode was saved
+
+            // Restore teams if present; otherwise reset to defaults for legacy map codes
+            if (loaded.teams && typeof loaded.teams === 'object') {
+                const list = Array.isArray(loaded.teams.list) ? loaded.teams.list : [];
+                const assignments = (loaded.teams.assignments && typeof loaded.teams.assignments === 'object')
+                    ? loaded.teams.assignments
+                    : {};
+                customTeams = list.map(t => ({
+                    name: typeof t.name === 'string' ? t.name : 'Team',
+                    color: typeof t.color === 'string' ? t.color : '#3B82F6'
+                }));
+                if (customTeams.length === 0) {
+                    initializeDefaultTeams();
+                }
+                cityTeams = assignments;
+            } else {
+                customTeams = [];
+                initializeDefaultTeams();
+                cityTeams = {};
+            }
+            updateTeamsUI();
         }
 
         let cityId = 1;
@@ -2744,66 +3103,35 @@ function loadMapFromQuery() {
 }
 
 function downloadCanvasAsPNG() {
-    // 1. Find the bounding box of all entities
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    // High-resolution export (4x)
+    const scale = 2;
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
 
-    if (entities.length === 0) {
-        // If empty, use the grid boundaries
-        minX = -gridCols;
-        maxX = gridCols;
-        minY = -gridRows;
-        maxY = gridRows;
-    } else {
-        // Otherwise, use the entity boundaries
-        entities.forEach(entity => {
-            minX = Math.min(minX, entity.x);
-            maxX = Math.max(maxX, entity.x + entity.width);
-            minY = Math.min(minY, entity.y);
-            maxY = Math.max(maxY, entity.y + entity.height);
-        });
-    }
+    const originalWidth = canvas.width;
+    const originalHeight = canvas.height;
+    tempCanvas.width = originalWidth * scale;
+    tempCanvas.height = originalHeight * scale;
 
-    // 2. Create an off-screen canvas
-    const offscreenCanvas = document.createElement('canvas');
-    const offscreenCtx = offscreenCanvas.getContext('2d');
+    const scaledPanX = panX * scale;
+    const scaledPanY = panY * scale;
+    const scaledZoom = zoom * scale;
 
-    // 3. Calculate the required canvas size
-    const padding = 60; // Add some padding around the entities
-    
-    // Calculate the corners of the bounding box in screen coordinates at zoom 1
-    const topLeft = diamondToScreenCorner(minX, minY, 0, 0, 1);
-    const topRight = diamondToScreenCorner(maxX, minY, 0, 0, 1);
-    const bottomLeft = diamondToScreenCorner(minX, maxY, 0, 0, 1);
-    const bottomRight = diamondToScreenCorner(maxX, maxY, 0, 0, 1);
+    drawDiamondGrid(tempCtx, scaledPanX, scaledPanY, scaledZoom);
+    drawEntities(tempCtx, scaledPanX, scaledPanY, scaledZoom);
+    drawAnchorSymbol(tempCtx, scaledPanX, scaledPanY, scaledZoom);
 
-    const screenMinX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
-    const screenMaxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
-    const screenMinY = Math.min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
-    const screenMaxY = Math.max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
-
-    const requiredWidth = screenMaxX - screenMinX + padding * 2;
-    const requiredHeight = screenMaxY - screenMinY + padding * 2;
-
-    offscreenCanvas.width = requiredWidth;
-    offscreenCanvas.height = requiredHeight;
-
-    // 4. Calculate new pan values to center the content
-    const exportPanX = -screenMinX + padding;
-    const exportPanY = -screenMinY + padding;
-    const exportZoom = 1;
-
-    // 5. Redraw everything on the off-screen canvas
-    drawDiamondGrid(offscreenCtx, exportPanX, exportPanY, exportZoom);
-    drawEntities(offscreenCtx, exportPanX, exportPanY, exportZoom);
-    drawAnchorSymbol(offscreenCtx, exportPanX, exportPanY, exportZoom);
-
-    // 6. Trigger download
-    const link = document.createElement('a');
-    const mapName = document.getElementById('mapNameInput').value.trim();
-    link.download = mapName ? `${sanitizeMapName(mapName)}.png` : 'layout.png';
-    link.href = offscreenCanvas.toDataURL('image/png');
-    link.click();
+    tempCanvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const mapName = document.getElementById('mapNameInput')?.value || 'layout';
+        link.download = `${mapName}.png`;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+    }, 'image/png');
 }
+
 
 function markUnsavedChanges() {
     hasUnsavedChanges = true;
@@ -2831,26 +3159,36 @@ function updatePageTitle() {
 // Populate sort selector dynamically
 function enablePopulateSortOptions(selected) {
     const sortSelect = document.getElementById('citySort');
-    if (!sortSelect) return;
-    sortSelect.innerHTML = '';
-    sortSelect.appendChild(new Option('ID', 'id'));
-    sortSelect.appendChild(new Option('Name', 'name'));
+    const mobileSort = document.getElementById('mobileCitySort');
+    const selects = [sortSelect, mobileSort].filter(Boolean);
+    if (!selects.length) return;
+
+    selects.forEach(sel => {
+        sel.innerHTML = '';
+        sel.appendChild(new Option('ID', 'id'));
+        sel.appendChild(new Option('Name', 'name'));
+        if (mapMode === 'castle' || showTeamsInBase) {
+            sel.appendChild(new Option('Team', 'team'));
+        }
+    });
     
     // Check presence of BT1/BT2
     const cities = entities.filter(e => e.type === 'city');
     const anyBT1 = cities.some(c => calculateMarchTimes(c).length >= 1);
     const anyBT2 = cities.some(c => calculateMarchTimes(c).length >= 2);
     
-    if (anyBT1) sortSelect.appendChild(new Option('BT1-Time', 'bt1'));
-    if (anyBT2) sortSelect.appendChild(new Option('BT2-Time', 'bt2'));
-    if (anyBT1 && anyBT2) sortSelect.appendChild(new Option('Combined BT1+BT2', 'both'));
-    
-    if (selected && Array.from(sortSelect.options).some(o => o.value === selected)) {
-        sortSelect.value = selected;
-    } else {
-        sortSelect.value = 'id';
-    }
-    sortSelect.onchange = updateCityList;
+    selects.forEach(sel => {
+        if (anyBT1) sel.appendChild(new Option('BT1-Time', 'bt1'));
+        if (anyBT2) sel.appendChild(new Option('BT2-Time', 'bt2'));
+        if (anyBT1 && anyBT2) sel.appendChild(new Option('Combined BT1+BT2', 'both'));
+
+        if (selected && Array.from(sel.options).some(o => o.value === selected)) {
+            sel.value = selected;
+        } else {
+            sel.value = 'id';
+        }
+        sel.onchange = updateCityList;
+    });
 }
 
 // Helper function to evaluate BT time for a city
