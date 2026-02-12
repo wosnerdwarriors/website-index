@@ -638,18 +638,19 @@ function drawSelectionHighlight(context, pX, pY, z, entity) {
 
     context.save();
 
+    traceEntityOutlinePath(context, pX, pY, z, entity);
+
     if (pulseActive) {
-        traceEntityOutlinePath(context, pX, pY, z, entity);
+        context.save();
         context.strokeStyle = `rgba(255, 255, 255, ${0.3 + pulseWave * 0.4})`;
         context.lineWidth = Math.max(4, (8 + pulseWave * 10) * z);
         context.setLineDash([]);
         context.shadowColor = `rgba(255, 255, 255, ${0.35 + pulseWave * 0.45})`;
         context.shadowBlur = Math.max(10, 24 * z);
         context.stroke();
-        context.shadowBlur = 0;
+        context.restore();
     }
 
-    traceEntityOutlinePath(context, pX, pY, z, entity);
     context.strokeStyle = '#ffff00';
     context.lineWidth = Math.max(2, 4 * z);
     context.setLineDash([5 * z, 5 * z]);
