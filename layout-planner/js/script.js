@@ -2396,13 +2396,23 @@ function updateGhostPreview(mouseX, mouseY) {
     }
 }
 
-function isFlagInsideForeignProtectedArea(newX, newY, entity) {
-    if (!entity || entity.type !== 'flag') return false;
+function isProtectedSourceInsideForeignProtectedArea(newX, newY, entity) {
+    if (!entity || (entity.type !== 'flag' && entity.type !== 'hq')) return false;
 
     const ownAllianceId = getEntityAllianceId(entity);
     const { claimedCells } = buildProtectedAreaSnapshot(entities, entity);
-    const owner = claimedCells.get(`${newX},${newY}`);
-    return Boolean(owner && owner !== ownAllianceId);
+    const width = entity.width || 1;
+    const height = entity.height || 1;
+
+    for (let dx = 0; dx < width; dx++) {
+        for (let dy = 0; dy < height; dy++) {
+            const owner = claimedCells.get(`${newX + dx},${newY + dy}`);
+            if (owner && owner !== ownAllianceId) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 function isPositionValid(newX, newY, entity) {
@@ -2466,8 +2476,8 @@ function isPositionValid(newX, newY, entity) {
         }
     }
 
-    // Flags cannot be placed inside the protected area of another alliance.
-    if (isFlagInsideForeignProtectedArea(newX, newY, entity)) {
+    // Flags/HQs cannot be placed inside the protected area of another alliance.
+    if (isProtectedSourceInsideForeignProtectedArea(newX, newY, entity)) {
         return false;
     }
     
