@@ -1027,14 +1027,8 @@ function selectEntity(event) {
         );
     });
 
-    if (clickedEntity) {
-        selectedEntity = clickedEntity;
-        stopSelectionPulse();
-    } else {
-        selectedEntity = null;
-        stopSelectionPulse();
-    }
-
+    selectedEntity = clickedEntity || null;
+    stopSelectionPulse();
     redraw();
 }
 
