@@ -69,6 +69,9 @@ let coordAnchor = { x: 600, y: 600 };
 let mapMode = 'base'; // 'base' or 'castle' (add island?)
 const castleReservedSize = 12; // Size of the reserved castle area
 const castleRedzoneThickness = 8; // Thickness of the redzone ring around the reserved area
+const selectionPulseDurationMs = 1400;
+let selectionPulseActiveUntil = 0;
+let selectionPulseRafId = null;
 
 
 // ==== WAVE COLORS ====
@@ -296,15 +299,16 @@ function drawEntities(context, pX, pY, z) {
     // Draw entities
     entities.forEach(entity => {
         drawEntity(context, pX, pY, z, entity, allProtectedAreas);
-        
-        if (selectedEntity === entity) {
-            drawSelectionHighlight(context, pX, pY, z, entity);
-        }
     });
     
     // Draw ghost preview if applicable
     if (ghostPreview) {
         drawGhostEntity(context, pX, pY, z, ghostPreview);
+    }
+
+    // Always draw selection as the top-most layer for better visibility.
+    if (selectedEntity && entities.includes(selectedEntity)) {
+        drawSelectionHighlight(context, pX, pY, z, selectedEntity);
     }
 }
 
@@ -593,42 +597,64 @@ function drawEnemyZoneDetails(context, z, zone, screen) {
 }
 
 
-function drawSelectionHighlight(context, pX, pY, z, entity) {
+function traceEntityOutlinePath(context, pX, pY, z, entity) {
     const currentGridSize = baseGridSize * z;
-    
-    context.save();
-    context.strokeStyle = '#ffff00';
-    context.lineWidth = Math.max(2, 4 * z);
-    context.setLineDash([5 * z, 5 * z]);
-    
+
     if (entity.width === 1 && entity.height === 1) {
-        // Single cell highlight
         const screen = diamondToScreen(entity.x, entity.y, pX, pY, z);
-        const size = currentGridSize * 1.0;
-        
+        const size = currentGridSize;
+
         context.beginPath();
         context.moveTo(screen.x, screen.y - size * 0.5);
         context.lineTo(screen.x + size * 0.5, screen.y);
         context.lineTo(screen.x, screen.y + size * 0.5);
         context.lineTo(screen.x - size * 0.5, screen.y);
         context.closePath();
-        context.stroke();
-    } else {
-        // Multi-cell highlight - draw outline around entire entity using corner coordinates
-        const topLeft = diamondToScreenCorner(entity.x, entity.y, pX, pY, z);
-        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y, pX, pY, z);
-        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height, pX, pY, z);
-        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height, pX, pY, z);
-        
-        context.beginPath();
-        context.moveTo(topLeft.x, topLeft.y);
-        context.lineTo(topRight.x, topRight.y);
-        context.lineTo(bottomRight.x, bottomRight.y);
-        context.lineTo(bottomLeft.x, bottomLeft.y);
-        context.closePath();
-        context.stroke();
+        return;
     }
-    
+
+    const topLeft = diamondToScreenCorner(entity.x, entity.y, pX, pY, z);
+    const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y, pX, pY, z);
+    const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height, pX, pY, z);
+    const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height, pX, pY, z);
+
+    context.beginPath();
+    context.moveTo(topLeft.x, topLeft.y);
+    context.lineTo(topRight.x, topRight.y);
+    context.lineTo(bottomRight.x, bottomRight.y);
+    context.lineTo(bottomLeft.x, bottomLeft.y);
+    context.closePath();
+}
+
+function drawSelectionHighlight(context, pX, pY, z, entity) {
+    const now = performance.now();
+    const pulseActive = now < selectionPulseActiveUntil;
+    const pulseProgress = pulseActive
+        ? 1 - ((selectionPulseActiveUntil - now) / selectionPulseDurationMs)
+        : 1;
+    const pulseWave = pulseActive
+        ? (Math.sin(pulseProgress * Math.PI * 6) + 1) * 0.5
+        : 0;
+
+    context.save();
+
+    if (pulseActive) {
+        traceEntityOutlinePath(context, pX, pY, z, entity);
+        context.strokeStyle = `rgba(255, 255, 255, ${0.3 + pulseWave * 0.4})`;
+        context.lineWidth = Math.max(4, (8 + pulseWave * 10) * z);
+        context.setLineDash([]);
+        context.shadowColor = `rgba(255, 255, 255, ${0.35 + pulseWave * 0.45})`;
+        context.shadowBlur = Math.max(10, 24 * z);
+        context.stroke();
+        context.shadowBlur = 0;
+    }
+
+    traceEntityOutlinePath(context, pX, pY, z, entity);
+    context.strokeStyle = '#ffff00';
+    context.lineWidth = Math.max(2, 4 * z);
+    context.setLineDash([5 * z, 5 * z]);
+    context.stroke();
+
     context.restore();
 }
 
@@ -957,6 +983,31 @@ function redraw() {
     drawAnchorSymbol(ctx, panX, panY, zoom);
 }
 
+function stopSelectionPulse() {
+    selectionPulseActiveUntil = 0;
+    if (selectionPulseRafId !== null) {
+        cancelAnimationFrame(selectionPulseRafId);
+        selectionPulseRafId = null;
+    }
+}
+
+function startSelectionPulse(durationMs = selectionPulseDurationMs) {
+    selectionPulseActiveUntil = performance.now() + durationMs;
+    if (selectionPulseRafId !== null) return;
+
+    const animatePulse = (now) => {
+        if (!selectedEntity || !entities.includes(selectedEntity) || now >= selectionPulseActiveUntil) {
+            selectionPulseRafId = null;
+            redraw();
+            return;
+        }
+        redraw();
+        selectionPulseRafId = requestAnimationFrame(animatePulse);
+    };
+
+    selectionPulseRafId = requestAnimationFrame(animatePulse);
+}
+
 function selectEntity(event) {
     if (selectedType !== 'select') return;
 
@@ -977,8 +1028,10 @@ function selectEntity(event) {
 
     if (clickedEntity) {
         selectedEntity = clickedEntity;
+        stopSelectionPulse();
     } else {
         selectedEntity = null;
+        stopSelectionPulse();
     }
 
     redraw();
@@ -1138,6 +1191,7 @@ function handleToolbarClick(e) {
     if (e.target.dataset.type) {
         selectedType = e.target.dataset.type;
         selectedEntity = null; // Deselect any entity when changing tools
+        stopSelectionPulse();
         
         // Remove highlighting from all buttons in both toolbars
         document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button, #mobile-toolbar-buildings button').forEach(button => {
@@ -1723,6 +1777,7 @@ window.addEventListener('DOMContentLoaded', () => {
             enemyZones.length = 0;
             cityCounterId = 1;
             selectedEntity = null;
+            stopSelectionPulse();
 
             redraw();
             updateCounters();
@@ -2410,6 +2465,7 @@ function deleteSelectedEntity() {
             entities.splice(index, 1);
         }
         selectedEntity = null;
+        stopSelectionPulse();
         redraw();
         updateCounters();
         updateCityList();
@@ -2491,6 +2547,12 @@ function updateCityList() {
     prioritized.sort(comparator);
     others.sort(comparator);
 
+    const selectCityFromList = (city) => {
+        selectedEntity = city;
+        startSelectionPulse();
+        redraw();
+    };
+
     const buildCityItem = (city) => {
         const li = document.createElement('li');
         li.className = 'flex items-center space-x-2 mb-2';
@@ -2501,6 +2563,8 @@ function updateCityList() {
         input.placeholder = `City ${city.id}`;
         input.className = 'border p-1 rounded touch-input';
         input.style.width = '15ch';
+        const handleCityNameClick = () => selectCityFromList(city);
+        input.addEventListener('click', handleCityNameClick);
         input.addEventListener('change', () => {
             city.name = input.value;
             redraw();
@@ -3675,6 +3739,7 @@ function applySnapshot(snapshot) {
         bearTraps = entities.filter(e => e.type === 'building');
         cityCounterId = state.cityCounterId || 1;
         selectedEntity = null;
+        stopSelectionPulse();
         redraw();
         updateCounters();
         updateCityList();
