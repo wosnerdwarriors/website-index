@@ -3129,10 +3129,9 @@ function getSerializableEntitiesForMapCode(sourceEntities = entities) {
 }
 
 function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode = waveMode, _cityLabelMode = cityLabelMode, _mapMode = mapMode) {
-    let base64String = compressMap(entities);
-
-    const parts = [base64String];
     const serializableEntities = getSerializableEntitiesForMapCode(entities);
+    let base64String = compressMap(serializableEntities);
+    const parts = [base64String];
 
     if (mapName && mapName.trim() !== '') {
         parts.push("n=" + sanitizeMapName(mapName));
