@@ -58,12 +58,19 @@
                 <input id="mapNameInput" type="text" placeholder="Map Name (optional)" 
                        class="w-full p-3 border-2 border-gray-300 rounded-lg text-center focus:border-blue-500 focus:outline-none" maxlength="30">
                 <div id="mapNameHint" class="text-center text-red-500 text-sm mt-1 hidden"></div>
-                <div class="mt-3 flex items-center justify-center gap-2">
-                    <label for="mapModeSelect" class="text-sm font-medium">Mode:</label>
-                    <select id="mapModeSelect" class="p-2 border-2 border-gray-300 rounded-lg text-sm">
-                        <option value="castle">Castle</option>
-                        <option value="base">Base</option>
-                    </select>
+                <div class="mt-3">
+                    <span class="text-sm font-medium">Mode:</span>
+                    <div class="mt-1 flex w-full items-center rounded-lg border border-gray-200 bg-gray-100 p-1" role="group" aria-label="Map mode switch">
+                        <button type="button" data-mode="base" aria-pressed="true" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-blue-500 text-white shadow-sm transition-colors">Base</button>
+                        <button type="button" data-mode="castle" aria-pressed="false" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-transparent text-gray-500 hover:text-gray-700 transition-colors">Castle</button>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="text-sm font-medium">Alliance:</span>
+                    <div class="mt-1 flex w-full items-center rounded-lg border border-gray-200 bg-gray-100 p-1" role="group" aria-label="Alliance switch">
+                        <button type="button" data-alliance="main" aria-pressed="true" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-blue-500 text-white shadow-sm transition-colors">Main</button>
+                        <button type="button" data-alliance="farm" aria-pressed="false" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-transparent text-gray-500 hover:text-gray-700 transition-colors">Farm</button>
+                    </div>
                 </div>
                     <div id="marchtimeHint" class="mt-2 text-center text-xs text-gray-600 px-3 hidden">
                     Note: In <strong>Castle</strong> mode march times are calculated using a 25% march speed bonus (no pets, with facilities).
@@ -93,7 +100,7 @@
                         <div class="flex justify-center space-x-2">
                             <span>Flags: <span id="flagCounter" class="font-bold">0</span></span>
                             <span>Cities: <span id="cityCounter" class="font-bold">0</span></span>
-                            <span>BT: <span id="buildingCounter" class="font-bold">0</span></span>
+                            <span>BT(active): <span id="buildingCounter" class="font-bold">0/2</span></span>
                         </div>
 
                         <!-- Row 2 -->
@@ -312,7 +319,7 @@
                     <span class="mx-2">•</span>
                     <span>Cities: <span id="mobileCityCounter" class="font-bold">0</span></span>
                     <span class="mx-2">•</span>
-                    <span>BT: <span id="mobileBuildingCounter" class="font-bold">0</span></span>
+                    <span>BT(active): <span id="mobileBuildingCounter" class="font-bold">0/2</span></span>
                     <span class="mx-2">•</span>
                     <span>HQ: <span id="mobileHqCounter" class="font-bold">0</span></span>
                     <span class="mx-2">•</span>
@@ -324,13 +331,21 @@
         <div id="mobileCities" class="mobile-panel">
             <div class="bg-white p-4">
                 <h3 class="font-medium mb-4">Cities</h3>
-                <div class="mb-3 flex items-center justify-between gap-2">
-                    <label for="mobileMapModeSelect" class="text-sm font-medium">Mode:</label>
-                    <select id="mobileMapModeSelect" class="p-2 border-2 border-gray-300 rounded-lg text-sm flex-1">
-                        <option value="castle">Castle</option>
-                        <option value="base">Base</option>
-                    </select>
+                <div class="mb-3">
+                    <span class="text-sm font-medium">Mode:</span>
+                    <div class="mt-1 flex w-full items-center rounded-lg border border-gray-200 bg-gray-100 p-1" role="group" aria-label="Mobile map mode switch">
+                        <button type="button" data-mode="castle" aria-pressed="false" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-transparent text-gray-500 hover:text-gray-700 transition-colors">Castle</button>
+                        <button type="button" data-mode="base" aria-pressed="true" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-blue-500 text-white shadow-sm transition-colors">Base</button>
+                    </div>
                 </div>
+                <div class="mb-2">
+                    <span class="text-sm font-medium">Alliance:</span>
+                    <div class="mt-1 flex w-full items-center rounded-lg border border-gray-200 bg-gray-100 p-1" role="group" aria-label="Mobile alliance switch">
+                        <button type="button" data-alliance="main" aria-pressed="true" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-blue-500 text-white shadow-sm transition-colors">Main</button>
+                        <button type="button" data-alliance="farm" aria-pressed="false" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-transparent text-gray-500 hover:text-gray-700 transition-colors">Farm</button>
+                    </div>
+                </div>
+                <div id="mobileActiveAllianceTrapHint" class="mb-3 text-center text-xs text-gray-600">Main traps: 0/2</div>
                 <div id="mobileMarchtimeHint" class="mb-3 text-center text-xs text-gray-600 px-3 hidden">
                     Note: In <strong>Castle</strong> mode march times are calculated using a 25% march speed bonus (no pets, with facilities).
                 </div>
@@ -501,13 +516,18 @@
             }
 
             // Show the marchtime hint only when Castle mode is selected
-            const mapModeSelect = document.getElementById('mapModeSelect');
-            const mobileMapModeSelect = document.getElementById('mobileMapModeSelect');
             const marchtimeHint = document.getElementById('marchtimeHint');
             const mobileMarchtimeHint = document.getElementById('mobileMarchtimeHint');
-            function updateMarchtimeHint() {
-                const mode = mapModeSelect?.value || mobileMapModeSelect?.value;
-                if (!mode) return;
+
+            function resolveCurrentMode(preferredMode) {
+                if (preferredMode === 'castle' || preferredMode === 'base') return preferredMode;
+                const activeModeButton = document.querySelector('[data-mode][aria-pressed="true"]');
+                if (activeModeButton?.dataset?.mode) return activeModeButton.dataset.mode;
+                return 'base';
+            }
+
+            function updateMarchtimeHint(modeOverride) {
+                const mode = resolveCurrentMode(modeOverride);
                 if (mode === 'castle') {
                     marchtimeHint.classList.remove('hidden');
                     mobileMarchtimeHint?.classList.remove('hidden');
@@ -517,8 +537,12 @@
                 }
             }
             updateMarchtimeHint();
-            if (mapModeSelect) mapModeSelect.addEventListener('change', updateMarchtimeHint);
-            if (mobileMapModeSelect) mobileMapModeSelect.addEventListener('change', updateMarchtimeHint);
+            document.querySelectorAll('[data-mode]').forEach(btn => {
+                btn.addEventListener('click', () => updateMarchtimeHint(btn.dataset.mode));
+            });
+            window.addEventListener('layout-mapmode-change', (event) => {
+                updateMarchtimeHint(event?.detail?.mode);
+            });
 
             // Event listeners declaratively
             document.querySelectorAll('[data-section]').forEach(btn => {
