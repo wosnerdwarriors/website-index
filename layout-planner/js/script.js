@@ -43,12 +43,21 @@ let enemyZones = []; // Array for enemy zones (max 3)
 let cityTeams = {}; // Store team assignments for cities: {cityId: teamIndex}
 let customTeams = []; // Dynamic array of teams: [{name: 'Team A', color: '#3B82F6'}, ...]
 let showTeamsInBase = false;
+const ALLIANCES = [
+    { id: 'main', name: 'Main', short: 'M', areaColor: 'rgba(167, 164, 0, 0.3)' },
+    { id: 'farm', name: 'Farm', short: 'F', areaColor: 'rgba(68, 239, 77, 0.3)' }
+];
+const DEFAULT_ALLIANCE_ID = 'main';
+let activeAllianceId = DEFAULT_ALLIANCE_ID;
+const INACTIVE_ALLIANCE_ENTITY_FILL = 'rgba(156, 163, 175, 0.92)';
+const INACTIVE_ALLIANCE_ENTITY_STROKE = 'rgba(75, 85, 99, 0.95)';
+const INACTIVE_ALLIANCE_AREA_FILL = 'rgba(148, 163, 184, 0.3)';
 
 // Initialize with default teams
 function initializeDefaultTeams() {
     if (customTeams.length === 0) {
         customTeams = [
-            {name: 'Main Team', color: '#3B82F6'},  // Blue
+            {name: 'Main Team', color: 'rgb(59, 130, 246)'},  // Blue
             {name: 'Counters', color: '#EF4444'},  // Red
         ];
     }
@@ -69,6 +78,87 @@ let coordAnchor = { x: 600, y: 600 };
 let mapMode = 'base'; // 'base' or 'castle' (add island?)
 const castleReservedSize = 12; // Size of the reserved castle area
 const castleRedzoneThickness = 8; // Thickness of the redzone ring around the reserved area
+
+function normalizeAllianceId(allianceId) {
+    return ALLIANCES.some(a => a.id === allianceId) ? allianceId : DEFAULT_ALLIANCE_ID;
+}
+
+function getAllianceMeta(allianceId) {
+    const normalized = normalizeAllianceId(allianceId);
+    return ALLIANCES.find(a => a.id === normalized) || ALLIANCES[0];
+}
+
+function getAllianceName(allianceId) {
+    return getAllianceMeta(allianceId).name;
+}
+
+function getAllianceShort(allianceId) {
+    return getAllianceMeta(allianceId).short;
+}
+
+function isAllianceScopedType(type) {
+    return type === 'flag' || type === 'city' || type === 'building' || type === 'hq' || type === 'node';
+}
+
+function getEntityAllianceId(entity) {
+    if (!entity || !isAllianceScopedType(entity.type)) {
+        return DEFAULT_ALLIANCE_ID;
+    }
+    const normalized = normalizeAllianceId(entity.allianceId);
+    if (entity.allianceId !== normalized) {
+        entity.allianceId = normalized;
+    }
+    return normalized;
+}
+
+function isInInactiveAllianceView(entity) {
+    if (!entity || !isAllianceScopedType(entity.type)) return false;
+    return getEntityAllianceId(entity) !== normalizeAllianceId(activeAllianceId);
+}
+
+function getAllianceTrapCount(allianceId = activeAllianceId) {
+    const normalized = normalizeAllianceId(allianceId);
+    return bearTraps.filter(trap => getEntityAllianceId(trap) === normalized).length;
+}
+
+function getAllianceTrapIndex(trap) {
+    if (!trap) return 0;
+    const trapAlliance = getEntityAllianceId(trap);
+    const trapsInAlliance = bearTraps.filter(t => getEntityAllianceId(t) === trapAlliance);
+    return trapsInAlliance.indexOf(trap) + 1;
+}
+
+function setActiveAlliance(allianceId) {
+    activeAllianceId = normalizeAllianceId(allianceId);
+
+    document.querySelectorAll('[data-alliance]').forEach(button => {
+        const isActive = button.dataset.alliance === activeAllianceId;
+        button.classList.remove(
+            'bg-transparent', 'text-gray-500', 'hover:text-gray-700',
+            'bg-blue-500', 'bg-rose-500', 'text-white', 'shadow-sm'
+        );
+        button.classList.add('transition-colors');
+
+        if (isActive) {
+            button.classList.add('bg-blue-500', 'text-white', 'shadow-sm');
+        } else {
+            button.classList.add('bg-transparent', 'text-gray-500', 'hover:text-gray-700');
+        }
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+
+    const hintText = `${getAllianceName(activeAllianceId)} traps: ${getAllianceTrapCount(activeAllianceId)}/2`;
+    const hintDesktop = document.getElementById('activeAllianceTrapHint');
+    const hintMobile = document.getElementById('mobileActiveAllianceTrapHint');
+    if (hintDesktop) hintDesktop.textContent = hintText;
+    if (hintMobile) hintMobile.textContent = hintText;
+
+    const currentSort = document.getElementById('citySort')?.value || 'id';
+    enablePopulateSortOptions(currentSort);
+    updateCounters();
+    redraw();
+    updateCityList();
+}
 
 
 // ==== WAVE COLORS ====
@@ -165,25 +255,33 @@ function diamondToScreenCorner(gridX, gridY, pX, pY, z) {
 
 // ===== UI UPDATES =====
 function updateCounters() {
-    const flags = entities.filter(entity => entity.type === 'flag').length;
-    const cities = entities.filter(entity => entity.type === 'city').length;
-    const buildings = entities.filter(entity => entity.type === 'building').length;
-    const hqs = entities.filter(entity => entity.type === 'hq').length;
-    const nodes = entities.filter(entity => entity.type === 'node').length;
+    const allianceId = normalizeAllianceId(activeAllianceId);
+    const flags = entities.filter(entity => entity.type === 'flag' && getEntityAllianceId(entity) === allianceId).length;
+    const cities = entities.filter(entity => entity.type === 'city' && getEntityAllianceId(entity) === allianceId).length;
+    const buildings = entities.filter(entity => entity.type === 'building' && getEntityAllianceId(entity) === allianceId).length;
+    const hqs = entities.filter(entity => entity.type === 'hq' && getEntityAllianceId(entity) === allianceId).length;
+    const nodes = entities.filter(entity => entity.type === 'node' && getEntityAllianceId(entity) === allianceId).length;
+    const trapText = `${buildings}/2`;
 
     // Update desktop counters
     flagCounter.textContent = flags;
     cityCounter.textContent = cities;
-    buildingCounter.textContent = buildings;
+    buildingCounter.textContent = trapText;
     hqCounter.textContent = hqs;
     nodeCounter.textContent = nodes;
 
     // Update mobile counters
     document.getElementById('mobileFlagCounter').textContent = flags;
     document.getElementById('mobileCityCounter').textContent = cities;
-    document.getElementById('mobileBuildingCounter').textContent = buildings;
+    document.getElementById('mobileBuildingCounter').textContent = trapText;
     document.getElementById('mobileHqCounter').textContent = hqs;
     document.getElementById('mobileNodeCounter').textContent = nodes;
+
+    const hintText = `${getAllianceName(allianceId)} traps: ${buildings}/2`;
+    const hintDesktop = document.getElementById('activeAllianceTrapHint');
+    const hintMobile = document.getElementById('mobileActiveAllianceTrapHint');
+    if (hintDesktop) hintDesktop.textContent = hintText;
+    if (hintMobile) hintMobile.textContent = hintText;
 }
 
 // ===== GRID RENDERING =====
@@ -271,31 +369,77 @@ function drawRedZoneArea(context, pX, pY, z) {
     context.restore();
 }
 
+function buildProtectedAreaSnapshot(sourceEntities = entities, excludedEntity = null) {
+    const protectedAreasByAlliance = {};
+    ALLIANCES.forEach(alliance => {
+        protectedAreasByAlliance[alliance.id] = new Set();
+    });
+
+    // Cell ownership by first placed protected source (flag/HQ).
+    const claimedCells = new Map();
+
+    sourceEntities.forEach(entity => {
+        if (!entity) return;
+        if (excludedEntity && entity === excludedEntity) return;
+        if (entity.type !== 'flag' && entity.type !== 'hq') return;
+
+        const allianceId = getEntityAllianceId(entity);
+        const area = new Set();
+        markFlagArea(entity, area, entity.type === 'flag' ? 3 : 6);
+
+        area.forEach(coord => {
+            const owner = claimedCells.get(coord);
+            if (owner && owner !== allianceId) {
+                return;
+            }
+            if (!owner) {
+                claimedCells.set(coord, allianceId);
+            }
+            protectedAreasByAlliance[allianceId].add(coord);
+        });
+    });
+
+    return { protectedAreasByAlliance, claimedCells };
+}
+
+function getTerritoryPreviewAreaForEntity(entity) {
+    if (!entity || (entity.type !== 'flag' && entity.type !== 'hq')) return null;
+
+    const rawArea = new Set();
+    markFlagArea(entity, rawArea, entity.type === 'flag' ? 3 : 6);
+
+    const ownAllianceId = getEntityAllianceId(entity);
+    const { claimedCells } = buildProtectedAreaSnapshot();
+    const effectiveArea = new Set();
+
+    rawArea.forEach(coord => {
+        const owner = claimedCells.get(coord);
+        if (owner && owner !== ownAllianceId) {
+            return;
+        }
+        effectiveArea.add(coord);
+    });
+
+    return effectiveArea;
+}
+
 // ===== ENTITY RENDERING =====
 function drawEntities(context, pX, pY, z) {
-    // Draw flag areas first
-    const flagAreas = new Set();
-    const hqAreas = new Set();
-    entities.forEach(entity => {
-        if (entity.type === 'flag') {
-            markFlagArea(entity, flagAreas, 3);
-        } else if (entity.type === 'hq') {
-            markFlagArea(entity, hqAreas, 6);
-        }
+    const { protectedAreasByAlliance } = buildProtectedAreaSnapshot();
+
+    ALLIANCES.forEach(alliance => {
+        const color = alliance.id === normalizeAllianceId(activeAllianceId)
+            ? alliance.areaColor
+            : INACTIVE_ALLIANCE_AREA_FILL;
+        drawFlagAreas(context, pX, pY, z, protectedAreasByAlliance[alliance.id], color);
     });
-     // Make existing areas slightly more transparent to let the preview stand out
-    drawFlagAreas(context, pX, pY, z, flagAreas);
-    drawFlagAreas(context, pX, pY, z, hqAreas);
 
     // Draw the territory preview for the building being placed
     drawTerritoryPreview(context, pX, pY, z, territoryPreview);
 
-    // Combine flag areas and HQ areas for city positioning check
-    const allProtectedAreas = new Set([...flagAreas, ...hqAreas]);
-
     // Draw entities
     entities.forEach(entity => {
-        drawEntity(context, pX, pY, z, entity, allProtectedAreas);
+        drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance);
         
         if (selectedEntity === entity) {
             drawSelectionHighlight(context, pX, pY, z, entity);
@@ -308,19 +452,28 @@ function drawEntities(context, pX, pY, z) {
     }
 }
 
-function drawEntity(context, pX, pY, z, entity, protectedAreas) {
+function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
     context.save();
     
     const screen = diamondToScreen(entity.x, entity.y, pX, pY, z);
     const currentGridSize = baseGridSize * z;
+    const isInactiveAllianceEntity = isInInactiveAllianceView(entity);
+
+    if (isInactiveAllianceEntity) {
+        context.globalAlpha = 0.82;
+    }
     
     
     if (entity.type === 'city') {
-        const teamIndex = cityTeams[entity.id];
-        const teamColor = (teamIndex !== undefined && customTeams[teamIndex]) ? customTeams[teamIndex].color : entity.color;
-        context.fillStyle = waveMode ? getWaveColorForCity(entity) : teamColor;
+        if (isInactiveAllianceEntity) {
+            context.fillStyle = INACTIVE_ALLIANCE_ENTITY_FILL;
+        } else {
+            const teamIndex = cityTeams[entity.id];
+            const teamColor = (teamIndex !== undefined && customTeams[teamIndex]) ? customTeams[teamIndex].color : entity.color;
+            context.fillStyle = waveMode ? getWaveColorForCity(entity) : teamColor;
+        }
     } else {
-        context.fillStyle = entity.color;
+        context.fillStyle = isInactiveAllianceEntity ? INACTIVE_ALLIANCE_ENTITY_FILL : entity.color;
     }
 
     
@@ -367,7 +520,12 @@ function drawEntity(context, pX, pY, z, entity, protectedAreas) {
 
     // For cities outside protected areas, use red border; otherwise use black
     // NOTE: in castle mode we skip this check to avoid showing red warning borders
-    if (entity.type === 'city' && mapMode !== 'castle' && !isCityInProtectedArea(entity, protectedAreas)) {
+    const cityAlliance = getEntityAllianceId(entity);
+    const cityProtectedAreas = protectedAreasByAlliance?.[cityAlliance] || new Set();
+    if (isInactiveAllianceEntity) {
+        context.strokeStyle = INACTIVE_ALLIANCE_ENTITY_STROKE;
+        context.lineWidth = Math.max(1, 2 * z);
+    } else if (entity.type === 'city' && mapMode !== 'castle' && !isCityInProtectedArea(entity, cityProtectedAreas)) {
         context.strokeStyle = 'rgba(255, 0, 0, 1.0)';
         context.lineWidth = Math.max(2, 4 * z);
     } else {
@@ -499,7 +657,7 @@ function drawCityDetails(context, z, city, screen) {
     context.textBaseline = 'middle';
     
     // Shift text upward to accommodate multiple bear trap times
-    const baseOffset = -currentGridSize * 0.2;
+    const baseOffset = -currentGridSize * 0.29;
     
     const label = city.name || `City ${city.id}`;
     context.fillText(label, screen.x, screen.y + baseOffset);
@@ -543,8 +701,9 @@ function drawBearTrapDetails(context, z, trap, screen) {
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     
-    const trapIndex = bearTraps.indexOf(trap) + 1;
-    context.fillText(`BT${trapIndex}`, screen.x, screen.y);
+    const trapIndex = getAllianceTrapIndex(trap);
+    const allianceShort = getAllianceShort(getEntityAllianceId(trap));
+    context.fillText(`${allianceShort}BT${trapIndex}`, screen.x, screen.y);
 }
 
 function drawHQDetails(context, z, hq, screen) {
@@ -660,7 +819,9 @@ function calculateMarchTimes(city) {
 
     // Beartap times
     const times = [];
+    const cityAlliance = getEntityAllianceId(city);
     bearTraps.forEach(trap => {
+        if (getEntityAllianceId(trap) !== cityAlliance) return;
         const cityCenterX = city.x + city.width / 2 - 0.5;
         const cityCenterY = city.y + city.height / 2 - 0.5;
         const trapCenterX = trap.x + trap.width / 2 - 0.5;
@@ -777,10 +938,14 @@ function getWaveRing(city) {
   // City-Center
   const cx = city.x + city.width  / 2 - 0.5;
   const cy = city.y + city.height / 2 - 0.5;
+  const cityAlliance = getEntityAllianceId(city);
 
   let best = Infinity;
+  let hasMatchingTrap = false;
 
   for (const t of bearTraps) {
+    if (getEntityAllianceId(t) !== cityAlliance) continue;
+    hasMatchingTrap = true;
     // Trap-Center + "Halfheight/width" in cells
     const tx = t.x + t.width  / 2 - 0.5;
     const ty = t.y + t.height / 2 - 0.5;
@@ -797,6 +962,7 @@ function getWaveRing(city) {
 
     if (ring < best) best = ring;
   }
+  if (!hasMatchingTrap) return null;
   return best; // 1 = next to bt, 2 = next row, etc.
 }
 
@@ -889,8 +1055,8 @@ function addEntity(event) {
         width = 2;
         height = 2;
     } else if (selectedType === 'building') {
-        if (bearTraps.length >= 2) {
-            alert('You can only place up to 2 Bear Traps.');
+        if (getAllianceTrapCount(activeAllianceId) >= 2) {
+            alert(`You can only place up to 2 Bear Traps for ${getAllianceName(activeAllianceId)}.`);
             return;
         }
         color = 'black';
@@ -922,7 +1088,9 @@ function addEntity(event) {
         height = 12;
     }
 
-    const newEntityTemplate = { x, y, width, height, type: selectedType };
+    const newEntityTemplate = isAllianceScopedType(selectedType)
+        ? { x, y, width, height, type: selectedType, allianceId: normalizeAllianceId(activeAllianceId) }
+        : { x, y, width, height, type: selectedType };
     if (isPositionValid(x, y, newEntityTemplate)) {
         if (selectedType === 'city') {
             id = cityCounterId;
@@ -1218,14 +1386,17 @@ function setWaveMode(_waveMode = defaultWaveMode) {
 function setMapMode(mode = 'base') {
     mapMode = mode || 'base';
 
-    // Update button visuals in both toolbars (desktop + mobile)
+    // Update mode switch visuals (desktop + mobile)
     document.querySelectorAll('[data-mode]').forEach(b => {
-        b.classList.remove('bg-yellow-500', 'text-white');
-        if (b.dataset.mode === mapMode) {
-            b.classList.add('bg-yellow-500', 'text-white');
+        const isActive = b.dataset.mode === mapMode;
+        b.classList.remove('bg-transparent', 'text-gray-500', 'hover:text-gray-700', 'bg-blue-500', 'text-white', 'shadow-sm');
+        b.classList.add('transition-colors');
+        if (isActive) {
+            b.classList.add('bg-blue-500', 'text-white', 'shadow-sm');
         } else {
-            b.classList.add('bg-gray-200');
+            b.classList.add('bg-transparent', 'text-gray-500', 'hover:text-gray-700');
         }
+        b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     });
 
     updateEnemyZoneButtonVisibility();
@@ -1239,14 +1410,9 @@ function setMapMode(mode = 'base') {
         // leaving castle mode -> remove the locked castle/turret entities
         removeCastleEntities();
     }
-    // Sync dropdown if present
-    const sel = document.getElementById('mapModeSelect');
-    if (sel) sel.value = mapMode;
-    const mobileSel = document.getElementById('mobileMapModeSelect');
-    if (mobileSel) mobileSel.value = mapMode;
-
     redraw();
     updateCityList();
+    window.dispatchEvent(new CustomEvent('layout-mapmode-change', { detail: { mode: mapMode } }));
 }
 
 function updateEnemyZoneButtonVisibility() {
@@ -1560,25 +1726,16 @@ window.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', handleToolbarClick);
     });
 
-    // Initialize map mode button visuals
-    setMapMode(mapMode);
+    document.querySelectorAll('[data-mode]').forEach(button => {
+        button.addEventListener('click', () => setMapMode(button.dataset.mode));
+    });
+    document.querySelectorAll('[data-alliance]').forEach(button => {
+        button.addEventListener('click', () => setActiveAlliance(button.dataset.alliance));
+    });
 
-    // Wire the map mode dropdown under the map name
-    const mapModeSelect = document.getElementById('mapModeSelect');
-    if (mapModeSelect) {
-        // set initial value
-        mapModeSelect.value = mapMode;
-        mapModeSelect.addEventListener('change', (e) => {
-            setMapMode(e.target.value);
-        });
-    }
-    const mobileMapModeSelect = document.getElementById('mobileMapModeSelect');
-    if (mobileMapModeSelect) {
-        mobileMapModeSelect.value = mapMode;
-        mobileMapModeSelect.addEventListener('change', (e) => {
-            setMapMode(e.target.value);
-        });
-    }
+    // Initialize mode/alliance switch visuals
+    setMapMode(mapMode);
+    setActiveAlliance(activeAllianceId);
 
     // Add zoom control event listeners
     document.getElementById('zoomInBtn')?.addEventListener('click', zoomIn);
@@ -2219,18 +2376,17 @@ function updateGhostPreview(mouseX, mouseY) {
             height = 3;
         }
 
-        const tempEntity = { x, y, width, height, type: selectedType };
+        const tempEntity = isAllianceScopedType(selectedType)
+            ? { x, y, width, height, type: selectedType, allianceId: normalizeAllianceId(activeAllianceId) }
+            : { x, y, width, height, type: selectedType };
         const validPosition = isPositionValid(x, y, tempEntity);
 
         if (validPosition) {
-            ghostPreview = { x, y, width, height, type: selectedType };
+            ghostPreview = { ...tempEntity };
 
             // If the selected building is a flag or HQ, calculate its territory for preview
             if (selectedType === 'flag' || selectedType === 'hq') {
-                const radius = selectedType === 'flag' ? 3 : 6;
-                const previewArea = new Set();
-                markFlagArea(ghostPreview, previewArea, radius);
-                territoryPreview = previewArea;
+                territoryPreview = getTerritoryPreviewAreaForEntity(ghostPreview);
             }
         } else {
             ghostPreview = null;
@@ -2238,6 +2394,25 @@ function updateGhostPreview(mouseX, mouseY) {
         
         redraw();
     }
+}
+
+function isProtectedSourceInsideForeignProtectedArea(newX, newY, entity) {
+    if (!entity || (entity.type !== 'flag' && entity.type !== 'hq')) return false;
+
+    const ownAllianceId = getEntityAllianceId(entity);
+    const { claimedCells } = buildProtectedAreaSnapshot(entities, entity);
+    const width = entity.width || 1;
+    const height = entity.height || 1;
+
+    for (let dx = 0; dx < width; dx++) {
+        for (let dy = 0; dy < height; dy++) {
+            const owner = claimedCells.get(`${newX + dx},${newY + dy}`);
+            if (owner && owner !== ownAllianceId) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 function isPositionValid(newX, newY, entity) {
@@ -2300,15 +2475,21 @@ function isPositionValid(newX, newY, entity) {
             }
         }
     }
+
+    // Flags/HQs cannot be placed inside the protected area of another alliance.
+    if (isProtectedSourceInsideForeignProtectedArea(newX, newY, entity)) {
+        return false;
+    }
     
     for (let other of entities) {
         if (other !== entity) {
-            if (
+            const hasOverlap =
                 newX < other.x + other.width &&
                 newX + entity.width > other.x &&
                 newY < other.y + other.height &&
-                newY + entity.height > other.y
-            ) {
+                newY + entity.height > other.y;
+
+            if (hasOverlap) {
                 return false;
             }
         }
@@ -2419,8 +2600,11 @@ function deleteSelectedEntity() {
 }
 
 function updateCityList() {
-    // Get march times for all cities
-    entities.filter(e => e.type === 'city').forEach(city => {
+    const allianceId = normalizeAllianceId(activeAllianceId);
+    const visibleCities = entities.filter(e => e.type === 'city' && getEntityAllianceId(e) === allianceId);
+
+    // Get march times for visible cities
+    visibleCities.forEach(city => {
         city.marchTimes = calculateMarchTimes(city);
     });
 
@@ -2449,7 +2633,7 @@ function updateCityList() {
     cityList.innerHTML = '';
     mobileCityList.innerHTML = '';
 
-    const cities = entities.filter(e => e.type === 'city');
+    const cities = visibleCities;
     const btIndex = sortBy === 'bt1' ? 0 : sortBy === 'bt2' ? 1 : null;
 
     // Separate prioritized
@@ -2540,7 +2724,9 @@ function updateCityList() {
             const key = `bt${i + 1}`;
             const isPriority = city.priorities && city.priorities[key];
             const bubble = document.createElement('span');
-            const labelPrefix = mapMode === 'castle' ? 'Castle' : `BT${i + 1}`;
+            const labelPrefix = mapMode === 'castle'
+                ? 'Castle'
+                : `${getAllianceShort(getEntityAllianceId(city))}BT${i + 1}`;
             bubble.textContent = `${labelPrefix}: ${time}s`;
             bubble.className = `bt-bubble inline-flex items-center justify-center px-2 py-1 text-xs leading-none rounded cursor-pointer min-w-[70px] ${
                 isPriority ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'
@@ -2549,10 +2735,11 @@ function updateCityList() {
                 city.priorities = city.priorities || {};
                 city.priorities[key] = !city.priorities[key];
                 if (city.priorities[key]) {
-                    const candidates = entities.filter(e =>
-                        e.type === 'city' &&
-                        !(e.priorities && e.priorities[key])
-                    );
+                        const candidates = entities.filter(e =>
+                            e.type === 'city' &&
+                            getEntityAllianceId(e) === getEntityAllianceId(city) &&
+                            !(e.priorities && e.priorities[key])
+                        );
                     if (candidates.length) {
                         let bestCity = candidates[0];
                         let bestTime = sortBy === 'both'
@@ -2937,9 +3124,13 @@ function sanitizeMapName(name) {
     return name.replace(/[^a-zA-Z0-9 \-_]/g, '').substring(0, 30);
 }
 
-function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode = waveMode, _cityLabelMode = cityLabelMode, _mapMode = mapMode) {
-    let base64String = compressMap(entities);
+function getSerializableEntitiesForMapCode(sourceEntities = entities) {
+    return sourceEntities.filter(entity => entity.type !== 'castle' && entity.type !== 'turret');
+}
 
+function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode = waveMode, _cityLabelMode = cityLabelMode, _mapMode = mapMode) {
+    const serializableEntities = getSerializableEntitiesForMapCode(entities);
+    let base64String = compressMap(serializableEntities);
     const parts = [base64String];
 
     if (mapName && mapName.trim() !== '') {
@@ -2954,14 +3145,18 @@ function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode 
     parts.push("m=" + _cityLabelMode);
     parts.push("mode=" + (_mapMode === 'castle' ? 'c' : 'b')); // 'b' = base, 'c' = castle
     parts.push("teams=" + encodeURIComponent(JSON.stringify({assignments: cityTeams, list: customTeams})));
+    parts.push("alli=" + encodeURIComponent(JSON.stringify({
+        active: normalizeAllianceId(activeAllianceId),
+        list: serializableEntities.map(entity => isAllianceScopedType(entity.type) ? getEntityAllianceId(entity) : null)
+    })));
 
     return parts.join("||");
 }
 
 
 function decompressMapWithName(combinedString) {
-    // Returns: { entities, mapName?, anchor?, waveMode?, cityLabelMode?, teams? }
-    const out = { entities: [], mapName: "", anchor: null, waveMode: null, cityLabelMode: null, teams: null };
+    // Returns: { entities, mapName?, anchor?, waveMode?, cityLabelMode?, teams?, alliances? }
+    const out = { entities: [], mapName: "", anchor: null, waveMode: null, cityLabelMode: null, teams: null, alliances: null };
 
     if (!combinedString || typeof combinedString !== 'string') {
         return out;
@@ -2992,6 +3187,13 @@ function decompressMapWithName(combinedString) {
                 out.teams = JSON.parse(raw);
             } catch (e) {
                 console.warn('Failed to parse teams data from map code', e);
+            }
+        } else if (seg.startsWith("alli=")) {
+            try {
+                const raw = decodeURIComponent(seg.slice(5));
+                out.alliances = JSON.parse(raw);
+            } catch (e) {
+                console.warn('Failed to parse alliances data from map code', e);
             }
         } else {
             // Legacy support: if no prefix, treat as name
@@ -3028,12 +3230,23 @@ function loadMap() {
         const compressedMap = mapData.value;
         const loaded = decompressMapWithName(compressedMap);
         const loadedEntities = Array.isArray(loaded) ? loaded : loaded.entities || [];
+        const loadedAllianceData = !Array.isArray(loaded) && loaded.alliances && typeof loaded.alliances === 'object'
+            ? loaded.alliances
+            : null;
+        const allianceList = Array.isArray(loadedAllianceData?.list) ? loadedAllianceData.list : [];
+        const activeFromMap = normalizeAllianceId(loadedAllianceData?.active);
 
         entities.length = 0;
         bearTraps.length = 0;
         enemyZones.length = 0;
 
-        loadedEntities.forEach(entity => {
+        loadedEntities.forEach((entity, index) => {
+            if (isAllianceScopedType(entity.type)) {
+                const fromList = allianceList[index];
+                entity.allianceId = normalizeAllianceId(
+                    typeof fromList === 'string' ? fromList : entity.allianceId
+                );
+            }
             entities.push(entity);
             if (entity.type === "building") {
                 bearTraps.push(entity);
@@ -3068,6 +3281,9 @@ function loadMap() {
                 cityTeams = {};
             }
             updateTeamsUI();
+            activeAllianceId = activeFromMap;
+        } else {
+            activeAllianceId = DEFAULT_ALLIANCE_ID;
         }
 
         let cityId = 1;
@@ -3082,9 +3298,7 @@ function loadMap() {
         });
         cityCounterId = cityId;
 
-        redraw();
-        updateCounters();
-        updateCityList();
+        setActiveAlliance(activeAllianceId);
         markChangesSaved();
     } catch (e) {
         alert('Error loading the map. Please check the format.');
@@ -3173,7 +3387,8 @@ function enablePopulateSortOptions(selected) {
     });
     
     // Check presence of BT1/BT2
-    const cities = entities.filter(e => e.type === 'city');
+    const allianceId = normalizeAllianceId(activeAllianceId);
+    const cities = entities.filter(e => e.type === 'city' && getEntityAllianceId(e) === allianceId);
     const anyBT1 = cities.some(c => calculateMarchTimes(c).length >= 1);
     const anyBT2 = cities.some(c => calculateMarchTimes(c).length >= 2);
     
@@ -3258,6 +3473,49 @@ function splitCsvLine(line){
     return out;
 }
 
+function csvEscape(value) {
+    const str = String(value ?? '');
+    return `"${str.replace(/"/g, '""')}"`;
+}
+
+function parseAllianceIdFromCsv(value, fallbackAllianceId = activeAllianceId) {
+    const fallback = normalizeAllianceId(fallbackAllianceId);
+    const needle = String(value ?? '').trim().toLowerCase();
+    if (!needle) return fallback;
+
+    const match = ALLIANCES.find(alliance =>
+        alliance.id.toLowerCase() === needle ||
+        alliance.name.toLowerCase() === needle ||
+        alliance.short.toLowerCase() === needle
+    );
+    return match ? match.id : fallback;
+}
+
+function findTeamIndexByName(teamName) {
+    const needle = String(teamName ?? '').trim().toLowerCase();
+    if (!needle) return -1;
+    return customTeams.findIndex(team => String(team?.name ?? '').trim().toLowerCase() === needle);
+}
+
+function getImportTeamColor(index) {
+    const palette = [
+        '#3B82F6', '#10B981', '#EF4444', '#F59E0B',
+        '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'
+    ];
+    return palette[index % palette.length];
+}
+
+function ensureTeamIndexByName(teamName) {
+    const normalizedName = String(teamName ?? '').trim();
+    if (!normalizedName) return -1;
+
+    const existing = findTeamIndexByName(normalizedName);
+    if (existing !== -1) return existing;
+
+    customTeams.push({ name: normalizedName, color: getImportTeamColor(customTeams.length) });
+    return customTeams.length - 1;
+}
+
 // find a free spot in the grid for a new entity of given size
 // spiral search from anchorGridCell or 0,0
 // respects isPositionValid if defined
@@ -3293,7 +3551,7 @@ function worldCoordToGrid(world, width=2, height=2){
   return { x: tipX - (width - 1), y: tipY - (height - 1) };
 }
 
-// Import: name[,x,y] while x and y are optional
+// Import: name[,x,y,alliance,team] where all but "name" are optional
 // 1) Existing "City N" cities are RENAMED only.
 // 2) Only when no default cities remain, new 2x2 cities are created.
 // 3) Provided x,y are by default used ONLY for new cities.
@@ -3302,13 +3560,18 @@ function worldCoordToGrid(world, width=2, height=2){
 function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
   const lines = String(text).split(/\r?\n/).filter(l => l.trim().length);
   if (!lines.length) return;
+  const fallbackAllianceId = normalizeAllianceId(activeAllianceId);
 
-  const headers = splitCsvLine(lines[0]).map(h => h.trim().toLowerCase());
+  const headers = splitCsvLine(lines[0]).map(h => h.replace(/^\uFEFF/, '').trim().toLowerCase());
   const idx = k => headers.indexOf(k);
 
   const iName = idx('name');
   const iX    = idx('x');
   const iY    = idx('y');
+  const iAlliance = idx('alliance');
+  const iTeam = idx('team');
+  const hasAllianceColumn = iAlliance !== -1;
+  const hasTeamColumn = iTeam !== -1;
 
   if (iName === -1) {
     alert('CSV must have at least a "name" column.');
@@ -3323,39 +3586,56 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
     if (!name) continue;
     const x = (iX !== -1) ? num(cols[iX]) : null;
     const y = (iY !== -1) ? num(cols[iY]) : null;
-    rows.push({ name, x, y });
+    const allianceId = hasAllianceColumn
+      ? parseAllianceIdFromCsv(cols[iAlliance], fallbackAllianceId)
+      : fallbackAllianceId;
+    const teamName = hasTeamColumn ? (cols[iTeam] || '').trim() : null;
+    rows.push({ name, x, y, allianceId, teamName });
   }
   if (!rows.length) return;
 
-  // 1) Collect default cities (rename only)
-  const defaultCities = entities
-    .filter(e => e.type === 'city' && isDefaultCityName(e.name))
-    .sort((a,b) => (a.id||0) - (b.id||0));
+  const defaultCitiesByAlliance = {};
+  const alliancesToPrepare = hasAllianceColumn ? ALLIANCES.map(a => a.id) : [fallbackAllianceId];
+  alliancesToPrepare.forEach(allianceId => {
+    defaultCitiesByAlliance[allianceId] = entities
+      .filter(e => e.type === 'city' && getEntityAllianceId(e) === allianceId && isDefaultCityName(e.name))
+      .sort((a,b) => (a.id||0) - (b.id||0));
+  });
 
-  let r = 0;
+  const assignImportedTeam = (city, teamName) => {
+    if (!hasTeamColumn || !city || city.id === undefined) return;
+    const teamIndex = ensureTeamIndexByName(teamName);
+    if (teamIndex === -1) {
+      delete cityTeams[city.id];
+      return;
+    }
+    cityTeams[city.id] = teamIndex;
+  };
 
-  while (r < rows.length && defaultCities.length){
-    const city = defaultCities.shift();
-    const rec  = rows[r];
+  const teamCountBeforeImport = customTeams.length;
 
-    // only rename
-    city.name = rec.name;
+  // 1) First consume default cities per alliance, then create new ones.
+  for (let r = 0; r < rows.length; r++){
+    const rec = rows[r];
+    const defaultCities = defaultCitiesByAlliance[rec.allianceId] || [];
+    const existingCity = defaultCities.shift();
 
-    // only move if explicitly allowed
-    if (moveDefaultCities && Number.isFinite(rec.x) && Number.isFinite(rec.y)) {
-      const width = city.width || 2, height = city.height || 2;
-      const g = worldCoordToGrid({ x: rec.x, y: rec.y }, width, height);
-      const ok = (typeof isPositionValid !== 'function') ||
-                 isPositionValid(g.x, g.y, { x:g.x, y:g.y, width, height });
-      if (ok) { city.x = g.x; city.y = g.y; }
+    if (existingCity) {
+      existingCity.name = rec.name;
+
+      // only move if explicitly allowed
+      if (moveDefaultCities && Number.isFinite(rec.x) && Number.isFinite(rec.y)) {
+        const width = existingCity.width || 2, height = existingCity.height || 2;
+        const g = worldCoordToGrid({ x: rec.x, y: rec.y }, width, height);
+        const ok = (typeof isPositionValid !== 'function') ||
+                   isPositionValid(g.x, g.y, { x:g.x, y:g.y, width, height });
+        if (ok) { existingCity.x = g.x; existingCity.y = g.y; }
+      }
+
+      assignImportedTeam(existingCity, rec.teamName);
+      continue;
     }
 
-    r++;
-  }
-  
-  // 2) Für übrig gebliebene Namen neue Städte anlegen
-  for (; r < rows.length; r++){
-    const rec = rows[r];
     const width = 2, height = 2;
 
     // Get target position (x,y only for new cities)
@@ -3371,14 +3651,21 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
       gx = spot.x; gy = spot.y;
     }
 
-    entities.push({
+    const city = {
       type: 'city',
       id: (typeof cityCounterId !== 'undefined' ? cityCounterId++ : undefined),
       name: rec.name,
       x: gx, y: gy,
       width, height,
+      allianceId: rec.allianceId,
       color: (typeof getRandomColor === 'function' ? getRandomColor() : 'rgb(200,200,200)')
-    });
+    };
+    entities.push(city);
+    assignImportedTeam(city, rec.teamName);
+  }
+
+  if (hasTeamColumn && customTeams.length !== teamCountBeforeImport) {
+    updateTeamsUI();
   }
 
   try { redraw(); } catch(e) { console.error("Redraw failed:", e); }  
@@ -3389,25 +3676,47 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
 
 
 /* =========================
-   EXPORT: name,x,y  (coordinates, lower corner)
+   EXPORT: name,x,y,alliance,team
    - x,y = coordForCity(city)
+   - includes all cities (both alliances)
    - onlyNamed=true -> skips "City N" - only used for testing
 ========================= */
 function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
   if (preventActionOnEmptyMap("exporting to CSV")) return;
-  const rows = ['name,x,y'];
+  const rows = ['name,x,y,alliance,team'];
+
+  const allianceOrder = ALLIANCES.reduce((acc, a, idx) => {
+    acc[a.id] = idx;
+    return acc;
+  }, {});
 
   const cities = entities
     .filter(e => e.type === 'city')
-    .sort((a,b) => (a.id||0) - (b.id||0));
+    .sort((a, b) => {
+      const aa = allianceOrder[getEntityAllianceId(a)] ?? 999;
+      const ab = allianceOrder[getEntityAllianceId(b)] ?? 999;
+      if (aa !== ab) return aa - ab;
+      return (a.id || 0) - (b.id || 0);
+    });
 
   for (const c of cities) {
     const rawName = (c.name && c.name.trim()) ? c.name.trim() : `City ${c.id ?? ''}`.trim();
     if (onlyNamed && isDefaultCityName(rawName)) continue;
 
     const world = coordForCity(c);
-    const safeName = `"${rawName.replace(/"/g,'""')}"`;
-    rows.push([safeName, world.x, world.y].join(','));
+    const allianceName = getAllianceName(getEntityAllianceId(c));
+    const teamIdx = cityTeams[c.id];
+    const teamName = (teamIdx !== undefined && customTeams[teamIdx]?.name)
+      ? customTeams[teamIdx].name
+      : '';
+
+    rows.push([
+      csvEscape(rawName),
+      world.x,
+      world.y,
+      csvEscape(allianceName),
+      csvEscape(teamName)
+    ].join(','));
   }
 
   const csv = rows.join('\n');
