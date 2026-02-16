@@ -16,8 +16,8 @@ const copyShortUrlButton = document.getElementById('copyShortUrlButton');
 const shortUrlContainer = document.getElementById('shortUrlContainer');
 const shortUrlOutput = document.getElementById('shortUrlOutput');
 const shortUrlError = document.getElementById('shortUrlError');
-const deleteButton = document.getElementById('deleteButton');
 const clearButton = document.getElementById('clearButton');
+const eraserCursor = document.getElementById('eraserCursor');
 
 // ===== GRID CONFIGURATION =====
 const baseGridSize = 30;
@@ -37,6 +37,7 @@ const defaultCityLabelMode = "march";
 const defaultWaveMode = false;
 let selectedType = null;
 let selectedEntity = null;
+let selectedEntities = new Set();
 let cityCounterId = 1;
 let bearTraps = [];
 let enemyZones = []; // Array for enemy zones (max 3)
@@ -64,9 +65,16 @@ function initializeDefaultTeams() {
 }
 
 let isDragging = false;
+let isErasing = false;
 let isPanning = false;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
+let dragSelectionStart = [];
+let hasDragMovement = false;
+let isBoxSelecting = false;
+let selectionBoxStart = null;
+let selectionBoxCurrent = null;
+let selectionBoxAdditive = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
 let hasUnsavedChanges = false;
@@ -81,6 +89,138 @@ const castleRedzoneThickness = 8; // Thickness of the redzone ring around the re
 const selectionPulseDurationMs = 1400;
 let selectionPulseActiveUntil = 0;
 let selectionPulseRafId = null;
+let shortcutToastTimerId = null;
+const selectionBoxMinPixels = 4;
+let lastPointerClientX = null;
+let lastPointerClientY = null;
+
+const TOOL_LABELS = Object.freeze({
+    select: 'Select',
+    move: 'Pan',
+    delete: 'Erase',
+    flag: 'Flag',
+    city: 'City',
+    building: 'Trap',
+    hq: 'HQ',
+    node: 'Node',
+    obstacle: 'Obstacle',
+    enemyzone: 'Enemy Zone'
+});
+
+const TOOL_SHORTCUT_LABELS = Object.freeze({
+    select: 'Q',
+    move: 'W',
+    delete: 'E',
+    flag: '1',
+    city: '2',
+    building: '3',
+    hq: '4',
+    node: '5',
+    obstacle: '6',
+    enemyzone: '7'
+});
+
+const TOOL_SHORTCUT_KEY_MAP = Object.freeze({
+    q: 'select',
+    w: 'move',
+    '1': 'flag',
+    '2': 'city',
+    '3': 'building',
+    '4': 'hq',
+    '5': 'node',
+    '6': 'obstacle',
+    '7': 'enemyzone'
+});
+
+function isTextInputTarget(target) {
+    if (!(target instanceof Element)) return false;
+    if (target.isContentEditable) return true;
+    return Boolean(target.closest('input, textarea, select, [contenteditable="true"], [role="textbox"]'));
+}
+
+function setEraserCursorVisible(isVisible) {
+    if (!eraserCursor) return;
+    eraserCursor.classList.toggle('visible', Boolean(isVisible));
+}
+
+function rememberPointerPosition(clientX, clientY) {
+    if (typeof clientX !== 'number' || typeof clientY !== 'number') return;
+    lastPointerClientX = clientX;
+    lastPointerClientY = clientY;
+}
+
+function updateEraserCursorPosition(clientX, clientY) {
+    if (!eraserCursor || typeof clientX !== 'number' || typeof clientY !== 'number') return;
+    eraserCursor.style.left = `${clientX}px`;
+    eraserCursor.style.top = `${clientY}px`;
+}
+
+function isPlacementTool(toolType = selectedType) {
+    return Boolean(toolType && toolType !== 'select' && toolType !== 'move' && toolType !== 'delete');
+}
+
+function refreshGhostPreviewForCurrentPointer(toolType = selectedType) {
+    if (!isPlacementTool(toolType)) return;
+    if (!canvas.matches(':hover')) return;
+    if (lastPointerClientX === null || lastPointerClientY === null) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = lastPointerClientX - rect.left;
+    const mouseY = lastPointerClientY - rect.top;
+    updateGhostPreview(mouseX, mouseY);
+}
+
+function refreshEraserCursorForCurrentPointer(toolType = selectedType) {
+    if (toolType !== 'delete') {
+        setEraserCursorVisible(false);
+        return;
+    }
+
+    if (!canvas.matches(':hover')) {
+        setEraserCursorVisible(false);
+        return;
+    }
+
+    if (lastPointerClientX === null || lastPointerClientY === null) {
+        const rect = canvas.getBoundingClientRect();
+        updateEraserCursorPosition(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    } else {
+        updateEraserCursorPosition(lastPointerClientX, lastPointerClientY);
+    }
+    setEraserCursorVisible(true);
+}
+
+function updateCanvasCursorForTool(toolType = selectedType) {
+    canvas.classList.toggle('eraser-cursor-active', toolType === 'delete');
+
+    if (toolType === 'move') {
+        canvas.style.cursor = 'move';
+    } else if (toolType === 'delete') {
+        canvas.style.cursor = 'none';
+    } else if (toolType === 'select') {
+        canvas.style.cursor = 'pointer';
+    } else {
+        canvas.style.cursor = 'crosshair';
+    }
+
+    refreshEraserCursorForCurrentPointer(toolType);
+}
+
+function showShortcutToast(message, timeoutMs = 950) {
+    const toast = document.getElementById('shortcutToast');
+    if (!toast || !message) return;
+
+    toast.textContent = message;
+    toast.classList.add('visible');
+
+    if (shortcutToastTimerId !== null) {
+        clearTimeout(shortcutToastTimerId);
+    }
+    shortcutToastTimerId = setTimeout(() => {
+        toast.classList.remove('visible');
+        shortcutToastTimerId = null;
+    }, timeoutMs);
+}
 
 function normalizeAllianceId(allianceId) {
     return ALLIANCES.some(a => a.id === allianceId) ? allianceId : DEFAULT_ALLIANCE_ID;
@@ -444,9 +584,6 @@ function drawEntities(context, pX, pY, z) {
     entities.forEach(entity => {
         drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance);
         
-        if (selectedEntity === entity) {
-            drawSelectionHighlight(context, pX, pY, z, entity);
-        }
     });
     
     // Draw ghost preview if applicable
@@ -455,8 +592,12 @@ function drawEntities(context, pX, pY, z) {
     }
 
     // Always draw selection as the top-most layer for better visibility.
-    if (selectedEntity && entities.includes(selectedEntity)) {
-        drawSelectionHighlight(context, pX, pY, z, selectedEntity);
+    getSelectedEntities().forEach(entity => {
+        drawSelectionHighlight(context, pX, pY, z, entity);
+    });
+
+    if (isBoxSelecting && selectionBoxStart && selectionBoxCurrent) {
+        drawSelectionMarquee(context);
     }
 }
 
@@ -822,6 +963,24 @@ function drawSelectionHighlight(context, pX, pY, z, entity) {
     context.restore();
 }
 
+function drawSelectionMarquee(context) {
+    if (!selectionBoxStart || !selectionBoxCurrent) return;
+
+    const x = Math.min(selectionBoxStart.x, selectionBoxCurrent.x);
+    const y = Math.min(selectionBoxStart.y, selectionBoxCurrent.y);
+    const width = Math.abs(selectionBoxCurrent.x - selectionBoxStart.x);
+    const height = Math.abs(selectionBoxCurrent.y - selectionBoxStart.y);
+
+    context.save();
+    context.fillStyle = 'rgba(59, 130, 246, 0.15)';
+    context.strokeStyle = 'rgba(59, 130, 246, 0.95)';
+    context.lineWidth = 1.5;
+    context.setLineDash([6, 4]);
+    context.fillRect(x, y, width, height);
+    context.strokeRect(x, y, width, height);
+    context.restore();
+}
+
 function calculateMarchTimes(city) {
     // Castle time at 25% speed bonus
     if (mapMode === 'castle') {
@@ -1066,7 +1225,7 @@ function drawAnchorSymbol(context, pX, pY, z) {
 
 // ===== ENTITY PLACEMENT =====
 function addEntity(event) {
-    if (!selectedType || selectedType === 'select') return;
+    if (!selectedType || selectedType === 'select' || selectedType === 'move' || selectedType === 'delete') return;
 
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
@@ -1181,27 +1340,224 @@ function startSelectionPulse(durationMs = selectionPulseDurationMs) {
     selectionPulseRafId = requestAnimationFrame(animatePulse);
 }
 
-function selectEntity(event) {
-    if (selectedType !== 'select') return;
+function getSelectedEntities() {
+    const validSelection = [];
+    selectedEntities.forEach(entity => {
+        if (entities.includes(entity)) {
+            validSelection.push(entity);
+        }
+    });
+
+    if (validSelection.length !== selectedEntities.size) {
+        selectedEntities = new Set(validSelection);
+    }
+
+    if (selectedEntity && !selectedEntities.has(selectedEntity)) {
+        selectedEntity = validSelection.length ? validSelection[validSelection.length - 1] : null;
+    }
+
+    return validSelection;
+}
+
+function clearSelection({ stopPulse = true } = {}) {
+    selectedEntities.clear();
+    selectedEntity = null;
+    if (stopPulse) {
+        stopSelectionPulse();
+    }
+}
+
+function setSelection(entitiesToSelect = [], { primaryEntity = null, pulse = false } = {}) {
+    const validSelection = entitiesToSelect.filter(entity => entity && entities.includes(entity));
+    selectedEntities = new Set(validSelection);
+
+    if (!validSelection.length) {
+        selectedEntity = null;
+        stopSelectionPulse();
+        return;
+    }
+
+    if (primaryEntity && selectedEntities.has(primaryEntity)) {
+        selectedEntity = primaryEntity;
+    } else {
+        selectedEntity = validSelection[validSelection.length - 1];
+    }
+
+    if (pulse) {
+        startSelectionPulse();
+    } else {
+        stopSelectionPulse();
+    }
+}
+
+function addToSelection(entity, { makePrimary = true, pulse = false } = {}) {
+    if (!entity || !entities.includes(entity)) return;
+    const currentSelection = getSelectedEntities();
+    if (!selectedEntities.has(entity)) {
+        currentSelection.push(entity);
+    }
+    setSelection(currentSelection, { primaryEntity: makePrimary ? entity : selectedEntity, pulse });
+}
+
+function removeFromSelection(entity) {
+    if (!entity || !selectedEntities.has(entity)) return;
+    const remainingSelection = getSelectedEntities().filter(item => item !== entity);
+    const nextPrimary = selectedEntity === entity ? remainingSelection[remainingSelection.length - 1] : selectedEntity;
+    setSelection(remainingSelection, { primaryEntity: nextPrimary, pulse: false });
+}
+
+function toggleSelection(entity, { pulseOnAdd = true } = {}) {
+    if (!entity) return;
+    if (selectedEntities.has(entity)) {
+        removeFromSelection(entity);
+    } else {
+        addToSelection(entity, { makePrimary: true, pulse: pulseOnAdd });
+    }
+}
+
+function getEntityAtGrid(gridX, gridY) {
+    for (let i = entities.length - 1; i >= 0; i--) {
+        const entity = entities[i];
+        if (
+            gridX >= entity.x &&
+            gridX < entity.x + entity.width &&
+            gridY >= entity.y &&
+            gridY < entity.y + entity.height
+        ) {
+            return entity;
+        }
+    }
+    return null;
+}
+
+function getSelectionBoxRect() {
+    if (!selectionBoxStart || !selectionBoxCurrent) return null;
+
+    const x = Math.min(selectionBoxStart.x, selectionBoxCurrent.x);
+    const y = Math.min(selectionBoxStart.y, selectionBoxCurrent.y);
+    const width = Math.abs(selectionBoxCurrent.x - selectionBoxStart.x);
+    const height = Math.abs(selectionBoxCurrent.y - selectionBoxStart.y);
+
+    return { x, y, width, height };
+}
+
+function getEntitiesInSelectionBox(rect) {
+    if (!rect) return [];
+
+    const right = rect.x + rect.width;
+    const bottom = rect.y + rect.height;
+
+    return entities.filter(entity => {
+        const topLeft = diamondToScreenCorner(entity.x, entity.y, panX, panY, zoom);
+        const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y, panX, panY, zoom);
+        const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height, panX, panY, zoom);
+        const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height, panX, panY, zoom);
+
+        const minX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+        const maxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+        const minY = Math.min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+        const maxY = Math.max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+
+        return !(maxX < rect.x || minX > right || maxY < rect.y || minY > bottom);
+    });
+}
+
+function startBoxSelection(mouseX, mouseY, { additive = false } = {}) {
+    isBoxSelecting = true;
+    selectionBoxAdditive = additive;
+    selectionBoxStart = { x: mouseX, y: mouseY };
+    selectionBoxCurrent = { x: mouseX, y: mouseY };
+}
+
+function updateBoxSelection(mouseX, mouseY) {
+    if (!isBoxSelecting) return;
+    selectionBoxCurrent = { x: mouseX, y: mouseY };
+}
+
+function resetBoxSelection() {
+    isBoxSelecting = false;
+    selectionBoxStart = null;
+    selectionBoxCurrent = null;
+    selectionBoxAdditive = false;
+}
+
+function finalizeBoxSelection() {
+    if (!isBoxSelecting) return;
+
+    const rect = getSelectionBoxRect();
+    const isDragSelection = rect && (rect.width >= selectionBoxMinPixels || rect.height >= selectionBoxMinPixels);
+
+    if (!isDragSelection) {
+        if (!selectionBoxAdditive) {
+            clearSelection();
+        }
+        resetBoxSelection();
+        redraw();
+        return;
+    }
+
+    const boxEntities = getEntitiesInSelectionBox(rect);
+    if (selectionBoxAdditive) {
+        const merged = new Set(getSelectedEntities());
+        boxEntities.forEach(entity => merged.add(entity));
+        const mergedArray = Array.from(merged);
+        setSelection(mergedArray, {
+            primaryEntity: boxEntities[boxEntities.length - 1] || selectedEntity,
+            pulse: false
+        });
+    } else {
+        setSelection(boxEntities, {
+            primaryEntity: boxEntities[boxEntities.length - 1] || null,
+            pulse: false
+        });
+    }
+
+    resetBoxSelection();
+    redraw();
+}
+
+function selectEntity(event, { additive = false, toggle = false, pulse = false } = {}) {
+    if (selectedType !== 'select') return null;
 
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    
     const gridPos = screenToDiamond(mouseX, mouseY);
+    const clickedEntity = getEntityAtGrid(gridPos.x, gridPos.y);
 
-    const clickedEntity = entities.find(entity => {
-        return (
-            gridPos.x >= entity.x &&
-            gridPos.x < entity.x + entity.width &&
-            gridPos.y >= entity.y &&
-            gridPos.y < entity.y + entity.height
-        );
-    });
+    if (!clickedEntity) {
+        if (!additive && !toggle) {
+            clearSelection();
+        }
+        redraw();
+        return null;
+    }
 
-    selectedEntity = clickedEntity || null;
-    stopSelectionPulse();
+    if (toggle || additive) {
+        toggleSelection(clickedEntity, { pulseOnAdd: pulse });
+    } else {
+        setSelection([clickedEntity], { primaryEntity: clickedEntity, pulse });
+    }
+
     redraw();
+    return clickedEntity;
+}
+
+function eraseEntityAtEvent(event) {
+    if (selectedType !== 'delete') return false;
+
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+    const gridPos = screenToDiamond(mouseX, mouseY);
+    const clickedEntity = getEntityAtGrid(gridPos.x, gridPos.y);
+
+    if (!clickedEntity || clickedEntity.locked) {
+        return false;
+    }
+
+    setSelection([clickedEntity], { primaryEntity: clickedEntity, pulse: false });
+    return deleteSelectedEntity() > 0;
 }
 
 // ===== INPUT HANDLING =====
@@ -1276,10 +1632,32 @@ function centerMap() {
     redraw();
 }
 
+function canMoveDraggedSelection(deltaX, deltaY) {
+    if (!dragSelectionStart.length) return false;
+    const ignoreEntities = new Set(dragSelectionStart.map(item => item.entity));
+
+    return dragSelectionStart.every(item =>
+        isPositionValid(item.x + deltaX, item.y + deltaY, item.entity, ignoreEntities)
+    );
+}
+
+function applyDraggedSelection(deltaX, deltaY) {
+    dragSelectionStart.forEach(item => {
+        item.entity.x = item.x + deltaX;
+        item.entity.y = item.y + deltaY;
+    });
+}
+
 function handleMouseDown(event) {
+    rememberPointerPosition(event.clientX, event.clientY);
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
+
+    if (selectedType === 'delete') {
+        updateEraserCursorPosition(event.clientX, event.clientY);
+        setEraserCursorVisible(true);
+    }
     
     if (event.button === 1) { // Middle mouse button
         isPanning = true;
@@ -1288,17 +1666,55 @@ function handleMouseDown(event) {
         event.preventDefault();
     } else if (event.button === 0) { // Left mouse button
         if (selectedType === 'select') {
-            selectEntity(event);
-            if (selectedEntity && !selectedEntity.locked) {
-                isDragging = true;
-                const gridPos = screenToDiamond(mouseX, mouseY);
-                dragOffsetX = gridPos.x - selectedEntity.x;
-                dragOffsetY = gridPos.y - selectedEntity.y;
+            const gridPos = screenToDiamond(mouseX, mouseY);
+            const clickedEntity = getEntityAtGrid(gridPos.x, gridPos.y);
+            const additiveSelection = event.ctrlKey || event.metaKey;
+
+            hasDragMovement = false;
+            dragSelectionStart = [];
+
+            if (clickedEntity) {
+                if (additiveSelection) {
+                    toggleSelection(clickedEntity, { pulseOnAdd: false });
+                    redraw();
+                    return;
+                }
+
+                const selectedNow = getSelectedEntities();
+                if (!selectedEntities.has(clickedEntity) || selectedNow.length <= 1) {
+                    setSelection([clickedEntity], { primaryEntity: clickedEntity, pulse: false });
+                    redraw();
+                } else {
+                    selectedEntity = clickedEntity;
+                    stopSelectionPulse();
+                    redraw();
+                }
+
+                const movableSelection = getSelectedEntities().filter(entity => !entity.locked);
+                if (movableSelection.length && movableSelection.includes(clickedEntity)) {
+                    isDragging = true;
+                    dragOffsetX = gridPos.x;
+                    dragOffsetY = gridPos.y;
+                    dragSelectionStart = movableSelection.map(entity => ({
+                        entity,
+                        x: entity.x,
+                        y: entity.y
+                    }));
+                }
+            } else {
+                startBoxSelection(mouseX, mouseY, { additive: additiveSelection });
+                if (!additiveSelection) {
+                    clearSelection();
+                }
+                redraw();
             }
         } else if (selectedType === 'move') {
             isPanning = true;
             lastMouseX = mouseX;
             lastMouseY = mouseY;
+        } else if (selectedType === 'delete') {
+            isErasing = true;
+            eraseEntityAtEvent(event);
         } else {
             addEntity(event);
         }
@@ -1306,9 +1722,15 @@ function handleMouseDown(event) {
 }
 
 function handleMouseMove(event) {
+    rememberPointerPosition(event.clientX, event.clientY);
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
+
+    if (selectedType === 'delete') {
+        updateEraserCursorPosition(event.clientX, event.clientY);
+        setEraserCursorVisible(true);
+    }
     
     if (isPanning) {
         panX += mouseX - lastMouseX;
@@ -1316,14 +1738,19 @@ function handleMouseMove(event) {
         lastMouseX = mouseX;
         lastMouseY = mouseY;
         redraw();
-    } else if (isDragging && selectedEntity) {
+    } else if (isBoxSelecting) {
+        updateBoxSelection(mouseX, mouseY);
+        redraw();
+    } else if (isErasing && selectedType === 'delete') {
+        eraseEntityAtEvent(event);
+    } else if (isDragging && dragSelectionStart.length) {
         const gridPos = screenToDiamond(mouseX, mouseY);
-        const newX = gridPos.x - dragOffsetX;
-        const newY = gridPos.y - dragOffsetY;
-        
-        if (isPositionValid(newX, newY, selectedEntity)) {
-            selectedEntity.x = newX;
-            selectedEntity.y = newY;
+        const deltaX = gridPos.x - dragOffsetX;
+        const deltaY = gridPos.y - dragOffsetY;
+
+        if ((deltaX !== 0 || deltaY !== 0) && canMoveDraggedSelection(deltaX, deltaY)) {
+            applyDraggedSelection(deltaX, deltaY);
+            hasDragMovement = true;
             redraw();
             markUnsavedChanges();
         }
@@ -1336,10 +1763,19 @@ function handleMouseUp(event) {
     if (event.button === 1) {
         isPanning = false;
     } else if (event.button === 0) {
-        // If we finished dragging an entity, snapshot the new state
+        isErasing = false;
+        if (isBoxSelecting) {
+            finalizeBoxSelection();
+            return;
+        }
+
         if (isDragging) {
             isDragging = false;
-            pushHistory();
+            dragSelectionStart = [];
+            if (hasDragMovement) {
+                pushHistory();
+            }
+            hasDragMovement = false;
         }
         if (selectedType === 'move') {
             isPanning = false;
@@ -1349,48 +1785,75 @@ function handleMouseUp(event) {
 
 // Update this function to handle both desktop and mobile toolbars
 function handleToolbarClick(e) {
+    const button = e.target instanceof Element ? e.target.closest('button') : null;
+    if (!button) return;
+
     // Handle map-mode toggles (e.g. Castle)
-    if (e.target.dataset.mode) {
-        setMapMode(e.target.dataset.mode);
+    if (button.dataset.mode) {
+        setMapMode(button.dataset.mode);
         return;
     }
 
-    if (e.target.dataset.type) {
-        selectedType = e.target.dataset.type;
-        selectedEntity = null; // Deselect any entity when changing tools
-        stopSelectionPulse();
-        
-        // Remove highlighting from all buttons in both toolbars
-        document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button, #mobile-toolbar-buildings button').forEach(button => {
-            button.classList.remove('bg-yellow-500', 'bg-yellow-600');
-            
-            // Restore original colors for non-selected buttons
-            if (button.dataset.type === e.target.dataset.type) {
-                button.classList.add('bg-yellow-500');
-            } else {
-                if (button.dataset.type === 'flag') button.classList.add('bg-blue-500');
-                if (button.dataset.type === 'city') button.classList.add('bg-blue-500');
-                if (button.dataset.type === 'building') button.classList.add('bg-blue-500');
-                if (button.dataset.type === 'node') button.classList.add('bg-blue-500');
-                if (button.dataset.type === 'hq') button.classList.add('bg-blue-500');
-                if (button.dataset.type === 'obstacle') button.classList.add('bg-blue-500');
-            }
-        });
-        
-        if ((selectedType === 'select' || selectedType === 'move') && ghostPreview) {
-            ghostPreview = null;
-        }
-        redraw(); // Redraw to remove selection highlight
-        
-        // Update cursor style
-        if (selectedType === 'move') {
-            canvas.style.cursor = 'move';
-        } else if (selectedType === 'select') {
-            canvas.style.cursor = 'pointer';
+    if (button.dataset.type === 'delete') {
+        if (getSelectedEntities().length) {
+            const deletedCount = deleteSelectedEntity();
+            showShortcutToast(
+                deletedCount > 0
+                    ? `Deleted ${deletedCount === 1 ? 'selected entity' : `${deletedCount} entities`} (E)`
+                    : 'Selected object cannot be deleted'
+            );
         } else {
-            canvas.style.cursor = 'crosshair';
+            setSelectedTool('delete', { showToast: true });
         }
+        return;
     }
+
+    if (button.dataset.type) {
+        setSelectedTool(button.dataset.type);
+    }
+}
+
+function setSelectedTool(toolType, { showToast = false } = {}) {
+    if (!toolType) return false;
+
+    const knownToolButton = document.querySelector(
+        `#toolbar-controls button[data-type="${toolType}"], #toolbar-buildings button[data-type="${toolType}"], #mobile-toolbar-buildings button[data-type="${toolType}"]`
+    );
+    if (!knownToolButton) return false;
+
+    selectedType = toolType;
+    clearSelection();
+    isErasing = false;
+    isDragging = false;
+    dragSelectionStart = [];
+    hasDragMovement = false;
+    resetBoxSelection();
+    stopSelectionPulse();
+
+    document.querySelectorAll('#toolbar-controls button[data-type], #toolbar-buildings button[data-type], #mobile-toolbar-buildings button[data-type]').forEach(button => {
+        button.classList.remove('bg-yellow-500', 'bg-yellow-600');
+
+        if (button.dataset.type === toolType) {
+            button.classList.add('bg-yellow-500');
+        } else if (['flag', 'city', 'building', 'node', 'hq', 'obstacle'].includes(button.dataset.type)) {
+            button.classList.add('bg-blue-500');
+        }
+    });
+
+    if ((selectedType === 'select' || selectedType === 'move' || selectedType === 'delete') && ghostPreview) {
+        ghostPreview = null;
+    }
+    redraw();
+    updateCanvasCursorForTool(toolType);
+    refreshGhostPreviewForCurrentPointer(toolType);
+
+    if (showToast) {
+        const shortcut = TOOL_SHORTCUT_LABELS[toolType];
+        const label = TOOL_LABELS[toolType] || toolType;
+        showShortcutToast(shortcut ? `${label} (${shortcut})` : label);
+    }
+
+    return true;
 }
 
 // ===== SET/RENDER GUI BUTTONS =====
@@ -1483,11 +1946,9 @@ function updateEnemyZoneButtonVisibility() {
     });
 
     if (!show && selectedType === 'enemyzone') {
-        const selectButton = document.querySelector('[data-type="select"]');
-        if (selectButton) {
-            selectButton.click();
-        } else {
+        if (!setSelectedTool('select')) {
             selectedType = 'select';
+            updateCanvasCursorForTool('select');
         }
     }
 }
@@ -1747,13 +2208,21 @@ window.addEventListener('DOMContentLoaded', () => {
 
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('keydown', handleKeyDown);
+window.addEventListener('mouseup', handleMouseUp);
 
 canvas.addEventListener('wheel', handleWheel);
 canvas.addEventListener('mousedown', handleMouseDown);
 canvas.addEventListener('mousemove', handleMouseMove);
 canvas.addEventListener('mouseup', handleMouseUp);
+canvas.addEventListener('mouseenter', (event) => {
+    rememberPointerPosition(event.clientX, event.clientY);
+    refreshEraserCursorForCurrentPointer(selectedType);
+    refreshGhostPreviewForCurrentPointer(selectedType);
+});
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 canvas.addEventListener('mouseleave', () => {
+    isErasing = false;
+    setEraserCursorVisible(false);
     // Clear ghost preview when mouse leaves canvas
     if (ghostPreview) {
         ghostPreview = null;
@@ -1789,6 +2258,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Initialize mode/alliance switch visuals
     setMapMode(mapMode);
     setActiveAlliance(activeAllianceId);
+    setSelectedTool(selectedType || 'select');
 
     // Add zoom control event listeners
     document.getElementById('zoomInBtn')?.addEventListener('click', zoomIn);
@@ -1912,14 +2382,6 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById(`${prefix}downloadButton`)?.addEventListener('click', downloadCanvasAsPNG);
     });
     
-    deleteButton.addEventListener('click', () => {
-        if (selectedEntity) {
-            deleteSelectedEntity();
-        } else {
-            alert('No entity selected to delete.');
-        }
-    });
-    
     // Clear the entire map but preserve locked entities (e.g., castle/turrets)
     clearButton.addEventListener('click', () => {
         if (confirm('Are you sure you want to clear the entire map?')) {
@@ -1932,8 +2394,7 @@ window.addEventListener('DOMContentLoaded', () => {
             bearTraps.length = 0;
             enemyZones.length = 0;
             cityCounterId = 1;
-            selectedEntity = null;
-            stopSelectionPulse();
+            clearSelection();
 
             redraw();
             updateCounters();
@@ -2348,7 +2809,7 @@ function handleTouchMove(event) {
             panX = touchStartPanX + (currentX - touchStartX);
             panY = touchStartPanY + (currentY - touchStartY);
             redraw();
-        } else if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
+        } else if (selectedType && selectedType !== 'select' && selectedType !== 'move' && selectedType !== 'delete') {
             // Update ghost preview
             updateGhostPreview(currentX, currentY);
         }
@@ -2396,7 +2857,7 @@ function handleTouchEnd(event) {
                 clientY: event.changedTouches[0].clientY
             };
             
-            if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
+            if (selectedType && selectedType !== 'select' && selectedType !== 'move' && selectedType !== 'delete') {
                 addEntity(tapEvent);
             }
         }
@@ -2410,7 +2871,7 @@ function handleTouchEnd(event) {
 function updateGhostPreview(mouseX, mouseY) {
     territoryPreview = null;
 
-    if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
+    if (selectedType && selectedType !== 'select' && selectedType !== 'move' && selectedType !== 'delete') {
         const gridPos = screenToDiamond(mouseX, mouseY);
         const x = gridPos.x;
         const y = gridPos.y;
@@ -2469,7 +2930,7 @@ function isProtectedSourceInsideForeignProtectedArea(newX, newY, entity) {
     return false;
 }
 
-function isPositionValid(newX, newY, entity) {
+function isPositionValid(newX, newY, entity, ignoreEntities = null) {
     if (newX < -gridCols || newX + entity.width > gridCols + 1 || 
         newY < -gridRows || newY + entity.height > gridRows + 1) {
         return false;
@@ -2537,6 +2998,7 @@ function isPositionValid(newX, newY, entity) {
     
     for (let other of entities) {
         if (other !== entity) {
+            if (ignoreEntities && ignoreEntities.has(other)) continue;
             const hasOverlap =
                 newX < other.x + other.width &&
                 newX + entity.width > other.x &&
@@ -2552,16 +3014,20 @@ function isPositionValid(newX, newY, entity) {
 }
 
 function handleKeyDown(event) {
+    const key = event.key || '';
+    const normalizedKey = key.toLowerCase();
+    const isTyping = isTextInputTarget(event.target);
+
     // Global Undo/Redo: Ctrl/Cmd+Z, Ctrl/Cmd+Y, Ctrl/Cmd+Shift+Z
     try {
         const isMac = navigator.platform.toUpperCase().includes('MAC');
         const modKey = isMac ? event.metaKey : event.ctrlKey;
-        if (modKey && event.key && event.key.toLowerCase() === 'z') {
+        if (!isTyping && modKey && normalizedKey === 'z') {
             event.preventDefault();
             if (event.shiftKey) redo(); else undo();
             return;
         }
-        if (modKey && event.key && event.key.toLowerCase() === 'y') {
+        if (!isTyping && modKey && normalizedKey === 'y') {
             event.preventDefault();
             redo();
             return;
@@ -2570,27 +3036,82 @@ function handleKeyDown(event) {
         console.error('Error in undo/redo keyboard shortcut handler:', e);
     }
 
-    if (!selectedEntity) return;
+    if (isTyping) return;
 
-    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)) {
+    if (!event.altKey && !event.ctrlKey && !event.metaKey) {
+        if (normalizedKey === 'm') {
+            event.preventDefault();
+            const nextMode = mapMode === 'castle' ? 'base' : 'castle';
+            setMapMode(nextMode);
+            showShortcutToast(`Mode: ${nextMode === 'castle' ? 'Castle' : 'Base'} (M)`);
+            return;
+        }
+
+        if (normalizedKey === 'a') {
+            event.preventDefault();
+            const currentAllianceIndex = ALLIANCES.findIndex(a => a.id === normalizeAllianceId(activeAllianceId));
+            const nextAlliance = ALLIANCES[(currentAllianceIndex + 1) % ALLIANCES.length]?.id || DEFAULT_ALLIANCE_ID;
+            setActiveAlliance(nextAlliance);
+            showShortcutToast(`Alliance: ${getAllianceName(nextAlliance)} (A)`);
+            return;
+        }
+
+        if (normalizedKey === 'e') {
+            event.preventDefault();
+            if (getSelectedEntities().length) {
+                const deletedCount = deleteSelectedEntity();
+                showShortcutToast(
+                    deletedCount > 0
+                        ? `Deleted ${deletedCount === 1 ? 'selected entity' : `${deletedCount} entities`} (E)`
+                        : 'Selected object cannot be deleted'
+                );
+            } else {
+                setSelectedTool('delete', { showToast: true });
+            }
+            return;
+        }
+
+        const shortcutTool = TOOL_SHORTCUT_KEY_MAP[normalizedKey];
+        if (shortcutTool) {
+            event.preventDefault();
+            if (shortcutTool === 'enemyzone' && mapMode !== 'castle') {
+                showShortcutToast('Enemy Zone only in Castle mode');
+                return;
+            }
+            setSelectedTool(shortcutTool, { showToast: true });
+            return;
+        }
+    }
+
+    const selectedNow = getSelectedEntities();
+    if (!selectedNow.length) return;
+
+    if (!selectedEntity || !selectedEntities.has(selectedEntity)) {
+        selectedEntity = selectedNow[selectedNow.length - 1];
+    }
+
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
         event.preventDefault();
-    }    
+    }
 
-    // City name editing
-    if (selectedEntity.type === 'city' &&
-        !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(event.key)
+    const singleSelection = selectedNow.length === 1;
+
+    // City name editing (single selected city only)
+    if (singleSelection &&
+        selectedEntity.type === 'city' &&
+        !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(key)
     ) {
-        if (event.key === 'Enter') {
+        if (key === 'Enter') {
             selectedEntity.isEditing = false;
-        } else if (event.key === 'Backspace') {
+        } else if (key === 'Backspace') {
             event.preventDefault();
             selectedEntity.name = selectedEntity.name ? selectedEntity.name.slice(0, -1) : '';
-        } else if (event.key.length === 1) { 
+        } else if (key.length === 1) {
             if (!selectedEntity.isEditing) {
                 selectedEntity.name = '';
                 selectedEntity.isEditing = true;
             }
-            selectedEntity.name += event.key;
+            selectedEntity.name += key;
         }
         redraw();
         updateCityList();
@@ -2598,60 +3119,88 @@ function handleKeyDown(event) {
         return;
     }
 
-    if (event.key === 'Delete') {
+    if (key === 'Delete') {
         deleteSelectedEntity();
         return;
     }
 
-    // Movement with arrow keys
-    let newX = selectedEntity.x;
-    let newY = selectedEntity.y;
-    
-    if (event.key === 'ArrowUp') {
-        newY -= 1;
-    } else if (event.key === 'ArrowDown') {
-        newY += 1;
-    } else if (event.key === 'ArrowLeft') {
-        newX -= 1;
-    } else if (event.key === 'ArrowRight') {
-        newX += 1;
+    let deltaX = 0;
+    let deltaY = 0;
+    if (key === 'ArrowUp') {
+        deltaY = -1;
+    } else if (key === 'ArrowDown') {
+        deltaY = 1;
+    } else if (key === 'ArrowLeft') {
+        deltaX = -1;
+    } else if (key === 'ArrowRight') {
+        deltaX = 1;
     }
-    
-    if (isPositionValid(newX, newY, selectedEntity)) {
-        selectedEntity.x = newX;
-        selectedEntity.y = newY;
+
+    if (deltaX === 0 && deltaY === 0) return;
+
+    if (singleSelection) {
+        const newX = selectedEntity.x + deltaX;
+        const newY = selectedEntity.y + deltaY;
+        if (isPositionValid(newX, newY, selectedEntity)) {
+            selectedEntity.x = newX;
+            selectedEntity.y = newY;
+            redraw();
+            markUnsavedChanges();
+        }
+        return;
+    }
+
+    const movableSelection = selectedNow.filter(entity => !entity.locked);
+    if (!movableSelection.length) return;
+    const ignoreEntities = new Set(movableSelection);
+    const canMove = movableSelection.every(entity =>
+        isPositionValid(entity.x + deltaX, entity.y + deltaY, entity, ignoreEntities)
+    );
+
+    if (canMove) {
+        movableSelection.forEach(entity => {
+            entity.x += deltaX;
+            entity.y += deltaY;
+        });
         redraw();
         markUnsavedChanges();
     }
 }
 
 function deleteSelectedEntity() {
-    if (!selectedEntity) return;
-    // Do not allow deleting locked entities (castle/turret)
-    if (selectedEntity.locked) return;
-    
-    const index = entities.indexOf(selectedEntity);
-    if (index !== -1) {
-        if (selectedEntity.type === 'city') {
-            entities.splice(index, 1);
-            renumberCities();
-        } else if (selectedEntity.type === 'building') {
-            bearTraps = bearTraps.filter(trap => trap !== selectedEntity);
-            entities.splice(index, 1);
-        } else if (selectedEntity.type === 'enemyzone') {
-            enemyZones = enemyZones.filter(zone => zone !== selectedEntity);
-            entities.splice(index, 1);
-        } else {
-            entities.splice(index, 1);
+    const selectedNow = getSelectedEntities();
+    if (!selectedNow.length) return 0;
+
+    const deletable = selectedNow.filter(entity => !entity.locked);
+    if (!deletable.length) return 0;
+
+    let removedCities = false;
+    deletable.forEach(entity => {
+        const index = entities.indexOf(entity);
+        if (index === -1) return;
+
+        if (entity.type === 'city') {
+            removedCities = true;
+        } else if (entity.type === 'building') {
+            bearTraps = bearTraps.filter(trap => trap !== entity);
+        } else if (entity.type === 'enemyzone') {
+            enemyZones = enemyZones.filter(zone => zone !== entity);
         }
-        selectedEntity = null;
-        stopSelectionPulse();
-        redraw();
-        updateCounters();
-        updateCityList();
-        markUnsavedChanges();
-        pushHistory();
+
+        entities.splice(index, 1);
+    });
+
+    if (removedCities) {
+        renumberCities();
     }
+
+    clearSelection();
+    redraw();
+    updateCounters();
+    updateCityList();
+    markUnsavedChanges();
+    pushHistory();
+    return deletable.length;
 }
 
 function updateCityList() {
@@ -2731,8 +3280,7 @@ function updateCityList() {
     others.sort(comparator);
 
     const selectCityFromList = (city) => {
-        selectedEntity = city;
-        startSelectionPulse();
+        setSelection([city], { primaryEntity: city, pulse: true });
         redraw();
     };
 
@@ -3835,7 +4383,7 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
             clearLongPress();
             longPressTimer = setTimeout(()=>{
                 // If something is selected, delete it
-                if (selectedEntity){
+                if (getSelectedEntities().length){
                     deleteSelectedEntity();
                 }
             }, LONG_PRESS_MS);
@@ -3935,6 +4483,10 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
             const rect = canvas.getBoundingClientRect();
             const event = { clientX: x + rect.left, clientY: y + rect.top };
             selectEntity(event);
+        } else if (selectedType === 'delete') {
+            const rect = canvas.getBoundingClientRect();
+            const event = { clientX: x + rect.left, clientY: y + rect.top };
+            eraseEntityAtEvent(event);
         } else {
             // Simulate an addEntity at (x, y)
             const rect = canvas.getBoundingClientRect();
@@ -4046,8 +4598,7 @@ function applySnapshot(snapshot) {
         // Reconstruct derived arrays
         bearTraps = entities.filter(e => e.type === 'building');
         cityCounterId = state.cityCounterId || 1;
-        selectedEntity = null;
-        stopSelectionPulse();
+        clearSelection();
         redraw();
         updateCounters();
         updateCityList();
