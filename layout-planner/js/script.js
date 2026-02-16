@@ -94,6 +94,8 @@ let shortcutToastTimerId = null;
 const selectionBoxMinPixels = 4;
 let lastPointerClientX = null;
 let lastPointerClientY = null;
+const KEYBOARD_MOVE_HISTORY_DEBOUNCE_MS = 220;
+let keyboardMoveHistoryTimerId = null;
 
 const TOOL_LABELS = Object.freeze({
     select: 'Select',
@@ -195,6 +197,23 @@ function flushPendingEraseHistory() {
     if (!hasPendingEraseHistory) return;
     pushHistory();
     hasPendingEraseHistory = false;
+}
+
+function flushPendingKeyboardMoveHistory() {
+    if (keyboardMoveHistoryTimerId === null) return;
+    clearTimeout(keyboardMoveHistoryTimerId);
+    keyboardMoveHistoryTimerId = null;
+    pushHistory();
+}
+
+function scheduleKeyboardMoveHistoryPush() {
+    if (keyboardMoveHistoryTimerId !== null) {
+        clearTimeout(keyboardMoveHistoryTimerId);
+    }
+    keyboardMoveHistoryTimerId = window.setTimeout(() => {
+        keyboardMoveHistoryTimerId = null;
+        pushHistory();
+    }, KEYBOARD_MOVE_HISTORY_DEBOUNCE_MS);
 }
 
 function updateCanvasCursorForTool(toolType = selectedType) {
@@ -2894,6 +2913,11 @@ function handleKeyDown(event) {
     const key = event.key || '';
     const normalizedKey = key.toLowerCase();
     const isTyping = isTextInputTarget(event.target);
+    const isArrowKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key);
+
+    if (!isArrowKey) {
+        flushPendingKeyboardMoveHistory();
+    }
 
     // Global Undo/Redo: Ctrl/Cmd+Z, Ctrl/Cmd+Y, Ctrl/Cmd+Shift+Z
     try {
@@ -2967,7 +2991,7 @@ function handleKeyDown(event) {
         selectedEntity = selectedNow[selectedNow.length - 1];
     }
 
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+    if (isArrowKey) {
         event.preventDefault();
     }
 
@@ -3015,18 +3039,6 @@ function handleKeyDown(event) {
 
     if (deltaX === 0 && deltaY === 0) return;
 
-    if (singleSelection) {
-        const newX = selectedEntity.x + deltaX;
-        const newY = selectedEntity.y + deltaY;
-        if (isPositionValid(newX, newY, selectedEntity)) {
-            selectedEntity.x = newX;
-            selectedEntity.y = newY;
-            redraw();
-            markUnsavedChanges();
-        }
-        return;
-    }
-
     const movableSelection = selectedNow.filter(entity => !entity.locked);
     if (!movableSelection.length) return;
     const ignoreEntities = new Set(movableSelection);
@@ -3041,6 +3053,7 @@ function handleKeyDown(event) {
         });
         redraw();
         markUnsavedChanges();
+        scheduleKeyboardMoveHistoryPush();
     }
 }
 
