@@ -2982,7 +2982,7 @@ function handleInlineEntityNameEditKey(event, key, entity) {
     if (!canInlineEditEntityName(entity)) return false;
     if (event.altKey || event.ctrlKey || event.metaKey) return false;
 
-    if (key === 'Enter' || key === 'Escape') {
+    if (key === 'Enter') {
         event.preventDefault();
         entity.isEditing = false;
         redraw();
@@ -3051,6 +3051,22 @@ function handleKeyDown(event) {
 
     if (singleSelection && (!selectedEntity || !selectedEntities.has(selectedEntity))) {
         selectedEntity = selectedNow[selectedNow.length - 1];
+    }
+
+    if (key === 'Escape' || key === 'Enter' && selectedNow.length) {
+        event.preventDefault();
+        selectedNow.forEach(entity => {
+            if (entity && entity.type === 'city') {
+                entity.isEditing = false;
+            }
+        });
+        clearSelection();
+        isDragging = false;
+        dragSelectionStart = [];
+        hasDragMovement = false;
+        resetBoxSelection();
+        redraw();
+        return;
     }
 
     // Inline rename has priority over plain shortcuts when a single editable entity is selected.
