@@ -322,16 +322,6 @@ const wavePalette = [
   '#2dd4bf'  // teal-400
 ];
 
-// ===== TOUCH/MOBILE SUPPORT =====
-let touchStartDistance = 0;
-let initialZoom = 1;
-let touchStartX = 0;
-let touchStartY = 0;
-let touchStartPanX = 0;
-let touchStartPanY = 0;
-let isTouching = false;
-let touchStartTime = 0;
-
 // ===== CANVAS MANAGEMENT =====
 // Initialize canvas size
 function resizeCanvas() {
@@ -2755,134 +2745,6 @@ function updateZoomDisplay() {
     }
 }
 
-function handleTouchStart(event) {
-    event.preventDefault();
-    isTouching = true;
-    touchStartTime = Date.now();
-    
-    const touches = event.touches;
-    
-    if (touches.length === 1) {
-        // Single touch
-        const rect = canvas.getBoundingClientRect();
-        touchStartX = touches[0].clientX - rect.left;
-        touchStartY = touches[0].clientY - rect.top;
-        touchStartPanX = panX;
-        touchStartPanY = panY;
-        
-        if (selectedType === 'select') {
-            selectEntity({ clientX: touches[0].clientX, clientY: touches[0].clientY });
-            if (selectedEntity) {
-                isDragging = true;
-                const gridPos = screenToDiamond(touchStartX, touchStartY);
-                dragOffsetX = gridPos.x - selectedEntity.x;
-                dragOffsetY = gridPos.y - selectedEntity.y;
-            }
-        } else if (selectedType === 'move') {
-            isPanning = true;
-        }
-    } else if (touches.length === 2) {
-        // Two finger touch for pinch zoom
-        const touch1 = touches[0];
-        const touch2 = touches[1];
-        touchStartDistance = Math.sqrt(
-            Math.pow(touch2.clientX - touch1.clientX, 2) +
-            Math.pow(touch2.clientY - touch1.clientY, 2)
-        );
-        initialZoom = zoom;
-        
-        // Center point between fingers
-        const rect = canvas.getBoundingClientRect();
-        touchStartX = ((touch1.clientX + touch2.clientX) / 2) - rect.left;
-        touchStartY = ((touch1.clientY + touch2.clientY) / 2) - rect.top;
-    }
-}
-
-function handleTouchMove(event) {
-    event.preventDefault();
-    const touches = event.touches;
-    
-    if (touches.length === 1 && isTouching) {
-        const rect = canvas.getBoundingClientRect();
-        const currentX = touches[0].clientX - rect.left;
-        const currentY = touches[0].clientY - rect.top;
-        
-        if (isDragging && selectedEntity) {
-            // Move selected entity
-            const gridPos = screenToDiamond(currentX, currentY);
-            const newX = gridPos.x - dragOffsetX;
-            const newY = gridPos.y - dragOffsetY;
-            
-            if (isPositionValid(newX, newY, selectedEntity)) {
-                selectedEntity.x = newX;
-                selectedEntity.y = newY;
-                redraw();
-                markUnsavedChanges();
-            }
-        } else if (isPanning || selectedType === 'move') {
-            // Pan the map
-            panX = touchStartPanX + (currentX - touchStartX);
-            panY = touchStartPanY + (currentY - touchStartY);
-            redraw();
-        } else if (selectedType && selectedType !== 'select' && selectedType !== 'move' && selectedType !== 'delete') {
-            // Update ghost preview
-            updateGhostPreview(currentX, currentY);
-        }
-    } else if (touches.length === 2) {
-        // Pinch zoom
-        const touch1 = touches[0];
-        const touch2 = touches[1];
-        const currentDistance = Math.sqrt(
-            Math.pow(touch2.clientX - touch1.clientX, 2) +
-            Math.pow(touch2.clientY - touch1.clientY, 2)
-        );
-        
-        if (touchStartDistance > 0) {
-            const zoomFactor = currentDistance / touchStartDistance;
-            const newZoom = Math.max(0.1, Math.min(3, initialZoom * zoomFactor));
-            
-            // Zoom towards the center point between fingers
-            const dx = touchStartX - panX;
-            const dy = touchStartY - panY;
-            
-            panX = touchStartX - dx * (newZoom / zoom);
-            panY = touchStartY - dy * (newZoom / zoom);
-            
-            zoom = newZoom;
-            gridSize = baseGridSize * zoom;
-            
-            redraw();
-            updateZoomDisplay();
-        }
-    }
-}
-
-function handleTouchEnd(event) {
-    event.preventDefault();
-    const touchDuration = Date.now() - touchStartTime;
-    
-    if (event.touches.length === 0) {
-        isTouching = false;
-        
-        // Check for tap (short touch duration and minimal movement)
-        if (touchDuration < 300 && !isDragging && !isPanning) {
-            const rect = canvas.getBoundingClientRect();
-            const tapEvent = {
-                clientX: event.changedTouches[0].clientX,
-                clientY: event.changedTouches[0].clientY
-            };
-            
-            if (selectedType && selectedType !== 'select' && selectedType !== 'move' && selectedType !== 'delete') {
-                addEntity(tapEvent);
-            }
-        }
-        
-        isDragging = false;
-        isPanning = false;
-        touchStartDistance = 0;
-    }
-}
-
 function updateGhostPreview(mouseX, mouseY) {
     territoryPreview = null;
 
@@ -4362,101 +4224,177 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
 }
 
 // ======= Enhanced Mobile Touch (pinch-zoom + one-finger pan) =======
-(function(){
+(function () {
     let touchMode = null; // 'pan' | 'pinch' | null
-    let t0 = null, t1 = null;
-    let startPanX = 0, startPanY = 0;
+    let t0 = null;
+    let t1 = null;
+    let startPanX = 0;
+    let startPanY = 0;
     let startZoom = 1;
     let startDist = 0;
-    let lastCenter = {x: 0, y: 0};
-    let lastTapTime = 0;
+    let startCenterX = 0;
+    let startCenterY = 0;
     let longPressTimer = null;
     const LONG_PRESS_MS = 450;
+    const SELECT_TWO_FINGER_PAN_THRESHOLD = 0.2;
 
-    function getTouches(e){
+    function getTouches(e) {
         const rect = canvas.getBoundingClientRect();
-        const arr = Array.from(e.touches).map(t => ({x: t.clientX - rect.left, y: t.clientY - rect.top, id: t.identifier}));
-        return arr;
+        return Array.from(e.touches).map(t => ({
+            x: t.clientX - rect.left,
+            y: t.clientY - rect.top
+        }));
     }
 
-    function dist(a,b){ const dx=a.x-b.x, dy=a.y-b.y; return Math.hypot(dx,dy); }
-    function mid(a,b){ return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 }; }
+    function dist(a, b) {
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        return Math.hypot(dx, dy);
+    }
 
-    function clearLongPress(){ if (longPressTimer){ clearTimeout(longPressTimer); longPressTimer=null; }}
+    function mid(a, b) {
+        return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    }
 
-    canvas.addEventListener('touchstart', (e)=>{
-        if (!e.target.closest('#layoutCanvas')) return;
+    function clearLongPress() {
+        if (!longPressTimer) return;
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+    }
+
+    function resetTouchState() {
+        clearLongPress();
+        touchMode = null;
+        t0 = null;
+        t1 = null;
+    }
+
+    canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
         const touches = getTouches(e);
 
-        if (touches.length === 1){
-            // single-finger: either tap-to-place/select or drag-to-pan when in Move mode
+        if (touches.length === 1) {
             t0 = touches[0];
             touchMode = 'pan';
             startPanX = panX;
             startPanY = panY;
+            hasDragMovement = false;
+            dragSelectionStart = [];
 
-            // long-press to delete selected entity (mobile shortcut)
+            // Long-press deletes current selection on mobile.
             clearLongPress();
-            longPressTimer = setTimeout(()=>{
-                // If something is selected, delete it
-                if (getSelectedEntities().length){
+            longPressTimer = setTimeout(() => {
+                if (getSelectedEntities().length) {
                     deleteSelectedEntity();
                 }
             }, LONG_PRESS_MS);
 
-            // double-tap to quick zoom in towards tap
-            const now = Date.now();
-            if (now - lastTapTime < 350){
-                const prevZoom = zoom;
-                const newZoom = Math.min(3, zoom * 1.35);
-                const dx = t0.x - panX;
-                const dy = t0.y - panY;
-                panX = t0.x - dx * (newZoom / prevZoom);
-                panY = t0.y - dy * (newZoom / prevZoom);
-                zoom = newZoom;
-                gridSize = baseGridSize * zoom;
-                redraw();
-                updateZoomDisplay();
-            }
-            lastTapTime = now;
+            if (selectedType === 'select') {
+                const gridPos = screenToDiamond(t0.x, t0.y);
+                const touchedEntity = getEntityAtGrid(gridPos.x, gridPos.y);
 
-        } else if (touches.length >= 2){
-            // two-finger pinch
-            t0 = touches[0]; t1 = touches[1];
+                if (touchedEntity) {
+                    const selectedNow = getSelectedEntities();
+                    if (!selectedEntities.has(touchedEntity) || selectedNow.length <= 1) {
+                        setSelection([touchedEntity], { primaryEntity: touchedEntity, pulse: false });
+                    } else {
+                        selectedEntity = touchedEntity;
+                        stopSelectionPulse();
+                    }
+
+                    const movableSelection = getSelectedEntities().filter(entity => !entity.locked);
+                    if (movableSelection.length && movableSelection.includes(touchedEntity)) {
+                        isDragging = true;
+                        dragOffsetX = gridPos.x;
+                        dragOffsetY = gridPos.y;
+                        dragSelectionStart = movableSelection.map(entity => ({
+                            entity,
+                            x: entity.x,
+                            y: entity.y
+                        }));
+                    }
+                } else {
+                    clearSelection();
+                    isDragging = false;
+                    dragSelectionStart = [];
+                }
+                redraw();
+            }
+            return;
+        }
+
+        if (touches.length >= 2) {
+            t0 = touches[0];
+            t1 = touches[1];
             touchMode = 'pinch';
             startZoom = zoom;
             startDist = dist(t0, t1);
-            lastCenter = mid(t0, t1);
+            const startCenter = mid(t0, t1);
+            startCenterX = startCenter.x;
+            startCenterY = startCenter.y;
+            startPanX = panX;
+            startPanY = panY;
         }
-    }, {passive:false});
+    }, { passive: false });
 
-    canvas.addEventListener('touchmove', (e)=>{
-        if (!e.target.closest('#layoutCanvas')) return;
+    canvas.addEventListener('touchmove', (e) => {
         e.preventDefault();
         const touches = getTouches(e);
 
-        if (touchMode === 'pan' && touches.length === 1 && t0){
+        if (touchMode === 'pan' && touches.length === 1 && t0) {
             clearLongPress();
             const cur = touches[0];
-            // If toolbar mode is 'move' OR two-finger initially—pan the map
-            if (selectedType === 'move'){
+
+            if (isDragging && dragSelectionStart.length) {
+                const gridPos = screenToDiamond(cur.x, cur.y);
+                const deltaX = gridPos.x - dragOffsetX;
+                const deltaY = gridPos.y - dragOffsetY;
+
+                if ((deltaX !== 0 || deltaY !== 0) && canMoveDraggedSelection(deltaX, deltaY)) {
+                    applyDraggedSelection(deltaX, deltaY);
+                    hasDragMovement = true;
+                    redraw();
+                    markUnsavedChanges();
+                }
+            } else if (selectedType === 'move') {
                 panX = startPanX + (cur.x - t0.x);
                 panY = startPanY + (cur.y - t0.y);
                 redraw();
-            } else {
-                // show ghost preview while moving single finger
+            } else if (isPlacementTool(selectedType)) {
                 updateGhostPreview(cur.x, cur.y);
                 redraw();
             }
-        } else if (touchMode === 'pinch' && touches.length >= 2){
-            const a = touches[0], b = touches[1];
-            const currDist = dist(a,b);
+            return;
+        }
+
+        if (touchMode === 'pinch' && touches.length >= 2) {
+            const a = touches[0];
+            const b = touches[1];
+            const center = mid(a, b);
+            const currDist = dist(a, b);
             const factor = currDist / (startDist || 1);
+            const pinchDelta = Math.abs(factor - 1);
+
+            // In Pan mode, a two-finger gesture always translates the map.
+            if (selectedType === 'move') {
+                panX = startPanX + (center.x - startCenterX);
+                panY = startPanY + (center.y - startCenterY);
+                redraw();
+                return;
+            }
+
+            // In Select and placement modes, a two-finger swipe (without pinch) pans the map.
+            // Pinch is still available if the distance change is large enough.
+            if ((selectedType === 'select' || isPlacementTool(selectedType)) && pinchDelta < SELECT_TWO_FINGER_PAN_THRESHOLD) {
+                panX = startPanX + (center.x - startCenterX);
+                panY = startPanY + (center.y - startCenterY);
+                redraw();
+                return;
+            }
+
             const newZoom = Math.max(0.1, Math.min(3, startZoom * factor));
 
-            // Zoom around the pinch midpoint
-            const center = mid(a,b);
+            // Zoom around the pinch midpoint.
             const dx = center.x - panX;
             const dy = center.y - panY;
             panX = center.x - dx * (newZoom / zoom);
@@ -4466,22 +4404,28 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
             redraw();
             updateZoomDisplay();
         }
-    }, {passive:false});
+    }, { passive: false });
 
-    canvas.addEventListener('touchend', (e)=>{
-        if (!e.target.closest('#layoutCanvas')) return;
+    canvas.addEventListener('touchend', (e) => {
         e.preventDefault();
         const touches = getTouches(e);
+        const didEntityDrag = isDragging && hasDragMovement;
 
-        clearLongPress();
+        if (isDragging) {
+            isDragging = false;
+            dragSelectionStart = [];
+            if (hasDragMovement) {
+                pushHistory();
+            }
+            hasDragMovement = false;
+        }
 
-        if (touchMode === 'pan' && (!touches || touches.length === 0) && t0){
-            // Treat as tap if movement was very small
-            const dx = (e.changedTouches[0].clientX - (canvas.getBoundingClientRect().left + t0.x));
-            const dy = (e.changedTouches[0].clientY - (canvas.getBoundingClientRect().top + t0.y));
-            const moved = Math.hypot(dx,dy);
-            if (moved < 8){
-                // Trigger the same logic as a click on canvas (place/select)
+        if (touchMode === 'pan' && (!touches || touches.length === 0) && t0) {
+            // Treat as tap if movement was very small.
+            const dx = e.changedTouches[0].clientX - (canvas.getBoundingClientRect().left + t0.x);
+            const dy = e.changedTouches[0].clientY - (canvas.getBoundingClientRect().top + t0.y);
+            const moved = Math.hypot(dx, dy);
+            if (moved < 8 && !didEntityDrag) {
                 const rect = canvas.getBoundingClientRect();
                 const x = e.changedTouches[0].clientX - rect.left;
                 const y = e.changedTouches[0].clientY - rect.top;
@@ -4489,38 +4433,62 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
             }
         }
 
-        // reset
-        touchMode = null; t0 = null; t1 = null;
-    }, {passive:false});
+        resetTouchState();
+    }, { passive: false });
 
-    // Centralized handler for canvas tap/click logic (used by both mouse & touch)
+    canvas.addEventListener('touchcancel', () => {
+        resetTouchState();
+    }, { passive: true });
+
+    // Centralized handler for canvas tap/click logic (used by touch).
     function handleCanvasClick(x, y, opts = {}) {
+        const rect = canvas.getBoundingClientRect();
+        const event = { clientX: x + rect.left, clientY: y + rect.top };
+
         if (selectedType === 'select') {
-            // Simulate a selectEntity at (x, y)
-            const rect = canvas.getBoundingClientRect();
-            const event = { clientX: x + rect.left, clientY: y + rect.top };
             selectEntity(event);
         } else if (selectedType === 'delete') {
-            const rect = canvas.getBoundingClientRect();
-            const event = { clientX: x + rect.left, clientY: y + rect.top };
             eraseEntityAtEvent(event);
         } else {
-            // Simulate an addEntity at (x, y)
-            const rect = canvas.getBoundingClientRect();
-            const event = { clientX: x + rect.left, clientY: y + rect.top };
             addEntity(event);
         }
-      // Remove GhostPreview after placement
-      if (opts.fromTouch) {
-        ghostPreview = null;
-        redraw();
-      }
+
+        if (opts.fromTouch) {
+            ghostPreview = null;
+            redraw();
+        }
     }
 
-    // Prevent page bounce/scroll while interacting with canvas
-    document.addEventListener('touchmove', (e)=>{
+    // Prevent page bounce/scroll while interacting with canvas.
+    document.addEventListener('touchmove', (e) => {
         if (e.target === canvas) e.preventDefault();
-    }, {passive:false});
+    }, { passive: false });
+})();
+
+// Fallback guard to prevent browser double-tap zoom on non-interactive surfaces.
+(function () {
+    let lastTouchEndTs = 0;
+    const DOUBLE_TAP_GUARD_MS = 320;
+
+    function shouldBypassDoubleTapGuard(target) {
+        if (!(target instanceof Element)) return false;
+        if (isTextInputTarget(target)) return true;
+        return Boolean(target.closest('button, a, label, summary, [role="button"], [role="tab"], [data-allow-double-tap]'));
+    }
+
+    document.addEventListener('touchend', (e) => {
+        if (e.touches.length > 0 || e.changedTouches.length !== 1) return;
+        if (shouldBypassDoubleTapGuard(e.target)) {
+            lastTouchEndTs = 0;
+            return;
+        }
+
+        const now = Date.now();
+        if (now - lastTouchEndTs < DOUBLE_TAP_GUARD_MS) {
+            e.preventDefault();
+        }
+        lastTouchEndTs = now;
+    }, { passive: false });
 })();
 
 

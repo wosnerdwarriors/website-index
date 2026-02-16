@@ -1,4 +1,9 @@
 /* Essential canvas and positioning that can't be replaced with Tailwind */
+html,
+body {
+    touch-action: manipulation;
+}
+
 body {
     margin: 0;
     padding: 0;
