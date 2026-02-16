@@ -1664,6 +1664,62 @@ function applyDraggedSelection(deltaX, deltaY) {
     });
 }
 
+function beginSelectionDragFromEntity(clickedEntity, gridPos) {
+    const movableSelection = getSelectedEntities().filter(entity => !entity.locked);
+    if (!movableSelection.length || !movableSelection.includes(clickedEntity)) return;
+
+    isDragging = true;
+    dragOffsetX = gridPos.x;
+    dragOffsetY = gridPos.y;
+    dragSelectionStart = movableSelection.map(entity => ({
+        entity,
+        x: entity.x,
+        y: entity.y
+    }));
+}
+
+function handleSelectEntityClick(clickedEntity, gridPos, { additiveSelection = false } = {}) {
+    if (additiveSelection) {
+        toggleSelection(clickedEntity, { pulseOnAdd: false });
+        redraw();
+        return;
+    }
+
+    const selectedNow = getSelectedEntities();
+    if (!selectedEntities.has(clickedEntity) || selectedNow.length <= 1) {
+        setSelection([clickedEntity], { primaryEntity: clickedEntity, pulse: false });
+    } else {
+        selectedEntity = clickedEntity;
+        stopSelectionPulse();
+    }
+
+    beginSelectionDragFromEntity(clickedEntity, gridPos);
+    redraw();
+}
+
+function handleSelectBlankClick(mouseX, mouseY, { additiveSelection = false } = {}) {
+    startBoxSelection(mouseX, mouseY, { additive: additiveSelection });
+    if (!additiveSelection) {
+        clearSelection();
+    }
+    redraw();
+}
+
+function handleSelectMouseDown(event, mouseX, mouseY) {
+    const gridPos = screenToDiamond(mouseX, mouseY);
+    const clickedEntity = getEntityAtGrid(gridPos.x, gridPos.y);
+    const additiveSelection = event.ctrlKey || event.metaKey;
+
+    hasDragMovement = false;
+    dragSelectionStart = [];
+
+    if (clickedEntity) {
+        handleSelectEntityClick(clickedEntity, gridPos, { additiveSelection });
+    } else {
+        handleSelectBlankClick(mouseX, mouseY, { additiveSelection });
+    }
+}
+
 function handleMouseDown(event) {
     rememberPointerPosition(event.clientX, event.clientY);
     const rect = canvas.getBoundingClientRect();
@@ -1680,65 +1736,34 @@ function handleMouseDown(event) {
         lastMouseX = mouseX;
         lastMouseY = mouseY;
         event.preventDefault();
-    } else if (event.button === 0) { // Left mouse button
-        if (selectedType === 'select') {
-            const gridPos = screenToDiamond(mouseX, mouseY);
-            const clickedEntity = getEntityAtGrid(gridPos.x, gridPos.y);
-            const additiveSelection = event.ctrlKey || event.metaKey;
-
-            hasDragMovement = false;
-            dragSelectionStart = [];
-
-            if (clickedEntity) {
-                if (additiveSelection) {
-                    toggleSelection(clickedEntity, { pulseOnAdd: false });
-                    redraw();
-                    return;
-                }
-
-                const selectedNow = getSelectedEntities();
-                if (!selectedEntities.has(clickedEntity) || selectedNow.length <= 1) {
-                    setSelection([clickedEntity], { primaryEntity: clickedEntity, pulse: false });
-                    redraw();
-                } else {
-                    selectedEntity = clickedEntity;
-                    stopSelectionPulse();
-                    redraw();
-                }
-
-                const movableSelection = getSelectedEntities().filter(entity => !entity.locked);
-                if (movableSelection.length && movableSelection.includes(clickedEntity)) {
-                    isDragging = true;
-                    dragOffsetX = gridPos.x;
-                    dragOffsetY = gridPos.y;
-                    dragSelectionStart = movableSelection.map(entity => ({
-                        entity,
-                        x: entity.x,
-                        y: entity.y
-                    }));
-                }
-            } else {
-                startBoxSelection(mouseX, mouseY, { additive: additiveSelection });
-                if (!additiveSelection) {
-                    clearSelection();
-                }
-                redraw();
-            }
-        } else if (selectedType === 'move') {
-            isPanning = true;
-            lastMouseX = mouseX;
-            lastMouseY = mouseY;
-        } else if (selectedType === 'delete') {
-            flushPendingEraseHistory();
-            hasPendingEraseHistory = false;
-            isErasing = true;
-            if (eraseEntityAtEvent(event, { deferHistory: true })) {
-                hasPendingEraseHistory = true;
-            }
-        } else {
-            addEntity(event);
-        }
+        return;
     }
+
+    if (event.button !== 0) return; // Left mouse button only from here
+
+    if (selectedType === 'select') {
+        handleSelectMouseDown(event, mouseX, mouseY);
+        return;
+    }
+
+    if (selectedType === 'move') {
+        isPanning = true;
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
+        return;
+    }
+
+    if (selectedType === 'delete') {
+        flushPendingEraseHistory();
+        hasPendingEraseHistory = false;
+        isErasing = true;
+        if (eraseEntityAtEvent(event, { deferHistory: true })) {
+            hasPendingEraseHistory = true;
+        }
+        return;
+    }
+
+    addEntity(event);
 }
 
 function handleMouseMove(event) {
