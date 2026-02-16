@@ -2974,6 +2974,48 @@ function isPositionValid(newX, newY, entity, ignoreEntities = null) {
     return true;
 }
 
+function canInlineEditEntityName(entity) {
+    return Boolean(entity && entity.type === 'city' && !entity.locked);
+}
+
+function handleInlineEntityNameEditKey(event, key, entity) {
+    if (!canInlineEditEntityName(entity)) return false;
+    if (event.altKey || event.ctrlKey || event.metaKey) return false;
+
+    if (key === 'Enter' || key === 'Escape') {
+        event.preventDefault();
+        entity.isEditing = false;
+        redraw();
+        updateCityList();
+        return true;
+    }
+
+    if (key === 'Backspace') {
+        event.preventDefault();
+        entity.name = entity.name ? entity.name.slice(0, -1) : '';
+        entity.isEditing = true;
+        redraw();
+        updateCityList();
+        markUnsavedChanges();
+        return true;
+    }
+
+    if (key.length === 1) {
+        event.preventDefault();
+        if (!entity.isEditing) {
+            entity.name = '';
+        }
+        entity.isEditing = true;
+        entity.name += key;
+        redraw();
+        updateCityList();
+        markUnsavedChanges();
+        return true;
+    }
+
+    return false;
+}
+
 function handleKeyDown(event) {
     const key = event.key || '';
     const normalizedKey = key.toLowerCase();
@@ -3003,6 +3045,18 @@ function handleKeyDown(event) {
     }
 
     if (isTyping) return;
+
+    const selectedNow = getSelectedEntities();
+    const singleSelection = selectedNow.length === 1;
+
+    if (singleSelection && (!selectedEntity || !selectedEntities.has(selectedEntity))) {
+        selectedEntity = selectedNow[selectedNow.length - 1];
+    }
+
+    // Inline rename has priority over plain shortcuts when a single editable entity is selected.
+    if (singleSelection && handleInlineEntityNameEditKey(event, key, selectedEntity)) {
+        return;
+    }
 
     if (!event.altKey && !event.ctrlKey && !event.metaKey) {
         if (normalizedKey === 'm') {
@@ -3049,7 +3103,6 @@ function handleKeyDown(event) {
         }
     }
 
-    const selectedNow = getSelectedEntities();
     if (!selectedNow.length) return;
 
     if (!selectedEntity || !selectedEntities.has(selectedEntity)) {
@@ -3058,31 +3111,6 @@ function handleKeyDown(event) {
 
     if (isArrowKey) {
         event.preventDefault();
-    }
-
-    const singleSelection = selectedNow.length === 1;
-
-    // City name editing (single selected city only)
-    if (singleSelection &&
-        selectedEntity.type === 'city' &&
-        !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(key)
-    ) {
-        if (key === 'Enter') {
-            selectedEntity.isEditing = false;
-        } else if (key === 'Backspace') {
-            event.preventDefault();
-            selectedEntity.name = selectedEntity.name ? selectedEntity.name.slice(0, -1) : '';
-        } else if (key.length === 1) {
-            if (!selectedEntity.isEditing) {
-                selectedEntity.name = '';
-                selectedEntity.isEditing = true;
-            }
-            selectedEntity.name += key;
-        }
-        redraw();
-        updateCityList();
-        markUnsavedChanges();
-        return;
     }
 
     if (key === 'Delete') {
