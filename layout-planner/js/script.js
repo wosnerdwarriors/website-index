@@ -1664,6 +1664,43 @@ function applyDraggedSelection(deltaX, deltaY) {
     });
 }
 
+function getDraggedSelectionDelta() {
+    if (!dragSelectionStart.length) return { x: 0, y: 0 };
+    const first = dragSelectionStart[0];
+    return {
+        x: first.entity.x - first.x,
+        y: first.entity.y - first.y
+    };
+}
+
+function tryApplyDraggedSelectionDelta(targetDeltaX, targetDeltaY) {
+    if (!dragSelectionStart.length) return false;
+
+    const currentDelta = getDraggedSelectionDelta();
+    if (targetDeltaX === currentDelta.x && targetDeltaY === currentDelta.y) {
+        return false;
+    }
+
+    const fallbackDeltas = [
+        { x: targetDeltaX, y: targetDeltaY },
+        { x: targetDeltaX, y: currentDelta.y },
+        { x: currentDelta.x, y: targetDeltaY }
+    ];
+
+    const seen = new Set();
+    for (const candidate of fallbackDeltas) {
+        const key = `${candidate.x},${candidate.y}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        if (!canMoveDraggedSelection(candidate.x, candidate.y)) continue;
+        applyDraggedSelection(candidate.x, candidate.y);
+        return true;
+    }
+
+    return false;
+}
+
 function beginSelectionDragFromEntity(clickedEntity, gridPos) {
     const movableSelection = getSelectedEntities().filter(entity => !entity.locked);
     if (!movableSelection.length || !movableSelection.includes(clickedEntity)) return;
@@ -1795,8 +1832,7 @@ function handleMouseMove(event) {
         const deltaX = gridPos.x - dragOffsetX;
         const deltaY = gridPos.y - dragOffsetY;
 
-        if ((deltaX !== 0 || deltaY !== 0) && canMoveDraggedSelection(deltaX, deltaY)) {
-            applyDraggedSelection(deltaX, deltaY);
+        if (tryApplyDraggedSelectionDelta(deltaX, deltaY)) {
             hasDragMovement = true;
             redraw();
             markUnsavedChanges();
@@ -4388,8 +4424,7 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
                 const deltaX = gridPos.x - dragOffsetX;
                 const deltaY = gridPos.y - dragOffsetY;
 
-                if ((deltaX !== 0 || deltaY !== 0) && canMoveDraggedSelection(deltaX, deltaY)) {
-                    applyDraggedSelection(deltaX, deltaY);
+                if (tryApplyDraggedSelectionDelta(deltaX, deltaY)) {
                     hasDragMovement = true;
                     redraw();
                     markUnsavedChanges();
