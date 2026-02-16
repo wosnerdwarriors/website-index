@@ -75,6 +75,7 @@ let isBoxSelecting = false;
 let selectionBoxStart = null;
 let selectionBoxCurrent = null;
 let selectionBoxAdditive = false;
+let hasPendingEraseHistory = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
 let hasUnsavedChanges = false;
@@ -188,6 +189,12 @@ function refreshEraserCursorForCurrentPointer(toolType = selectedType) {
         updateEraserCursorPosition(lastPointerClientX, lastPointerClientY);
     }
     setEraserCursorVisible(true);
+}
+
+function flushPendingEraseHistory() {
+    if (!hasPendingEraseHistory) return;
+    pushHistory();
+    hasPendingEraseHistory = false;
 }
 
 function updateCanvasCursorForTool(toolType = selectedType) {
@@ -1543,7 +1550,7 @@ function selectEntity(event, { additive = false, toggle = false, pulse = false }
     return clickedEntity;
 }
 
-function eraseEntityAtEvent(event) {
+function eraseEntityAtEvent(event, { deferHistory = false } = {}) {
     if (selectedType !== 'delete') return false;
 
     const rect = canvas.getBoundingClientRect();
@@ -1557,7 +1564,7 @@ function eraseEntityAtEvent(event) {
     }
 
     setSelection([clickedEntity], { primaryEntity: clickedEntity, pulse: false });
-    return deleteSelectedEntity() > 0;
+    return deleteSelectedEntity({ pushHistoryEntry: !deferHistory }) > 0;
 }
 
 // ===== INPUT HANDLING =====
@@ -1713,8 +1720,12 @@ function handleMouseDown(event) {
             lastMouseX = mouseX;
             lastMouseY = mouseY;
         } else if (selectedType === 'delete') {
+            flushPendingEraseHistory();
+            hasPendingEraseHistory = false;
             isErasing = true;
-            eraseEntityAtEvent(event);
+            if (eraseEntityAtEvent(event, { deferHistory: true })) {
+                hasPendingEraseHistory = true;
+            }
         } else {
             addEntity(event);
         }
@@ -1742,7 +1753,9 @@ function handleMouseMove(event) {
         updateBoxSelection(mouseX, mouseY);
         redraw();
     } else if (isErasing && selectedType === 'delete') {
-        eraseEntityAtEvent(event);
+        if (eraseEntityAtEvent(event, { deferHistory: true })) {
+            hasPendingEraseHistory = true;
+        }
     } else if (isDragging && dragSelectionStart.length) {
         const gridPos = screenToDiamond(mouseX, mouseY);
         const deltaX = gridPos.x - dragOffsetX;
@@ -1764,6 +1777,7 @@ function handleMouseUp(event) {
         isPanning = false;
     } else if (event.button === 0) {
         isErasing = false;
+        flushPendingEraseHistory();
         if (isBoxSelecting) {
             finalizeBoxSelection();
             return;
@@ -1821,6 +1835,7 @@ function setSelectedTool(toolType, { showToast = false } = {}) {
     );
     if (!knownToolButton) return false;
 
+    flushPendingEraseHistory();
     selectedType = toolType;
     clearSelection();
     isErasing = false;
@@ -3167,7 +3182,7 @@ function handleKeyDown(event) {
     }
 }
 
-function deleteSelectedEntity() {
+function deleteSelectedEntity({ pushHistoryEntry = true } = {}) {
     const selectedNow = getSelectedEntities();
     if (!selectedNow.length) return 0;
 
@@ -3199,7 +3214,9 @@ function deleteSelectedEntity() {
     updateCounters();
     updateCityList();
     markUnsavedChanges();
-    pushHistory();
+    if (pushHistoryEntry) {
+        pushHistory();
+    }
     return deletable.length;
 }
 
