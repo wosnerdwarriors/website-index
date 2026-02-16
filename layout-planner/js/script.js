@@ -1846,8 +1846,6 @@ function handleMouseUp(event) {
     if (event.button === 1) {
         isPanning = false;
     } else if (event.button === 0) {
-        isErasing = false;
-        flushPendingEraseHistory();
         if (isBoxSelecting) {
             finalizeBoxSelection();
             return;
@@ -1864,6 +1862,12 @@ function handleMouseUp(event) {
         if (selectedType === 'move') {
             isPanning = false;
         }
+    }
+
+    // this has to be separate to avoid lost undo entries when click-deleting in Delete mode
+    if (isErasing) {
+        isErasing = false;
+        flushPendingEraseHistory();
     }
 }
 
@@ -4713,6 +4717,7 @@ function pushHistory() {
 }
 
 function undo() {
+    flushPendingEraseHistory();
     if (historyIndex <= 0) return;
     historyIndex -= 1;
     applySnapshot(history[historyIndex]);
