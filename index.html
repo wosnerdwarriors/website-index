@@ -20,7 +20,9 @@
     }
   </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-slate-50 text-slate-900 font-sans selection:bg-blue-500 selection:text-white">
+  <div class="fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.05),transparent_50%)] pointer-events-none"></div>
+
   <!-- Navbar will be injected here by navbar.js -->
   
   <!-- Hidden element to ensure teal colors are included in the build -->
@@ -31,20 +33,23 @@
   
   <!-- Main Content -->
   <div class="md:ml-64 p-4 transition-all duration-300 min-h-screen flex flex-col">
-    <main class="flex-grow container mx-auto px-4 py-8">
-      <h1 class="text-3xl md:text-4xl font-bold text-center mb-8">WOS Nerds - Whiteout Survival</h1>
+    <main class="flex-grow container mx-auto px-4 py-12">
+      <div class="text-center mb-16 relative">
+        <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter mb-4 uppercase">
+          WOS <span class="text-blue-600">Nerds</span>
+        </h1>
+        <p class="text-slate-500 text-lg font-medium max-w-2xl mx-auto">Calculators, Data, and Strategy for Whiteout Survival.</p>
+        <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 h-1.5 w-24 bg-blue-600 rounded-full"></div>
+      </div>
 
-      <div class="mt-5 max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-2xl font-semibold mb-4 text-center">About</h2>
-        <div class="space-y-4 text-gray-700">
+      <div class="mt-8 max-w-4xl mx-auto bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100">
+        <h2 class="text-2xl font-black mb-6 text-slate-800 flex items-center justify-center">
+          <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3 text-sm">i</span>
+          Our Mission
+        </h2>
+        <div class="space-y-4 text-slate-600 leading-relaxed text-center italic">
           <p>
-            hoi WOS Nerds is all about digging into data, running tests, and figuring out the best strategies. We'd like to minimise any guides/advice that's not based on some solid/decent proof.
-          </p>
-          <p>
-            Our focus is simple: find out what works, why it works, and how it can be improved. We love data, calculators, spreadsheets and using it to win!
-          </p>
-          <p>
-            Think our Website is very... unpolished/unfinished? It is. Everything is mostly in draft mode at the moment. Come contribute and help us though!
+            "WOS Nerds is all about digging into data, running tests, and figuring out the best strategies. We minimize advice that isn't backed by solid proof."
           </p>
         </div>
       </div>
@@ -54,12 +59,15 @@
         <h2 class="text-2xl font-semibold mb-6 text-center">Available Tools</h2>
         
         <!-- Data Collection Banner -->
-        <div class="bg-cyan-600 text-white p-4 rounded-lg shadow-md mb-6">
-          <h3 class="text-lg font-semibold mb-2">Help Us Collect Data</h3>
-          <p class="mb-3">Contribute to our research by submitting game data through our forms:</p>
-          <div class="flex flex-wrap gap-3 justify-center">
-            <a href="https://forms.gle/BBnuL5V8LJ12mB9S7" target="_blank" class="bg-white text-cyan-800 px-3 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors">SvS Match Results</a>
-            <a href="https://forms.gle/zeZJY8PBRHWsem2u7" target="_blank" class="bg-white text-cyan-800 px-3 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors">State Age</a>
+        <div class="bg-slate-900 text-white p-8 rounded-3xl shadow-2xl mb-12 relative overflow-hidden group">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -mr-32 -mt-32 blur-3xl transition-all group-hover:bg-blue-500/20"></div>
+          <div class="relative z-10 text-center">
+            <h3 class="text-2xl font-black mb-3 tracking-tight">HELP US COLLECT DATA</h3>
+            <p class="mb-6 text-slate-400 font-medium">Contribute to our research by submitting game data through our official forms</p>
+            <div class="flex flex-wrap gap-4 justify-center">
+              <a href="https://forms.gle/BBnuL5V8LJ12mB9S7" target="_blank" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-500 hover:scale-105 transition-all shadow-lg shadow-blue-500/25">SvS Match Results</a>
+              <a href="https://forms.gle/zeZJY8PBRHWsem2u7" target="_blank" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-700 hover:scale-105 transition-all border border-slate-700">State Age</a>
+            </div>
           </div>
         </div>
         

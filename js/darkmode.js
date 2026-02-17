@@ -1,40 +1,40 @@
 // Dark mode toggle script
 (function() {
-  const toggleBtn = document.createElement('button');
-  toggleBtn.innerText = '🌙 Dark Mode';
-  toggleBtn.id = 'darkModeToggle';
-  toggleBtn.style.position = 'fixed';
-  toggleBtn.style.bottom = '20px';
-  toggleBtn.style.right = '20px';
-  toggleBtn.style.zIndex = '1000';
-  toggleBtn.style.background = '#222';
-  toggleBtn.style.color = '#fff';
-  toggleBtn.style.border = 'none';
-  toggleBtn.style.padding = '10px 16px';
-  toggleBtn.style.borderRadius = '8px';
-  toggleBtn.style.cursor = 'pointer';
-  toggleBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+  // No floating button needed, we use the sidebar one
 
   function setDarkMode(on) {
+    const iconContainer = document.getElementById('theme-icon-container');
     if (on) {
       document.body.classList.add('dark');
       localStorage.setItem('darkMode', 'on');
-      toggleBtn.innerText = '☀️ Light Mode';
+      if (iconContainer) iconContainer.innerText = '☀️';
     } else {
       document.body.classList.remove('dark');
       localStorage.setItem('darkMode', 'off');
-      toggleBtn.innerText = '🌙 Dark Mode';
+      if (iconContainer) iconContainer.innerText = '🌙';
     }
   }
 
-  toggleBtn.onclick = function() {
-    setDarkMode(!document.body.classList.contains('dark'));
-  };
+  // Handle sidebar toggle click with delegation to be safe
+  document.addEventListener('click', function(e) {
+    const toggleBtn = e.target.closest('#sidebar-dark-mode-toggle');
+    if (toggleBtn) {
+      e.preventDefault();
+      setDarkMode(!document.body.classList.contains('dark'));
+    }
+  });
+
+  // Re-check icon state more frequently to fix visibility bugs
+  setInterval(() => {
+    const isDark = document.body.classList.contains('dark');
+    const iconContainer = document.getElementById('theme-icon-container');
+    if (iconContainer) {
+      iconContainer.innerText = isDark ? '☀️' : '🌙';
+    }
+  }, 1000);
 
   // On load, check localStorage
   if (localStorage.getItem('darkMode') === 'on') {
     setDarkMode(true);
   }
-
-  document.body.appendChild(toggleBtn);
 })();
