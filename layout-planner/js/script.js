@@ -48,6 +48,10 @@ const ALLIANCES = [
     { id: 'farm', name: 'Farm', short: 'F', areaColor: 'rgba(68, 239, 77, 0.3)' }
 ];
 const DEFAULT_ALLIANCE_ID = 'main';
+const DEFAULT_TEAMS = Object.freeze([
+    Object.freeze({ name: 'Main Team', color: '#3B82F6' }),
+    Object.freeze({ name: 'Counters', color: '#EF4444' })
+]);
 let activeAllianceId = DEFAULT_ALLIANCE_ID;
 const INACTIVE_ALLIANCE_ENTITY_FILL = 'rgba(156, 163, 175, 0.92)';
 const INACTIVE_ALLIANCE_ENTITY_STROKE = 'rgba(75, 85, 99, 0.95)';
@@ -56,10 +60,7 @@ const INACTIVE_ALLIANCE_AREA_FILL = 'rgba(148, 163, 184, 0.3)';
 // Initialize with default teams
 function initializeDefaultTeams() {
     if (customTeams.length === 0) {
-        customTeams = [
-            {name: 'Main Team', color: 'rgb(59, 130, 246)'},  // Blue
-            {name: 'Counters', color: '#EF4444'},  // Red
-        ];
+        customTeams = DEFAULT_TEAMS.map(team => ({ name: team.name, color: team.color }));
     }
 }
 
@@ -2026,6 +2027,16 @@ function preventActionOnEmptyMap(actionText) {
     return false;
 }
 
+function replaceBrowserUrlSafely(urlLike) {
+    try {
+        window.history.replaceState(null, '', urlLike);
+        return true;
+    } catch (error) {
+        console.warn('Skipping URL update (likely too long):', error);
+        return false;
+    }
+}
+
 // Update saveMap function to sync both textareas
 function saveMap() {
     if (preventActionOnEmptyMap("generating the code")) return;
@@ -2041,7 +2052,7 @@ function saveMap() {
         
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.set('mapData', compressedMap);
-        window.history.replaceState(null, '', newUrl);
+        replaceBrowserUrlSafely(newUrl);
         markChangesSaved();
     } catch (e) {
         console.error('Error saving map:', e);
@@ -2061,7 +2072,7 @@ function shareMap() {
         if (mobileMapData) mobileMapData.value = compressedMap;
         
         const longUrl = getShareableUrl(entities, mapName);
-        window.history.replaceState(null, '', longUrl);
+        replaceBrowserUrlSafely(longUrl);
 
         navigator.clipboard.writeText(longUrl)
             .then(() => {
@@ -2099,13 +2110,13 @@ function shareMap() {
     	const shortUrlError = document.getElementById('shortUrlError');
     	const mobileShortUrlError = document.getElementById('mobileShortUrlError');
 
-    	// simple default shortener endpoint (returns plain text)
-    	const config = {
-    		tinyurlApi: 'https://tinyurl.com/api-create.php',
-    		tinyurlManual: 'https://tinyurl.com/app/'
-    	};
+	    	// simple default shortener endpoint (returns plain text)
+	    	const config = {
+	    		tinyurlApi: 'https://tinyurl.com/api-create.php',
+	    		tinyurlManual: 'https://tinyurl.com/app/'
+	    	};
 
-    	async function doShorten(longUrl) {
+	    	async function doShorten(longUrl) {
     		// show both containers (desktop + mobile) and reset fields
     		if (shortUrlContainer) shortUrlContainer.classList.remove('hidden');
     		if (mobileShortUrlContainer) mobileShortUrlContainer.classList.remove('hidden');
@@ -2118,12 +2129,20 @@ function shareMap() {
     		if (shortUrlButton) shortUrlButton.disabled = true;
     		if (mobileShortUrlButton) mobileShortUrlButton.disabled = true;
 
-    		try {
-    			const controller = new AbortController();
-    			const timeout = setTimeout(() => controller.abort(), 10000);
-    			const resp = await fetch(`${config.tinyurlApi}?url=${encodeURIComponent(longUrl)}`, { signal: controller.signal });
-    			clearTimeout(timeout);
-    			if (!resp.ok) throw new Error(`Shortener API error ${resp.status}`);
+	    		try {
+	    			const controller = new AbortController();
+	    			const timeout = setTimeout(() => controller.abort(), 10000);
+                    const body = new URLSearchParams({ url: longUrl }).toString();
+	    			const resp = await fetch(config.tinyurlApi, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body,
+                        signal: controller.signal
+                    });
+	    			clearTimeout(timeout);
+	    			if (!resp.ok) throw new Error(`Shortener API error ${resp.status}`);
     			let text = await resp.text();
 
     			// some endpoints might return JSON - try parse
@@ -2134,21 +2153,21 @@ function shareMap() {
     				}
     			} catch (_) {}
 
-    			// set both outputs
-    			if (shortUrlOutput) shortUrlOutput.value = text;
-    			if (mobileShortUrlOutput) mobileShortUrlOutput.value = text;
-    			markChangesSaved();
-    		} catch (err) {
-    			console.warn('Short URL failed, falling back to long URL', err);
-    			const longFallback = longUrl;
-    			if (shortUrlOutput) shortUrlOutput.value = longFallback;
-    			if (mobileShortUrlOutput) mobileShortUrlOutput.value = longFallback;
+	    			// set both outputs
+	    			if (shortUrlOutput) shortUrlOutput.value = text;
+	    			if (mobileShortUrlOutput) mobileShortUrlOutput.value = text;
+	    			markChangesSaved();
+                    return text;
+	    		} catch (err) {
+	    			console.warn('Short URL failed', err);
+	    			if (shortUrlOutput) shortUrlOutput.value = '';
+	    			if (mobileShortUrlOutput) mobileShortUrlOutput.value = '';
 
     			// show manual fallback links
     			if (shortUrlError) {
     				shortUrlError.textContent = 'Shortening failed. ';
     				const a = document.createElement('a');
-    				a.href = `${config.tinyurlManual}?url=${encodeURIComponent(longFallback)}`;
+	    				a.href = `${config.tinyurlManual}?url=${encodeURIComponent(longUrl)}`;
     				a.target = '_blank';
     				a.rel = 'noopener noreferrer';
     				a.textContent = 'Try manually';
@@ -2158,18 +2177,19 @@ function shareMap() {
     			if (mobileShortUrlError) {
     				mobileShortUrlError.textContent = 'Shortening failed. ';
     				const a = document.createElement('a');
-    				a.href = `${config.tinyurlManual}?url=${encodeURIComponent(longFallback)}`;
+	    				a.href = `${config.tinyurlManual}?url=${encodeURIComponent(longUrl)}`;
     				a.target = '_blank';
     				a.rel = 'noopener noreferrer';
     				a.textContent = 'Try manually';
-    				a.className = 'underline text-blue-600';
-    				mobileShortUrlError.appendChild(a);
-    			}
-    		} finally {
-    			if (shortUrlButton) shortUrlButton.disabled = false;
-    			if (mobileShortUrlButton) mobileShortUrlButton.disabled = false;
-    		}
-    	}
+	    				a.className = 'underline text-blue-600';
+	    				mobileShortUrlError.appendChild(a);
+	    			}
+                    return null;
+	    		} finally {
+	    			if (shortUrlButton) shortUrlButton.disabled = false;
+	    			if (mobileShortUrlButton) mobileShortUrlButton.disabled = false;
+	    		}
+	    	}
 
     	// helper: show copy success for desktop + mobile
     	function showCopySuccess() {
@@ -2190,7 +2210,7 @@ function shareMap() {
     	}
 
     	// robust copy helper with execCommand fallback
-    	async function tryCopyText(text) {
+	    	async function tryCopyText(text) {
     		if (!text) return false;
     		// try Clipboard API
     		if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -2212,10 +2232,10 @@ function shareMap() {
     			const ok = document.execCommand('copy');
     			document.body.removeChild(ta);
     			return !!ok;
-    		} catch (e) {
-    			return false;
-    		}
-    	}
+	    		} catch (e) {
+	    			return false;
+	    		}
+	    	}
 
     	// bind desktop shortener button (unchanged)
     	if (shortUrlButton) {
@@ -3187,12 +3207,548 @@ function sanitizeMapName(name) {
     return name.replace(/[^a-zA-Z0-9 \-_]/g, '').substring(0, 30);
 }
 
+function base64UrlEncodeUtf8(text) {
+    const bytes = new TextEncoder().encode(String(text));
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '');
+}
+
+function base64UrlDecodeUtf8(value) {
+    const normalized = String(value || '')
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    const padding = normalized.length % 4;
+    const padded = normalized + (padding ? '='.repeat(4 - padding) : '');
+    const binary = atob(padded);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return new TextDecoder().decode(bytes);
+}
+
+function bytesToBase64(bytes) {
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
+function base64ToBytes(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+}
+
+function bytesToBase64Url(bytes) {
+    return bytesToBase64(bytes)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '');
+}
+
+function base64UrlToBytes(value) {
+    const normalized = String(value || '')
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    const padding = normalized.length % 4;
+    const padded = normalized + (padding ? '='.repeat(4 - padding) : '');
+    return base64ToBytes(padded);
+}
+
+function writeUInt32BE(bytes, offset, value) {
+    bytes[offset] = (value >>> 24) & 0xff;
+    bytes[offset + 1] = (value >>> 16) & 0xff;
+    bytes[offset + 2] = (value >>> 8) & 0xff;
+    bytes[offset + 3] = value & 0xff;
+}
+
+function readUInt32BE(bytes, offset) {
+    if (!bytes || offset + 4 > bytes.length) return null;
+    return ((bytes[offset] << 24) >>> 0) |
+        (bytes[offset + 1] << 16) |
+        (bytes[offset + 2] << 8) |
+        bytes[offset + 3];
+}
+
+const UNIFIED_MAP_PACKET_MAGIC = [0x4c, 0x50, 0x4d, 0x31]; // LPM1
+const UNIFIED_MAP_PACKET_HEADER_SIZE = 12;
+
+function getFflateApi() {
+    const api = (typeof window !== 'undefined' && window.fflate) ? window.fflate : null;
+    if (!api) return null;
+    if (typeof api.deflateSync !== 'function') return null;
+    if (typeof api.inflateSync !== 'function') return null;
+    return api;
+}
+
+function buildUnifiedMapMeta(mapName, anchor, _waveMode, _cityLabelMode, _mapMode, serializableEntities) {
+    const meta = {};
+    const sanitizedName = sanitizeMapName(mapName || '');
+    if (sanitizedName) meta.n = sanitizedName;
+
+    if (anchor && Number.isFinite(anchor.x) && Number.isFinite(anchor.y)) {
+        meta.a = [clamp1200(anchor.x), clamp1200(anchor.y)];
+    }
+
+    meta.w = _waveMode ? 1 : 0;
+    meta.m = _cityLabelMode;
+    meta.o = _mapMode === 'castle' ? 'c' : 'b';
+
+    const teamsPayload = getOptionalTeamsPayloadForMapCode();
+    if (teamsPayload) {
+        meta.t = teamsPayload;
+    }
+
+    const alliancesPayload = getOptionalAlliancesPayloadForMapCode(serializableEntities);
+    if (alliancesPayload) {
+        meta.l = alliancesPayload;
+    }
+
+    return meta;
+}
+
+function buildUnifiedMapPacket(serializableEntities, mapName, anchor, _waveMode, _cityLabelMode, _mapMode) {
+    const entitiesBase64 = compressMap(serializableEntities);
+    const entityBytes = base64ToBytes(entitiesBase64);
+    const metaPayload = buildUnifiedMapMeta(
+        mapName,
+        anchor,
+        _waveMode,
+        _cityLabelMode,
+        _mapMode,
+        serializableEntities
+    );
+    const metaBytes = new TextEncoder().encode(JSON.stringify(metaPayload));
+
+    const totalLength = UNIFIED_MAP_PACKET_HEADER_SIZE + entityBytes.length + metaBytes.length;
+    const packet = new Uint8Array(totalLength);
+
+    packet[0] = UNIFIED_MAP_PACKET_MAGIC[0];
+    packet[1] = UNIFIED_MAP_PACKET_MAGIC[1];
+    packet[2] = UNIFIED_MAP_PACKET_MAGIC[2];
+    packet[3] = UNIFIED_MAP_PACKET_MAGIC[3];
+    writeUInt32BE(packet, 4, entityBytes.length);
+    writeUInt32BE(packet, 8, metaBytes.length);
+    packet.set(entityBytes, UNIFIED_MAP_PACKET_HEADER_SIZE);
+    packet.set(metaBytes, UNIFIED_MAP_PACKET_HEADER_SIZE + entityBytes.length);
+
+    return packet;
+}
+
+function decodeUnifiedMapPacket(packet) {
+    if (!(packet instanceof Uint8Array) || packet.length < UNIFIED_MAP_PACKET_HEADER_SIZE) {
+        return null;
+    }
+
+    const isMagic = packet[0] === UNIFIED_MAP_PACKET_MAGIC[0] &&
+        packet[1] === UNIFIED_MAP_PACKET_MAGIC[1] &&
+        packet[2] === UNIFIED_MAP_PACKET_MAGIC[2] &&
+        packet[3] === UNIFIED_MAP_PACKET_MAGIC[3];
+    if (!isMagic) return null;
+
+    const entityLen = readUInt32BE(packet, 4);
+    const metaLen = readUInt32BE(packet, 8);
+    if (entityLen === null || metaLen === null) return null;
+
+    const expected = UNIFIED_MAP_PACKET_HEADER_SIZE + entityLen + metaLen;
+    if (expected !== packet.length) return null;
+
+    const entityBytes = packet.slice(UNIFIED_MAP_PACKET_HEADER_SIZE, UNIFIED_MAP_PACKET_HEADER_SIZE + entityLen);
+    const metaBytes = packet.slice(UNIFIED_MAP_PACKET_HEADER_SIZE + entityLen, expected);
+    const entitiesBase64 = bytesToBase64(entityBytes);
+    const entitiesDecoded = decompressMap(entitiesBase64);
+
+    let meta = {};
+    try {
+        meta = JSON.parse(new TextDecoder().decode(metaBytes));
+    } catch (e) {
+        console.warn('Failed to parse unified map metadata payload', e);
+    }
+
+    const out = {
+        entities: Array.isArray(entitiesDecoded) ? entitiesDecoded : [],
+        mapName: '',
+        anchor: null,
+        waveMode: null,
+        cityLabelMode: null,
+        mapMode: null,
+        teams: null,
+        alliances: null
+    };
+
+    if (typeof meta.n === 'string') {
+        out.mapName = meta.n;
+    }
+
+    if (Array.isArray(meta.a) && meta.a.length >= 2) {
+        out.anchor = parseCoordInput(`${meta.a[0]}:${meta.a[1]}`);
+    }
+
+    if (meta.w !== undefined) {
+        out.waveMode = String(meta.w) === '1' || meta.w === true;
+    }
+
+    if (typeof meta.m === 'string') {
+        const mode = meta.m.trim().toLowerCase();
+        if (['march', 'coords', 'none'].includes(mode)) {
+            out.cityLabelMode = mode;
+        }
+    }
+
+    if (typeof meta.o === 'string') {
+        out.mapMode = meta.o === 'c' ? 'castle' : 'base';
+    }
+
+    const normalizedTeams = deserializeTeamsFromMapCode(meta.t ?? meta.teams);
+    if (normalizedTeams) {
+        out.teams = normalizedTeams;
+    }
+
+    const normalizedAlliances = deserializeAlliancesFromMapCode(meta.l ?? meta.alliances);
+    if (normalizedAlliances) {
+        out.alliances = normalizedAlliances;
+    }
+
+    return out;
+}
+
+function compressMapUnifiedPayload(serializableEntities, mapName, anchor, _waveMode, _cityLabelMode, _mapMode) {
+    try {
+        const packet = buildUnifiedMapPacket(
+            serializableEntities,
+            mapName,
+            anchor,
+            _waveMode,
+            _cityLabelMode,
+            _mapMode
+        );
+
+        const lp1Payload = 'lp1:' + bytesToBase64Url(packet);
+        const fflateApi = getFflateApi();
+        if (!fflateApi) {
+            return lp1Payload;
+        }
+
+        try {
+            const compressed = fflateApi.deflateSync(packet, { level: 9 });
+            if (!(compressed instanceof Uint8Array) || compressed.length === 0) {
+                return lp1Payload;
+            }
+            const lp2Payload = 'lp2:' + bytesToBase64Url(compressed);
+            return lp2Payload.length < lp1Payload.length ? lp2Payload : lp1Payload;
+        } catch (compressionError) {
+            console.warn('Failed to compress unified map payload with deflate; using lp1 payload.', compressionError);
+            return lp1Payload;
+        }
+    } catch (e) {
+        console.warn('Failed to build unified map payload; falling back to segmented code.', e);
+        return null;
+    }
+}
+
+function decompressMapUnifiedPayload(combinedString) {
+    if (typeof combinedString !== 'string') {
+        return null;
+    }
+
+    try {
+        if (combinedString.startsWith('lp1:')) {
+            const packet = base64UrlToBytes(combinedString.slice(4));
+            return decodeUnifiedMapPacket(packet);
+        }
+        if (combinedString.startsWith('lp2:')) {
+            const fflateApi = getFflateApi();
+            if (!fflateApi) {
+                console.warn('Cannot decode lp2 payload because compression support is unavailable.');
+                return null;
+            }
+            const compressed = base64UrlToBytes(combinedString.slice(4));
+            const packet = fflateApi.inflateSync(compressed);
+            return decodeUnifiedMapPacket(packet);
+        }
+        return null;
+    } catch (e) {
+        console.warn('Failed to decode unified map payload', e);
+        return null;
+    }
+}
+
+function encodeCompactJsonForMapCode(payload) {
+    try {
+        return base64UrlEncodeUtf8(JSON.stringify(payload));
+    } catch (e) {
+        console.warn('Failed to encode compact map payload', e);
+        return '';
+    }
+}
+
+function decodeCompactJsonFromMapCode(value) {
+    try {
+        const raw = base64UrlDecodeUtf8(value);
+        return JSON.parse(raw);
+    } catch (e) {
+        console.warn('Failed to decode compact map payload', e);
+        return null;
+    }
+}
+
+const DEFAULT_MAP_CODE_TEAM_LIST = DEFAULT_TEAMS.map(team => [
+    normalizeTeamNameForMapCodeComparison(team.name),
+    normalizeTeamColorForMapCodeComparison(team.color)
+]);
+
+function normalizeTeamColorForMapCodeComparison(color) {
+    const raw = String(color || '').trim().toLowerCase().replace(/\s+/g, '');
+    if (!raw) return '#3b82f6';
+    if (raw === '#3b82f6' || raw === 'rgb(59,130,246)' || raw === 'rgba(59,130,246,1)') return '#3b82f6';
+    if (raw === '#ef4444' || raw === 'rgb(239,68,68)' || raw === 'rgba(239,68,68,1)') return '#ef4444';
+    return raw;
+}
+
+function normalizeTeamNameForMapCodeComparison(name) {
+    return typeof name === 'string' ? name.trim() : 'Team';
+}
+
+function hasTeamAssignmentsForMapCode() {
+    return Object.entries(cityTeams).some(([cityId, teamIndex]) => {
+        const parsedCityId = Number.parseInt(cityId, 10);
+        const parsedTeamIndex = Number.parseInt(teamIndex, 10);
+        return Number.isFinite(parsedCityId) && Number.isFinite(parsedTeamIndex) && parsedTeamIndex >= 0;
+    });
+}
+
+function hasNonDefaultTeamListForMapCode() {
+    if (!Array.isArray(customTeams) || customTeams.length === 0) {
+        // Empty team list falls back to defaults on load, so we can omit it.
+        return false;
+    }
+
+    const normalizedCurrent = customTeams.map(team => [
+        normalizeTeamNameForMapCodeComparison(team?.name),
+        normalizeTeamColorForMapCodeComparison(team?.color)
+    ]);
+
+    if (normalizedCurrent.length !== DEFAULT_MAP_CODE_TEAM_LIST.length) {
+        return true;
+    }
+
+    for (let i = 0; i < normalizedCurrent.length; i++) {
+        if (normalizedCurrent[i][0] !== DEFAULT_MAP_CODE_TEAM_LIST[i][0]) return true;
+        if (normalizedCurrent[i][1] !== DEFAULT_MAP_CODE_TEAM_LIST[i][1]) return true;
+    }
+
+    return false;
+}
+
+function shouldPersistTeamsForMapCode() {
+    return hasTeamAssignmentsForMapCode() || hasNonDefaultTeamListForMapCode();
+}
+
+function serializeTeamsForMapCode() {
+    const compactAssignments = Object.entries(cityTeams)
+        .map(([cityId, teamIndex]) => [Number.parseInt(cityId, 10), Number(teamIndex)])
+        .filter(([cityId, teamIndex]) => Number.isFinite(cityId) && Number.isFinite(teamIndex))
+        .sort((a, b) => a[0] - b[0]);
+
+    return {
+        a: compactAssignments,
+        l: customTeams.map(team => [
+            typeof team?.name === 'string' ? team.name : 'Team',
+            typeof team?.color === 'string' ? team.color : '#3B82F6'
+        ])
+    };
+}
+
+function deserializeTeamsFromMapCode(payload) {
+    if (!payload || typeof payload !== 'object') return null;
+
+    const rawAssignmentsPayload = payload.assignments ?? payload.a;
+    const rawAssignments = {};
+    if (Array.isArray(rawAssignmentsPayload)) {
+        rawAssignmentsPayload.forEach(item => {
+            if (!Array.isArray(item) || item.length < 2) return;
+            const cityId = Number.parseInt(item[0], 10);
+            const teamIndex = Number.parseInt(item[1], 10);
+            if (!Number.isFinite(cityId) || !Number.isFinite(teamIndex)) return;
+            rawAssignments[String(cityId)] = teamIndex;
+        });
+    } else if (rawAssignmentsPayload && typeof rawAssignmentsPayload === 'object') {
+        Object.entries(rawAssignmentsPayload).forEach(([key, value]) => {
+            const cityId = Number.parseInt(key, 10);
+            const teamIndex = Number.parseInt(value, 10);
+            if (!Number.isFinite(cityId) || !Number.isFinite(teamIndex)) return;
+            rawAssignments[String(cityId)] = teamIndex;
+        });
+    }
+
+    const rawList = Array.isArray(payload.list)
+        ? payload.list
+        : (Array.isArray(payload.l) ? payload.l : []);
+
+    const normalizedList = rawList.map(item => {
+        if (Array.isArray(item)) {
+            return {
+                name: typeof item[0] === 'string' ? item[0] : 'Team',
+                color: typeof item[1] === 'string' ? item[1] : '#3B82F6'
+            };
+        }
+        if (item && typeof item === 'object') {
+            return {
+                name: typeof item.name === 'string' ? item.name : 'Team',
+                color: typeof item.color === 'string' ? item.color : '#3B82F6'
+            };
+        }
+        return { name: 'Team', color: '#3B82F6' };
+    });
+
+    return {
+        assignments: rawAssignments,
+        list: normalizedList
+    };
+}
+
+function getOptionalTeamsPayloadForMapCode() {
+    if (!shouldPersistTeamsForMapCode()) return null;
+    return serializeTeamsForMapCode();
+}
+
+function encodeAllianceTokenToBits(token) {
+    if (token === 'm') return 1;
+    if (token === 'f') return 2;
+    return 0;
+}
+
+function decodeAllianceBitsToToken(bits) {
+    if (bits === 1) return 'm';
+    if (bits === 2) return 'f';
+    return 'n';
+}
+
+function packAllianceTokenString(tokenString) {
+    if (typeof tokenString !== 'string') return { p: '', c: 0 };
+    const count = tokenString.length;
+    if (count === 0) return { p: '', c: 0 };
+
+    const bytes = new Uint8Array(Math.ceil(count / 4));
+    for (let i = 0; i < count; i++) {
+        const code = encodeAllianceTokenToBits(tokenString[i]);
+        const byteIndex = Math.floor(i / 4);
+        const shift = (3 - (i % 4)) * 2;
+        bytes[byteIndex] |= code << shift;
+    }
+
+    return { p: bytesToBase64Url(bytes), c: count };
+}
+
+function unpackAllianceTokenString(packedBase64, count) {
+    const safeCount = Number.parseInt(count, 10);
+    if (!Number.isFinite(safeCount) || safeCount <= 0) return [];
+    if (typeof packedBase64 !== 'string' || packedBase64.length === 0) return [];
+
+    try {
+        const bytes = base64UrlToBytes(packedBase64);
+        const requiredBytes = Math.ceil(safeCount / 4);
+        if (bytes.length < requiredBytes) return [];
+
+        const tokens = new Array(safeCount);
+        for (let i = 0; i < safeCount; i++) {
+            const byteIndex = Math.floor(i / 4);
+            const shift = (3 - (i % 4)) * 2;
+            const code = (bytes[byteIndex] >> shift) & 0b11;
+            tokens[i] = decodeAllianceBitsToToken(code);
+        }
+        return tokens;
+    } catch (e) {
+        console.warn('Failed to unpack compact alliance list', e);
+        return [];
+    }
+}
+
+function serializeAlliancesForMapCode(serializableEntities) {
+    const activeToken = normalizeAllianceId(activeAllianceId) === 'farm' ? 'f' : 'm';
+    const listTokens = serializableEntities.map(entity => {
+        if (!isAllianceScopedType(entity.type)) return 'n';
+        return normalizeAllianceId(getEntityAllianceId(entity)) === 'farm' ? 'f' : 'm';
+    }).join('');
+
+    const packed = packAllianceTokenString(listTokens);
+    return { a: activeToken, p: packed.p, c: packed.c };
+}
+
+function shouldPersistAlliancesForMapCode(serializableEntities) {
+    if (normalizeAllianceId(activeAllianceId) !== DEFAULT_ALLIANCE_ID) {
+        return true;
+    }
+
+    return serializableEntities.some(entity => (
+        isAllianceScopedType(entity.type) &&
+        normalizeAllianceId(getEntityAllianceId(entity)) !== DEFAULT_ALLIANCE_ID
+    ));
+}
+
+function getOptionalAlliancesPayloadForMapCode(serializableEntities) {
+    if (!shouldPersistAlliancesForMapCode(serializableEntities)) return null;
+    return serializeAlliancesForMapCode(serializableEntities);
+}
+
+function normalizeAllianceToken(value) {
+    if (value === null || value === undefined) return null;
+    if (value === 'n' || value === 'x') return null;
+    if (value === 'f' || value === 'farm') return 'farm';
+    if (value === 'm' || value === 'main') return 'main';
+    return null;
+}
+
+function deserializeAlliancesFromMapCode(payload) {
+    if (!payload || typeof payload !== 'object') return null;
+
+    const rawActive = payload.active ?? payload.a;
+    const active = normalizeAllianceToken(rawActive) || DEFAULT_ALLIANCE_ID;
+
+    let rawList = [];
+    if (typeof payload.p === 'string' && payload.p.length > 0) {
+        rawList = unpackAllianceTokenString(payload.p, payload.c);
+    } else if (Array.isArray(payload.list)) {
+        rawList = payload.list;
+    } else if (Array.isArray(payload.l)) {
+        rawList = payload.l;
+    } else if (typeof payload.l === 'string') {
+        rawList = Array.from(payload.l);
+    }
+
+    const list = rawList.map(item => normalizeAllianceToken(item));
+    return { active, list };
+}
+
 function getSerializableEntitiesForMapCode(sourceEntities = entities) {
     return sourceEntities.filter(entity => entity.type !== 'castle' && entity.type !== 'turret');
 }
 
 function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode = waveMode, _cityLabelMode = cityLabelMode, _mapMode = mapMode) {
     const serializableEntities = getSerializableEntitiesForMapCode(entities);
+    const unifiedPayload = compressMapUnifiedPayload(
+        serializableEntities,
+        mapName,
+        anchor,
+        _waveMode,
+        _cityLabelMode,
+        _mapMode
+    );
+    if (unifiedPayload) {
+        return unifiedPayload;
+    }
+
     let base64String = compressMap(serializableEntities);
     const parts = [base64String];
 
@@ -3207,11 +3763,29 @@ function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode 
     parts.push("w=" + (_waveMode ? "1" : "0"));
     parts.push("m=" + _cityLabelMode);
     parts.push("mode=" + (_mapMode === 'castle' ? 'c' : 'b')); // 'b' = base, 'c' = castle
-    parts.push("teams=" + encodeURIComponent(JSON.stringify({assignments: cityTeams, list: customTeams})));
-    parts.push("alli=" + encodeURIComponent(JSON.stringify({
-        active: normalizeAllianceId(activeAllianceId),
-        list: serializableEntities.map(entity => isAllianceScopedType(entity.type) ? getEntityAllianceId(entity) : null)
-    })));
+
+    const teamsPayload = getOptionalTeamsPayloadForMapCode();
+    if (teamsPayload) {
+        const teamsCompact = encodeCompactJsonForMapCode(teamsPayload);
+        if (teamsCompact) {
+            parts.push("teams2=" + teamsCompact);
+        } else {
+            parts.push("teams=" + encodeURIComponent(JSON.stringify({ assignments: cityTeams, list: customTeams })));
+        }
+    }
+
+    const alliancesPayload = getOptionalAlliancesPayloadForMapCode(serializableEntities);
+    if (alliancesPayload) {
+        const alliancesCompact = encodeCompactJsonForMapCode(alliancesPayload);
+        if (alliancesCompact) {
+            parts.push("alli2=" + alliancesCompact);
+        } else {
+            parts.push("alli=" + encodeURIComponent(JSON.stringify({
+                active: normalizeAllianceId(activeAllianceId),
+                list: serializableEntities.map(entity => isAllianceScopedType(entity.type) ? getEntityAllianceId(entity) : null)
+            })));
+        }
+    }
 
     return parts.join("||");
 }
@@ -3223,6 +3797,15 @@ function decompressMapWithName(combinedString) {
 
     if (!combinedString || typeof combinedString !== 'string') {
         return out;
+    }
+
+    const unified = decompressMapUnifiedPayload(combinedString);
+    if (unified) {
+        if (unified.mapName) {
+            const mapNameInput = document.getElementById('mapNameInput');
+            if (mapNameInput) mapNameInput.value = unified.mapName;
+        }
+        return unified;
     }
 
     const parts = combinedString.split("||");
@@ -3244,17 +3827,37 @@ function decompressMapWithName(combinedString) {
             out.cityLabelMode = mode;
         } else if (seg.startsWith("mode=")) {
             out.mapMode = seg.slice(5).trim().toLowerCase();
+        } else if (seg.startsWith("teams2=")) {
+            const decoded = decodeCompactJsonFromMapCode(seg.slice(7));
+            const normalizedTeams = deserializeTeamsFromMapCode(decoded);
+            if (normalizedTeams) {
+                out.teams = normalizedTeams;
+            }
         } else if (seg.startsWith("teams=")) {
             try {
                 const raw = decodeURIComponent(seg.slice(6));
-                out.teams = JSON.parse(raw);
+                const parsed = JSON.parse(raw);
+                const normalizedTeams = deserializeTeamsFromMapCode(parsed);
+                if (normalizedTeams) {
+                    out.teams = normalizedTeams;
+                }
             } catch (e) {
                 console.warn('Failed to parse teams data from map code', e);
+            }
+        } else if (seg.startsWith("alli2=")) {
+            const decoded = decodeCompactJsonFromMapCode(seg.slice(6));
+            const normalizedAlliances = deserializeAlliancesFromMapCode(decoded);
+            if (normalizedAlliances) {
+                out.alliances = normalizedAlliances;
             }
         } else if (seg.startsWith("alli=")) {
             try {
                 const raw = decodeURIComponent(seg.slice(5));
-                out.alliances = JSON.parse(raw);
+                const parsed = JSON.parse(raw);
+                const normalizedAlliances = deserializeAlliancesFromMapCode(parsed);
+                if (normalizedAlliances) {
+                    out.alliances = normalizedAlliances;
+                }
             } catch (e) {
                 console.warn('Failed to parse alliances data from map code', e);
             }
