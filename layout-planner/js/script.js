@@ -3203,6 +3203,132 @@ function decompressNew(binaryString) {
   return entities;
 }
 
+// ===== ENTITY ENCODING (6-bit coordinates, 15 bits/entity) =====
+// Used by the lp1/lp2 packet format.
+// gridCols/gridRows = 30, so storageX/Y range = 0–60, fits in 6 bits (max 63). Need to be adjusted if grid size changes.
+
+function compressMapV3Bytes(entities) {
+    let bitString = "";
+
+    entities.forEach(entity => {
+        if (entity.type === 'castle' || entity.type === 'turret') return;
+
+        const type = entity.type === "flag"      ? "000" :
+                     entity.type === "city"      ? "001" :
+                     entity.type === "building"  ? "010" :
+                     entity.type === "node"      ? "011" :
+                     entity.type === "hq"        ? "101" :
+                     entity.type === "enemyzone" ? "110" :
+                                                   "100"; // obstacle
+
+        const storageX = entity.x + gridCols;
+        const storageY = entity.y + gridRows;
+        bitString += type
+            + storageX.toString(2).padStart(6, "0")
+            + storageY.toString(2).padStart(6, "0");
+
+        if (entity.type === "city") {
+            const name = entity.name || `City ${entity.id}`;
+            if (needsUtf8(name)) {
+                const utf8 = new TextEncoder().encode(name);
+                bitString += "11111111"; // marker 255
+                bitString += utf8.length.toString(2).padStart(16, "0");
+                bitString += bytesToBitString(utf8);
+            } else {
+                const len = Math.min(name.length, 254);
+                bitString += len.toString(2).padStart(8, "0");
+                for (let i = 0; i < len; i++) {
+                    bitString += (name.charCodeAt(i) & 0xFF).toString(2).padStart(8, "0");
+                }
+            }
+        }
+    });
+
+    if (bitString.length % 8 !== 0) {
+        bitString += "0".repeat(8 - (bitString.length % 8));
+    }
+
+    const bytes = bitString.match(/.{1,8}/g).map(b => parseInt(b, 2));
+    return new Uint8Array(bytes);
+}
+
+function decompressMapV2Bytes(bytes) {
+    let bitString = "";
+    for (let i = 0; i < bytes.length; i++) {
+        bitString += bytes[i].toString(2).padStart(8, "0");
+    }
+
+    const entities = [];
+    let i = 0;
+
+    while (i + 15 <= bitString.length) {
+        const typeBits = bitString.slice(i, i + 3);
+        i += 3;
+        const storageX = parseInt(bitString.slice(i, i + 6), 2);
+        i += 6;
+        const storageY = parseInt(bitString.slice(i, i + 6), 2);
+        i += 6;
+
+        const type = typeBits === "000" ? "flag"      :
+                     typeBits === "001" ? "city"      :
+                     typeBits === "010" ? "building"  :
+                     typeBits === "011" ? "node"      :
+                     typeBits === "101" ? "hq"        :
+                     typeBits === "110" ? "enemyzone" :
+                                         "obstacle";
+
+        const entity = {
+            x: storageX - gridCols,
+            y: storageY - gridRows,
+            type
+        };
+
+        if (type === "flag") {
+            entity.width = 1; entity.height = 1; entity.color = "gray";
+        } else if (type === "city") {
+            entity.width = 2; entity.height = 2; entity.color = getRandomColor();
+
+            const lenByteRes = readUInt(bitString, i, 8);
+            if (!lenByteRes.ok) break;
+            const lenByte = lenByteRes.value;
+            i = lenByteRes.next;
+
+            if (lenByte === 255) {
+                const len16Res = readUInt(bitString, i, 16);
+                if (!len16Res.ok) break;
+                i = len16Res.next;
+                const bytesRes = readBytesFromBitString(bitString, i, len16Res.value);
+                if (!bytesRes.ok) break;
+                i = bytesRes.next;
+                entity.name = _utf8Decoder.decode(bytesRes.bytes);
+            } else {
+                const bytesRes = readBytesFromBitString(bitString, i, lenByte);
+                if (!bytesRes.ok) break;
+                i = bytesRes.next;
+                let name = "";
+                for (let k = 0; k < bytesRes.bytes.length; k++) {
+                    name += String.fromCharCode(bytesRes.bytes[k]);
+                }
+                entity.name = name;
+            }
+        } else if (type === "building") {
+            entity.width = 3; entity.height = 3; entity.color = "black";
+        } else if (type === "hq") {
+            entity.width = 3; entity.height = 3; entity.color = "darkgoldenrod";
+        } else if (type === "node") {
+            entity.width = 3; entity.height = 3; entity.color = "darkgreen";
+        } else if (type === "enemyzone") {
+            entity.width = 12; entity.height = 12; entity.color = "black";
+        } else if (type === "obstacle") {
+            entity.width = 1; entity.height = 1; entity.color = "#8B0000";
+        }
+
+        entities.push(entity);
+    }
+
+    return entities;
+}
+
 function sanitizeMapName(name) {
     return name.replace(/[^a-zA-Z0-9 \-_]/g, '').substring(0, 30);
 }
@@ -3266,23 +3392,6 @@ function base64UrlToBytes(value) {
     return base64ToBytes(padded);
 }
 
-function writeUInt32BE(bytes, offset, value) {
-    bytes[offset] = (value >>> 24) & 0xff;
-    bytes[offset + 1] = (value >>> 16) & 0xff;
-    bytes[offset + 2] = (value >>> 8) & 0xff;
-    bytes[offset + 3] = value & 0xff;
-}
-
-function readUInt32BE(bytes, offset) {
-    if (!bytes || offset + 4 > bytes.length) return null;
-    return ((bytes[offset] << 24) >>> 0) |
-        (bytes[offset + 1] << 16) |
-        (bytes[offset + 2] << 8) |
-        bytes[offset + 3];
-}
-
-const UNIFIED_MAP_PACKET_MAGIC = [0x4c, 0x50, 0x4d, 0x31]; // LPM1
-const UNIFIED_MAP_PACKET_HEADER_SIZE = 12;
 
 function getFflateApi() {
     const api = (typeof window !== 'undefined' && window.fflate) ? window.fflate : null;
@@ -3301,9 +3410,9 @@ function buildUnifiedMapMeta(mapName, anchor, _waveMode, _cityLabelMode, _mapMod
         meta.a = [clamp1200(anchor.x), clamp1200(anchor.y)];
     }
 
-    meta.w = _waveMode ? 1 : 0;
-    meta.m = _cityLabelMode;
-    meta.o = _mapMode === 'castle' ? 'c' : 'b';
+    if (_waveMode) meta.w = 1;                                    // omit if false (default)
+    if (_cityLabelMode !== defaultCityLabelMode) meta.m = _cityLabelMode; // omit if "march"
+    if (_mapMode === 'castle') meta.o = 'c';                     // omit if 'base' (default)
 
     const teamsPayload = getOptionalTeamsPayloadForMapCode();
     if (teamsPayload) {
@@ -3319,8 +3428,7 @@ function buildUnifiedMapMeta(mapName, anchor, _waveMode, _cityLabelMode, _mapMod
 }
 
 function buildUnifiedMapPacket(serializableEntities, mapName, anchor, _waveMode, _cityLabelMode, _mapMode) {
-    const entitiesBase64 = compressMap(serializableEntities);
-    const entityBytes = base64ToBytes(entitiesBase64);
+    const entityBytes = compressMapV3Bytes(serializableEntities);
     const metaPayload = buildUnifiedMapMeta(
         mapName,
         anchor,
@@ -3331,43 +3439,27 @@ function buildUnifiedMapPacket(serializableEntities, mapName, anchor, _waveMode,
     );
     const metaBytes = new TextEncoder().encode(JSON.stringify(metaPayload));
 
-    const totalLength = UNIFIED_MAP_PACKET_HEADER_SIZE + entityBytes.length + metaBytes.length;
-    const packet = new Uint8Array(totalLength);
-
-    packet[0] = UNIFIED_MAP_PACKET_MAGIC[0];
-    packet[1] = UNIFIED_MAP_PACKET_MAGIC[1];
-    packet[2] = UNIFIED_MAP_PACKET_MAGIC[2];
-    packet[3] = UNIFIED_MAP_PACKET_MAGIC[3];
-    writeUInt32BE(packet, 4, entityBytes.length);
-    writeUInt32BE(packet, 8, metaBytes.length);
-    packet.set(entityBytes, UNIFIED_MAP_PACKET_HEADER_SIZE);
-    packet.set(metaBytes, UNIFIED_MAP_PACKET_HEADER_SIZE + entityBytes.length);
+    // Header: 2 bytes big-endian uint16 = entity data length (up to 65535 bytes)
+    const packet = new Uint8Array(2 + entityBytes.length + metaBytes.length);
+    packet[0] = (entityBytes.length >> 8) & 0xFF;
+    packet[1] = entityBytes.length & 0xFF;
+    packet.set(entityBytes, 2);
+    packet.set(metaBytes, 2 + entityBytes.length);
 
     return packet;
 }
 
 function decodeUnifiedMapPacket(packet) {
-    if (!(packet instanceof Uint8Array) || packet.length < UNIFIED_MAP_PACKET_HEADER_SIZE) {
+    if (!(packet instanceof Uint8Array) || packet.length < 2) {
         return null;
     }
 
-    const isMagic = packet[0] === UNIFIED_MAP_PACKET_MAGIC[0] &&
-        packet[1] === UNIFIED_MAP_PACKET_MAGIC[1] &&
-        packet[2] === UNIFIED_MAP_PACKET_MAGIC[2] &&
-        packet[3] === UNIFIED_MAP_PACKET_MAGIC[3];
-    if (!isMagic) return null;
+    const entityLen = (packet[0] << 8) | packet[1];
+    if (2 + entityLen > packet.length) return null;
 
-    const entityLen = readUInt32BE(packet, 4);
-    const metaLen = readUInt32BE(packet, 8);
-    if (entityLen === null || metaLen === null) return null;
-
-    const expected = UNIFIED_MAP_PACKET_HEADER_SIZE + entityLen + metaLen;
-    if (expected !== packet.length) return null;
-
-    const entityBytes = packet.slice(UNIFIED_MAP_PACKET_HEADER_SIZE, UNIFIED_MAP_PACKET_HEADER_SIZE + entityLen);
-    const metaBytes = packet.slice(UNIFIED_MAP_PACKET_HEADER_SIZE + entityLen, expected);
-    const entitiesBase64 = bytesToBase64(entityBytes);
-    const entitiesDecoded = decompressMap(entitiesBase64);
+    const entityBytes = packet.slice(2, 2 + entityLen);
+    const metaBytes = packet.slice(2 + entityLen);
+    const entitiesDecoded = decompressMapV2Bytes(entityBytes);
 
     let meta = {};
     try {
@@ -3380,9 +3472,9 @@ function decodeUnifiedMapPacket(packet) {
         entities: Array.isArray(entitiesDecoded) ? entitiesDecoded : [],
         mapName: '',
         anchor: null,
-        waveMode: null,
-        cityLabelMode: null,
-        mapMode: null,
+        waveMode: defaultWaveMode,
+        cityLabelMode: defaultCityLabelMode,
+        mapMode: 'base',
         teams: null,
         alliances: null
     };
