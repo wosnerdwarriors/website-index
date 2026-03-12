@@ -3248,7 +3248,7 @@ function compressMapV3Bytes(entities) {
         bitString += "0".repeat(8 - (bitString.length % 8));
     }
 
-    const bytes = bitString.match(/.{1,8}/g).map(b => parseInt(b, 2));
+    const bytes = (bitString.match(/.{1,8}/g) || []).map(b => parseInt(b, 2));
     return new Uint8Array(bytes);
 }
 
