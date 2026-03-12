@@ -3440,6 +3440,9 @@ function buildUnifiedMapPacket(serializableEntities, mapName, anchor, _waveMode,
     const metaBytes = new TextEncoder().encode(JSON.stringify(metaPayload));
 
     // Header: 2 bytes big-endian uint16 = entity data length (up to 65535 bytes)
+    if (entityBytes.length > 0xFFFF) {
+        throw new Error(`Map entity data too large to encode: ${entityBytes.length} bytes (max 65535)`);
+    }
     const packet = new Uint8Array(2 + entityBytes.length + metaBytes.length);
     packet[0] = (entityBytes.length >> 8) & 0xFF;
     packet[1] = entityBytes.length & 0xFF;
