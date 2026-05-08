@@ -870,42 +870,61 @@ function drawCityDetails(context, z, city, screen) {
 
 }
 
+function drawCoordLabelBelow(context, z, entity, screen, mainFontSize) {
+    if (cityLabelMode !== 'coords') return;
+    const c = coordForCity(entity);
+    const fs = Math.max(6, Math.min(14, baseGridSize * z * 0.22));
+    context.font = `${fs}px Arial`;
+    context.textAlign = 'center';
+    context.textBaseline = 'top';
+    context.fillText(`${c.x}:${c.y}`, screen.x, screen.y + mainFontSize * 0.55);
+}
+
 function drawBearTrapDetails(context, z, trap, screen) {
     context.fillStyle = 'white';
-    
+
     const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
     context.font = `${baseFontSize}px Arial`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    
+
     const trapIndex = getAllianceTrapIndex(trap);
     const allianceShort = getAllianceShort(getEntityAllianceId(trap));
-    context.fillText(`${allianceShort}BT${trapIndex}`, screen.x, screen.y);
+    const labelOffset = cityLabelMode === 'coords' ? -baseFontSize * 0.55 : 0;
+    context.fillText(`${allianceShort}BT${trapIndex}`, screen.x, screen.y + labelOffset);
+
+    drawCoordLabelBelow(context, z, trap, screen, baseFontSize);
 }
 
 function drawHQDetails(context, z, hq, screen) {
     context.fillStyle = 'white';
-    
+
     const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
     context.font = `${baseFontSize}px Arial`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    
-    context.fillText('HQ', screen.x, screen.y);
+
+    const labelOffset = cityLabelMode === 'coords' ? -baseFontSize * 0.55 : 0;
+    context.fillText('HQ', screen.x, screen.y + labelOffset);
+
+    drawCoordLabelBelow(context, z, hq, screen, baseFontSize);
 }
 
 function drawNodeDetails(context, z, node, screen) {
     context.fillStyle = 'white';
-    
+
     const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(6, Math.min(18, currentGridSize * 0.25));
     context.font = `${baseFontSize}px Arial`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    
-    context.fillText('NODE', screen.x, screen.y);
+
+    const labelOffset = cityLabelMode === 'coords' ? -baseFontSize * 0.55 : 0;
+    context.fillText('NODE', screen.x, screen.y + labelOffset);
+
+    drawCoordLabelBelow(context, z, node, screen, baseFontSize);
 }
 
 function drawObstacleDetails(context, z, obstacle, screen) {
