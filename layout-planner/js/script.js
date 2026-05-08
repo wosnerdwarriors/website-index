@@ -691,9 +691,20 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
     if (isInactiveAllianceEntity) {
         context.strokeStyle = INACTIVE_ALLIANCE_ENTITY_STROKE;
         context.lineWidth = Math.max(1, 2 * z);
-    } else if (entity.type === 'city' && mapMode !== 'castle' && !isCityInProtectedArea(entity, cityProtectedAreas)) {
-        context.strokeStyle = 'rgba(255, 0, 0, 1.0)';
-        context.lineWidth = Math.max(2, 4 * z);
+    } else if (entity.type === 'city' && mapMode !== 'castle') {
+        // Flag bonus thresholds: 2/4 cells is the minimum to still receive the alliance bonus.
+        const protectedCells = countCityProtectedCells(entity, cityProtectedAreas);
+        const totalCells = entity.width * entity.height;
+        if (protectedCells < 2) {
+            context.strokeStyle = 'rgba(255, 0, 0, 1.0)';
+            context.lineWidth = Math.max(2, 4 * z);
+        } else if (protectedCells < totalCells) {
+            context.strokeStyle = 'rgba(255, 140, 0, 1.0)';
+            context.lineWidth = Math.max(2, 4 * z);
+        } else {
+            context.strokeStyle = 'rgba(0, 0, 0, 0.9)';
+            context.lineWidth = Math.max(1, 2 * z);
+        }
     } else {
         context.strokeStyle = 'rgba(0, 0, 0, 0.9)';
         context.lineWidth = Math.max(1, 2 * z);
@@ -1075,23 +1086,19 @@ function markFlagArea(entity, areas, radiusSize = 3) {
     }
 }
 
-// Helper function to check if a city is within any flag's or HQ's area
-function isCityInProtectedArea(cityEntity, protectedAreas) {
-    // For a 2x2 city, check all 4 grid cells that the city occupies
+// Helper function to count how many of a city's cells fall inside any flag's or HQ's area
+function countCityProtectedCells(cityEntity, protectedAreas) {
+    let count = 0;
     for (let dx = 0; dx < cityEntity.width; dx++) {
         for (let dy = 0; dy < cityEntity.height; dy++) {
             const gridX = cityEntity.x + dx;
             const gridY = cityEntity.y + dy;
-            
-            // If any cell of the city is NOT in a protected area (flag or HQ), the city is not well positioned
-            if (!protectedAreas.has(`${gridX},${gridY}`)) {
-                return false;
+            if (protectedAreas.has(`${gridX},${gridY}`)) {
+                count++;
             }
         }
     }
-    
-    // All cells of the city are within protected areas
-    return true;
+    return count;
 }
 
 function drawFlagAreas(context, pX, pY, z, areas, color = 'rgba(173, 216, 230, 0.3)') {
