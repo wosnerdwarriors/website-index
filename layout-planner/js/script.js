@@ -36,6 +36,7 @@ const entities = [];
 const defaultCityLabelMode = "march";
 const defaultWaveMode = false;
 let selectedType = null;
+let obstacleSize = 1; // 1, 2, 3 or 4 — placement drops N×N individual 1×1 obstacles
 let selectedEntity = null;
 let selectedEntities = new Set();
 let cityCounterId = 1;
@@ -691,9 +692,20 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
     if (isInactiveAllianceEntity) {
         context.strokeStyle = INACTIVE_ALLIANCE_ENTITY_STROKE;
         context.lineWidth = Math.max(1, 2 * z);
-    } else if (entity.type === 'city' && mapMode !== 'castle' && !isCityInProtectedArea(entity, cityProtectedAreas)) {
-        context.strokeStyle = 'rgba(255, 0, 0, 1.0)';
-        context.lineWidth = Math.max(2, 4 * z);
+    } else if (entity.type === 'city' && mapMode !== 'castle') {
+        // Flag bonus thresholds: 2/4 cells is the minimum to still receive the alliance bonus.
+        const protectedCells = countCityProtectedCells(entity, cityProtectedAreas);
+        const totalCells = entity.width * entity.height;
+        if (protectedCells < 2) {
+            context.strokeStyle = 'rgba(255, 0, 0, 1.0)';
+            context.lineWidth = Math.max(2, 4 * z);
+        } else if (protectedCells < totalCells) {
+            context.strokeStyle = 'rgba(255, 140, 0, 1.0)';
+            context.lineWidth = Math.max(2, 4 * z);
+        } else {
+            context.strokeStyle = 'rgba(0, 0, 0, 0.9)';
+            context.lineWidth = Math.max(1, 2 * z);
+        }
     } else {
         context.strokeStyle = 'rgba(0, 0, 0, 0.9)';
         context.lineWidth = Math.max(1, 2 * z);
@@ -858,42 +870,61 @@ function drawCityDetails(context, z, city, screen) {
 
 }
 
+function drawCoordLabelBelow(context, z, entity, screen, mainFontSize) {
+    if (cityLabelMode !== 'coords') return;
+    const c = coordForCity(entity);
+    const fs = Math.max(6, Math.min(14, baseGridSize * z * 0.22));
+    context.font = `${fs}px Arial`;
+    context.textAlign = 'center';
+    context.textBaseline = 'top';
+    context.fillText(`${c.x}:${c.y}`, screen.x, screen.y + mainFontSize * 0.55);
+}
+
 function drawBearTrapDetails(context, z, trap, screen) {
     context.fillStyle = 'white';
-    
+
     const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
     context.font = `${baseFontSize}px Arial`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    
+
     const trapIndex = getAllianceTrapIndex(trap);
     const allianceShort = getAllianceShort(getEntityAllianceId(trap));
-    context.fillText(`${allianceShort}BT${trapIndex}`, screen.x, screen.y);
+    const labelOffset = cityLabelMode === 'coords' ? -baseFontSize * 0.55 : 0;
+    context.fillText(`${allianceShort}BT${trapIndex}`, screen.x, screen.y + labelOffset);
+
+    drawCoordLabelBelow(context, z, trap, screen, baseFontSize);
 }
 
 function drawHQDetails(context, z, hq, screen) {
     context.fillStyle = 'white';
-    
+
     const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
     context.font = `${baseFontSize}px Arial`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    
-    context.fillText('HQ', screen.x, screen.y);
+
+    const labelOffset = cityLabelMode === 'coords' ? -baseFontSize * 0.55 : 0;
+    context.fillText('HQ', screen.x, screen.y + labelOffset);
+
+    drawCoordLabelBelow(context, z, hq, screen, baseFontSize);
 }
 
 function drawNodeDetails(context, z, node, screen) {
     context.fillStyle = 'white';
-    
+
     const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(6, Math.min(18, currentGridSize * 0.25));
     context.font = `${baseFontSize}px Arial`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    
-    context.fillText('NODE', screen.x, screen.y);
+
+    const labelOffset = cityLabelMode === 'coords' ? -baseFontSize * 0.55 : 0;
+    context.fillText('NODE', screen.x, screen.y + labelOffset);
+
+    drawCoordLabelBelow(context, z, node, screen, baseFontSize);
 }
 
 function drawObstacleDetails(context, z, obstacle, screen) {
@@ -1075,23 +1106,19 @@ function markFlagArea(entity, areas, radiusSize = 3) {
     }
 }
 
-// Helper function to check if a city is within any flag's or HQ's area
-function isCityInProtectedArea(cityEntity, protectedAreas) {
-    // For a 2x2 city, check all 4 grid cells that the city occupies
+// Helper function to count how many of a city's cells fall inside any flag's or HQ's area
+function countCityProtectedCells(cityEntity, protectedAreas) {
+    let count = 0;
     for (let dx = 0; dx < cityEntity.width; dx++) {
         for (let dy = 0; dy < cityEntity.height; dy++) {
             const gridX = cityEntity.x + dx;
             const gridY = cityEntity.y + dy;
-            
-            // If any cell of the city is NOT in a protected area (flag or HQ), the city is not well positioned
-            if (!protectedAreas.has(`${gridX},${gridY}`)) {
-                return false;
+            if (protectedAreas.has(`${gridX},${gridY}`)) {
+                count++;
             }
         }
     }
-    
-    // All cells of the city are within protected areas
-    return true;
+    return count;
 }
 
 function drawFlagAreas(context, pX, pY, z, areas, color = 'rgba(173, 216, 230, 0.3)') {
@@ -1252,6 +1279,31 @@ function addEntity(event) {
     const x = gridPos.x;
     const y = gridPos.y;
 
+    // Obstacle preset: drop N×N individual 1×1 obstacles in one click. Each placed cell
+    // remains its own entity so the existing save/load format (which derives obstacle size
+    // from type) keeps working unchanged.
+    if (selectedType === 'obstacle') {
+        const size = Math.max(1, Math.min(4, obstacleSize | 0));
+        let placedAny = false;
+        for (let dx = 0; dx < size; dx++) {
+            for (let dy = 0; dy < size; dy++) {
+                const cellX = x + dx;
+                const cellY = y + dy;
+                const cellTemplate = { x: cellX, y: cellY, width: 1, height: 1, type: 'obstacle' };
+                if (!isPositionValid(cellX, cellY, cellTemplate)) continue;
+                entities.push({ ...cellTemplate, color: '#8B0000', id: null });
+                placedAny = true;
+            }
+        }
+        if (placedAny) {
+            redraw();
+            updateCounters();
+            markUnsavedChanges();
+            pushHistory();
+        }
+        return;
+    }
+
     let color, width, height, id = null;
     if (selectedType === 'flag') {
         color = 'gray';
@@ -1277,10 +1329,6 @@ function addEntity(event) {
         color = 'darkgreen';
         width = 3;
         height = 3;
-    } else if (selectedType === 'obstacle') {
-        color = '#8B0000';
-        width = 1;
-        height = 1;
     } else if (selectedType === 'enemyzone') {
         if (mapMode !== 'castle') {
             alert('Enemy zones can only be placed in Castle mode.');
@@ -1933,6 +1981,7 @@ function setSelectedTool(toolType, { showToast = false } = {}) {
     if ((selectedType === 'select' || selectedType === 'move' || selectedType === 'delete') && ghostPreview) {
         ghostPreview = null;
     }
+    updateObstacleSizeSelectorVisibility();
     redraw();
     updateCanvasCursorForTool(toolType);
     refreshGhostPreviewForCurrentPointer(toolType);
@@ -1944,6 +1993,33 @@ function setSelectedTool(toolType, { showToast = false } = {}) {
     }
 
     return true;
+}
+
+function setObstacleSize(size) {
+    const normalized = Math.max(1, Math.min(4, parseInt(size, 10) || 1));
+    obstacleSize = normalized;
+
+    document.querySelectorAll('[data-obstacle-size]').forEach(btn => {
+        const isActive = parseInt(btn.dataset.obstacleSize, 10) === normalized;
+        btn.classList.remove('bg-blue-500', 'text-white', 'shadow-sm', 'bg-transparent', 'text-gray-500', 'hover:text-gray-700');
+        if (isActive) {
+            btn.classList.add('bg-blue-500', 'text-white', 'shadow-sm');
+        } else {
+            btn.classList.add('bg-transparent', 'text-gray-500', 'hover:text-gray-700');
+        }
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+
+    if (selectedType === 'obstacle') {
+        refreshGhostPreviewForCurrentPointer('obstacle');
+    }
+}
+
+function updateObstacleSizeSelectorVisibility() {
+    const visible = selectedType === 'obstacle';
+    document.querySelectorAll('.obstacle-size-selector').forEach(el => {
+        el.classList.toggle('hidden', !visible);
+    });
 }
 
 // ===== SET/RENDER GUI BUTTONS =====
@@ -2344,10 +2420,14 @@ window.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-alliance]').forEach(button => {
         button.addEventListener('click', () => setActiveAlliance(button.dataset.alliance));
     });
+    document.querySelectorAll('[data-obstacle-size]').forEach(button => {
+        button.addEventListener('click', () => setObstacleSize(button.dataset.obstacleSize));
+    });
 
     // Initialize mode/alliance switch visuals
     setMapMode(mapMode);
     setActiveAlliance(activeAllianceId);
+    setObstacleSize(obstacleSize);
     setSelectedTool(selectedType || 'select');
 
     // Add zoom control event listeners
@@ -2858,9 +2938,12 @@ function updateGhostPreview(mouseX, mouseY) {
         const y = gridPos.y;
 
         let width, height;
-        if (selectedType === 'flag' || selectedType === 'obstacle') {
+        if (selectedType === 'flag') {
             width = 1;
             height = 1;
+        } else if (selectedType === 'obstacle') {
+            width = Math.max(1, Math.min(4, obstacleSize | 0));
+            height = width;
         } else if (selectedType === 'enemyzone') {
             width = 12;
             height = 12;
@@ -2875,7 +2958,21 @@ function updateGhostPreview(mouseX, mouseY) {
         const tempEntity = isAllianceScopedType(selectedType)
             ? { x, y, width, height, type: selectedType, allianceId: normalizeAllianceId(activeAllianceId) }
             : { x, y, width, height, type: selectedType };
-        const validPosition = isPositionValid(x, y, tempEntity);
+
+        let validPosition;
+        if (selectedType === 'obstacle') {
+            // Each cell is placed individually; show preview if at least one cell fits.
+            validPosition = false;
+            for (let dx = 0; dx < width && !validPosition; dx++) {
+                for (let dy = 0; dy < height && !validPosition; dy++) {
+                    if (isPositionValid(x + dx, y + dy, { x: x + dx, y: y + dy, width: 1, height: 1, type: 'obstacle' })) {
+                        validPosition = true;
+                    }
+                }
+            }
+        } else {
+            validPosition = isPositionValid(x, y, tempEntity);
+        }
 
         if (validPosition) {
             ghostPreview = { ...tempEntity };
@@ -3132,6 +3229,12 @@ function handleKeyDown(event) {
             event.preventDefault();
             if (shortcutTool === 'enemyzone' && mapMode !== 'castle') {
                 showShortcutToast('Enemy Zone only in Castle mode');
+                return;
+            }
+            if (shortcutTool === 'obstacle' && selectedType === 'obstacle') {
+                const nextSize = (obstacleSize % 4) + 1;
+                setObstacleSize(nextSize);
+                showShortcutToast(`Obstacle ${nextSize}×${nextSize} (${TOOL_SHORTCUT_LABELS.obstacle})`);
                 return;
             }
             setSelectedTool(shortcutTool, { showToast: true });
