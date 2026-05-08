@@ -107,6 +107,15 @@
                             <button data-type="obstacle" aria-keyshortcuts="6" title="Obstacle (6)" class="shortcut-button bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium"><span>Obstacle</span><span class="shortcut-hint" aria-hidden="true">6</span></button>
                             <button data-type="enemyzone" aria-keyshortcuts="7" title="Enemy Zone (7, Castle mode only)" class="shortcut-button bg-gray-700 hover:bg-gray-800 text-white px-4 py-3 rounded-lg text-sm font-medium"><span>Enemy Zone</span><span class="shortcut-hint" aria-hidden="true">7</span></button>
                         </div>
+                        <div class="obstacle-size-selector hidden mb-4">
+                            <span class="text-sm font-medium">Obstacle Size:</span>
+                            <div class="mt-1 flex w-full items-center rounded-lg border border-gray-200 bg-gray-100 p-1" role="group" aria-label="Obstacle size">
+                                <button type="button" data-obstacle-size="1" aria-pressed="true" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-blue-500 text-white shadow-sm transition-colors">1×1</button>
+                                <button type="button" data-obstacle-size="2" aria-pressed="false" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-transparent text-gray-500 hover:text-gray-700 transition-colors">2×2</button>
+                                <button type="button" data-obstacle-size="3" aria-pressed="false" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-transparent text-gray-500 hover:text-gray-700 transition-colors">3×3</button>
+                                <button type="button" data-obstacle-size="4" aria-pressed="false" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-transparent text-gray-500 hover:text-gray-700 transition-colors">4×4</button>
+                            </div>
+                        </div>
                         <div class="text-sm p-3 bg-gray-100 rounded-lg text-center space-y-1">
                         <!-- Row 1 -->
                         <div class="flex justify-center space-x-2">
@@ -337,6 +346,15 @@
                 <!-- Building Controls -->
                 <div id="mobile-toolbar-buildings" class="grid grid-cols-2 gap-2 mb-4">
                     <!-- Content will be synced with desktop version -->
+                </div>
+                <div class="obstacle-size-selector hidden mb-4">
+                    <span class="text-sm font-medium">Obstacle Size:</span>
+                    <div class="mt-1 flex w-full items-center rounded-lg border border-gray-200 bg-gray-100 p-1" role="group" aria-label="Obstacle size (mobile)">
+                        <button type="button" data-obstacle-size="1" aria-pressed="true" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-blue-500 text-white shadow-sm transition-colors">1×1</button>
+                        <button type="button" data-obstacle-size="2" aria-pressed="false" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-transparent text-gray-500 hover:text-gray-700 transition-colors">2×2</button>
+                        <button type="button" data-obstacle-size="3" aria-pressed="false" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-transparent text-gray-500 hover:text-gray-700 transition-colors">3×3</button>
+                        <button type="button" data-obstacle-size="4" aria-pressed="false" class="flex-1 px-3 py-1 text-center text-xs font-medium rounded-md bg-transparent text-gray-500 hover:text-gray-700 transition-colors">4×4</button>
+                    </div>
                 </div>
                 <div class="text-sm p-3 bg-gray-100 rounded-lg text-center">
                     <span>Flags: <span id="mobileFlagCounter" class="font-bold">0</span></span>
