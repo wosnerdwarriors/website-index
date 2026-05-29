@@ -86,6 +86,9 @@ let territoryPreview = null;
 let cityLabelMode = defaultCityLabelMode;  // "march", "coords", "none"
 let waveMode = defaultWaveMode;
 let coordAnchor = { x: 600, y: 600 };
+let worldmapPresence = null; // Uint8Array(1200*1200), key per cell; loaded on first activation
+let worldmapLoading = false;
+let showWorldmap = false;
 let mapMode = 'base'; // 'base' or 'castle' (add island?)
 const castleReservedSize = 12; // Size of the reserved castle area
 const castleRedzoneThickness = 8; // Thickness of the redzone ring around the reserved area
@@ -98,6 +101,7 @@ let lastPointerClientX = null;
 let lastPointerClientY = null;
 const KEYBOARD_MOVE_HISTORY_DEBOUNCE_MS = 220;
 let keyboardMoveHistoryTimerId = null;
+const WORLDMAP_URL = 'https://raw.githubusercontent.com/wosnerdwarriors/wos-data/refs/heads/main/data/worldmap/worldmap.json';
 
 const TOOL_LABELS = Object.freeze({
     select: 'Select',
@@ -136,6 +140,18 @@ const TOOL_SHORTCUT_KEY_MAP = Object.freeze({
     '6': 'obstacle',
     '7': 'enemyzone'
 });
+
+// Semi-transparent fill colors per key type (keys 1-6)
+const WORLDMAP_KEY_COLORS = [
+    null,
+    'rgba(120, 120, 130, 0.55)', // 1 – mountain (grey)
+    'rgba(25, 63, 102, 0.52)', // 2 – lake (blue)
+    'rgba(210, 150,  50, 0.55)', // 3 – building (amber)
+    'rgba(180,  60, 180, 0.60)', // 4 – castle (purple)
+    'rgba(160,  50,  50, 0.55)', // 5 – fortress / stronghold (dark red)
+    'rgba( 50, 170, 150, 0.55)', // 6 – facility area (green)
+];
+
 
 function isTextInputTarget(target) {
     if (!(target instanceof Element)) return false;
@@ -1374,8 +1390,82 @@ function addEntity(event) {
     }
 }
 
+// ===== WORLDMAP OBSTACLE LAYER =====
+
+async function loadWorldmapData() {
+    if (worldmapPresence || worldmapLoading) return;
+    worldmapLoading = true;
+    try {
+        const resp = await fetch(WORLDMAP_URL);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const entries = await resp.json();
+        if (!Array.isArray(entries)) throw new Error('Expected an array of entries');
+        const map = new Uint8Array(1200 * 1200);
+        for (const { x, y, key } of entries) {
+            if (x >= 0 && x < 1200 && y >= 0 && y < 1200) map[y * 1200 + x] = key;
+        }
+        worldmapPresence = map;
+        redraw();
+    } catch (e) {
+        console.warn('[Worldmap] Failed to load:', e);
+    } finally {
+        worldmapLoading = false;
+    }
+}
+
+function drawWorldmapLayer(context, pX, pY, z) {
+    if (!worldmapPresence || (!showWorldmap && cityLabelMode !== 'coords')) return;
+
+    const S = baseGridSize * z;
+    const fillSize = S * 0.75;
+    const hs = fillSize * 0.5;
+
+    // Tight viewport culling via diagonal constraints. diamondToScreen gives:
+    //   screen.x = (gx - gy) * S * 0.5 + pX
+    //   screen.y = (gx + gy + 1) * S * 0.5 + pY
+    // A cell is on-screen when screen.x ∈ [-hs, canvasWidth+hs] and screen.y ∈ [-hs, canvasHeight+hs].
+    const diagDiffMin = Math.floor(2 * (-hs - pX) / S);
+    const diagDiffMax = Math.ceil(2 * (canvasWidth + hs - pX) / S);
+    const diagSumMin  = Math.floor(2 * (-hs - pY) / S) - 1;
+    const diagSumMax  = Math.ceil(2 * (canvasHeight + hs - pY) / S) - 1;
+
+    // Axis-aligned bounds derived from diagonal constraints, clamped to worldmap range
+    // and to the placement grid (where entities can actually be placed).
+    const minGX = Math.max(Math.floor((diagSumMin + diagDiffMin) / 2), coordAnchor.y - 1199, -gridCols);
+    const maxGX = Math.min(Math.ceil((diagSumMax + diagDiffMax) / 2),  coordAnchor.y,          gridCols);
+    const minGY = Math.max(Math.floor((diagSumMin - diagDiffMax) / 2), coordAnchor.x - 1199, -gridRows);
+    const maxGY = Math.min(Math.ceil((diagSumMax - diagDiffMin) / 2),  coordAnchor.x,          gridRows);
+
+    if (minGX > maxGX || minGY > maxGY) return;
+
+    context.save();
+    for (let gx = minGX; gx <= maxGX; gx++) {
+        // Per-column tight gy bounds eliminate the triangle corners that fall off-screen.
+        const gyMin = Math.max(minGY, diagSumMin - gx, gx - diagDiffMax);
+        const gyMax = Math.min(maxGY, diagSumMax - gx, gx - diagDiffMin);
+        for (let gy = gyMin; gy <= gyMax; gy++) {
+            const wx = coordAnchor.x - gy;
+            const wy = coordAnchor.y - gx;
+            if (wx < 0 || wx >= 1200 || wy < 0 || wy >= 1200) continue;
+            const key = worldmapPresence[wy * 1200 + wx];
+            if (!key) continue;
+            const screen = diamondToScreen(gx, gy, pX, pY, z);
+            context.fillStyle = WORLDMAP_KEY_COLORS[key] ?? 'rgba(139, 90, 43, 0.45)';
+            context.beginPath();
+            context.moveTo(screen.x,      screen.y - hs);
+            context.lineTo(screen.x + hs, screen.y);
+            context.lineTo(screen.x,      screen.y + hs);
+            context.lineTo(screen.x - hs, screen.y);
+            context.closePath();
+            context.fill();
+        }
+    }
+    context.restore();
+}
+
 function redraw() {
     drawDiamondGrid(ctx, panX, panY, zoom);
+    drawWorldmapLayer(ctx, panX, panY, zoom);
     drawEntities(ctx, panX, panY, zoom);
     drawAnchorSymbol(ctx, panX, panY, zoom);
 }
@@ -2048,6 +2138,8 @@ function setCityLabelMode(mode = defaultCityLabelMode) {
         anchorInputContainer.classList.toggle('hidden', cityLabelMode !== "coords");
     }
 
+    if (cityLabelMode === 'coords') loadWorldmapData();
+
     redraw();
 }
 
@@ -2061,6 +2153,16 @@ function setWaveMode(_waveMode = defaultWaveMode) {
         b.classList.toggle('bg-yellow-500', waveMode);
         b.classList.toggle('text-white', waveMode);
     });
+    redraw();
+}
+
+function setShowWorldmap(value) {
+    showWorldmap = value;
+    document.querySelectorAll('[citySettingsButtons="6"], [citySettingsButtons="m6"]').forEach(b => {
+        b.classList.toggle('bg-yellow-500', showWorldmap);
+        b.classList.toggle('text-white', showWorldmap);
+    });
+    if (showWorldmap) loadWorldmapData();
     redraw();
 }
 
@@ -2645,6 +2747,11 @@ window.addEventListener('DOMContentLoaded', () => {
                 updateTeamControlsVisibility();
                 updateCityList();
             }
+
+            // P6: Toggle worldmap obstacle layer
+            if (key.endsWith('6')) {
+                setShowWorldmap(!showWorldmap);
+            }
         });
     });
 });
@@ -3074,6 +3181,21 @@ function isPositionValid(newX, newY, entity, ignoreEntities = null) {
         return false;
     }
     
+    // Block placement on worldmap terrain when the worldmap layer is visible.
+    if (worldmapPresence && (showWorldmap || cityLabelMode === 'coords')) {
+        for (let dx = 0; dx < entity.width; dx++) {
+            for (let dy = 0; dy < entity.height; dy++) {
+                const wx = coordAnchor.x - (newY + dy);
+                const wy = coordAnchor.y - (newX + dx);
+                const wmKey = wx >= 0 && wx < 1200 && wy >= 0 && wy < 1200 ? worldmapPresence[wy * 1200 + wx] : 0;
+                if (wmKey) {
+                    if (wmKey !== 5 && wmKey !== 6) return false;
+                    if (wmKey === 5 && entity.type !== 'city') return false;
+                }
+            }
+        }
+    }
+
     for (let other of entities) {
         if (other !== entity) {
             if (ignoreEntities && ignoreEntities.has(other)) continue;
