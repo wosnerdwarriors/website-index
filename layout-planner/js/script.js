@@ -3187,8 +3187,9 @@ function isPositionValid(newX, newY, entity, ignoreEntities = null) {
                 const wx = coordAnchor.x - (newY + dy);
                 const wy = coordAnchor.y - (newX + dx);
                 const wmKey = wx >= 0 && wx < 1200 && wy >= 0 && wy < 1200 ? worldmapPresence[wy * 1200 + wx] : 0;
-                if (wmKey && wmKey !== 5 && wmKey !== 6) {
-                    return false;
+                if (wmKey) {
+                    if (wmKey !== 5 && wmKey !== 6) return false;
+                    if (wmKey === 5 && entity.type !== 'city') return false;
                 }
             }
         }
