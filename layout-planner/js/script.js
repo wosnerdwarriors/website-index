@@ -1399,6 +1399,7 @@ async function loadWorldmapData() {
         const resp = await fetch(WORLDMAP_URL);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const entries = await resp.json();
+        if (!Array.isArray(entries)) throw new Error('Expected an array of entries');
         const map = new Uint8Array(1200 * 1200);
         for (const { x, y, key } of entries) {
             if (x >= 0 && x < 1200 && y >= 0 && y < 1200) map[y * 1200 + x] = key;
