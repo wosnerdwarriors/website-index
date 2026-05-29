@@ -145,7 +145,7 @@ const TOOL_SHORTCUT_KEY_MAP = Object.freeze({
 const WORLDMAP_KEY_COLORS = [
     null,
     'rgba(120, 120, 130, 0.55)', // 1 – mountain (grey)
-    'rgba( 60, 130, 200, 0.55)', // 2 – lake (blue)
+    'rgba(25, 63, 102, 0.52)', // 2 – lake (blue)
     'rgba(210, 150,  50, 0.55)', // 3 – building (amber)
     'rgba(180,  60, 180, 0.60)', // 4 – castle (purple)
     'rgba(160,  50,  50, 0.55)', // 5 – fortress / stronghold (dark red)
