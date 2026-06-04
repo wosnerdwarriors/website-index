@@ -124,6 +124,9 @@ let touchStartX = 0, touchStartY = 0;
 let _connCache    = null;
 let _terrCache    = null;
 let _claimedCache = null;
+// Drag-phase cache: claimed cells of the static backdrop (dragged entities excluded),
+// computed once at drag start and reused for every canMoveGroupTo call in the drag.
+let _dragClaimedCache = null;
 
 function invalidateConnectivity() { _connCache = null; _terrCache = null; _claimedCache = null; }
 
@@ -131,6 +134,7 @@ function invalidateConnectivity() { _connCache = null; _terrCache = null; _claim
 // The first alliance whose flag/HQ covers a cell wins it permanently.
 function buildGlobalClaimedCells(excludeEntities = null) {
     if (!excludeEntities && _claimedCache) return _claimedCache;
+    if (excludeEntities && _dragClaimedCache) return _dragClaimedCache;
     const claimed = new Map();
     for (const e of entities) {
         if (excludeEntities && excludeEntities.has(e)) continue;
@@ -1471,6 +1475,7 @@ canvas.addEventListener('mousedown', e => {
                 isDragging = true;
                 dragOffsetX = g.x; dragOffsetY = g.y;
                 dragSelectionStart = getSelectedEntities().map(ent => ({ entity:ent, origX:ent.x, origY:ent.y }));
+                _dragClaimedCache = buildGlobalClaimedCells(new Set(dragSelectionStart.map(i => i.entity)));
                 hasDragMovement = false;
                 canvas.style.cursor = 'grabbing';
             }
@@ -1519,6 +1524,7 @@ canvas.addEventListener('mouseup', () => {
     }
     if (isDragging) {
         isDragging = false;
+        _dragClaimedCache = null;
         if (hasDragMovement) { pushHistory(); updateUI(); }
         hasDragMovement = false;
         canvas.style.cursor = 'grab';
@@ -1538,6 +1544,7 @@ canvas.addEventListener('mouseleave', () => {
     if (isBoxSelecting) { isBoxSelecting = false; boxStart = null; boxCurrent = null; }
     if (isDragging) {
         isDragging = false;
+        _dragClaimedCache = null;
         if (hasDragMovement) { pushHistory(); updateUI(); }
         hasDragMovement = false;
     }
