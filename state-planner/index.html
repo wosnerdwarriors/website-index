@@ -245,53 +245,51 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Sync buildings buttons to mobile
-            const db = document.getElementById('toolbar-buildings');
-            const mb = document.getElementById('mobile-toolbar-buildings');
-            if (db && mb) Array.from(db.children).forEach(b => mb.appendChild(b.cloneNode(true)));
+        // Sync buildings buttons to mobile
+        const db = document.getElementById('toolbar-buildings');
+        const mb = document.getElementById('mobile-toolbar-buildings');
+        if (db && mb) Array.from(db.children).forEach(b => mb.appendChild(b.cloneNode(true)));
 
-            // Copy help to mobile
-            const dh = document.getElementById('helpSection');
-            const mhw = document.querySelector('#mobileHelp .bg-white');
-            if (dh && mhw) {
-                const h = document.createElement('h3'); h.className='font-medium mb-4'; h.textContent='Help';
-                mhw.appendChild(h);
-                Array.from(dh.childNodes).forEach(n => mhw.appendChild(n.cloneNode(true)));
-            }
+        // Copy help to mobile
+        const dh = document.getElementById('helpSection');
+        const mhw = document.querySelector('#mobileHelp .bg-white');
+        if (dh && mhw) {
+            const h = document.createElement('h3'); h.className='font-medium mb-4'; h.textContent='Help';
+            mhw.appendChild(h);
+            Array.from(dh.childNodes).forEach(n => mhw.appendChild(n.cloneNode(true)));
+        }
 
-            function toggleSection(id) {
-                const el = document.getElementById(id+'Section');
-                const ar = document.getElementById(id+'Arrow');
-                if (!el) return;
-                el.classList.toggle('hidden');
-                if (ar) ar.style.transform = el.classList.contains('hidden') ? 'rotate(180deg)' : '';
-            }
-            function toggleBottomSection(id) {
-                ['actions','help'].forEach(s => {
-                    if (s!==id) { const e=document.getElementById(s+'Section'),a=document.getElementById(s+'Arrow'); if(e) e.classList.add('hidden'); if(a) a.style.transform='rotate(180deg)'; }
-                });
-                toggleSection(id);
-            }
-            function toggleMobilePanel(name) {
-                document.querySelectorAll('.mobile-panel').forEach(p => {
-                    if (p.id==='mobile'+name.charAt(0).toUpperCase()+name.slice(1)) {
-                        p.style.display='block'; setTimeout(()=>p.classList.toggle('active'),10);
-                    } else {
-                        p.classList.remove('active'); setTimeout(()=>{ if(!p.classList.contains('active')) p.style.display='none'; },300);
-                    }
-                });
-            }
-            document.querySelectorAll('[data-section]').forEach(b=>b.addEventListener('click',()=>{
-                toggleSection(b.dataset.section);
-                if (b.dataset.section==='connections') {
-                    const s=document.getElementById('connectionsSection');
-                    if (s && !s.classList.contains('hidden') && typeof renderConnectionStatus==='function') renderConnectionStatus();
+        function toggleSection(id) {
+            const el = document.getElementById(id+'Section');
+            const ar = document.getElementById(id+'Arrow');
+            if (!el) return;
+            el.classList.toggle('hidden');
+            if (ar) ar.style.transform = el.classList.contains('hidden') ? 'rotate(180deg)' : '';
+        }
+        function toggleBottomSection(id) {
+            ['actions','help'].forEach(s => {
+                if (s!==id) { const e=document.getElementById(s+'Section'),a=document.getElementById(s+'Arrow'); if(e) e.classList.add('hidden'); if(a) a.style.transform='rotate(180deg)'; }
+            });
+            toggleSection(id);
+        }
+        function toggleMobilePanel(name) {
+            document.querySelectorAll('.mobile-panel').forEach(p => {
+                if (p.id==='mobile'+name.charAt(0).toUpperCase()+name.slice(1)) {
+                    p.style.display='block'; setTimeout(()=>p.classList.toggle('active'),10);
+                } else {
+                    p.classList.remove('active'); setTimeout(()=>{ if(!p.classList.contains('active')) p.style.display='none'; },300);
                 }
-            }));
-            document.querySelectorAll('[data-bottom]').forEach(b=>b.addEventListener('click',()=>toggleBottomSection(b.dataset.bottom)));
-            document.querySelectorAll('[data-mobile]').forEach(b=>b.addEventListener('click',()=>toggleMobilePanel(b.dataset.mobile)));
-        });
+            });
+        }
+        document.querySelectorAll('[data-section]').forEach(b=>b.addEventListener('click',()=>{
+            toggleSection(b.dataset.section);
+            if (b.dataset.section==='connections') {
+                const s=document.getElementById('connectionsSection');
+                if (s && !s.classList.contains('hidden') && typeof renderConnectionStatus==='function') renderConnectionStatus();
+            }
+        }));
+        document.querySelectorAll('[data-bottom]').forEach(b=>b.addEventListener('click',()=>toggleBottomSection(b.dataset.bottom)));
+        document.querySelectorAll('[data-mobile]').forEach(b=>b.addEventListener('click',()=>toggleMobilePanel(b.dataset.mobile)));
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js"
