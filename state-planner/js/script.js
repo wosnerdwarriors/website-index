@@ -1648,20 +1648,21 @@ function init() {
     document.getElementById('downloadButton').addEventListener('click',savePNG);
     const md=document.getElementById('mobileDownloadButton');if(md) md.addEventListener('click',savePNG);
 
-    function saveCSV() {
-        const rows = ['alliance;type;x;y'];
-        entities.forEach(e => {
-            if (e.type !== 'hq' && e.type !== 'flag') return;
-            const name = alliances[e.allianceIndex]?.name || '';
-            rows.push(`${name};${e.type};${e.x};${e.y}`);
-        });
-        const blob = new Blob([rows.join('\r\n')], { type: 'text/csv' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = (mapName || 'state-plan') + '.csv';
-        a.click();
-        URL.revokeObjectURL(a.href);
-    }
+    function saveCSV() {  
+        const rows = ['alliance;type;x;y'];  
+        entities.forEach(e => {  
+            if (e.type !== 'hq' && e.type !== 'flag') return;  
+            const name = alliances[e.allianceIndex]?.name || '';  
+            const safeName = name.includes(';') || name.includes('"') ? `"${name.replace(/"/g, '""')}"` : name;  
+            rows.push(`${safeName};${e.type};${e.x};${e.y}`);  
+        });  
+        const blob = new Blob([rows.join('\r\n')], { type: 'text/csv' });  
+        const a = document.createElement('a');  
+        a.href = URL.createObjectURL(blob);  
+        a.download = (mapName || 'state-plan') + '.csv';  
+        a.click();  
+        URL.revokeObjectURL(a.href);  
+    } 
     document.getElementById('saveAsCSVButton')?.addEventListener('click', saveCSV);
     document.getElementById('mobileSaveAsCSVButton')?.addEventListener('click', saveCSV);
 
