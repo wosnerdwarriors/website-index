@@ -1603,13 +1603,16 @@ document.addEventListener('keydown',e=>{
 });
 
 // ===== PNG SAVE =====
-function savePNG() {
-    const scale=2,tmp=document.createElement('canvas');
-    tmp.width=canvasWidth*scale;tmp.height=canvasHeight*scale;
-    const tc=tmp.getContext('2d');tc.scale(scale,scale);
-    drawGrid(tc,panX,panY,zoom);drawWorldmapOffscreenLayer(tc,panX,panY,zoom);drawAll(tc,panX,panY,zoom);
-    tmp.toBlob(b=>{const a=document.createElement('a');a.download=(mapName||'state-plan')+'.png';a.href=URL.createObjectURL(b);a.click();});
-}
+function savePNG() {  
+    const scale=2,tmp=document.createElement('canvas');  
+    tmp.width=canvasWidth*scale;tmp.height=canvasHeight*scale;  
+    const tc=tmp.getContext('2d');tc.scale(scale,scale);  
+    drawGrid(tc,panX,panY,zoom);  
+    drawWorldmapOffscreenLayer(tc,panX,panY,zoom);  
+    drawObstacleOverlay(tc,panX,panY,zoom);  
+    drawAll(tc,panX,panY,zoom);  
+    tmp.toBlob(b=>{const a=document.createElement('a');a.download=(mapName||'state-plan')+'.png';a.href=URL.createObjectURL(b);a.click();});  
+}  
 
 function showCopied(btnId,msgId){const b=document.getElementById(btnId),m=document.getElementById(msgId);if(m){m.classList.remove('hidden');setTimeout(()=>m.classList.add('hidden'),2000);}if(b){const o=b.textContent;b.textContent='Copied!';setTimeout(()=>b.textContent=o,2000);}}
 
