@@ -10,6 +10,7 @@
       { name: "Alliance RSS Calc", url: "/alliancerss", color: "teal" },
       { name: "Formation Builder", url: "/formationbuilder", color: "zinc" },
       { name: "Layout Planner", url: "/layout-planner", color: "slate" },
+      { name: "State Planner", url: "/state-planner", color: "slate" },
       { name: "Videos", url: "/videos", color: "purple" }
     ],
     external: [
