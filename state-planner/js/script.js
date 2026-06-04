@@ -1011,18 +1011,22 @@ function _hPop(h) {
 
 // A* on the diamond grid, avoiding terrain-blocked cells.
 // Returns array of {x,y} from (x0,y0) to (x1,y1), or null if unreachable / no worldmap.
-function aStarPath(x0, y0, x1, y1) {
-    if (x0===x1 && y0===y1) return [{x:x0,y:y0}];
-    if (!worldmapData) return null;
-    const cheb = Math.max(Math.abs(x1-x0), Math.abs(y1-y0));
-    const pad  = Math.min(80, (cheb>>1) + 20);
-    const minX = Math.max(Math.min(x0,x1)-pad, -GRID_COLS);
-    const maxX = Math.min(Math.max(x0,x1)+pad,  GRID_COLS);
-    const minY = Math.max(Math.min(y0,y1)-pad, -GRID_ROWS);
-    const maxY = Math.min(Math.max(y0,y1)+pad,  GRID_ROWS);
-    const W=maxX-minX+1, H=maxY-minY+1;
-    const lx0=x0-minX, ly0=y0-minY, lx1=x1-minX, ly1=y1-minY;
-    if (lx1<0||lx1>=W||ly1<0||ly1>=H) return null;
+function aStarPath(x0, y0, x1, y1) {  
+    x0 = Math.max(-GRID_COLS, Math.min(GRID_COLS, x0));  
+    y0 = Math.max(-GRID_ROWS, Math.min(GRID_ROWS, y0));  
+    x1 = Math.max(-GRID_COLS, Math.min(GRID_COLS, x1));  
+    y1 = Math.max(-GRID_ROWS, Math.min(GRID_ROWS, y1));  
+    if (x0===x1 && y0===y1) return [{x:x0,y:y0}];  
+    if (!worldmapData) return null;  
+    const cheb = Math.max(Math.abs(x1-x0), Math.abs(y1-y0));  
+    const pad  = Math.min(80, (cheb>>1) + 20);  
+    const minX = Math.max(Math.min(x0,x1)-pad, -GRID_COLS);  
+    const maxX = Math.min(Math.max(x0,x1)+pad,  GRID_COLS);  
+    const minY = Math.max(Math.min(y0,y1)-pad, -GRID_ROWS);  
+    const maxY = Math.min(Math.max(y0,y1)+pad,  GRID_ROWS);  
+    const W=maxX-minX+1, H=maxY-minY+1;  
+    const lx0=x0-minX, ly0=y0-minY, lx1=x1-minX, ly1=y1-minY;  
+    if (lx1<0||lx1>=W||ly1<0||ly1>=H) return null;  
     const INF=1e9;
     const g=new Float32Array(W*H).fill(INF);
     const came=new Int32Array(W*H).fill(-1);
