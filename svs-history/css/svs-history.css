@@ -14,22 +14,64 @@
     border-radius: 5px;
 }
 
-/* Table styling with fixed first column and scrollable date columns */
-.table-container {
-    overflow-x: auto;
-    position: relative;
+/* Table styling with fixed header/first column inside a bounded scroll area */
+.svs-table-card {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden;
+    width: 100%;
 }
 
-.table {
+.svs-table-scroll {
+    max-width: 100%;
+    max-height: 72rem;
+    min-width: 0;
+    overflow: auto;
+    position: relative;
+    width: 100%;
+}
+
+.svs-history-table {
+    border-collapse: separate;
+    border-spacing: 0;
     min-width: 100%;
+    table-layout: auto;
+    width: max-content;
+}
+
+.svs-history-table th,
+.svs-history-table td {
+    min-width: 8rem;
+    padding: 0.5rem 0.75rem;
+    vertical-align: top;
     white-space: nowrap;
 }
 
-.table tbody tr th {
+.svs-history-table td div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.svs-history-table thead th {
+    background: #f3f4f6;
     position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.svs-history-table thead th:first-child,
+.svs-history-table tbody th {
     left: 0;
-    background: #f8f9fa;
-    z-index: 1;
+    position: sticky;
+}
+
+.svs-history-table thead th:first-child {
+    z-index: 5;
+}
+
+.svs-history-table tbody th {
+    background: #ffffff;
+    z-index: 2;
 }
 
 /* Highlighting for Yes/No */
