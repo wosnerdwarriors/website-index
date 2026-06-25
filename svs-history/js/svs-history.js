@@ -308,7 +308,43 @@ document.addEventListener('DOMContentLoaded', function () {
             if (debug) console.log('Rendering date column:', date);
         });
 
-        const states = Object.keys(selectedStates).filter(state => selectedStates[state]);
+        const filterDate = selectedSvsDates.length === 1 ? selectedSvsDates[0] : null;
+
+        function matchesWinFilter(value, filterValue) {
+            return filterValue === 'all' ||
+                (filterValue === 'won' && value === true) ||
+                (filterValue === 'lost' && value === false);
+        }
+
+            if (!filterDate) {
+                return true;
+            }
+
+            const details = stateData && stateData[filterDate] ? stateData[filterDate] : null;
+            const hadMatch = Boolean(details && details['had-svs-match']);
+
+            if (matchFilter.value === 'yes' && !hadMatch) {
+                return false;
+            }
+
+            if (matchFilter.value === 'no' && (!details || hadMatch)) {
+                return false;
+            }
+
+            if (!matchesWinFilter(details && details['won-prep'], prepFilter.value)) {
+                return false;
+            }
+
+            if (!matchesWinFilter(details && details['won-castle'], castleFilter.value)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        const states = Object.keys(selectedStates).filter(state => {
+            return selectedStates[state] && matchesFilters(svsData[state]);
+        });
 
         states.forEach(state => {
             const stateData = svsData[state];
