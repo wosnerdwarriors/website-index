@@ -355,23 +355,53 @@ document.addEventListener('DOMContentLoaded', function () {
     castleFilter.addEventListener('change', renderTable);
     matchFilter.addEventListener('change', renderTable);
 
-    // Get data source URL from config
-    async function getDataSourceUrl() {
+    async function loadSvsHistoryData() {
         const configResponse = await fetch('/config.json');
         const config = await configResponse.json();
-        return config.dataSources.svs.url;
+        const baseUrl = new URL(config.dataSources.svs.url, window.location.href);
+        const shards = [];
+
+        for (let startState = 1; ; startState += 500) {
+            const endState = startState + 499;
+            const fileName = `svs-history-${String(startState).padStart(4, '0')}-${String(endState).padStart(4, '0')}.json`;
+            const shardUrl = new URL(fileName, baseUrl);
+
+            if (debug) console.log(`Using SVS data source ${startState}-${endState}:`, shardUrl.toString());
+            const response = await fetch(shardUrl);
+
+            if (response.status === 404) {
+                if (debug) console.log(`No SVS data source found for ${startState}-${endState}; stopping.`);
+                break;
+            }
+
+            if (!response.ok) {
+                throw new Error(`Failed to load ${shardUrl}: ${response.status} ${response.statusText}`);
+            }
+
+            shards.push(await response.json());
+        }
+
+        if (shards.length === 0) {
+            throw new Error(`No SVS history files found at ${baseUrl.toString()}`);
+        }
+
+        return shards.reduce((mergedData, shard) => {
+            Object.entries(shard["svs-data-per-state"] || shard).forEach(([state, stateHistory]) => {
+                mergedData[state] = {
+                    ...(mergedData[state] || {}),
+                    ...stateHistory
+                };
+            });
+
+            return mergedData;
+        }, {});
     }
 
     // Fetch the JSON data and initialize
-    getDataSourceUrl()
-        .then(dataUrl => {
-            if (debug) console.log('Using data source URL:', dataUrl);
-            return fetch(dataUrl);
-        })
-        .then(response => response.json())
+    loadSvsHistoryData()
         .then(data => {
-            if (debug) console.log('JSON data loaded:', data);
-            svsData = data["svs-data-per-state"];
+            if (debug) console.log('SVS history data loaded:', data);
+            svsData = data;
             collectAllSvsDates();  // Collect all SVS dates from all states
             populateStateSelect();  // Populate the state select box with full state range
             populateDateSelect();   // Populate the date select box
@@ -382,4 +412,3 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => console.error('Error loading JSON data:', error));
 });
-
