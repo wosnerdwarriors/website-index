@@ -108,7 +108,9 @@
             <div class="fixed bottom-0 left-0 right-0 py-3 px-4 bg-gray-100 border-t border-gray-300 flex justify-center items-center z-10 md:ml-64">
                 <button id="firstPageBtn" class="px-3 py-1 mx-1 bg-blue-500 text-white rounded hover:bg-blue-600 shadow-sm">First</button>
                 <button id="prevPageBtn" class="px-3 py-1 mx-1 bg-blue-500 text-white rounded hover:bg-blue-600 shadow-sm">Previous</button>
-                <span id="currentPage" class="mx-2 font-medium">1</span>
+                <label for="currentPageInput" class="mx-2 text-sm font-medium">Page</label>
+                <input id="currentPageInput" type="number" min="1" value="1" class="w-16 border border-gray-300 rounded px-2 py-1 text-center">
+                <span class="mx-2 text-sm">of <span id="totalPages">1</span></span>
                 <button id="nextPageBtn" class="px-3 py-1 mx-1 bg-blue-500 text-white rounded hover:bg-blue-600 shadow-sm">Next</button>
                 <button id="lastPageBtn" class="px-3 py-1 mx-1 bg-blue-500 text-white rounded hover:bg-blue-600 shadow-sm">Last</button>
             </div>
