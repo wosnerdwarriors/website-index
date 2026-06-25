@@ -316,6 +316,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 (filterValue === 'lost' && value === false);
         }
 
+        function matchesFilters(stateData) {
             if (!filterDate) {
                 return true;
             }
@@ -396,8 +397,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const config = await configResponse.json();
         const baseUrl = new URL(config.dataSources.svs.url, window.location.href);
         const shards = [];
+        const maxState = 10000;
 
-        for (let startState = 1; ; startState += 500) {
+        for (let startState = 1; startState <= maxState; startState += 500) {
             const endState = startState + 499;
             const fileName = `svs-history-${String(startState).padStart(4, '0')}-${String(endState).padStart(4, '0')}.json`;
             const shardUrl = new URL(fileName, baseUrl);
