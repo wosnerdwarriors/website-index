@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let selectedSvsDates = [];
     let allSvsDates = [];
     let currentPage = 1;
+    let totalPages = 1;
     let statesPerPage = 50;
 
     // Ensure debug mode is enabled via URL parameter
@@ -32,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
             selectedStates[checkbox.value] = true;  // Add all states
         });
         if (debug) console.log('All states added:', selectedStates);
-        renderTable();
+        resetPageAndRender();
     });
 
     // Clear All States button functionality
@@ -43,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         selectedStates = {};  // Clear selected states
         if (debug) console.log('All states cleared.');
-        renderTable();
+        resetPageAndRender();
     });
 
     // Add All Dates button functionality
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         if (debug) console.log('All dates added:', selectedSvsDates);
         checkFilterAvailability(); // Check if filters should be enabled/disabled
-        renderTable();
+        resetPageAndRender();
     });
 
     // Clear All Dates button functionality
@@ -68,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedSvsDates = [];  // Clear selected dates
         if (debug) console.log('All dates cleared.');
         checkFilterAvailability(); // Check if filters should be enabled/disabled
-        renderTable();
+        resetPageAndRender();
     });
 
     // Define function to populate state select box
@@ -183,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const state = e.target.value;
         selectedStates[state] = e.target.checked;
         if (debug) console.log(`State ${state} selected:`, selectedStates[state]);
-        renderTable();
+        resetPageAndRender();
     }
 
     // Handle SVS date selection changes
@@ -200,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (debug) console.log('Updated selected SVS dates:', selectedSvsDates);
 
         checkFilterAvailability();  // Enable/Disable filters based on number of selected dates
-        renderTable();
+        resetPageAndRender();
     }
 
     // Check if the filter dropdowns should be enabled or disabled
@@ -243,15 +244,37 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Pagination logic
-    function updatePagination() {
-        const totalPages = Math.ceil(Object.keys(selectedStates).length / statesPerPage);
+    function updatePagination(totalStates) {
+        const selectedStateCount = totalStates ?? Object.keys(selectedStates).filter(state => selectedStates[state]).length;
+        totalPages = Math.max(1, Math.ceil(selectedStateCount / statesPerPage));
 
         document.getElementById('firstPageBtn').disabled = currentPage === 1;
         document.getElementById('prevPageBtn').disabled = currentPage === 1;
         document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
         document.getElementById('lastPageBtn').disabled = currentPage === totalPages;
 
-        document.getElementById('currentPage').textContent = currentPage;
+        const currentPageInput = document.getElementById('currentPageInput');
+        currentPageInput.value = currentPage;
+        currentPageInput.max = totalPages;
+        document.getElementById('totalPages').textContent = totalPages;
+    }
+
+    function resetPageAndRender() {
+        currentPage = 1;
+        renderTable();
+    }
+
+    function goToEnteredPage() {
+        const currentPageInput = document.getElementById('currentPageInput');
+        const requestedPage = parseInt(currentPageInput.value, 10);
+
+        if (Number.isNaN(requestedPage)) {
+            currentPageInput.value = currentPage;
+            return;
+        }
+
+        currentPage = Math.min(Math.max(requestedPage, 1), totalPages);
+        renderTable();
     }
 
     document.getElementById('firstPageBtn').addEventListener('click', () => {
@@ -269,7 +292,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('nextPageBtn').addEventListener('click', () => {
-        const totalPages = Math.ceil(Object.keys(selectedStates).length / statesPerPage);
         if (currentPage < totalPages) {
             currentPage++;
             updatePagination();
@@ -278,9 +300,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('lastPageBtn').addEventListener('click', () => {
-        currentPage = Math.ceil(Object.keys(selectedStates).length / statesPerPage);
+        currentPage = totalPages;
         updatePagination();
         renderTable();
+    });
+
+    document.getElementById('currentPageInput').addEventListener('change', goToEnteredPage);
+    document.getElementById('currentPageInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            goToEnteredPage();
+        }
     });
 
     // Render the table with dynamically populated date columns and corresponding state data
@@ -308,7 +338,52 @@ document.addEventListener('DOMContentLoaded', function () {
             if (debug) console.log('Rendering date column:', date);
         });
 
-        const states = Object.keys(selectedStates).filter(state => selectedStates[state]);
+        const filterDate = selectedSvsDates.length === 1 ? selectedSvsDates[0] : null;
+
+        function matchesWinFilter(value, filterValue) {
+            return filterValue === 'all' ||
+                (filterValue === 'won' && value === true) ||
+                (filterValue === 'lost' && value === false);
+        }
+
+        function matchesFilters(stateData) {
+            if (!filterDate) {
+                return true;
+            }
+
+            const details = stateData && stateData[filterDate] ? stateData[filterDate] : null;
+            const hadMatch = Boolean(details && details['had-svs-match']);
+
+            if (matchFilter.value === 'yes' && !hadMatch) {
+                return false;
+            }
+
+            if (matchFilter.value === 'no' && (!details || hadMatch)) {
+                return false;
+            }
+
+            if (!matchesWinFilter(details && details['won-prep'], prepFilter.value)) {
+                return false;
+            }
+
+            if (!matchesWinFilter(details && details['won-castle'], castleFilter.value)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        const filteredStates = Object.keys(selectedStates).filter(state => {
+            return selectedStates[state] && matchesFilters(svsData[state]);
+        });
+        totalPages = Math.max(1, Math.ceil(filteredStates.length / statesPerPage));
+
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+
+        const pageStart = (currentPage - 1) * statesPerPage;
+        const states = filteredStates.slice(pageStart, pageStart + statesPerPage);
 
         states.forEach(state => {
             const stateData = svsData[state];
@@ -345,33 +420,64 @@ document.addEventListener('DOMContentLoaded', function () {
             tableBody.appendChild(row);
         });
 
-        updatePagination();
+        updatePagination(filteredStates.length);
 
         if (debug) console.log('Table rendered with states:', selectedStates, 'and dates:', selectedSvsDates);
     }
 
     // Filters for Prep, Castle, and Match
-    prepFilter.addEventListener('change', renderTable);
-    castleFilter.addEventListener('change', renderTable);
-    matchFilter.addEventListener('change', renderTable);
+    prepFilter.addEventListener('change', resetPageAndRender);
+    castleFilter.addEventListener('change', resetPageAndRender);
+    matchFilter.addEventListener('change', resetPageAndRender);
 
-    // Get data source URL from config
-    async function getDataSourceUrl() {
+    async function loadSvsHistoryData() {
         const configResponse = await fetch('/config.json');
         const config = await configResponse.json();
-        return config.dataSources.svs.url;
+        const baseUrl = new URL(config.dataSources.svs.url, window.location.href);
+        const shards = [];
+        const maxState = 10000;
+
+        for (let startState = 1; startState <= maxState; startState += 500) {
+            const endState = startState + 499;
+            const fileName = `svs-history-${String(startState).padStart(4, '0')}-${String(endState).padStart(4, '0')}.json`;
+            const shardUrl = new URL(fileName, baseUrl);
+
+            if (debug) console.log(`Using SVS data source ${startState}-${endState}:`, shardUrl.toString());
+            const response = await fetch(shardUrl);
+
+            if (response.status === 404) {
+                if (debug) console.log(`No SVS data source found for ${startState}-${endState}; stopping.`);
+                break;
+            }
+
+            if (!response.ok) {
+                throw new Error(`Failed to load ${shardUrl}: ${response.status} ${response.statusText}`);
+            }
+
+            shards.push(await response.json());
+        }
+
+        if (shards.length === 0) {
+            throw new Error(`No SVS history files found at ${baseUrl.toString()}`);
+        }
+
+        return shards.reduce((mergedData, shard) => {
+            Object.entries(shard["svs-data-per-state"] || shard).forEach(([state, stateHistory]) => {
+                mergedData[state] = {
+                    ...(mergedData[state] || {}),
+                    ...stateHistory
+                };
+            });
+
+            return mergedData;
+        }, {});
     }
 
     // Fetch the JSON data and initialize
-    getDataSourceUrl()
-        .then(dataUrl => {
-            if (debug) console.log('Using data source URL:', dataUrl);
-            return fetch(dataUrl);
-        })
-        .then(response => response.json())
+    loadSvsHistoryData()
         .then(data => {
-            if (debug) console.log('JSON data loaded:', data);
-            svsData = data["svs-data-per-state"];
+            if (debug) console.log('SVS history data loaded:', data);
+            svsData = data;
             collectAllSvsDates();  // Collect all SVS dates from all states
             populateStateSelect();  // Populate the state select box with full state range
             populateDateSelect();   // Populate the date select box
@@ -382,4 +488,3 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => console.error('Error loading JSON data:', error));
 });
-

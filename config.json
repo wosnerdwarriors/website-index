@@ -7,7 +7,7 @@
       "url": "https://data.wosnerds.com/data/calendar-data.json"
     },
     "svs": {
-      "url": "https://data.wosnerds.com/data/svs-history.json"
+      "url": "https://data.wosnerds.com/data/svs-history/"
     },
     "research": {
       "url": "https://data.wosnerds.com/data/research-upgrades.json"
