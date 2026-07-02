@@ -205,7 +205,7 @@ const LAYER_MARGIN    = 1.5;  // buffer size = viewport size * this, centred on 
 const LAYER_SCALE_MIN = 0.5;
 const LAYER_SCALE_MAX = 2.0;
 // Flushing every PATH_CHUNK_SIZE subpaths keeps each individual fill/stroke call cheap.
-const PATH_CHUNK_SIZE = 4000;
+const PATH_CHUNK_SIZE = 1000;
 
 function createLayerCache() { return { canvas:null, ctx:null, gs:0, refPX:0, refPY:0, w:0, h:0, dirty:true }; }
 
