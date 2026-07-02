@@ -204,6 +204,8 @@ function scheduleRedraw() {
 const LAYER_MARGIN    = 1.5;  // buffer size = viewport size * this, centred on pan
 const LAYER_SCALE_MIN = 0.5;
 const LAYER_SCALE_MAX = 2.0;
+// Flushing every PATH_CHUNK_SIZE subpaths keeps each individual fill/stroke call cheap.
+const PATH_CHUNK_SIZE = 4000;
 
 function createLayerCache() { return { canvas:null, ctx:null, gs:0, refPX:0, refPY:0, w:0, h:0, dirty:true }; }
 
@@ -332,10 +334,15 @@ function coordForEntity(entity) {
 }
 
 // World bounding box → grid entity (hardcoded anchor 600/600)
+// refSc/refHs are computed here (not in a later pass) because worldTargets is
+// populated incrementally by an async/chunked extraction (extractTargetsFromWorldmap
+// yields via setTimeout every 100 rows) — a redraw() triggered mid-extraction (e.g.
+// the user zooming while the map is still loading) would otherwise hit a target
+// whose refSc hasn't been set yet and crash in drawEntitiesLayer.
 function worldBboxToEntity(type, minWX, minWY, maxWX, maxWY) {
     const gridW = maxWY - minWY + 1;   // world-Y span → grid width
     const gridH = maxWX - minWX + 1;   // world-X span → grid height
-    return {
+    const e = {
         type,
         x: ANCHOR_Y - maxWY,   // = ANCHOR_Y - minWY - (gridW-1)
         y: ANCHOR_X - maxWX,   // = ANCHOR_X - minWX - (gridH-1)
@@ -344,6 +351,9 @@ function worldBboxToEntity(type, minWX, minWY, maxWX, maxWY) {
         fromWorldmap: true,
         worldMinX: minWX, worldMinY: minWY,
     };
+    e.refSc = entityCenter(e, 0, 0, 1);
+    e.refHs = (e.width + e.height) / 2 * BASE_GRID_SIZE * 0.45;
+    return e;
 }
 
 // ===== GRID RENDERING =====
@@ -375,17 +385,21 @@ function drawGridLines(context, pX, pY, z, viewW = canvasWidth, viewH = canvasHe
     context.save();
     context.strokeStyle = 'rgba(255,255,255,0.3)';
     context.lineWidth = 1;
-    // Batch ALL grid lines into one path → one stroke() call instead of 2*N
+    // Batch grid lines into a path per PATH_CHUNK_SIZE cells → few stroke()
+    // calls instead of 2*N (see PATH_CHUNK_SIZE comment for why chunked).
     context.beginPath();
+    let n = 0;
     for (let x = Math.floor(x0/stride)*stride; x <= x1; x += stride) {
         const yl = Math.max(y0, sMin-x, x-dMax);
         const yh = Math.min(y1, sMax-x, x-dMin);
         for (let y = Math.floor(yl/stride)*stride; y <= yh; y += stride) {
+            if (n > 0 && n % PATH_CHUNK_SIZE === 0) { context.stroke(); context.beginPath(); }
             const s  = diamondToScreenCorner(x,        y,        pX, pY, z);
             const s2 = diamondToScreenCorner(x+stride, y,        pX, pY, z);
             const s3 = diamondToScreenCorner(x,        y+stride, pX, pY, z);
             context.moveTo(s.x, s.y); context.lineTo(s2.x, s2.y);
             context.moveTo(s.x, s.y); context.lineTo(s3.x, s3.y);
+            n++;
         }
     }
     context.stroke();
@@ -459,7 +473,6 @@ async function loadWorldmap() {
 
         setStatus('Extracting targets…');
         await extractTargetsFromWorldmap();
-        precomputeTargetPositions();
         invalidateConnectivity();
         setStatus(``);
         updateUI();
@@ -473,15 +486,6 @@ async function loadWorldmap() {
 
 function setStatus(msg) {
     const el = document.getElementById('worldmapStatus'); if (el) el.textContent = msg;
-}
-
-// Pre-compute screen positions at reference scale (pX=0, pY=0, z=1).
-// At runtime: screenX = t.refSc.x * zoom + panX  (linear transform, no trig needed).
-function precomputeTargetPositions() {
-    for (const t of worldTargets) {
-        t.refSc = entityCenter(t, 0, 0, 1);
-        t.refHs = (t.width + t.height) / 2 * BASE_GRID_SIZE * 0.45;
-    }
 }
 
 // Connected-component extraction for key=5 (castle/stronghold) and key=6 (facility).
@@ -615,13 +619,15 @@ function drawObstacleOverlay(context, pX, pY, z, viewW = canvasWidth, viewH = ca
         }
     }
 
-    // Batch draw per key type (one fill() call each → minimal GPU state changes)
+    // Batch draw per key type, chunked every PATH_CHUNK_SIZE cells (few fill()
+    // calls each → minimal GPU state changes while keeping each path small).
     context.save();
     for (const [key, pairs] of Object.entries(byKey)) {
         if (!pairs.length) continue;
         context.fillStyle = OBSTACLE_COLORS[key];
         context.beginPath();
-        for (let i = 0; i < pairs.length; i += 2) {
+        for (let i = 0, n = 0; i < pairs.length; i += 2, n++) {
+            if (n > 0 && n % PATH_CHUNK_SIZE === 0) { context.fill(); context.beginPath(); }
             const s = diamondToScreen(pairs[i], pairs[i + 1], pX, pY, z);
             context.moveTo(s.x, s.y - hs); context.lineTo(s.x + hs, s.y);
             context.lineTo(s.x, s.y + hs); context.lineTo(s.x - hs, s.y);
@@ -737,13 +743,16 @@ function drawFlagCells(context, pX, pY, z, cells, color, viewW = canvasWidth, vi
     context.save();
     context.fillStyle = color;
     context.beginPath();
+    let n = 0;
     for (const coord of cells) {
         const { x, y } = unpackCoord(coord);
         const s = diamondToScreen(x, y, pX, pY, z);
         if (s.x+hs<0||s.x-hs>viewW||s.y+hs<0||s.y-hs>viewH) continue;
+        if (n > 0 && n % PATH_CHUNK_SIZE === 0) { context.fill(); context.beginPath(); }
         context.moveTo(s.x, s.y-hs); context.lineTo(s.x+hs, s.y);
         context.lineTo(s.x, s.y+hs); context.lineTo(s.x-hs, s.y);
         context.closePath();
+        n++;
     }
     context.fill();
     context.restore();
