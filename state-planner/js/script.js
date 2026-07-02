@@ -128,7 +128,7 @@ let _claimedCache = null;
 // computed once at drag start and reused for every canMoveGroupTo call in the drag.
 let _dragClaimedCache = null;
 
-function invalidateConnectivity() { _connCache = null; _terrCache = null; _claimedCache = null; }
+function invalidateConnectivity() { _connCache = null; _terrCache = null; _claimedCache = null; territoryLayerCache.dirty = true; }
 
 // Build a Map<coord, allianceIndex> in entity-insertion order.
 // The first alliance whose flag/HQ covers a cell wins it permanently.
@@ -172,7 +172,7 @@ function isForeignTerritory(gx, gy, width, height, ownAllianceIndex, excludeEnti
     const claimed = buildGlobalClaimedCells(excludeEntities);
     for (let dx = 0; dx < width; dx++) {
         for (let dy = 0; dy < height; dy++) {
-            const owner = claimed.get(`${gx+dx},${gy+dy}`);
+            const owner = claimed.get(packCoord(gx+dx, gy+dy));
             if (owner !== undefined && owner !== ownAllianceIndex) return true;
         }
     }
@@ -189,6 +189,71 @@ function scheduleRedraw() {
     _rafPending = true;
     requestAnimationFrame(() => { _rafPending = false; redraw(); });
 }
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── Viewport-cached render layers ───────────────────────────────────────────
+// Grid lines, terrain obstacles and territory overlays are expensive to redraw
+// per-cell every frame (hundreds of thousands of path ops when zoomed out with
+// many objects on the map). Each is instead pre-rendered once into an offscreen
+// canvas sized to cover the viewport plus a margin. Panning then only needs a
+// translated drawImage(); small zoom changes are absorbed by scaling the same
+// raster. A full re-render only happens when the raster would need to scale
+// beyond [0.5x, 2x] (visibly blurry), the pan has moved outside the buffered
+// margin, the window was resized, or the layer was explicitly marked dirty
+// (worldmap loaded / entities changed).
+const LAYER_MARGIN    = 1.5;  // buffer size = viewport size * this, centred on pan
+const LAYER_SCALE_MIN = 0.5;
+const LAYER_SCALE_MAX = 2.0;
+// Flushing every PATH_CHUNK_SIZE subpaths keeps each individual fill/stroke call cheap.
+const PATH_CHUNK_SIZE = 4000;
+
+function createLayerCache() { return { canvas:null, ctx:null, gs:0, refPX:0, refPY:0, w:0, h:0, dirty:true }; }
+
+// renderFn(context, pX, pY, z, viewW, viewH) must draw the layer using viewW/viewH
+// (not the canvasWidth/canvasHeight globals) for its own viewport culling, since
+// during a rebuild it draws into a buffer larger than the live canvas.
+function blitLayer(cache, renderFn, context, pX, pY, z) {
+    const gs = BASE_GRID_SIZE * z;
+    const w = Math.ceil(canvasWidth  * LAYER_MARGIN);
+    const h = Math.ceil(canvasHeight * LAYER_MARGIN);
+
+    let scale = (cache.canvas && cache.gs) ? gs / cache.gs : 0;
+    let fits = false;
+    if (cache.canvas && !cache.dirty && cache.w === w && cache.h === h &&
+            scale >= LAYER_SCALE_MIN && scale <= LAYER_SCALE_MAX) {
+        const destX = pX - scale * cache.refPX, destY = pY - scale * cache.refPY;
+        const destW = scale * cache.w,          destH = scale * cache.h;
+        fits = destX <= 0 && destY <= 0 && destX + destW >= canvasWidth && destY + destH >= canvasHeight;
+    }
+
+    if (!fits) {
+        if (!cache.canvas) {
+            cache.canvas = document.createElement('canvas');
+            cache.ctx = cache.canvas.getContext('2d');
+        }
+        if (cache.w !== w || cache.h !== h) {
+            cache.canvas.width = w; cache.canvas.height = h;
+            cache.w = w; cache.h = h;
+        } else {
+            cache.ctx.clearRect(0, 0, w, h);
+        }
+        const marginX = (w - canvasWidth) / 2, marginY = (h - canvasHeight) / 2;
+        cache.refPX = pX + marginX;
+        cache.refPY = pY + marginY;
+        cache.gs    = gs;
+        cache.dirty = false;
+        renderFn(cache.ctx, cache.refPX, cache.refPY, z, w, h);
+        scale = 1;
+    }
+
+    context.drawImage(cache.canvas,
+        pX - scale * cache.refPX, pY - scale * cache.refPY,
+        scale * cache.w,          scale * cache.h);
+}
+
+const gridLayerCache      = createLayerCache();
+const obstacleLayerCache  = createLayerCache();
+const territoryLayerCache = createLayerCache();
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ===== UTILITY =====
@@ -234,10 +299,13 @@ function calcFitZoom() {
 }
 
 function redraw() {
-    drawGrid(ctx, panX, panY, zoom);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    drawBackground(ctx);
+    blitLayer(gridLayerCache, drawGridLines, ctx, panX, panY, zoom);
     drawWorldmapOffscreenLayer(ctx, panX, panY, zoom);
-    drawObstacleOverlay(ctx, panX, panY, zoom); // per-cell obstacle layer, visible when zoomed in
-    drawAll(ctx, panX, panY, zoom);
+    blitLayer(obstacleLayerCache, drawObstacleOverlay, ctx, panX, panY, zoom); // per-cell obstacle layer, visible when zoomed in
+    blitLayer(territoryLayerCache, drawTerritoryLayer, ctx, panX, panY, zoom);
+    drawEntitiesLayer(ctx, panX, panY, zoom);
 }
 
 // ===== COORDINATE CONVERSION =====
@@ -268,10 +336,15 @@ function coordForEntity(entity) {
 }
 
 // World bounding box → grid entity (hardcoded anchor 600/600)
+// refSc/refHs are computed here (not in a later pass) because worldTargets is
+// populated incrementally by an async/chunked extraction (extractTargetsFromWorldmap
+// yields via setTimeout every 100 rows) — a redraw() triggered mid-extraction (e.g.
+// the user zooming while the map is still loading) would otherwise hit a target
+// whose refSc hasn't been set yet and crash in drawEntitiesLayer.
 function worldBboxToEntity(type, minWX, minWY, maxWX, maxWY) {
     const gridW = maxWY - minWY + 1;   // world-Y span → grid width
     const gridH = maxWX - minWX + 1;   // world-X span → grid height
-    return {
+    const e = {
         type,
         x: ANCHOR_Y - maxWY,   // = ANCHOR_Y - minWY - (gridW-1)
         y: ANCHOR_X - maxWX,   // = ANCHOR_X - minWX - (gridH-1)
@@ -280,22 +353,32 @@ function worldBboxToEntity(type, minWX, minWY, maxWX, maxWY) {
         fromWorldmap: true,
         worldMinX: minWX, worldMinY: minWY,
     };
+    e.refSc = entityCenter(e, 0, 0, 1);
+    e.refHs = (e.width + e.height) / 2 * BASE_GRID_SIZE * 0.45;
+    return e;
 }
 
 // ===== GRID RENDERING =====
-function drawGrid(context, pX, pY, z) {
-    context.clearRect(0, 0, canvasWidth, canvasHeight);
+// Layer 0 – background gradient. One fillRect; drawn fresh every frame directly onto the visible canvas, never cached.
+function drawBackground(context) {
     const g = context.createLinearGradient(0, 0, canvasWidth, canvasHeight);
     g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
     context.fillStyle = g; context.fillRect(0, 0, canvasWidth, canvasHeight);
+}
 
+function drawGridLines(context, pX, pY, z, viewW = canvasWidth, viewH = canvasHeight) {
     const gs = BASE_GRID_SIZE * z;
-    if (gs < 5) return; // lines invisible below this scale – skip entirely
+    if (gs < 6) return; // lines invisible below this scale – skip entirely
+
+    // At low zoom a full 1-cell grid needs hundreds of thousands of segments;
+    // thin it out (draw every Nth line) to keep on-screen line density roughly
+    // constant instead of scaling with the number of visible cells.
+    const stride = gs < 16 ? Math.ceil(16 / gs) : 1;
 
     // Viewport-culled iteration (same math as worldmap layer)
     const hs = gs * 0.5;
-    const dMin = Math.floor(2*(-hs-pX)/gs),   dMax = Math.ceil(2*(canvasWidth+hs-pX)/gs);
-    const sMin = Math.floor(2*(-hs-pY)/gs)-1, sMax = Math.ceil(2*(canvasHeight+hs-pY)/gs)-1;
+    const dMin = Math.floor(2*(-hs-pX)/gs),   dMax = Math.ceil(2*(viewW+hs-pX)/gs);
+    const sMin = Math.floor(2*(-hs-pY)/gs)-1, sMax = Math.ceil(2*(viewH+hs-pY)/gs)-1;
     const x0 = Math.max(Math.floor((sMin+dMin)/2), -GRID_COLS);
     const x1 = Math.min(Math.ceil( (sMax+dMax)/2),  GRID_COLS);
     const y0 = Math.max(Math.floor((sMin-dMax)/2), -GRID_ROWS);
@@ -304,17 +387,21 @@ function drawGrid(context, pX, pY, z) {
     context.save();
     context.strokeStyle = 'rgba(255,255,255,0.3)';
     context.lineWidth = 1;
-    // Batch ALL grid lines into one path → one stroke() call instead of 2*N
+    // Batch grid lines into a path per PATH_CHUNK_SIZE cells → few stroke()
+    // calls instead of 2*N (see PATH_CHUNK_SIZE comment for why chunked).
     context.beginPath();
-    for (let x = x0; x <= x1; x++) {
+    let n = 0;
+    for (let x = Math.floor(x0/stride)*stride; x <= x1; x += stride) {
         const yl = Math.max(y0, sMin-x, x-dMax);
         const yh = Math.min(y1, sMax-x, x-dMin);
-        for (let y = yl; y <= yh; y++) {
-            const s  = diamondToScreenCorner(x,   y,   pX, pY, z);
-            const s2 = diamondToScreenCorner(x+1, y,   pX, pY, z);
-            const s3 = diamondToScreenCorner(x,   y+1, pX, pY, z);
+        for (let y = Math.floor(yl/stride)*stride; y <= yh; y += stride) {
+            if (n > 0 && n % PATH_CHUNK_SIZE === 0) { context.stroke(); context.beginPath(); }
+            const s  = diamondToScreenCorner(x,        y,        pX, pY, z);
+            const s2 = diamondToScreenCorner(x+stride, y,        pX, pY, z);
+            const s3 = diamondToScreenCorner(x,        y+stride, pX, pY, z);
             context.moveTo(s.x, s.y); context.lineTo(s2.x, s2.y);
             context.moveTo(s.x, s.y); context.lineTo(s3.x, s3.y);
+            n++;
         }
     }
     context.stroke();
@@ -383,11 +470,11 @@ async function loadWorldmap() {
         setStatus('Building offscreen canvas…');
         // Build offscreen canvas synchronously (< 50 ms typical)
         worldmapOffscreen = buildWorldmapOffscreen();
+        obstacleLayerCache.dirty = true;
         redraw(); // show the map before target extraction
 
         setStatus('Extracting targets…');
         await extractTargetsFromWorldmap();
-        precomputeTargetPositions();
         invalidateConnectivity();
         setStatus(``);
         updateUI();
@@ -401,15 +488,6 @@ async function loadWorldmap() {
 
 function setStatus(msg) {
     const el = document.getElementById('worldmapStatus'); if (el) el.textContent = msg;
-}
-
-// Pre-compute screen positions at reference scale (pX=0, pY=0, z=1).
-// At runtime: screenX = t.refSc.x * zoom + panX  (linear transform, no trig needed).
-function precomputeTargetPositions() {
-    for (const t of worldTargets) {
-        t.refSc = entityCenter(t, 0, 0, 1);
-        t.refHs = (t.width + t.height) / 2 * BASE_GRID_SIZE * 0.45;
-    }
 }
 
 // Connected-component extraction for key=5 (castle/stronghold) and key=6 (facility).
@@ -508,7 +586,7 @@ const OBSTACLE_COLORS = {
     6: 'rgba( 50, 170, 150,  0.60)', // facility  – teal
 };
 
-function drawObstacleOverlay(context, pX, pY, z) {
+function drawObstacleOverlay(context, pX, pY, z, viewW = canvasWidth, viewH = canvasHeight) {
     if (!worldmapData) return;
     const gs = BASE_GRID_SIZE * z;
     if (gs < 2) return; // too small – the offscreen worldmap texture covers sub-pixel range
@@ -518,9 +596,9 @@ function drawObstacleOverlay(context, pX, pY, z) {
 
     // Diagonal-constraint viewport culling (identical to drawWorldmapLayer)
     const dMin = Math.floor(2 * (-hs - pX) / S);
-    const dMax = Math.ceil( 2 * (canvasWidth  + hs - pX) / S);
+    const dMax = Math.ceil( 2 * (viewW  + hs - pX) / S);
     const sMin = Math.floor(2 * (-hs - pY) / S) - 1;
-    const sMax = Math.ceil( 2 * (canvasHeight + hs - pY) / S) - 1;
+    const sMax = Math.ceil( 2 * (viewH + hs - pY) / S) - 1;
 
     const minGX = Math.max(Math.floor((sMin + dMin) / 2), ANCHOR_Y - 1199, -GRID_COLS);
     const maxGX = Math.min(Math.ceil( (sMax + dMax) / 2), ANCHOR_Y,          GRID_COLS);
@@ -543,13 +621,15 @@ function drawObstacleOverlay(context, pX, pY, z) {
         }
     }
 
-    // Batch draw per key type (one fill() call each → minimal GPU state changes)
+    // Batch draw per key type, chunked every PATH_CHUNK_SIZE cells (few fill()
+    // calls each → minimal GPU state changes while keeping each path small).
     context.save();
     for (const [key, pairs] of Object.entries(byKey)) {
         if (!pairs.length) continue;
         context.fillStyle = OBSTACLE_COLORS[key];
         context.beginPath();
-        for (let i = 0; i < pairs.length; i += 2) {
+        for (let i = 0, n = 0; i < pairs.length; i += 2, n++) {
+            if (n > 0 && n % PATH_CHUNK_SIZE === 0) { context.fill(); context.beginPath(); }
             const s = diamondToScreen(pairs[i], pairs[i + 1], pX, pY, z);
             context.moveTo(s.x, s.y - hs); context.lineTo(s.x + hs, s.y);
             context.lineTo(s.x, s.y + hs); context.lineTo(s.x - hs, s.y);
@@ -560,13 +640,19 @@ function drawObstacleOverlay(context, pX, pY, z) {
     context.restore();
 }
 
+// Numeric packing for grid coordinates (replaces "x,y" string keys). Territory
+// sets are rebuilt rarely but read every frame in the render path, so avoiding
+// the per-cell string alloc + split + parseInt there matters.
+function packCoord(x, y) { return (x + 2000) * 5000 + (y + 2000); }
+function unpackCoord(key) { const yy = key % 5000; return { x: (key - yy) / 5000 - 2000, y: yy - 2000 }; }
+
 // ===== FLAG AREA MECHANICS (from layout-planner) =====
 function markFlagArea(entity, areas, radius) {
     let cx, cy;
     if (entity.width === 1 && entity.height === 1) { cx=entity.x; cy=entity.y; }
     else { cx=entity.x+Math.floor(entity.width/2); cy=entity.y+Math.floor(entity.height/2); }
     const r = entity.type==='hq' ? radius+Math.floor(entity.width/2) : radius;
-    for (let x=cx-r; x<=cx+r; x++) for (let y=cy-r; y<=cy+r; y++) areas.add(`${x},${y}`);
+    for (let x=cx-r; x<=cx+r; x++) for (let y=cy-r; y<=cy+r; y++) areas.add(packCoord(x, y));
 }
 
 // ===== CHAIN CONNECTIVITY =====
@@ -619,7 +705,7 @@ function computeConnectivity(allianceIdx) {
         let hit = false;
         outer: for (let dx=0; dx<t.width; dx++)
             for (let dy=0; dy<t.height; dy++)
-                if (territory.has(`${t.x+dx},${t.y+dy}`)) { hit=true; break outer; }
+                if (territory.has(packCoord(t.x+dx, t.y+dy))) { hit=true; break outer; }
         if (hit) connectedTargets.add(t);
     }
 
@@ -652,37 +738,44 @@ function entityCenter(e, pX, pY, z) {
 }
 
 // Draw territory cells – all in ONE batched path per color
-function drawFlagCells(context, pX, pY, z, cells, color) {
+function drawFlagCells(context, pX, pY, z, cells, color, viewW = canvasWidth, viewH = canvasHeight) {
     const gs = BASE_GRID_SIZE * z;
     if (gs < 2 || cells.size === 0) return;
     const hs = gs * 0.45;
     context.save();
     context.fillStyle = color;
     context.beginPath();
+    let n = 0;
     for (const coord of cells) {
-        const [x, y] = coord.split(',').map(Number);
+        const { x, y } = unpackCoord(coord);
         const s = diamondToScreen(x, y, pX, pY, z);
-        if (s.x+hs<0||s.x-hs>canvasWidth||s.y+hs<0||s.y-hs>canvasHeight) continue;
+        if (s.x+hs<0||s.x-hs>viewW||s.y+hs<0||s.y-hs>viewH) continue;
+        if (n > 0 && n % PATH_CHUNK_SIZE === 0) { context.fill(); context.beginPath(); }
         context.moveTo(s.x, s.y-hs); context.lineTo(s.x+hs, s.y);
         context.lineTo(s.x, s.y+hs); context.lineTo(s.x-hs, s.y);
         context.closePath();
+        n++;
     }
     context.fill();
     context.restore();
 }
 
-function drawAll(context, pX, pY, z) {
+// Layer 3 – territory overlays (per-alliance claimed/disconnected cells).
+// Invalidated only when entities/alliances change (see invalidateConnectivity).
+function drawTerritoryLayer(context, pX, pY, z, viewW = canvasWidth, viewH = canvasHeight) {
+    const conn = getConnectivity(); // cached
+    alliances.forEach((alli, i) => {
+        const { territory, disconnTerr } = conn[i];
+        drawFlagCells(context, pX, pY, z, territory,   hexToRgba(alli.color, 0.22), viewW, viewH);
+        drawFlagCells(context, pX, pY, z, disconnTerr, 'rgba(220,40,40,0.18)',      viewW, viewH);
+    });
+}
+
+function drawEntitiesLayer(context, pX, pY, z) {
     const gs   = BASE_GRID_SIZE * z;
     const conn = getConnectivity(); // cached
 
-    // 1. Territory overlays
-    alliances.forEach((alli, i) => {
-        const { territory, disconnTerr } = conn[i];
-        drawFlagCells(context, pX, pY, z, territory,   hexToRgba(alli.color, 0.22));
-        drawFlagCells(context, pX, pY, z, disconnTerr, 'rgba(220,40,40,0.18)');
-    });
-
-    // 2. World targets – batched per type to minimise GPU state changes.
+    // 1. World targets – batched per type to minimise GPU state changes.
     //    Pre-computed refSc/refHs means no diamondToScreen calls per frame.
     if (worldTargets.length > 0) {
         // Which targets are connected by the active alliance?
@@ -737,7 +830,7 @@ function drawAll(context, pX, pY, z) {
         }
     }
 
-    // 3. User entities (HQ + Flag) – typically few, individual draw is fine
+    // 2. User entities (HQ + Flag) – typically few, individual draw is fine
     for (const entity of entities) {
         const sc = entityCenter(entity, pX, pY, z);
         if (entity.type === 'hq') {
@@ -770,7 +863,7 @@ function drawAll(context, pX, pY, z) {
         }
     }
 
-    // 4. Ghost preview – red when hovering over impassable terrain
+    // 3. Ghost preview – red when hovering over impassable terrain
     if (ghostPreview) {
         context.save(); context.globalAlpha = ghostBlocked ? 0.55 : 0.45;
         const gp  = ghostPreview;
@@ -799,7 +892,7 @@ function drawAll(context, pX, pY, z) {
         context.restore();
     }
 
-    // 5. Box-selection marquee
+    // 4. Box-selection marquee
     if (isBoxSelecting && boxStart && boxCurrent) {
         const bx = Math.min(boxStart.x, boxCurrent.x), by = Math.min(boxStart.y, boxCurrent.y);
         const bw = Math.abs(boxCurrent.x - boxStart.x), bh = Math.abs(boxCurrent.y - boxStart.y);
@@ -813,7 +906,7 @@ function drawAll(context, pX, pY, z) {
         context.restore();
     }
 
-    // 6. Route preview – all cells along the path + waypoint markers
+    // 5. Route preview – all cells along the path + waypoint markers
     if (selectedType === 'flag-route') {
         const cells = getRouteCells();
         if (cells.length > 0) {
@@ -1613,11 +1706,13 @@ document.addEventListener('keydown',e=>{
 function savePNG() {  
     const scale=2,tmp=document.createElement('canvas');  
     tmp.width=canvasWidth*scale;tmp.height=canvasHeight*scale;  
-    const tc=tmp.getContext('2d');tc.scale(scale,scale);  
-    drawGrid(tc,panX,panY,zoom);  
-    drawWorldmapOffscreenLayer(tc,panX,panY,zoom);  
-    drawObstacleOverlay(tc,panX,panY,zoom);  
-    drawAll(tc,panX,panY,zoom);  
+    const tc=tmp.getContext('2d');tc.scale(scale,scale);
+    drawBackground(tc);
+    drawGridLines(tc,panX,panY,zoom);
+    drawWorldmapOffscreenLayer(tc,panX,panY,zoom);
+    drawObstacleOverlay(tc,panX,panY,zoom);
+    drawTerritoryLayer(tc,panX,panY,zoom);
+    drawEntitiesLayer(tc,panX,panY,zoom);
     tmp.toBlob(b=>{const a=document.createElement('a');a.download=(mapName||'state-plan')+'.png';a.href=URL.createObjectURL(b);a.click();});  
 }  
 
