@@ -44,6 +44,7 @@ const WM_RGBA = [
     [180, 60,180,153], // 4 castle
     [160, 50, 50,140], // 5 fortress / stronghold
     [ 50,170,150,140], // 6 facility
+    [234,179,  8,140], // 7 alliance resource node
 ];
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -420,7 +421,7 @@ function buildWorldmapOffscreen() {
     for (let wy = 0; wy < 1200; wy++) {
         for (let wx = 0; wx < 1200; wx++) {
             const key = worldmapData[wy * 1200 + wx];
-            if (!key || key > 6) continue;
+            if (!key || key > 7) continue;
             const rgba = WM_RGBA[key]; if (!rgba) continue;
 
             // Isometric pixel position inside the offscreen canvas
@@ -584,6 +585,7 @@ const OBSTACLE_COLORS = {
     4: 'rgba(130,  35, 130,  0.60)', // castle    – purple
     5: 'rgba(160,  50,  50,  0.60)', // stronghold/fortress – red
     6: 'rgba( 50, 170, 150,  0.60)', // facility  – teal
+    7: 'rgba(234, 179,   8,  0.60)', // alliance resource node – gold
 };
 
 function drawObstacleOverlay(context, pX, pY, z, viewW = canvasWidth, viewH = canvasHeight) {
@@ -607,7 +609,7 @@ function drawObstacleOverlay(context, pX, pY, z, viewW = canvasWidth, viewH = ca
     if (minGX > maxGX || minGY > maxGY) return;
 
     // Collect visible obstacle cells grouped by key
-    const byKey = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+    const byKey = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] };
     for (let gx = minGX; gx <= maxGX; gx++) {
         const gyMin = Math.max(minGY, sMin - gx, gx - dMax);
         const gyMax = Math.min(maxGY, sMax - gx, gx - dMin);

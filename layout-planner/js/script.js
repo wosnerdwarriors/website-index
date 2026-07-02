@@ -141,7 +141,7 @@ const TOOL_SHORTCUT_KEY_MAP = Object.freeze({
     '7': 'enemyzone'
 });
 
-// Semi-transparent fill colors per key type (keys 1-6)
+// Semi-transparent fill colors per key type (keys 1-7)
 const WORLDMAP_KEY_COLORS = [
     null,
     'rgba(120, 120, 130, 0.55)', // 1 – mountain (grey)
@@ -150,6 +150,7 @@ const WORLDMAP_KEY_COLORS = [
     'rgba(180,  60, 180, 0.60)', // 4 – castle (purple)
     'rgba(160,  50,  50, 0.55)', // 5 – fortress / stronghold (dark red)
     'rgba( 50, 170, 150, 0.55)', // 6 – facility area (green)
+    'rgba(234, 179,   8, 0.55)', // 7 – alliance resource node (gold)
 ];
 
 
