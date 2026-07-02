@@ -227,10 +227,12 @@ function blitLayer(cache, renderFn, context, pX, pY, z) {
     }
 
     if (!fits) {
-        if (!cache.canvas || cache.w !== w || cache.h !== h) {
+        if (!cache.canvas) {
             cache.canvas = document.createElement('canvas');
-            cache.canvas.width = w; cache.canvas.height = h;
             cache.ctx = cache.canvas.getContext('2d');
+        }
+        if (cache.w !== w || cache.h !== h) {
+            cache.canvas.width = w; cache.canvas.height = h;
             cache.w = w; cache.h = h;
         } else {
             cache.ctx.clearRect(0, 0, w, h);
