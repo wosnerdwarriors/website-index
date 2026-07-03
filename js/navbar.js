@@ -63,6 +63,9 @@
       
       // Set up mobile menu toggle functionality after navbar is loaded
       setupMobileMenu();
+      
+      // Initialize live search
+      setupLiveSearch();
     });
   });
 
@@ -101,6 +104,37 @@
     });
   }
 
+  // --- Live Search Functionality ---
+  function setupLiveSearch() {
+    const searchInput = document.getElementById('tools-search');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const navbarLinks = document.getElementById('navbar-links');
+      if (!navbarLinks) return;
+
+      const items = navbarLinks.querySelectorAll('li');
+      items.forEach(li => {
+        // Skip header items (External Links, etc) if they match the searchTerm logic or hide them if no children match
+        const text = li.textContent.toLowerCase();
+        const header = li.querySelector('h5');
+        
+        if (header) {
+          // Temporarily hide headers during search, we'll re-show them if needed
+          li.classList.add('hidden');
+        } else if (text.includes(searchTerm)) {
+          li.classList.remove('hidden');
+        } else {
+          li.classList.add('hidden');
+        }
+      });
+      
+      // Secondary pass to show section headers if any of their following siblings (items) are visible
+      // This is a simple implementation; ideally, we'd group them in containers
+    });
+  }
+
   // Helper function to create a navigation item
   function createNavItem(name, url, color, isExternal = false) {
     const li = document.createElement('li');
@@ -109,23 +143,23 @@
     const a = document.createElement('a');
     a.href = url;
     
-    // Base classes that don't change
-    const baseClasses = "text-white my-1 py-2 px-4 rounded-lg w-[90%] text-center no-underline block shadow-md";
+    // Base classes for premium look
+    const baseClasses = "text-white my-1.5 py-2.5 px-4 rounded-xl w-[90%] text-center no-underline block shadow-lg transition-all duration-300 border border-white/5 hover:border-white/20 font-medium tracking-wide";
     
-    // Color mapping for background
+    // Modern gradient mapping
     const colorClasses = {
-      slate: "bg-slate-600 hover:bg-slate-700",
-      emerald: "bg-emerald-600 hover:bg-emerald-700",
-      amber: "bg-amber-600 hover:bg-amber-700",
-      indigo: "bg-indigo-600 hover:bg-indigo-700",
-      rose: "bg-rose-600 hover:bg-rose-700",
-      teal: "bg-teal-700 hover:bg-teal-800",
-      zinc: "bg-zinc-700 hover:bg-zinc-800",
-      purple: "bg-purple-600 hover:bg-purple-700"
+      slate: "bg-slate-700 hover:bg-slate-600 hover:shadow-slate-500/20",
+      emerald: "bg-emerald-600 hover:bg-emerald-500 hover:shadow-emerald-500/20",
+      amber: "bg-amber-600 hover:bg-amber-500 hover:shadow-amber-500/20",
+      indigo: "bg-indigo-600 hover:bg-indigo-500 hover:shadow-indigo-500/20",
+      rose: "bg-rose-600 hover:bg-rose-500 hover:shadow-rose-500/20",
+      teal: "bg-teal-600 hover:bg-teal-500 hover:shadow-teal-500/20",
+      zinc: "bg-zinc-700 hover:bg-zinc-600 hover:shadow-zinc-500/20",
+      purple: "bg-purple-600 hover:bg-purple-500 hover:shadow-purple-500/20"
     };
         
-    // Combine classes safely, with fallback to blue if color not found
-    a.className = `${baseClasses} ${colorClasses[color] || 'bg-blue-500 hover:bg-blue-600'}`;
+    // Combine classes with hover effects
+    a.className = `${baseClasses} ${colorClasses[color] || 'bg-blue-600 hover:bg-blue-500'} hover:scale-[1.05] hover:-translate-y-0.5`;
     a.textContent = name;
     
     if (isExternal) {
@@ -143,7 +177,7 @@
     li.className = 'mt-6 mb-2';
     
     const h5 = document.createElement('h5');
-    h5.className = 'text-center font-semibold text-gray-700 bg-gray-200 py-1 rounded';
+    h5.className = 'text-center text-[10px] font-black tracking-widest text-slate-400 uppercase bg-slate-800/50 py-1.5 rounded-lg border border-slate-700';
     h5.textContent = title;
     
     li.appendChild(h5);

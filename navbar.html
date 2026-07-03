@@ -7,18 +7,42 @@
 </button>
 
 <!-- Sidebar Navigation - Hidden on Mobile by Default -->
-<div id="wosnerds-navbar-container" class="bg-gray-100 w-full md:w-64 h-screen fixed top-0 left-0 md:flex flex-col items-center py-4 shadow-md rounded-r-lg overflow-y-auto z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-  <div class="p-3 flex justify-center w-full">
-    <a href="/" class="block w-auto md:w-4/5 mx-auto">
-      <img src="/greg.png" alt="WOS Nerds Logo" class="w-auto h-auto object-contain pb-2 md:pb-4 border-b-2 border-gray-500 max-h-[80px] md:max-h-none max-w-[70px] md:max-w-full">
+<div id="wosnerds-navbar-container" class="bg-slate-900 border-r border-slate-800 w-full md:w-64 h-screen fixed top-0 left-0 md:flex flex-col items-center py-6 shadow-2xl rounded-r-2xl overflow-y-auto z-40 transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-in-out">
+  <div class="p-4 flex flex-col items-center justify-center w-full mb-6">
+    <a href="/" class="block w-auto transition-transform hover:scale-110 duration-300">
+      <img src="/greg.png" alt="WOS Nerds Logo" class="w-20 h-20 object-contain rounded-full border-2 border-blue-500/50 p-1 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
     </a>
+    <h2 class="mt-3 text-xl font-black text-white tracking-widest uppercase">WOS Nerds</h2>
+    <div class="h-1 w-12 bg-blue-500 rounded-full mt-2"></div>
   </div>
-  <h2 class="text-center text-lg font-bold text-gray-800 mb-2 md:hidden">WOS Nerds</h2>
+
+  <!-- Tools Search Bar -->
+  <div class="w-full px-4 mb-4">
+    <div class="relative group">
+      <input type="text" id="tools-search" placeholder="Search tools..." 
+        class="w-full bg-slate-950 border border-slate-800 text-white text-sm rounded-xl py-2.5 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-600">
+      <div class="absolute left-3 top-2.5 text-slate-600 group-focus-within:text-blue-500 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+    </div>
+  </div>
   
   <nav class="w-full px-4 mt-4 overflow-y-auto">
     <ul id="navbar-links" class="space-y-3 w-full">
       <!-- Menu items will be dynamically inserted here by JavaScript -->
     </ul>
+    
+    <!-- Premium Dark Mode Toggle (Inside Sidebar) -->
+    <div class="mt-auto pt-6 pb-4 border-t border-slate-800 w-full flex flex-col items-center sticky bottom-0 sticky-nav-bottom">
+      <button id="sidebar-dark-mode-toggle" class="flex items-center justify-between w-[90%] px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-all duration-300 group shadow-lg">
+        <span class="text-xs font-black tracking-widest text-slate-400 uppercase group-hover:text-white transition-colors">Theme</span>
+        <div id="theme-icon-container" class="w-8 h-8 rounded-lg bg-slate-950 flex items-center justify-center text-lg shadow-inner">
+          🌙
+        </div>
+      </button>
+    </div>
   </nav>
 </div>
 
