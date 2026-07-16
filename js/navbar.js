@@ -11,6 +11,7 @@
       { name: "Formation Builder", url: "/formationbuilder", color: "zinc" },
       { name: "Layout Planner", url: "/layout-planner", color: "slate" },
       { name: "State Planner", url: "/state-planner", color: "slate" },
+      { name: "Castle March Speeds", url: "/castle-march%20speeds", color: "amber" },
       { name: "Videos", url: "/videos", color: "purple" }
     ],
     external: [

@@ -14,6 +14,7 @@ The website is organized into multiple standalone tools in subfolders:
 - `/alliancerss` - Alliance RSS Calculator
 - `/formationbuilder` - Formation building tool
 - `/layout-planner` - Base layout planner
+- `/castle-march%20speeds` - Castle red-zone march speed reference
 
 ## Technology Stack
 
