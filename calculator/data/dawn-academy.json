@@ -1,0 +1,7015 @@
+{
+  "experts": {
+    "Cyrille": [
+      {
+        "level": 0,
+        "affinity": 0,
+        "sigils": 0,
+        "books": 0,
+        "xp": 0
+      },
+      {
+        "level": 1,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.0158,
+        "xp": 0.02
+      },
+      {
+        "level": 2,
+        "affinity": 200,
+        "sigils": 0,
+        "books": 0.0165,
+        "xp": 0
+      },
+      {
+        "level": 3,
+        "affinity": 210,
+        "sigils": 0,
+        "books": 0.0173,
+        "xp": 0
+      },
+      {
+        "level": 4,
+        "affinity": 220,
+        "sigils": 0,
+        "books": 0.018,
+        "xp": 0
+      },
+      {
+        "level": 5,
+        "affinity": 230,
+        "sigils": 0,
+        "books": 0.0188,
+        "xp": 0
+      },
+      {
+        "level": 6,
+        "affinity": 240,
+        "sigils": 0,
+        "books": 0.0195,
+        "xp": 0
+      },
+      {
+        "level": 7,
+        "affinity": 260,
+        "sigils": 0,
+        "books": 0.0203,
+        "xp": 0
+      },
+      {
+        "level": 8,
+        "affinity": 280,
+        "sigils": 0,
+        "books": 0.021,
+        "xp": 0
+      },
+      {
+        "level": 9,
+        "affinity": 300,
+        "sigils": 0,
+        "books": 0.0218,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 320,
+        "sigils": 0,
+        "books": 0.0225,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 0,
+        "sigils": 5,
+        "books": 0.0285,
+        "xp": 0.04
+      },
+      {
+        "level": 11,
+        "affinity": 340,
+        "sigils": 0,
+        "books": 0.0293,
+        "xp": 0
+      },
+      {
+        "level": 12,
+        "affinity": 360,
+        "sigils": 0,
+        "books": 0.03,
+        "xp": 0
+      },
+      {
+        "level": 13,
+        "affinity": 380,
+        "sigils": 0,
+        "books": 0.0308,
+        "xp": 0
+      },
+      {
+        "level": 14,
+        "affinity": 400,
+        "sigils": 0,
+        "books": 0.0315,
+        "xp": 0
+      },
+      {
+        "level": 15,
+        "affinity": 420,
+        "sigils": 0,
+        "books": 0.0323,
+        "xp": 0
+      },
+      {
+        "level": 16,
+        "affinity": 440,
+        "sigils": 0,
+        "books": 0.033,
+        "xp": 0
+      },
+      {
+        "level": 17,
+        "affinity": 460,
+        "sigils": 0,
+        "books": 0.0338,
+        "xp": 0
+      },
+      {
+        "level": 18,
+        "affinity": 480,
+        "sigils": 0,
+        "books": 0.0345,
+        "xp": 0
+      },
+      {
+        "level": 19,
+        "affinity": 500,
+        "sigils": 0,
+        "books": 0.0353,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 520,
+        "sigils": 0,
+        "books": 0.036,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 0,
+        "sigils": 10,
+        "books": 0.042,
+        "xp": 0.06
+      },
+      {
+        "level": 21,
+        "affinity": 540,
+        "sigils": 0,
+        "books": 0.0428,
+        "xp": 0
+      },
+      {
+        "level": 22,
+        "affinity": 560,
+        "sigils": 0,
+        "books": 0.0435,
+        "xp": 0
+      },
+      {
+        "level": 23,
+        "affinity": 580,
+        "sigils": 0,
+        "books": 0.0443,
+        "xp": 0
+      },
+      {
+        "level": 24,
+        "affinity": 600,
+        "sigils": 0,
+        "books": 0.045,
+        "xp": 0
+      },
+      {
+        "level": 25,
+        "affinity": 620,
+        "sigils": 0,
+        "books": 0.0458,
+        "xp": 0
+      },
+      {
+        "level": 26,
+        "affinity": 640,
+        "sigils": 0,
+        "books": 0.0465,
+        "xp": 0
+      },
+      {
+        "level": 27,
+        "affinity": 660,
+        "sigils": 0,
+        "books": 0.0473,
+        "xp": 0
+      },
+      {
+        "level": 28,
+        "affinity": 680,
+        "sigils": 0,
+        "books": 0.048,
+        "xp": 0
+      },
+      {
+        "level": 29,
+        "affinity": 700,
+        "sigils": 0,
+        "books": 0.0488,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 730,
+        "sigils": 0,
+        "books": 0.0495,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 0,
+        "sigils": 15,
+        "books": 0.0555,
+        "xp": 0.09
+      },
+      {
+        "level": 31,
+        "affinity": 760,
+        "sigils": 0,
+        "books": 0.0563,
+        "xp": 0
+      },
+      {
+        "level": 32,
+        "affinity": 790,
+        "sigils": 0,
+        "books": 0.057,
+        "xp": 0
+      },
+      {
+        "level": 33,
+        "affinity": 820,
+        "sigils": 0,
+        "books": 0.0578,
+        "xp": 0
+      },
+      {
+        "level": 34,
+        "affinity": 850,
+        "sigils": 0,
+        "books": 0.0585,
+        "xp": 0
+      },
+      {
+        "level": 35,
+        "affinity": 880,
+        "sigils": 0,
+        "books": 0.0593,
+        "xp": 0
+      },
+      {
+        "level": 36,
+        "affinity": 910,
+        "sigils": 0,
+        "books": 0.06,
+        "xp": 0
+      },
+      {
+        "level": 37,
+        "affinity": 940,
+        "sigils": 0,
+        "books": 0.0608,
+        "xp": 0
+      },
+      {
+        "level": 38,
+        "affinity": 970,
+        "sigils": 0,
+        "books": 0.0615,
+        "xp": 0
+      },
+      {
+        "level": 39,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.0623,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 1040,
+        "sigils": 0,
+        "books": 0.063,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 0,
+        "sigils": 20,
+        "books": 0.069,
+        "xp": 0.12
+      },
+      {
+        "level": 41,
+        "affinity": 1080,
+        "sigils": 0,
+        "books": 0.0698,
+        "xp": 0
+      },
+      {
+        "level": 42,
+        "affinity": 1120,
+        "sigils": 0,
+        "books": 0.0705,
+        "xp": 0
+      },
+      {
+        "level": 43,
+        "affinity": 1160,
+        "sigils": 0,
+        "books": 0.0713,
+        "xp": 0
+      },
+      {
+        "level": 44,
+        "affinity": 1200,
+        "sigils": 0,
+        "books": 0.072,
+        "xp": 0
+      },
+      {
+        "level": 45,
+        "affinity": 1240,
+        "sigils": 0,
+        "books": 0.0728,
+        "xp": 0
+      },
+      {
+        "level": 46,
+        "affinity": 1280,
+        "sigils": 0,
+        "books": 0.0735,
+        "xp": 0
+      },
+      {
+        "level": 47,
+        "affinity": 1320,
+        "sigils": 0,
+        "books": 0.0743,
+        "xp": 0
+      },
+      {
+        "level": 48,
+        "affinity": 1360,
+        "sigils": 0,
+        "books": 0.075,
+        "xp": 0
+      },
+      {
+        "level": 49,
+        "affinity": 1400,
+        "sigils": 0,
+        "books": 0.0758,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 1450,
+        "sigils": 0,
+        "books": 0.0765,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 0,
+        "sigils": 25,
+        "books": 0.0825,
+        "xp": 0.15
+      },
+      {
+        "level": 51,
+        "affinity": 1500,
+        "sigils": 0,
+        "books": 0.0833,
+        "xp": 0
+      },
+      {
+        "level": 52,
+        "affinity": 1550,
+        "sigils": 0,
+        "books": 0.084,
+        "xp": 0
+      },
+      {
+        "level": 53,
+        "affinity": 1600,
+        "sigils": 0,
+        "books": 0.0848,
+        "xp": 0
+      },
+      {
+        "level": 54,
+        "affinity": 1650,
+        "sigils": 0,
+        "books": 0.0855,
+        "xp": 0
+      },
+      {
+        "level": 55,
+        "affinity": 1700,
+        "sigils": 0,
+        "books": 0.0863,
+        "xp": 0
+      },
+      {
+        "level": 56,
+        "affinity": 1750,
+        "sigils": 0,
+        "books": 0.087,
+        "xp": 0
+      },
+      {
+        "level": 57,
+        "affinity": 1800,
+        "sigils": 0,
+        "books": 0.0878,
+        "xp": 0
+      },
+      {
+        "level": 58,
+        "affinity": 1850,
+        "sigils": 0,
+        "books": 0.0885,
+        "xp": 0
+      },
+      {
+        "level": 59,
+        "affinity": 1900,
+        "sigils": 0,
+        "books": 0.0893,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 1950,
+        "sigils": 0,
+        "books": 0.09,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 0,
+        "sigils": 30,
+        "books": 0.096,
+        "xp": 0.18
+      },
+      {
+        "level": 61,
+        "affinity": 2000,
+        "sigils": 0,
+        "books": 0.0968,
+        "xp": 0
+      },
+      {
+        "level": 62,
+        "affinity": 2050,
+        "sigils": 0,
+        "books": 0.0975,
+        "xp": 0
+      },
+      {
+        "level": 63,
+        "affinity": 2100,
+        "sigils": 0,
+        "books": 0.0983,
+        "xp": 0
+      },
+      {
+        "level": 64,
+        "affinity": 2150,
+        "sigils": 0,
+        "books": 0.099,
+        "xp": 0
+      },
+      {
+        "level": 65,
+        "affinity": 2200,
+        "sigils": 0,
+        "books": 0.0998,
+        "xp": 0
+      },
+      {
+        "level": 66,
+        "affinity": 2250,
+        "sigils": 0,
+        "books": 0.1005,
+        "xp": 0
+      },
+      {
+        "level": 67,
+        "affinity": 2300,
+        "sigils": 0,
+        "books": 0.1013,
+        "xp": 0
+      },
+      {
+        "level": 68,
+        "affinity": 2350,
+        "sigils": 0,
+        "books": 0.102,
+        "xp": 0
+      },
+      {
+        "level": 69,
+        "affinity": 2400,
+        "sigils": 0,
+        "books": 0.1028,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 2450,
+        "sigils": 0,
+        "books": 0.1035,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 0,
+        "sigils": 35,
+        "books": 0.1095,
+        "xp": 0.21
+      },
+      {
+        "level": 71,
+        "affinity": 2500,
+        "sigils": 0,
+        "books": 0.1103,
+        "xp": 0
+      },
+      {
+        "level": 72,
+        "affinity": 2550,
+        "sigils": 0,
+        "books": 0.111,
+        "xp": 0
+      },
+      {
+        "level": 73,
+        "affinity": 2600,
+        "sigils": 0,
+        "books": 0.1118,
+        "xp": 0
+      },
+      {
+        "level": 74,
+        "affinity": 2650,
+        "sigils": 0,
+        "books": 0.1125,
+        "xp": 0
+      },
+      {
+        "level": 75,
+        "affinity": 2700,
+        "sigils": 0,
+        "books": 0.1133,
+        "xp": 0
+      },
+      {
+        "level": 76,
+        "affinity": 2750,
+        "sigils": 0,
+        "books": 0.114,
+        "xp": 0
+      },
+      {
+        "level": 77,
+        "affinity": 2800,
+        "sigils": 0,
+        "books": 0.1148,
+        "xp": 0
+      },
+      {
+        "level": 78,
+        "affinity": 2850,
+        "sigils": 0,
+        "books": 0.1155,
+        "xp": 0
+      },
+      {
+        "level": 79,
+        "affinity": 2900,
+        "sigils": 0,
+        "books": 0.1163,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 2950,
+        "sigils": 0,
+        "books": 0.117,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 0,
+        "sigils": 40,
+        "books": 0.123,
+        "xp": 0.24
+      },
+      {
+        "level": 81,
+        "affinity": 3000,
+        "sigils": 0,
+        "books": 0.1238,
+        "xp": 0
+      },
+      {
+        "level": 82,
+        "affinity": 3050,
+        "sigils": 0,
+        "books": 0.1245,
+        "xp": 0
+      },
+      {
+        "level": 83,
+        "affinity": 3100,
+        "sigils": 0,
+        "books": 0.1253,
+        "xp": 0
+      },
+      {
+        "level": 84,
+        "affinity": 3150,
+        "sigils": 0,
+        "books": 0.126,
+        "xp": 0
+      },
+      {
+        "level": 85,
+        "affinity": 3200,
+        "sigils": 0,
+        "books": 0.1268,
+        "xp": 0
+      },
+      {
+        "level": 86,
+        "affinity": 3250,
+        "sigils": 0,
+        "books": 0.1275,
+        "xp": 0
+      },
+      {
+        "level": 87,
+        "affinity": 3300,
+        "sigils": 0,
+        "books": 0.1283,
+        "xp": 0
+      },
+      {
+        "level": 88,
+        "affinity": 3350,
+        "sigils": 0,
+        "books": 0.129,
+        "xp": 0
+      },
+      {
+        "level": 89,
+        "affinity": 3400,
+        "sigils": 0,
+        "books": 0.1298,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 3450,
+        "sigils": 0,
+        "books": 0.1305,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 0,
+        "sigils": 45,
+        "books": 0.1365,
+        "xp": 0.27
+      },
+      {
+        "level": 91,
+        "affinity": 3500,
+        "sigils": 0,
+        "books": 0.1373,
+        "xp": 0
+      },
+      {
+        "level": 92,
+        "affinity": 3550,
+        "sigils": 0,
+        "books": 0.138,
+        "xp": 0
+      },
+      {
+        "level": 93,
+        "affinity": 3600,
+        "sigils": 0,
+        "books": 0.1388,
+        "xp": 0
+      },
+      {
+        "level": 94,
+        "affinity": 3650,
+        "sigils": 0,
+        "books": 0.1395,
+        "xp": 0
+      },
+      {
+        "level": 95,
+        "affinity": 3700,
+        "sigils": 0,
+        "books": 0.1403,
+        "xp": 0
+      },
+      {
+        "level": 96,
+        "affinity": 3750,
+        "sigils": 0,
+        "books": 0.141,
+        "xp": 0
+      },
+      {
+        "level": 97,
+        "affinity": 3800,
+        "sigils": 0,
+        "books": 0.1418,
+        "xp": 0
+      },
+      {
+        "level": 98,
+        "affinity": 3850,
+        "sigils": 0,
+        "books": 0.1425,
+        "xp": 0
+      },
+      {
+        "level": 99,
+        "affinity": 3900,
+        "sigils": 0,
+        "books": 0.1433,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 3950,
+        "sigils": 0,
+        "books": 0.144,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 0,
+        "sigils": 50,
+        "books": 0.15,
+        "xp": 0.3
+      }
+    ],
+    "Agnes": [
+      {
+        "level": 0,
+        "affinity": 0,
+        "sigils": 0,
+        "books": 0,
+        "xp": 0
+      },
+      {
+        "level": 1,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.0158,
+        "xp": 1
+      },
+      {
+        "level": 2,
+        "affinity": 240,
+        "sigils": 0,
+        "books": 0.0165,
+        "xp": 0
+      },
+      {
+        "level": 3,
+        "affinity": 260,
+        "sigils": 0,
+        "books": 0.0173,
+        "xp": 0
+      },
+      {
+        "level": 4,
+        "affinity": 270,
+        "sigils": 0,
+        "books": 0.018,
+        "xp": 0
+      },
+      {
+        "level": 5,
+        "affinity": 280,
+        "sigils": 0,
+        "books": 0.0188,
+        "xp": 0
+      },
+      {
+        "level": 6,
+        "affinity": 290,
+        "sigils": 0,
+        "books": 0.0195,
+        "xp": 0
+      },
+      {
+        "level": 7,
+        "affinity": 320,
+        "sigils": 0,
+        "books": 0.0203,
+        "xp": 0
+      },
+      {
+        "level": 8,
+        "affinity": 340,
+        "sigils": 0,
+        "books": 0.021,
+        "xp": 0
+      },
+      {
+        "level": 9,
+        "affinity": 360,
+        "sigils": 0,
+        "books": 0.0218,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 390,
+        "sigils": 0,
+        "books": 0.0228,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 0,
+        "sigils": 5,
+        "books": 0.0285,
+        "xp": 1
+      },
+      {
+        "level": 11,
+        "affinity": 410,
+        "sigils": 0,
+        "books": 0.0293,
+        "xp": 0
+      },
+      {
+        "level": 12,
+        "affinity": 440,
+        "sigils": 0,
+        "books": 0.03,
+        "xp": 0
+      },
+      {
+        "level": 13,
+        "affinity": 460,
+        "sigils": 0,
+        "books": 0.0308,
+        "xp": 0
+      },
+      {
+        "level": 14,
+        "affinity": 480,
+        "sigils": 0,
+        "books": 0.0315,
+        "xp": 0
+      },
+      {
+        "level": 15,
+        "affinity": 510,
+        "sigils": 0,
+        "books": 0.0323,
+        "xp": 0
+      },
+      {
+        "level": 16,
+        "affinity": 530,
+        "sigils": 0,
+        "books": 0.033,
+        "xp": 0
+      },
+      {
+        "level": 17,
+        "affinity": 560,
+        "sigils": 0,
+        "books": 0.0338,
+        "xp": 0
+      },
+      {
+        "level": 18,
+        "affinity": 580,
+        "sigils": 0,
+        "books": 0.0345,
+        "xp": 0
+      },
+      {
+        "level": 19,
+        "affinity": 600,
+        "sigils": 0,
+        "books": 0.0353,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 630,
+        "sigils": 0,
+        "books": 0.036,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 0,
+        "sigils": 10,
+        "books": 0.042,
+        "xp": 1
+      },
+      {
+        "level": 21,
+        "affinity": 650,
+        "sigils": 0,
+        "books": 0.0428,
+        "xp": 0
+      },
+      {
+        "level": 22,
+        "affinity": 680,
+        "sigils": 0,
+        "books": 0.0435,
+        "xp": 0
+      },
+      {
+        "level": 23,
+        "affinity": 700,
+        "sigils": 0,
+        "books": 0.0443,
+        "xp": 0
+      },
+      {
+        "level": 24,
+        "affinity": 720,
+        "sigils": 0,
+        "books": 0.045,
+        "xp": 0
+      },
+      {
+        "level": 25,
+        "affinity": 750,
+        "sigils": 0,
+        "books": 0.0458,
+        "xp": 0
+      },
+      {
+        "level": 26,
+        "affinity": 770,
+        "sigils": 0,
+        "books": 0.0465,
+        "xp": 0
+      },
+      {
+        "level": 27,
+        "affinity": 800,
+        "sigils": 0,
+        "books": 0.0473,
+        "xp": 0
+      },
+      {
+        "level": 28,
+        "affinity": 820,
+        "sigils": 0,
+        "books": 0.048,
+        "xp": 0
+      },
+      {
+        "level": 29,
+        "affinity": 840,
+        "sigils": 0,
+        "books": 0.0488,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 880,
+        "sigils": 0,
+        "books": 0.0495,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 0,
+        "sigils": 15,
+        "books": 0.055,
+        "xp": 2
+      },
+      {
+        "level": 31,
+        "affinity": 920,
+        "sigils": 0,
+        "books": 0.0563,
+        "xp": 0
+      },
+      {
+        "level": 32,
+        "affinity": 950,
+        "sigils": 0,
+        "books": 0.057,
+        "xp": 0
+      },
+      {
+        "level": 33,
+        "affinity": 990,
+        "sigils": 0,
+        "books": 0.0578,
+        "xp": 0
+      },
+      {
+        "level": 34,
+        "affinity": 1020,
+        "sigils": 0,
+        "books": 0.0585,
+        "xp": 0
+      },
+      {
+        "level": 35,
+        "affinity": 1060,
+        "sigils": 0,
+        "books": 0.0593,
+        "xp": 0
+      },
+      {
+        "level": 36,
+        "affinity": 1100,
+        "sigils": 0,
+        "books": 0.06,
+        "xp": 0
+      },
+      {
+        "level": 37,
+        "affinity": 1130,
+        "sigils": 0,
+        "books": 0.0608,
+        "xp": 0
+      },
+      {
+        "level": 38,
+        "affinity": 1170,
+        "sigils": 0,
+        "books": 0.0615,
+        "xp": 0
+      },
+      {
+        "level": 39,
+        "affinity": 1210,
+        "sigils": 0,
+        "books": 0.0623,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 1250,
+        "sigils": 0,
+        "books": 0.063,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 0,
+        "sigils": 20,
+        "books": 0.069,
+        "xp": 2
+      },
+      {
+        "level": 41,
+        "affinity": 1300,
+        "sigils": 0,
+        "books": 0.0698,
+        "xp": 0
+      },
+      {
+        "level": 42,
+        "affinity": 1350,
+        "sigils": 0,
+        "books": 0.0705,
+        "xp": 0
+      },
+      {
+        "level": 43,
+        "affinity": 1400,
+        "sigils": 0,
+        "books": 0.0713,
+        "xp": 0
+      },
+      {
+        "level": 44,
+        "affinity": 1440,
+        "sigils": 0,
+        "books": 0.072,
+        "xp": 0
+      },
+      {
+        "level": 45,
+        "affinity": 1490,
+        "sigils": 0,
+        "books": 0.0728,
+        "xp": 0
+      },
+      {
+        "level": 46,
+        "affinity": 1540,
+        "sigils": 0,
+        "books": 0.0735,
+        "xp": 0
+      },
+      {
+        "level": 47,
+        "affinity": 1590,
+        "sigils": 0,
+        "books": 0.0743,
+        "xp": 0
+      },
+      {
+        "level": 48,
+        "affinity": 1640,
+        "sigils": 0,
+        "books": 0.075,
+        "xp": 0
+      },
+      {
+        "level": 49,
+        "affinity": 1680,
+        "sigils": 0,
+        "books": 0.0758,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 1740,
+        "sigils": 0,
+        "books": 0.0765,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 0,
+        "sigils": 25,
+        "books": 0.0825,
+        "xp": 3
+      },
+      {
+        "level": 51,
+        "affinity": 1800,
+        "sigils": 0,
+        "books": 0.0833,
+        "xp": 0
+      },
+      {
+        "level": 52,
+        "affinity": 1860,
+        "sigils": 0,
+        "books": 0.084,
+        "xp": 0
+      },
+      {
+        "level": 53,
+        "affinity": 1920,
+        "sigils": 0,
+        "books": 0.0848,
+        "xp": 0
+      },
+      {
+        "level": 54,
+        "affinity": 1980,
+        "sigils": 0,
+        "books": 0.0855,
+        "xp": 0
+      },
+      {
+        "level": 55,
+        "affinity": 2040,
+        "sigils": 0,
+        "books": 0.0863,
+        "xp": 0
+      },
+      {
+        "level": 56,
+        "affinity": 2100,
+        "sigils": 0,
+        "books": 0.087,
+        "xp": 0
+      },
+      {
+        "level": 57,
+        "affinity": 2160,
+        "sigils": 0,
+        "books": 0.0878,
+        "xp": 0
+      },
+      {
+        "level": 58,
+        "affinity": 2220,
+        "sigils": 0,
+        "books": 0.0885,
+        "xp": 0
+      },
+      {
+        "level": 59,
+        "affinity": 2280,
+        "sigils": 0,
+        "books": 0.0893,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 2340,
+        "sigils": 0,
+        "books": 0.09,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 0,
+        "sigils": 30,
+        "books": 0.096,
+        "xp": 3
+      },
+      {
+        "level": 61,
+        "affinity": 2400,
+        "sigils": 0,
+        "books": 0.0968,
+        "xp": 0
+      },
+      {
+        "level": 62,
+        "affinity": 2460,
+        "sigils": 0,
+        "books": 0.0975,
+        "xp": 0
+      },
+      {
+        "level": 63,
+        "affinity": 2520,
+        "sigils": 0,
+        "books": 0.0983,
+        "xp": 0
+      },
+      {
+        "level": 64,
+        "affinity": 2580,
+        "sigils": 0,
+        "books": 0.099,
+        "xp": 0
+      },
+      {
+        "level": 65,
+        "affinity": 2640,
+        "sigils": 0,
+        "books": 0.0998,
+        "xp": 0
+      },
+      {
+        "level": 66,
+        "affinity": 2700,
+        "sigils": 0,
+        "books": 0.1005,
+        "xp": 0
+      },
+      {
+        "level": 67,
+        "affinity": 2760,
+        "sigils": 0,
+        "books": 0.1013,
+        "xp": 0
+      },
+      {
+        "level": 68,
+        "affinity": 2820,
+        "sigils": 0,
+        "books": 0.102,
+        "xp": 0
+      },
+      {
+        "level": 69,
+        "affinity": 2880,
+        "sigils": 0,
+        "books": 0.1028,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 2940,
+        "sigils": 0,
+        "books": 0.1035,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 0,
+        "sigils": 35,
+        "books": 0.1095,
+        "xp": 4
+      },
+      {
+        "level": 71,
+        "affinity": 3000,
+        "sigils": 0,
+        "books": 0.1103,
+        "xp": 0
+      },
+      {
+        "level": 72,
+        "affinity": 3060,
+        "sigils": 0,
+        "books": 0.111,
+        "xp": 0
+      },
+      {
+        "level": 73,
+        "affinity": 3120,
+        "sigils": 0,
+        "books": 0.1118,
+        "xp": 0
+      },
+      {
+        "level": 74,
+        "affinity": 3180,
+        "sigils": 0,
+        "books": 0.1125,
+        "xp": 0
+      },
+      {
+        "level": 75,
+        "affinity": 3240,
+        "sigils": 0,
+        "books": 0.1133,
+        "xp": 0
+      },
+      {
+        "level": 76,
+        "affinity": 3300,
+        "sigils": 0,
+        "books": 0.114,
+        "xp": 0
+      },
+      {
+        "level": 77,
+        "affinity": 3360,
+        "sigils": 0,
+        "books": 0.1148,
+        "xp": 0
+      },
+      {
+        "level": 78,
+        "affinity": 3420,
+        "sigils": 0,
+        "books": 0.1155,
+        "xp": 0
+      },
+      {
+        "level": 79,
+        "affinity": 3480,
+        "sigils": 0,
+        "books": 0.1163,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 3540,
+        "sigils": 0,
+        "books": 0.117,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 0,
+        "sigils": 40,
+        "books": 0.123,
+        "xp": 4
+      },
+      {
+        "level": 81,
+        "affinity": 3600,
+        "sigils": 0,
+        "books": 0.1238,
+        "xp": 0
+      },
+      {
+        "level": 82,
+        "affinity": 3660,
+        "sigils": 0,
+        "books": 0.1245,
+        "xp": 0
+      },
+      {
+        "level": 83,
+        "affinity": 3720,
+        "sigils": 0,
+        "books": 0.1253,
+        "xp": 0
+      },
+      {
+        "level": 84,
+        "affinity": 3780,
+        "sigils": 0,
+        "books": 0.126,
+        "xp": 0
+      },
+      {
+        "level": 85,
+        "affinity": 3840,
+        "sigils": 0,
+        "books": 0.1268,
+        "xp": 0
+      },
+      {
+        "level": 86,
+        "affinity": 3900,
+        "sigils": 0,
+        "books": 0.1275,
+        "xp": 0
+      },
+      {
+        "level": 87,
+        "affinity": 3960,
+        "sigils": 0,
+        "books": 0.1283,
+        "xp": 0
+      },
+      {
+        "level": 88,
+        "affinity": 4020,
+        "sigils": 0,
+        "books": 0.129,
+        "xp": 0
+      },
+      {
+        "level": 89,
+        "affinity": 4080,
+        "sigils": 0,
+        "books": 0.1298,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 4140,
+        "sigils": 0,
+        "books": 0.1305,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 0,
+        "sigils": 45,
+        "books": 0.1365,
+        "xp": 5
+      },
+      {
+        "level": 91,
+        "affinity": 4200,
+        "sigils": 0,
+        "books": 0.1373,
+        "xp": 0
+      },
+      {
+        "level": 92,
+        "affinity": 4260,
+        "sigils": 0,
+        "books": 0.138,
+        "xp": 0
+      },
+      {
+        "level": 93,
+        "affinity": 4320,
+        "sigils": 0,
+        "books": 0.1388,
+        "xp": 0
+      },
+      {
+        "level": 94,
+        "affinity": 4380,
+        "sigils": 0,
+        "books": 0.1395,
+        "xp": 0
+      },
+      {
+        "level": 95,
+        "affinity": 4440,
+        "sigils": 0,
+        "books": 0.1403,
+        "xp": 0
+      },
+      {
+        "level": 96,
+        "affinity": 4500,
+        "sigils": 0,
+        "books": 0.141,
+        "xp": 0
+      },
+      {
+        "level": 97,
+        "affinity": 4560,
+        "sigils": 0,
+        "books": 0.1418,
+        "xp": 0
+      },
+      {
+        "level": 98,
+        "affinity": 4620,
+        "sigils": 0,
+        "books": 0.1425,
+        "xp": 0
+      },
+      {
+        "level": 99,
+        "affinity": 4680,
+        "sigils": 0,
+        "books": 0.1433,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 4740,
+        "sigils": 0,
+        "books": 0.144,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 0,
+        "sigils": 50,
+        "books": 0.15,
+        "xp": 5
+      }
+    ],
+    "Holger": [
+      {
+        "level": 0,
+        "affinity": 0,
+        "sigils": 0,
+        "books": 0,
+        "xp": 0
+      },
+      {
+        "level": 1,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.0158,
+        "xp": 0.5
+      },
+      {
+        "level": 2,
+        "affinity": 600,
+        "sigils": 0,
+        "books": 0.0165,
+        "xp": 0
+      },
+      {
+        "level": 3,
+        "affinity": 630,
+        "sigils": 0,
+        "books": 0.0173,
+        "xp": 0
+      },
+      {
+        "level": 4,
+        "affinity": 660,
+        "sigils": 0,
+        "books": 0.018,
+        "xp": 0
+      },
+      {
+        "level": 5,
+        "affinity": 690,
+        "sigils": 0,
+        "books": 0.0188,
+        "xp": 0
+      },
+      {
+        "level": 6,
+        "affinity": 720,
+        "sigils": 0,
+        "books": 0.0195,
+        "xp": 0
+      },
+      {
+        "level": 7,
+        "affinity": 780,
+        "sigils": 0,
+        "books": 0.0203,
+        "xp": 0
+      },
+      {
+        "level": 8,
+        "affinity": 840,
+        "sigils": 0,
+        "books": 0.021,
+        "xp": 0
+      },
+      {
+        "level": 9,
+        "affinity": 900,
+        "sigils": 0,
+        "books": 0.0218,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 960,
+        "sigils": 0,
+        "books": 0.0225,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 0,
+        "sigils": 8,
+        "books": 0.0285,
+        "xp": 0.55
+      },
+      {
+        "level": 11,
+        "affinity": 1020,
+        "sigils": 0,
+        "books": 0.0293,
+        "xp": 0
+      },
+      {
+        "level": 12,
+        "affinity": 1080,
+        "sigils": 0,
+        "books": 0.03,
+        "xp": 0
+      },
+      {
+        "level": 13,
+        "affinity": 1140,
+        "sigils": 0,
+        "books": 0.0308,
+        "xp": 0
+      },
+      {
+        "level": 14,
+        "affinity": 1200,
+        "sigils": 0,
+        "books": 0.0315,
+        "xp": 0
+      },
+      {
+        "level": 15,
+        "affinity": 1260,
+        "sigils": 0,
+        "books": 0.0323,
+        "xp": 0
+      },
+      {
+        "level": 16,
+        "affinity": 1320,
+        "sigils": 0,
+        "books": 0.033,
+        "xp": 0
+      },
+      {
+        "level": 17,
+        "affinity": 1380,
+        "sigils": 0,
+        "books": 0.0338,
+        "xp": 0
+      },
+      {
+        "level": 18,
+        "affinity": 1440,
+        "sigils": 0,
+        "books": 0.0345,
+        "xp": 0
+      },
+      {
+        "level": 19,
+        "affinity": 1500,
+        "sigils": 0,
+        "books": 0.0353,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 1560,
+        "sigils": 0,
+        "books": 0.036,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 0,
+        "sigils": 16,
+        "books": 0.042,
+        "xp": 0.6
+      },
+      {
+        "level": 21,
+        "affinity": 1620,
+        "sigils": 0,
+        "books": 0.0428,
+        "xp": 0
+      },
+      {
+        "level": 22,
+        "affinity": 1680,
+        "sigils": 0,
+        "books": 0.0435,
+        "xp": 0
+      },
+      {
+        "level": 23,
+        "affinity": 1740,
+        "sigils": 0,
+        "books": 0.0443,
+        "xp": 0
+      },
+      {
+        "level": 24,
+        "affinity": 1800,
+        "sigils": 0,
+        "books": 0.045,
+        "xp": 0
+      },
+      {
+        "level": 25,
+        "affinity": 1860,
+        "sigils": 0,
+        "books": 0.0458,
+        "xp": 0
+      },
+      {
+        "level": 26,
+        "affinity": 1920,
+        "sigils": 0,
+        "books": 0.0465,
+        "xp": 0
+      },
+      {
+        "level": 27,
+        "affinity": 1980,
+        "sigils": 0,
+        "books": 0.0473,
+        "xp": 0
+      },
+      {
+        "level": 28,
+        "affinity": 2040,
+        "sigils": 0,
+        "books": 0.048,
+        "xp": 0
+      },
+      {
+        "level": 29,
+        "affinity": 2100,
+        "sigils": 0,
+        "books": 0.0488,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 2190,
+        "sigils": 0,
+        "books": 0.0495,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 0,
+        "sigils": 24,
+        "books": 0.055,
+        "xp": 0.65
+      },
+      {
+        "level": 31,
+        "affinity": 2280,
+        "sigils": 0,
+        "books": 0.0563,
+        "xp": 0
+      },
+      {
+        "level": 32,
+        "affinity": 2370,
+        "sigils": 0,
+        "books": 0.057,
+        "xp": 0
+      },
+      {
+        "level": 33,
+        "affinity": 2460,
+        "sigils": 0,
+        "books": 0.0578,
+        "xp": 0
+      },
+      {
+        "level": 34,
+        "affinity": 2550,
+        "sigils": 0,
+        "books": 0.0585,
+        "xp": 0
+      },
+      {
+        "level": 35,
+        "affinity": 2640,
+        "sigils": 0,
+        "books": 0.0593,
+        "xp": 0
+      },
+      {
+        "level": 36,
+        "affinity": 2730,
+        "sigils": 0,
+        "books": 0.06,
+        "xp": 0
+      },
+      {
+        "level": 37,
+        "affinity": 2820,
+        "sigils": 0,
+        "books": 0.0608,
+        "xp": 0
+      },
+      {
+        "level": 38,
+        "affinity": 2910,
+        "sigils": 0,
+        "books": 0.0615,
+        "xp": 0
+      },
+      {
+        "level": 39,
+        "affinity": 3000,
+        "sigils": 0,
+        "books": 0.0623,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 3120,
+        "sigils": 0,
+        "books": 0.063,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 0,
+        "sigils": 32,
+        "books": 0.069,
+        "xp": 0.7
+      },
+      {
+        "level": 41,
+        "affinity": 3240,
+        "sigils": 0,
+        "books": 0.0698,
+        "xp": 0
+      },
+      {
+        "level": 42,
+        "affinity": 3360,
+        "sigils": 0,
+        "books": 0.0705,
+        "xp": 0
+      },
+      {
+        "level": 43,
+        "affinity": 3480,
+        "sigils": 0,
+        "books": 0.0713,
+        "xp": 0
+      },
+      {
+        "level": 44,
+        "affinity": 3600,
+        "sigils": 0,
+        "books": 0.072,
+        "xp": 0
+      },
+      {
+        "level": 45,
+        "affinity": 3720,
+        "sigils": 0,
+        "books": 0.0728,
+        "xp": 0
+      },
+      {
+        "level": 46,
+        "affinity": 3840,
+        "sigils": 0,
+        "books": 0.0735,
+        "xp": 0
+      },
+      {
+        "level": 47,
+        "affinity": 3960,
+        "sigils": 0,
+        "books": 0.0743,
+        "xp": 0
+      },
+      {
+        "level": 48,
+        "affinity": 4080,
+        "sigils": 0,
+        "books": 0.075,
+        "xp": 0
+      },
+      {
+        "level": 49,
+        "affinity": 4200,
+        "sigils": 0,
+        "books": 0.0758,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 4350,
+        "sigils": 0,
+        "books": 0.0765,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 0,
+        "sigils": 40,
+        "books": 0.0825,
+        "xp": 0.75
+      },
+      {
+        "level": 51,
+        "affinity": 4500,
+        "sigils": 0,
+        "books": 0.0833,
+        "xp": 0
+      },
+      {
+        "level": 52,
+        "affinity": 4650,
+        "sigils": 0,
+        "books": 0.084,
+        "xp": 0
+      },
+      {
+        "level": 53,
+        "affinity": 4800,
+        "sigils": 0,
+        "books": 0.0848,
+        "xp": 0
+      },
+      {
+        "level": 54,
+        "affinity": 4950,
+        "sigils": 0,
+        "books": 0.0855,
+        "xp": 0
+      },
+      {
+        "level": 55,
+        "affinity": 5100,
+        "sigils": 0,
+        "books": 0.0863,
+        "xp": 0
+      },
+      {
+        "level": 56,
+        "affinity": 5250,
+        "sigils": 0,
+        "books": 0.087,
+        "xp": 0
+      },
+      {
+        "level": 57,
+        "affinity": 5400,
+        "sigils": 0,
+        "books": 0.0878,
+        "xp": 0
+      },
+      {
+        "level": 58,
+        "affinity": 5550,
+        "sigils": 0,
+        "books": 0.0885,
+        "xp": 0
+      },
+      {
+        "level": 59,
+        "affinity": 5700,
+        "sigils": 0,
+        "books": 0.0893,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 5850,
+        "sigils": 0,
+        "books": 0.09,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 0,
+        "sigils": 48,
+        "books": 0.096,
+        "xp": 0.8
+      },
+      {
+        "level": 61,
+        "affinity": 6000,
+        "sigils": 0,
+        "books": 0.0968,
+        "xp": 0
+      },
+      {
+        "level": 62,
+        "affinity": 6150,
+        "sigils": 0,
+        "books": 0.0975,
+        "xp": 0
+      },
+      {
+        "level": 63,
+        "affinity": 6300,
+        "sigils": 0,
+        "books": 0.0983,
+        "xp": 0
+      },
+      {
+        "level": 64,
+        "affinity": 6450,
+        "sigils": 0,
+        "books": 0.099,
+        "xp": 0
+      },
+      {
+        "level": 65,
+        "affinity": 6600,
+        "sigils": 0,
+        "books": 0.0998,
+        "xp": 0
+      },
+      {
+        "level": 66,
+        "affinity": 6750,
+        "sigils": 0,
+        "books": 0.1005,
+        "xp": 0
+      },
+      {
+        "level": 67,
+        "affinity": 6900,
+        "sigils": 0,
+        "books": 0.1013,
+        "xp": 0
+      },
+      {
+        "level": 68,
+        "affinity": 7050,
+        "sigils": 0,
+        "books": 0.102,
+        "xp": 0
+      },
+      {
+        "level": 69,
+        "affinity": 7200,
+        "sigils": 0,
+        "books": 0.1028,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 7350,
+        "sigils": 0,
+        "books": 0.1035,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 0,
+        "sigils": 56,
+        "books": 0.1095,
+        "xp": 0.85
+      },
+      {
+        "level": 71,
+        "affinity": 7500,
+        "sigils": 0,
+        "books": 0.1103,
+        "xp": 0
+      },
+      {
+        "level": 72,
+        "affinity": 7650,
+        "sigils": 0,
+        "books": 0.111,
+        "xp": 0
+      },
+      {
+        "level": 73,
+        "affinity": 7800,
+        "sigils": 0,
+        "books": 0.1118,
+        "xp": 0
+      },
+      {
+        "level": 74,
+        "affinity": 7950,
+        "sigils": 0,
+        "books": 0.1125,
+        "xp": 0
+      },
+      {
+        "level": 75,
+        "affinity": 8100,
+        "sigils": 0,
+        "books": 0.1133,
+        "xp": 0
+      },
+      {
+        "level": 76,
+        "affinity": 8250,
+        "sigils": 0,
+        "books": 0.114,
+        "xp": 0
+      },
+      {
+        "level": 77,
+        "affinity": 8400,
+        "sigils": 0,
+        "books": 0.1148,
+        "xp": 0
+      },
+      {
+        "level": 78,
+        "affinity": 8550,
+        "sigils": 0,
+        "books": 0.1155,
+        "xp": 0
+      },
+      {
+        "level": 79,
+        "affinity": 8700,
+        "sigils": 0,
+        "books": 0.1163,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 8850,
+        "sigils": 0,
+        "books": 0.117,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 0,
+        "sigils": 64,
+        "books": 0.123,
+        "xp": 0.9
+      },
+      {
+        "level": 81,
+        "affinity": 9000,
+        "sigils": 0,
+        "books": 0.1238,
+        "xp": 0
+      },
+      {
+        "level": 82,
+        "affinity": 9150,
+        "sigils": 0,
+        "books": 0.1245,
+        "xp": 0
+      },
+      {
+        "level": 83,
+        "affinity": 9300,
+        "sigils": 0,
+        "books": 0.1253,
+        "xp": 0
+      },
+      {
+        "level": 84,
+        "affinity": 9450,
+        "sigils": 0,
+        "books": 0.126,
+        "xp": 0
+      },
+      {
+        "level": 85,
+        "affinity": 9600,
+        "sigils": 0,
+        "books": 0.1268,
+        "xp": 0
+      },
+      {
+        "level": 86,
+        "affinity": 9750,
+        "sigils": 0,
+        "books": 0.1275,
+        "xp": 0
+      },
+      {
+        "level": 87,
+        "affinity": 9900,
+        "sigils": 0,
+        "books": 0.1283,
+        "xp": 0
+      },
+      {
+        "level": 88,
+        "affinity": 10050,
+        "sigils": 0,
+        "books": 0.129,
+        "xp": 0
+      },
+      {
+        "level": 89,
+        "affinity": 10200,
+        "sigils": 0,
+        "books": 0.1298,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 10350,
+        "sigils": 0,
+        "books": 0.1305,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 0,
+        "sigils": 72,
+        "books": 0.1365,
+        "xp": 0.95
+      },
+      {
+        "level": 91,
+        "affinity": 10500,
+        "sigils": 0,
+        "books": 0.1373,
+        "xp": 0
+      },
+      {
+        "level": 92,
+        "affinity": 10650,
+        "sigils": 0,
+        "books": 0.138,
+        "xp": 0
+      },
+      {
+        "level": 93,
+        "affinity": 10800,
+        "sigils": 0,
+        "books": 0.1388,
+        "xp": 0
+      },
+      {
+        "level": 94,
+        "affinity": 10950,
+        "sigils": 0,
+        "books": 0.1395,
+        "xp": 0
+      },
+      {
+        "level": 95,
+        "affinity": 11100,
+        "sigils": 0,
+        "books": 0.1403,
+        "xp": 0
+      },
+      {
+        "level": 96,
+        "affinity": 11250,
+        "sigils": 0,
+        "books": 0.141,
+        "xp": 0
+      },
+      {
+        "level": 97,
+        "affinity": 11400,
+        "sigils": 0,
+        "books": 0.1418,
+        "xp": 0
+      },
+      {
+        "level": 98,
+        "affinity": 11550,
+        "sigils": 0,
+        "books": 0.1425,
+        "xp": 0
+      },
+      {
+        "level": 99,
+        "affinity": 11700,
+        "sigils": 0,
+        "books": 0.1433,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 11850,
+        "sigils": 0,
+        "books": 0.144,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 0,
+        "sigils": 80,
+        "books": 0.15,
+        "xp": 1
+      }
+    ],
+    "Romulus": [
+      {
+        "level": 0,
+        "affinity": 0,
+        "sigils": 0,
+        "books": 0,
+        "xp": 0
+      },
+      {
+        "level": 1,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.021,
+        "xp": 300
+      },
+      {
+        "level": 2,
+        "affinity": 1100,
+        "sigils": 0,
+        "books": 0.022,
+        "xp": 0
+      },
+      {
+        "level": 3,
+        "affinity": 1160,
+        "sigils": 0,
+        "books": 0.023,
+        "xp": 0
+      },
+      {
+        "level": 4,
+        "affinity": 1210,
+        "sigils": 0,
+        "books": 0.024,
+        "xp": 0
+      },
+      {
+        "level": 5,
+        "affinity": 1270,
+        "sigils": 0,
+        "books": 0.025,
+        "xp": 0
+      },
+      {
+        "level": 6,
+        "affinity": 1320,
+        "sigils": 0,
+        "books": 0.026,
+        "xp": 0
+      },
+      {
+        "level": 7,
+        "affinity": 1430,
+        "sigils": 0,
+        "books": 0.027,
+        "xp": 0
+      },
+      {
+        "level": 8,
+        "affinity": 1540,
+        "sigils": 0,
+        "books": 0.028,
+        "xp": 0
+      },
+      {
+        "level": 9,
+        "affinity": 1650,
+        "sigils": 0,
+        "books": 0.029,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 1760,
+        "sigils": 0,
+        "books": 0.03,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 0,
+        "sigils": 20,
+        "books": 0.038,
+        "xp": 600
+      },
+      {
+        "level": 11,
+        "affinity": 1870,
+        "sigils": 0,
+        "books": 0.039,
+        "xp": 0
+      },
+      {
+        "level": 12,
+        "affinity": 1980,
+        "sigils": 0,
+        "books": 0.04,
+        "xp": 0
+      },
+      {
+        "level": 13,
+        "affinity": 2090,
+        "sigils": 0,
+        "books": 0.041,
+        "xp": 0
+      },
+      {
+        "level": 14,
+        "affinity": 2200,
+        "sigils": 0,
+        "books": 0.042,
+        "xp": 0
+      },
+      {
+        "level": 15,
+        "affinity": 2310,
+        "sigils": 0,
+        "books": 0.043,
+        "xp": 0
+      },
+      {
+        "level": 16,
+        "affinity": 2420,
+        "sigils": 0,
+        "books": 0.044,
+        "xp": 0
+      },
+      {
+        "level": 17,
+        "affinity": 2530,
+        "sigils": 0,
+        "books": 0.045,
+        "xp": 0
+      },
+      {
+        "level": 18,
+        "affinity": 2640,
+        "sigils": 0,
+        "books": 0.046,
+        "xp": 0
+      },
+      {
+        "level": 19,
+        "affinity": 2750,
+        "sigils": 0,
+        "books": 0.047,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 2860,
+        "sigils": 0,
+        "books": 0.048,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 0,
+        "sigils": 40,
+        "books": 0.056,
+        "xp": 1000
+      },
+      {
+        "level": 21,
+        "affinity": 2970,
+        "sigils": 0,
+        "books": 0.057,
+        "xp": 0
+      },
+      {
+        "level": 22,
+        "affinity": 3080,
+        "sigils": 0,
+        "books": 0.058,
+        "xp": 0
+      },
+      {
+        "level": 23,
+        "affinity": 3190,
+        "sigils": 0,
+        "books": 0.059,
+        "xp": 0
+      },
+      {
+        "level": 24,
+        "affinity": 3300,
+        "sigils": 0,
+        "books": 0.06,
+        "xp": 0
+      },
+      {
+        "level": 25,
+        "affinity": 3520,
+        "sigils": 0,
+        "books": 0.061,
+        "xp": 0
+      },
+      {
+        "level": 26,
+        "affinity": 3620,
+        "sigils": 0,
+        "books": 0.062,
+        "xp": 0
+      },
+      {
+        "level": 27,
+        "affinity": 3720,
+        "sigils": 0,
+        "books": 0.063,
+        "xp": 0
+      },
+      {
+        "level": 28,
+        "affinity": 3820,
+        "sigils": 0,
+        "books": 0.064,
+        "xp": 0
+      },
+      {
+        "level": 29,
+        "affinity": 3920,
+        "sigils": 0,
+        "books": 0.065,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 4020,
+        "sigils": 0,
+        "books": 0.066,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 0,
+        "sigils": 80,
+        "books": 0.074,
+        "xp": 1500
+      },
+      {
+        "level": 31,
+        "affinity": 4180,
+        "sigils": 0,
+        "books": 0.075,
+        "xp": 0
+      },
+      {
+        "level": 32,
+        "affinity": 4350,
+        "sigils": 0,
+        "books": 0.076,
+        "xp": 0
+      },
+      {
+        "level": 33,
+        "affinity": 4510,
+        "sigils": 0,
+        "books": 0.077,
+        "xp": 0
+      },
+      {
+        "level": 34,
+        "affinity": 4680,
+        "sigils": 0,
+        "books": 0.078,
+        "xp": 0
+      },
+      {
+        "level": 35,
+        "affinity": 4840,
+        "sigils": 0,
+        "books": 0.079,
+        "xp": 0
+      },
+      {
+        "level": 36,
+        "affinity": 5000,
+        "sigils": 0,
+        "books": 0.08,
+        "xp": 0
+      },
+      {
+        "level": 37,
+        "affinity": 5170,
+        "sigils": 0,
+        "books": 0.081,
+        "xp": 0
+      },
+      {
+        "level": 38,
+        "affinity": 5330,
+        "sigils": 0,
+        "books": 0.082,
+        "xp": 0
+      },
+      {
+        "level": 39,
+        "affinity": 5500,
+        "sigils": 0,
+        "books": 0.083,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 5720,
+        "sigils": 0,
+        "books": 0.084,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 0,
+        "sigils": 120,
+        "books": 0.092,
+        "xp": 2000
+      },
+      {
+        "level": 41,
+        "affinity": 5940,
+        "sigils": 0,
+        "books": 0.093,
+        "xp": 0
+      },
+      {
+        "level": 42,
+        "affinity": 6160,
+        "sigils": 0,
+        "books": 0.094,
+        "xp": 0
+      },
+      {
+        "level": 43,
+        "affinity": 6380,
+        "sigils": 0,
+        "books": 0.095,
+        "xp": 0
+      },
+      {
+        "level": 44,
+        "affinity": 6600,
+        "sigils": 0,
+        "books": 0.096,
+        "xp": 0
+      },
+      {
+        "level": 45,
+        "affinity": 6820,
+        "sigils": 0,
+        "books": 0.097,
+        "xp": 0
+      },
+      {
+        "level": 46,
+        "affinity": 7040,
+        "sigils": 0,
+        "books": 0.098,
+        "xp": 0
+      },
+      {
+        "level": 47,
+        "affinity": 7260,
+        "sigils": 0,
+        "books": 0.099,
+        "xp": 0
+      },
+      {
+        "level": 48,
+        "affinity": 7480,
+        "sigils": 0,
+        "books": 0.1,
+        "xp": 0
+      },
+      {
+        "level": 49,
+        "affinity": 7700,
+        "sigils": 0,
+        "books": 0.101,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 7980,
+        "sigils": 0,
+        "books": 0.102,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 0,
+        "sigils": 160,
+        "books": 0.11,
+        "xp": 3000
+      },
+      {
+        "level": 51,
+        "affinity": 8250,
+        "sigils": 0,
+        "books": 0.111,
+        "xp": 0
+      },
+      {
+        "level": 52,
+        "affinity": 8530,
+        "sigils": 0,
+        "books": 0.112,
+        "xp": 0
+      },
+      {
+        "level": 53,
+        "affinity": 8800,
+        "sigils": 0,
+        "books": 0.113,
+        "xp": 0
+      },
+      {
+        "level": 54,
+        "affinity": 9080,
+        "sigils": 0,
+        "books": 0.114,
+        "xp": 0
+      },
+      {
+        "level": 55,
+        "affinity": 9350,
+        "sigils": 0,
+        "books": 0.115,
+        "xp": 0
+      },
+      {
+        "level": 56,
+        "affinity": 9630,
+        "sigils": 0,
+        "books": 0.116,
+        "xp": 0
+      },
+      {
+        "level": 57,
+        "affinity": 9900,
+        "sigils": 0,
+        "books": 0.117,
+        "xp": 0
+      },
+      {
+        "level": 58,
+        "affinity": 10180,
+        "sigils": 0,
+        "books": 0.118,
+        "xp": 0
+      },
+      {
+        "level": 59,
+        "affinity": 10450,
+        "sigils": 0,
+        "books": 0.119,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 10730,
+        "sigils": 0,
+        "books": 0.12,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 0,
+        "sigils": 200,
+        "books": 0.128,
+        "xp": 4000
+      },
+      {
+        "level": 61,
+        "affinity": 11000,
+        "sigils": 0,
+        "books": 0.129,
+        "xp": 0
+      },
+      {
+        "level": 62,
+        "affinity": 11280,
+        "sigils": 0,
+        "books": 0.13,
+        "xp": 0
+      },
+      {
+        "level": 63,
+        "affinity": 11560,
+        "sigils": 0,
+        "books": 0.131,
+        "xp": 0
+      },
+      {
+        "level": 64,
+        "affinity": 11830,
+        "sigils": 0,
+        "books": 0.132,
+        "xp": 0
+      },
+      {
+        "level": 65,
+        "affinity": 12110,
+        "sigils": 0,
+        "books": 0.133,
+        "xp": 0
+      },
+      {
+        "level": 66,
+        "affinity": 12380,
+        "sigils": 0,
+        "books": 0.134,
+        "xp": 0
+      },
+      {
+        "level": 67,
+        "affinity": 12660,
+        "sigils": 0,
+        "books": 0.135,
+        "xp": 0
+      },
+      {
+        "level": 68,
+        "affinity": 12930,
+        "sigils": 0,
+        "books": 0.136,
+        "xp": 0
+      },
+      {
+        "level": 69,
+        "affinity": 13210,
+        "sigils": 0,
+        "books": 0.137,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 13480,
+        "sigils": 0,
+        "books": 0.138,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 0,
+        "sigils": 240,
+        "books": 0.146,
+        "xp": 5500
+      },
+      {
+        "level": 71,
+        "affinity": 13750,
+        "sigils": 0,
+        "books": 0.147,
+        "xp": 0
+      },
+      {
+        "level": 72,
+        "affinity": 14030,
+        "sigils": 0,
+        "books": 0.148,
+        "xp": 0
+      },
+      {
+        "level": 73,
+        "affinity": 14300,
+        "sigils": 0,
+        "books": 0.149,
+        "xp": 0
+      },
+      {
+        "level": 74,
+        "affinity": 14580,
+        "sigils": 0,
+        "books": 0.15,
+        "xp": 0
+      },
+      {
+        "level": 75,
+        "affinity": 14850,
+        "sigils": 0,
+        "books": 0.151,
+        "xp": 0
+      },
+      {
+        "level": 76,
+        "affinity": 15130,
+        "sigils": 0,
+        "books": 0.152,
+        "xp": 0
+      },
+      {
+        "level": 77,
+        "affinity": 15400,
+        "sigils": 0,
+        "books": 0.153,
+        "xp": 0
+      },
+      {
+        "level": 78,
+        "affinity": 15680,
+        "sigils": 0,
+        "books": 0.154,
+        "xp": 0
+      },
+      {
+        "level": 79,
+        "affinity": 15950,
+        "sigils": 0,
+        "books": 0.155,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 16230,
+        "sigils": 0,
+        "books": 0.156,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 0,
+        "sigils": 280,
+        "books": 0.164,
+        "xp": 7000
+      },
+      {
+        "level": 81,
+        "affinity": 16500,
+        "sigils": 0,
+        "books": 0.165,
+        "xp": 0
+      },
+      {
+        "level": 82,
+        "affinity": 16780,
+        "sigils": 0,
+        "books": 0.166,
+        "xp": 0
+      },
+      {
+        "level": 83,
+        "affinity": 17050,
+        "sigils": 0,
+        "books": 0.167,
+        "xp": 0
+      },
+      {
+        "level": 84,
+        "affinity": 17330,
+        "sigils": 0,
+        "books": 0.168,
+        "xp": 0
+      },
+      {
+        "level": 85,
+        "affinity": 17600,
+        "sigils": 0,
+        "books": 0.169,
+        "xp": 0
+      },
+      {
+        "level": 86,
+        "affinity": 17880,
+        "sigils": 0,
+        "books": 0.17,
+        "xp": 0
+      },
+      {
+        "level": 87,
+        "affinity": 18150,
+        "sigils": 0,
+        "books": 0.171,
+        "xp": 0
+      },
+      {
+        "level": 88,
+        "affinity": 18430,
+        "sigils": 0,
+        "books": 0.172,
+        "xp": 0
+      },
+      {
+        "level": 89,
+        "affinity": 18700,
+        "sigils": 0,
+        "books": 0.173,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 18980,
+        "sigils": 0,
+        "books": 0.174,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 0,
+        "sigils": 320,
+        "books": 0.182,
+        "xp": 8500
+      },
+      {
+        "level": 91,
+        "affinity": 19250,
+        "sigils": 0,
+        "books": 0.183,
+        "xp": 0
+      },
+      {
+        "level": 92,
+        "affinity": 19530,
+        "sigils": 0,
+        "books": 0.184,
+        "xp": 0
+      },
+      {
+        "level": 93,
+        "affinity": 19800,
+        "sigils": 0,
+        "books": 0.185,
+        "xp": 0
+      },
+      {
+        "level": 94,
+        "affinity": 20080,
+        "sigils": 0,
+        "books": 0.186,
+        "xp": 0
+      },
+      {
+        "level": 95,
+        "affinity": 20350,
+        "sigils": 0,
+        "books": 0.187,
+        "xp": 0
+      },
+      {
+        "level": 96,
+        "affinity": 20630,
+        "sigils": 0,
+        "books": 0.188,
+        "xp": 0
+      },
+      {
+        "level": 97,
+        "affinity": 20900,
+        "sigils": 0,
+        "books": 0.189,
+        "xp": 0
+      },
+      {
+        "level": 98,
+        "affinity": 21180,
+        "sigils": 0,
+        "books": 0.19,
+        "xp": 0
+      },
+      {
+        "level": 99,
+        "affinity": 21450,
+        "sigils": 0,
+        "books": 0.191,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 21730,
+        "sigils": 0,
+        "books": 0.192,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 0,
+        "sigils": 360,
+        "books": 0.2,
+        "xp": 10000
+      }
+    ],
+    "Fabian": [
+      {
+        "level": 0,
+        "affinity": 0,
+        "sigils": 0,
+        "books": 0,
+        "xp": 0
+      },
+      {
+        "level": 1,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.0158,
+        "xp": 0.02
+      },
+      {
+        "level": 2,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.0165,
+        "xp": 0
+      },
+      {
+        "level": 3,
+        "affinity": 1050,
+        "sigils": 0,
+        "books": 0.0173,
+        "xp": 0
+      },
+      {
+        "level": 4,
+        "affinity": 1100,
+        "sigils": 0,
+        "books": 0.018,
+        "xp": 0
+      },
+      {
+        "level": 5,
+        "affinity": 1150,
+        "sigils": 0,
+        "books": 0.0188,
+        "xp": 0
+      },
+      {
+        "level": 6,
+        "affinity": 1200,
+        "sigils": 0,
+        "books": 0.0195,
+        "xp": 0
+      },
+      {
+        "level": 7,
+        "affinity": 1300,
+        "sigils": 0,
+        "books": 0.0203,
+        "xp": 0
+      },
+      {
+        "level": 8,
+        "affinity": 1400,
+        "sigils": 0,
+        "books": 0.021,
+        "xp": 0
+      },
+      {
+        "level": 9,
+        "affinity": 1500,
+        "sigils": 0,
+        "books": 0.0218,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 1600,
+        "sigils": 0,
+        "books": 0.0225,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 0,
+        "sigils": 12,
+        "books": 0.0285,
+        "xp": 0.04
+      },
+      {
+        "level": 11,
+        "affinity": 1700,
+        "sigils": 0,
+        "books": 0.0293,
+        "xp": 0
+      },
+      {
+        "level": 12,
+        "affinity": 1800,
+        "sigils": 0,
+        "books": 0.03,
+        "xp": 0
+      },
+      {
+        "level": 13,
+        "affinity": 1900,
+        "sigils": 0,
+        "books": 0.0308,
+        "xp": 0
+      },
+      {
+        "level": 14,
+        "affinity": 2000,
+        "sigils": 0,
+        "books": 0.0315,
+        "xp": 0
+      },
+      {
+        "level": 15,
+        "affinity": 2100,
+        "sigils": 0,
+        "books": 0.0323,
+        "xp": 0
+      },
+      {
+        "level": 16,
+        "affinity": 2200,
+        "sigils": 0,
+        "books": 0.033,
+        "xp": 0
+      },
+      {
+        "level": 17,
+        "affinity": 2300,
+        "sigils": 0,
+        "books": 0.0338,
+        "xp": 0
+      },
+      {
+        "level": 18,
+        "affinity": 2400,
+        "sigils": 0,
+        "books": 0.0345,
+        "xp": 0
+      },
+      {
+        "level": 19,
+        "affinity": 5600,
+        "sigils": 0,
+        "books": 0.0353,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 2600,
+        "sigils": 0,
+        "books": 0.036,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 0,
+        "sigils": 24,
+        "books": 0.042,
+        "xp": 0.06
+      },
+      {
+        "level": 21,
+        "affinity": 2700,
+        "sigils": 0,
+        "books": 0.0428,
+        "xp": 0
+      },
+      {
+        "level": 22,
+        "affinity": 2800,
+        "sigils": 0,
+        "books": 0.0435,
+        "xp": 0
+      },
+      {
+        "level": 23,
+        "affinity": 2900,
+        "sigils": 0,
+        "books": 0.0443,
+        "xp": 0
+      },
+      {
+        "level": 24,
+        "affinity": 3000,
+        "sigils": 0,
+        "books": 0.045,
+        "xp": 0
+      },
+      {
+        "level": 25,
+        "affinity": 3100,
+        "sigils": 0,
+        "books": 0.0458,
+        "xp": 0
+      },
+      {
+        "level": 26,
+        "affinity": 3200,
+        "sigils": 0,
+        "books": 0.0465,
+        "xp": 0
+      },
+      {
+        "level": 27,
+        "affinity": 3300,
+        "sigils": 0,
+        "books": 0.0473,
+        "xp": 0
+      },
+      {
+        "level": 28,
+        "affinity": 3400,
+        "sigils": 0,
+        "books": 0.048,
+        "xp": 0
+      },
+      {
+        "level": 29,
+        "affinity": 3500,
+        "sigils": 0,
+        "books": 0.0488,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 3650,
+        "sigils": 0,
+        "books": 0.0495,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 0,
+        "sigils": 36,
+        "books": 0.0555,
+        "xp": 0.09
+      },
+      {
+        "level": 31,
+        "affinity": 3800,
+        "sigils": 0,
+        "books": 0.0563,
+        "xp": 0
+      },
+      {
+        "level": 32,
+        "affinity": 3950,
+        "sigils": 0,
+        "books": 0.057,
+        "xp": 0
+      },
+      {
+        "level": 33,
+        "affinity": 4100,
+        "sigils": 0,
+        "books": 0.0578,
+        "xp": 0
+      },
+      {
+        "level": 34,
+        "affinity": 4250,
+        "sigils": 0,
+        "books": 0.0585,
+        "xp": 0
+      },
+      {
+        "level": 35,
+        "affinity": 4400,
+        "sigils": 0,
+        "books": 0.0593,
+        "xp": 0
+      },
+      {
+        "level": 36,
+        "affinity": 4550,
+        "sigils": 0,
+        "books": 0.06,
+        "xp": 0
+      },
+      {
+        "level": 37,
+        "affinity": 4700,
+        "sigils": 0,
+        "books": 0.0608,
+        "xp": 0
+      },
+      {
+        "level": 38,
+        "affinity": 4850,
+        "sigils": 0,
+        "books": 0.0615,
+        "xp": 0
+      },
+      {
+        "level": 39,
+        "affinity": 5000,
+        "sigils": 0,
+        "books": 0.0623,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 5200,
+        "sigils": 0,
+        "books": 0.063,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 0,
+        "sigils": 48,
+        "books": 0.069,
+        "xp": 0.12
+      },
+      {
+        "level": 41,
+        "affinity": 5400,
+        "sigils": 0,
+        "books": 0.0698,
+        "xp": 0
+      },
+      {
+        "level": 42,
+        "affinity": 5600,
+        "sigils": 0,
+        "books": 0.0705,
+        "xp": 0
+      },
+      {
+        "level": 43,
+        "affinity": 5800,
+        "sigils": 0,
+        "books": 0.0713,
+        "xp": 0
+      },
+      {
+        "level": 44,
+        "affinity": 6000,
+        "sigils": 0,
+        "books": 0.072,
+        "xp": 0
+      },
+      {
+        "level": 45,
+        "affinity": 6200,
+        "sigils": 0,
+        "books": 0.0728,
+        "xp": 0
+      },
+      {
+        "level": 46,
+        "affinity": 6400,
+        "sigils": 0,
+        "books": 0.0735,
+        "xp": 0
+      },
+      {
+        "level": 47,
+        "affinity": 6600,
+        "sigils": 0,
+        "books": 0.0743,
+        "xp": 0
+      },
+      {
+        "level": 48,
+        "affinity": 6800,
+        "sigils": 0,
+        "books": 0.045,
+        "xp": 0
+      },
+      {
+        "level": 49,
+        "affinity": 7000,
+        "sigils": 0,
+        "books": 0.0758,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 7250,
+        "sigils": 0,
+        "books": 0.0765,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 0,
+        "sigils": 60,
+        "books": 0.0825,
+        "xp": 0.15
+      },
+      {
+        "level": 51,
+        "affinity": 7500,
+        "sigils": 0,
+        "books": 0.0832,
+        "xp": 0
+      },
+      {
+        "level": 52,
+        "affinity": 7750,
+        "sigils": 0,
+        "books": 0.084,
+        "xp": 0
+      },
+      {
+        "level": 53,
+        "affinity": 8000,
+        "sigils": 0,
+        "books": 0.0848,
+        "xp": 0
+      },
+      {
+        "level": 54,
+        "affinity": 8250,
+        "sigils": 0,
+        "books": 0.0855,
+        "xp": 0
+      },
+      {
+        "level": 55,
+        "affinity": 8500,
+        "sigils": 0,
+        "books": 0.0863,
+        "xp": 0
+      },
+      {
+        "level": 56,
+        "affinity": 8750,
+        "sigils": 0,
+        "books": 0.087,
+        "xp": 0
+      },
+      {
+        "level": 57,
+        "affinity": 9000,
+        "sigils": 0,
+        "books": 0.0878,
+        "xp": 0
+      },
+      {
+        "level": 58,
+        "affinity": 9250,
+        "sigils": 0,
+        "books": 0.0885,
+        "xp": 0
+      },
+      {
+        "level": 59,
+        "affinity": 9500,
+        "sigils": 0,
+        "books": 0.0892,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 9750,
+        "sigils": 0,
+        "books": 0.09,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 0,
+        "sigils": 72,
+        "books": 0.096,
+        "xp": 0.18
+      },
+      {
+        "level": 61,
+        "affinity": 10000,
+        "sigils": 0,
+        "books": 0.0967,
+        "xp": 0
+      },
+      {
+        "level": 62,
+        "affinity": 10250,
+        "sigils": 0,
+        "books": 0.0975,
+        "xp": 0
+      },
+      {
+        "level": 63,
+        "affinity": 10500,
+        "sigils": 0,
+        "books": 0.0982,
+        "xp": 0
+      },
+      {
+        "level": 64,
+        "affinity": 10750,
+        "sigils": 0,
+        "books": 0.099,
+        "xp": 0
+      },
+      {
+        "level": 65,
+        "affinity": 11000,
+        "sigils": 0,
+        "books": 0.0997,
+        "xp": 0
+      },
+      {
+        "level": 66,
+        "affinity": 11250,
+        "sigils": 0,
+        "books": 0.1005,
+        "xp": 0
+      },
+      {
+        "level": 67,
+        "affinity": 11500,
+        "sigils": 0,
+        "books": 0.1012,
+        "xp": 0
+      },
+      {
+        "level": 68,
+        "affinity": 11750,
+        "sigils": 0,
+        "books": 0.102,
+        "xp": 0
+      },
+      {
+        "level": 69,
+        "affinity": 12000,
+        "sigils": 0,
+        "books": 0.1027,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 12250,
+        "sigils": 0,
+        "books": 0.1035,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 0,
+        "sigils": 84,
+        "books": 0.1095,
+        "xp": 0.21
+      },
+      {
+        "level": 71,
+        "affinity": 12500,
+        "sigils": 0,
+        "books": 0.1102,
+        "xp": 0
+      },
+      {
+        "level": 72,
+        "affinity": 12750,
+        "sigils": 0,
+        "books": 0.111,
+        "xp": 0
+      },
+      {
+        "level": 73,
+        "affinity": 13000,
+        "sigils": 0,
+        "books": 0.1117,
+        "xp": 0
+      },
+      {
+        "level": 74,
+        "affinity": 13250,
+        "sigils": 0,
+        "books": 0.1125,
+        "xp": 0
+      },
+      {
+        "level": 75,
+        "affinity": 13500,
+        "sigils": 0,
+        "books": 0.1132,
+        "xp": 0
+      },
+      {
+        "level": 76,
+        "affinity": 13750,
+        "sigils": 0,
+        "books": 0.114,
+        "xp": 0
+      },
+      {
+        "level": 77,
+        "affinity": 14000,
+        "sigils": 0,
+        "books": 0.1147,
+        "xp": 0
+      },
+      {
+        "level": 78,
+        "affinity": 14250,
+        "sigils": 0,
+        "books": 0.1155,
+        "xp": 0
+      },
+      {
+        "level": 79,
+        "affinity": 14500,
+        "sigils": 0,
+        "books": 0.1162,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 14750,
+        "sigils": 0,
+        "books": 0.117,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 0,
+        "sigils": 96,
+        "books": 0.123,
+        "xp": 0.24
+      },
+      {
+        "level": 81,
+        "affinity": 15000,
+        "sigils": 0,
+        "books": 0.1237,
+        "xp": 0
+      },
+      {
+        "level": 82,
+        "affinity": 15250,
+        "sigils": 0,
+        "books": 0.1245,
+        "xp": 0
+      },
+      {
+        "level": 83,
+        "affinity": 15500,
+        "sigils": 0,
+        "books": 0.1252,
+        "xp": 0
+      },
+      {
+        "level": 84,
+        "affinity": 15750,
+        "sigils": 0,
+        "books": 0.126,
+        "xp": 0
+      },
+      {
+        "level": 85,
+        "affinity": 16000,
+        "sigils": 0,
+        "books": 0.1267,
+        "xp": 0
+      },
+      {
+        "level": 86,
+        "affinity": 16250,
+        "sigils": 0,
+        "books": 0.1275,
+        "xp": 0
+      },
+      {
+        "level": 87,
+        "affinity": 16500,
+        "sigils": 0,
+        "books": 0.1283,
+        "xp": 0
+      },
+      {
+        "level": 88,
+        "affinity": 16750,
+        "sigils": 0,
+        "books": 0.129,
+        "xp": 0
+      },
+      {
+        "level": 89,
+        "affinity": 17000,
+        "sigils": 0,
+        "books": 0.1297,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 17250,
+        "sigils": 0,
+        "books": 0.1305,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 0,
+        "sigils": 108,
+        "books": 0.1365,
+        "xp": 0.27
+      },
+      {
+        "level": 91,
+        "affinity": 17500,
+        "sigils": 0,
+        "books": 0.1372,
+        "xp": 0
+      },
+      {
+        "level": 92,
+        "affinity": 17750,
+        "sigils": 0,
+        "books": 0.138,
+        "xp": 0
+      },
+      {
+        "level": 93,
+        "affinity": 18000,
+        "sigils": 0,
+        "books": 0.1387,
+        "xp": 0
+      },
+      {
+        "level": 94,
+        "affinity": 18250,
+        "sigils": 0,
+        "books": 0.1395,
+        "xp": 0
+      },
+      {
+        "level": 95,
+        "affinity": 18500,
+        "sigils": 0,
+        "books": 0.1402,
+        "xp": 0
+      },
+      {
+        "level": 96,
+        "affinity": 18750,
+        "sigils": 0,
+        "books": 0.141,
+        "xp": 0
+      },
+      {
+        "level": 97,
+        "affinity": 19000,
+        "sigils": 0,
+        "books": 0.1417,
+        "xp": 0
+      },
+      {
+        "level": 98,
+        "affinity": 19250,
+        "sigils": 0,
+        "books": 0.1425,
+        "xp": 0
+      },
+      {
+        "level": 99,
+        "affinity": 19500,
+        "sigils": 0,
+        "books": 0.1432,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 19750,
+        "sigils": 0,
+        "books": 0.144,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 0,
+        "sigils": 120,
+        "books": 0.15,
+        "xp": 0.3
+      }
+    ],
+    "Baldur": [
+      {
+        "level": 0,
+        "affinity": 0,
+        "sigils": 0,
+        "books": 0,
+        "xp": 0
+      },
+      {
+        "level": 1,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.0105,
+        "xp": 0.05
+      },
+      {
+        "level": 2,
+        "affinity": 400,
+        "sigils": 0,
+        "books": 0.011,
+        "xp": 0
+      },
+      {
+        "level": 3,
+        "affinity": 420,
+        "sigils": 0,
+        "books": 0.0115,
+        "xp": 0
+      },
+      {
+        "level": 4,
+        "affinity": 440,
+        "sigils": 0,
+        "books": 0.012,
+        "xp": 0
+      },
+      {
+        "level": 5,
+        "affinity": 460,
+        "sigils": 0,
+        "books": 0.0125,
+        "xp": 0
+      },
+      {
+        "level": 6,
+        "affinity": 480,
+        "sigils": 0,
+        "books": 0.013,
+        "xp": 0
+      },
+      {
+        "level": 7,
+        "affinity": 520,
+        "sigils": 0,
+        "books": 0.0135,
+        "xp": 0
+      },
+      {
+        "level": 8,
+        "affinity": 560,
+        "sigils": 0,
+        "books": 0.014,
+        "xp": 0
+      },
+      {
+        "level": 9,
+        "affinity": 600,
+        "sigils": 0,
+        "books": 0.0145,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 640,
+        "sigils": 0,
+        "books": 0.015,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 0,
+        "sigils": 6,
+        "books": 0.019,
+        "xp": 0.05
+      },
+      {
+        "level": 11,
+        "affinity": 680,
+        "sigils": 0,
+        "books": 0.0195,
+        "xp": 0
+      },
+      {
+        "level": 12,
+        "affinity": 720,
+        "sigils": 0,
+        "books": 0.02,
+        "xp": 0
+      },
+      {
+        "level": 13,
+        "affinity": 760,
+        "sigils": 0,
+        "books": 0.0205,
+        "xp": 0
+      },
+      {
+        "level": 14,
+        "affinity": 800,
+        "sigils": 0,
+        "books": 0.021,
+        "xp": 0
+      },
+      {
+        "level": 15,
+        "affinity": 840,
+        "sigils": 0,
+        "books": 0.0215,
+        "xp": 0
+      },
+      {
+        "level": 16,
+        "affinity": 880,
+        "sigils": 0,
+        "books": 0.022,
+        "xp": 0
+      },
+      {
+        "level": 17,
+        "affinity": 920,
+        "sigils": 0,
+        "books": 0.0225,
+        "xp": 0
+      },
+      {
+        "level": 18,
+        "affinity": 960,
+        "sigils": 0,
+        "books": 0.023,
+        "xp": 0
+      },
+      {
+        "level": 19,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.0235,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 1040,
+        "sigils": 0,
+        "books": 0.024,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 0,
+        "sigils": 12,
+        "books": 0.028,
+        "xp": 0.05
+      },
+      {
+        "level": 21,
+        "affinity": 1080,
+        "sigils": 0,
+        "books": 0.0285,
+        "xp": 0
+      },
+      {
+        "level": 22,
+        "affinity": 1120,
+        "sigils": 0,
+        "books": 0.029,
+        "xp": 0
+      },
+      {
+        "level": 23,
+        "affinity": 1160,
+        "sigils": 0,
+        "books": 0.0295,
+        "xp": 0
+      },
+      {
+        "level": 24,
+        "affinity": 1200,
+        "sigils": 0,
+        "books": 0.03,
+        "xp": 0
+      },
+      {
+        "level": 25,
+        "affinity": 1240,
+        "sigils": 0,
+        "books": 0.0305,
+        "xp": 0
+      },
+      {
+        "level": 26,
+        "affinity": 1284,
+        "sigils": 0,
+        "books": 0.031,
+        "xp": 0
+      },
+      {
+        "level": 27,
+        "affinity": 1320,
+        "sigils": 0,
+        "books": 0.0315,
+        "xp": 0
+      },
+      {
+        "level": 28,
+        "affinity": 1360,
+        "sigils": 0,
+        "books": 0.032,
+        "xp": 0
+      },
+      {
+        "level": 29,
+        "affinity": 1400,
+        "sigils": 0,
+        "books": 0.0325,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 1460,
+        "sigils": 0,
+        "books": 0.033,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 0,
+        "sigils": 18,
+        "books": 0.037,
+        "xp": 0.05
+      },
+      {
+        "level": 31,
+        "affinity": 1520,
+        "sigils": 0,
+        "books": 0.0375,
+        "xp": 0
+      },
+      {
+        "level": 32,
+        "affinity": 1580,
+        "sigils": 0,
+        "books": 0.038,
+        "xp": 0
+      },
+      {
+        "level": 33,
+        "affinity": 1640,
+        "sigils": 0,
+        "books": 0.0385,
+        "xp": 0
+      },
+      {
+        "level": 34,
+        "affinity": 1700,
+        "sigils": 0,
+        "books": 0.039,
+        "xp": 0
+      },
+      {
+        "level": 35,
+        "affinity": 1760,
+        "sigils": 0,
+        "books": 0.0395,
+        "xp": 0
+      },
+      {
+        "level": 36,
+        "affinity": 1820,
+        "sigils": 0,
+        "books": 0.04,
+        "xp": 0
+      },
+      {
+        "level": 37,
+        "affinity": 1880,
+        "sigils": 0,
+        "books": 0.0405,
+        "xp": 0
+      },
+      {
+        "level": 38,
+        "affinity": 1940,
+        "sigils": 0,
+        "books": 0.041,
+        "xp": 0
+      },
+      {
+        "level": 39,
+        "affinity": 2000,
+        "sigils": 0,
+        "books": 0.0415,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 2080,
+        "sigils": 0,
+        "books": 0.042,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 0,
+        "sigils": 24,
+        "books": 0.046,
+        "xp": 0.05
+      },
+      {
+        "level": 41,
+        "affinity": 2160,
+        "sigils": 0,
+        "books": 0.0465,
+        "xp": 0
+      },
+      {
+        "level": 42,
+        "affinity": 2240,
+        "sigils": 0,
+        "books": 0.047,
+        "xp": 0
+      },
+      {
+        "level": 43,
+        "affinity": 2320,
+        "sigils": 0,
+        "books": 0.0475,
+        "xp": 0
+      },
+      {
+        "level": 44,
+        "affinity": 2400,
+        "sigils": 0,
+        "books": 0.048,
+        "xp": 0
+      },
+      {
+        "level": 45,
+        "affinity": 2480,
+        "sigils": 0,
+        "books": 0.0485,
+        "xp": 0
+      },
+      {
+        "level": 46,
+        "affinity": 2560,
+        "sigils": 0,
+        "books": 0.049,
+        "xp": 0
+      },
+      {
+        "level": 47,
+        "affinity": 2640,
+        "sigils": 0,
+        "books": 0.0495,
+        "xp": 0
+      },
+      {
+        "level": 48,
+        "affinity": 2720,
+        "sigils": 0,
+        "books": 0.05,
+        "xp": 0
+      },
+      {
+        "level": 49,
+        "affinity": 2800,
+        "sigils": 0,
+        "books": 0.0505,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 2900,
+        "sigils": 0,
+        "books": 0.051,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 0,
+        "sigils": 30,
+        "books": 0.055,
+        "xp": 0.1
+      },
+      {
+        "level": 51,
+        "affinity": 3000,
+        "sigils": 0,
+        "books": 0.0555,
+        "xp": 0
+      },
+      {
+        "level": 52,
+        "affinity": 3100,
+        "sigils": 0,
+        "books": 0.056,
+        "xp": 0
+      },
+      {
+        "level": 53,
+        "affinity": 3200,
+        "sigils": 0,
+        "books": 0.0565,
+        "xp": 0
+      },
+      {
+        "level": 54,
+        "affinity": 3300,
+        "sigils": 0,
+        "books": 0.057,
+        "xp": 0
+      },
+      {
+        "level": 55,
+        "affinity": 3400,
+        "sigils": 0,
+        "books": 0.0575,
+        "xp": 0
+      },
+      {
+        "level": 56,
+        "affinity": 3500,
+        "sigils": 0,
+        "books": 0.058,
+        "xp": 0
+      },
+      {
+        "level": 57,
+        "affinity": 3600,
+        "sigils": 0,
+        "books": 0.0585,
+        "xp": 0
+      },
+      {
+        "level": 58,
+        "affinity": 3700,
+        "sigils": 0,
+        "books": 0.059,
+        "xp": 0
+      },
+      {
+        "level": 59,
+        "affinity": 3800,
+        "sigils": 0,
+        "books": 0.0595,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 3900,
+        "sigils": 0,
+        "books": 0.06,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 0,
+        "sigils": 36,
+        "books": 0.064,
+        "xp": 0.1
+      },
+      {
+        "level": 61,
+        "affinity": 4000,
+        "sigils": 0,
+        "books": 0.0645,
+        "xp": 0
+      },
+      {
+        "level": 62,
+        "affinity": 4100,
+        "sigils": 0,
+        "books": 0.065,
+        "xp": 0
+      },
+      {
+        "level": 63,
+        "affinity": 4200,
+        "sigils": 0,
+        "books": 0.0655,
+        "xp": 0
+      },
+      {
+        "level": 64,
+        "affinity": 4300,
+        "sigils": 0,
+        "books": 0.066,
+        "xp": 0
+      },
+      {
+        "level": 65,
+        "affinity": 4400,
+        "sigils": 0,
+        "books": 0.0665,
+        "xp": 0
+      },
+      {
+        "level": 66,
+        "affinity": 4500,
+        "sigils": 0,
+        "books": 0.067,
+        "xp": 0
+      },
+      {
+        "level": 67,
+        "affinity": 4600,
+        "sigils": 0,
+        "books": 0.0675,
+        "xp": 0
+      },
+      {
+        "level": 68,
+        "affinity": 4700,
+        "sigils": 0,
+        "books": 0.068,
+        "xp": 0
+      },
+      {
+        "level": 69,
+        "affinity": 4800,
+        "sigils": 0,
+        "books": 0.0685,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 4900,
+        "sigils": 0,
+        "books": 0.069,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 0,
+        "sigils": 42,
+        "books": 0.073,
+        "xp": 0.1
+      },
+      {
+        "level": 71,
+        "affinity": 5000,
+        "sigils": 0,
+        "books": 0.0735,
+        "xp": 0
+      },
+      {
+        "level": 72,
+        "affinity": 5100,
+        "sigils": 0,
+        "books": 0.074,
+        "xp": 0
+      },
+      {
+        "level": 73,
+        "affinity": 5200,
+        "sigils": 0,
+        "books": 0.0745,
+        "xp": 0
+      },
+      {
+        "level": 74,
+        "affinity": 5300,
+        "sigils": 0,
+        "books": 0.075,
+        "xp": 0
+      },
+      {
+        "level": 75,
+        "affinity": 5400,
+        "sigils": 0,
+        "books": 0.0755,
+        "xp": 0
+      },
+      {
+        "level": 76,
+        "affinity": 5500,
+        "sigils": 0,
+        "books": 0.076,
+        "xp": 0
+      },
+      {
+        "level": 77,
+        "affinity": 5600,
+        "sigils": 0,
+        "books": 0.0765,
+        "xp": 0
+      },
+      {
+        "level": 78,
+        "affinity": 5700,
+        "sigils": 0,
+        "books": 0.077,
+        "xp": 0
+      },
+      {
+        "level": 79,
+        "affinity": 5800,
+        "sigils": 0,
+        "books": 0.0775,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 5900,
+        "sigils": 0,
+        "books": 0.078,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 0,
+        "sigils": 48,
+        "books": 0.082,
+        "xp": 0.1
+      },
+      {
+        "level": 81,
+        "affinity": 6000,
+        "sigils": 0,
+        "books": 0.0825,
+        "xp": 0
+      },
+      {
+        "level": 82,
+        "affinity": 6100,
+        "sigils": 0,
+        "books": 0.083,
+        "xp": 0
+      },
+      {
+        "level": 83,
+        "affinity": 6200,
+        "sigils": 0,
+        "books": 0.0835,
+        "xp": 0
+      },
+      {
+        "level": 84,
+        "affinity": 6300,
+        "sigils": 0,
+        "books": 0.084,
+        "xp": 0
+      },
+      {
+        "level": 85,
+        "affinity": 6400,
+        "sigils": 0,
+        "books": 0.0845,
+        "xp": 0
+      },
+      {
+        "level": 86,
+        "affinity": 6500,
+        "sigils": 0,
+        "books": 0.085,
+        "xp": 0
+      },
+      {
+        "level": 87,
+        "affinity": 6600,
+        "sigils": 0,
+        "books": 0.0855,
+        "xp": 0
+      },
+      {
+        "level": 88,
+        "affinity": 6700,
+        "sigils": 0,
+        "books": 0.086,
+        "xp": 0
+      },
+      {
+        "level": 89,
+        "affinity": 6800,
+        "sigils": 0,
+        "books": 0.0865,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 6900,
+        "sigils": 0,
+        "books": 0.087,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 0,
+        "sigils": 54,
+        "books": 0.091,
+        "xp": 0.1
+      },
+      {
+        "level": 91,
+        "affinity": 7000,
+        "sigils": 0,
+        "books": 0.0915,
+        "xp": 0
+      },
+      {
+        "level": 92,
+        "affinity": 7100,
+        "sigils": 0,
+        "books": 0.092,
+        "xp": 0
+      },
+      {
+        "level": 93,
+        "affinity": 7200,
+        "sigils": 0,
+        "books": 0.0925,
+        "xp": 0
+      },
+      {
+        "level": 94,
+        "affinity": 7300,
+        "sigils": 0,
+        "books": 0.093,
+        "xp": 0
+      },
+      {
+        "level": 95,
+        "affinity": 7400,
+        "sigils": 0,
+        "books": 0.0935,
+        "xp": 0
+      },
+      {
+        "level": 96,
+        "affinity": 7500,
+        "sigils": 0,
+        "books": 0.094,
+        "xp": 0
+      },
+      {
+        "level": 97,
+        "affinity": 7600,
+        "sigils": 0,
+        "books": 0.0945,
+        "xp": 0
+      },
+      {
+        "level": 98,
+        "affinity": 7700,
+        "sigils": 0,
+        "books": 0.095,
+        "xp": 0
+      },
+      {
+        "level": 99,
+        "affinity": 7800,
+        "sigils": 0,
+        "books": 0.0955,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 7900,
+        "sigils": 0,
+        "books": 0.096,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 0,
+        "sigils": 60,
+        "books": 0.1,
+        "xp": 0.15
+      }
+    ],
+    "Valeria": [
+      {
+        "level": 0,
+        "affinity": 0,
+        "sigils": 0,
+        "books": 0,
+        "xp": 0
+      },
+      {
+        "level": 1,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.02,
+        "xp": 0.02
+      },
+      {
+        "level": 2,
+        "affinity": 1840,
+        "sigils": 0,
+        "books": 0.021,
+        "xp": 0
+      },
+      {
+        "level": 3,
+        "affinity": 1940,
+        "sigils": 0,
+        "books": 0.022,
+        "xp": 0
+      },
+      {
+        "level": 4,
+        "affinity": 2030,
+        "sigils": 0,
+        "books": 0.023,
+        "xp": 0
+      },
+      {
+        "level": 5,
+        "affinity": 2120,
+        "sigils": 0,
+        "books": 0.024,
+        "xp": 0
+      },
+      {
+        "level": 6,
+        "affinity": 2210,
+        "sigils": 0,
+        "books": 0.025,
+        "xp": 0
+      },
+      {
+        "level": 7,
+        "affinity": 2400,
+        "sigils": 0,
+        "books": 0.026,
+        "xp": 0
+      },
+      {
+        "level": 8,
+        "affinity": 2580,
+        "sigils": 0,
+        "books": 0.027,
+        "xp": 0
+      },
+      {
+        "level": 9,
+        "affinity": 2760,
+        "sigils": 0,
+        "books": 0.028,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 2950,
+        "sigils": 0,
+        "books": 0.029,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 0,
+        "sigils": 20,
+        "books": 0.038,
+        "xp": 0.04
+      },
+      {
+        "level": 11,
+        "affinity": 3130,
+        "sigils": 0,
+        "books": 0.039,
+        "xp": 0
+      },
+      {
+        "level": 12,
+        "affinity": 3320,
+        "sigils": 0,
+        "books": 0.04,
+        "xp": 0
+      },
+      {
+        "level": 13,
+        "affinity": 3500,
+        "sigils": 0,
+        "books": 0.041,
+        "xp": 0
+      },
+      {
+        "level": 14,
+        "affinity": 3680,
+        "sigils": 0,
+        "books": 0.042,
+        "xp": 0
+      },
+      {
+        "level": 15,
+        "affinity": 3870,
+        "sigils": 0,
+        "books": 0.043,
+        "xp": 0
+      },
+      {
+        "level": 16,
+        "affinity": 4050,
+        "sigils": 0,
+        "books": 0.044,
+        "xp": 0
+      },
+      {
+        "level": 17,
+        "affinity": 4240,
+        "sigils": 0,
+        "books": 0.045,
+        "xp": 0
+      },
+      {
+        "level": 18,
+        "affinity": 4420,
+        "sigils": 0,
+        "books": 0.046,
+        "xp": 0
+      },
+      {
+        "level": 19,
+        "affinity": 4600,
+        "sigils": 0,
+        "books": 0.047,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 4790,
+        "sigils": 0,
+        "books": 0.048,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 0,
+        "sigils": 40,
+        "books": 0.056,
+        "xp": 0.06
+      },
+      {
+        "level": 21,
+        "affinity": 4970,
+        "sigils": 0,
+        "books": 0.057,
+        "xp": 0
+      },
+      {
+        "level": 22,
+        "affinity": 5160,
+        "sigils": 0,
+        "books": 0.058,
+        "xp": 0
+      },
+      {
+        "level": 23,
+        "affinity": 5340,
+        "sigils": 0,
+        "books": 0.059,
+        "xp": 0
+      },
+      {
+        "level": 24,
+        "affinity": 5520,
+        "sigils": 0,
+        "books": 0.06,
+        "xp": 0
+      },
+      {
+        "level": 25,
+        "affinity": 5710,
+        "sigils": 0,
+        "books": 0.061,
+        "xp": 0
+      },
+      {
+        "level": 26,
+        "affinity": 5890,
+        "sigils": 0,
+        "books": 0.062,
+        "xp": 0
+      },
+      {
+        "level": 27,
+        "affinity": 6080,
+        "sigils": 0,
+        "books": 0.063,
+        "xp": 0
+      },
+      {
+        "level": 28,
+        "affinity": 6260,
+        "sigils": 0,
+        "books": 0.064,
+        "xp": 0
+      },
+      {
+        "level": 29,
+        "affinity": 6440,
+        "sigils": 0,
+        "books": 0.065,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 6720,
+        "sigils": 0,
+        "books": 0.066,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 0,
+        "sigils": 60,
+        "books": 0.074,
+        "xp": 0.09
+      },
+      {
+        "level": 31,
+        "affinity": 7000,
+        "sigils": 0,
+        "books": 0.075,
+        "xp": 0
+      },
+      {
+        "level": 32,
+        "affinity": 7270,
+        "sigils": 0,
+        "books": 0.076,
+        "xp": 0
+      },
+      {
+        "level": 33,
+        "affinity": 7550,
+        "sigils": 0,
+        "books": 0.077,
+        "xp": 0
+      },
+      {
+        "level": 34,
+        "affinity": 7820,
+        "sigils": 0,
+        "books": 0.078,
+        "xp": 0
+      },
+      {
+        "level": 35,
+        "affinity": 8100,
+        "sigils": 0,
+        "books": 0.079,
+        "xp": 0
+      },
+      {
+        "level": 36,
+        "affinity": 8380,
+        "sigils": 0,
+        "books": 0.08,
+        "xp": 0
+      },
+      {
+        "level": 37,
+        "affinity": 8650,
+        "sigils": 0,
+        "books": 0.081,
+        "xp": 0
+      },
+      {
+        "level": 38,
+        "affinity": 8930,
+        "sigils": 0,
+        "books": 0.082,
+        "xp": 0
+      },
+      {
+        "level": 39,
+        "affinity": 9200,
+        "sigils": 0,
+        "books": 0.083,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 9570,
+        "sigils": 0,
+        "books": 0.084,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 0,
+        "sigils": 80,
+        "books": 0.092,
+        "xp": 0.12
+      },
+      {
+        "level": 41,
+        "affinity": 9940,
+        "sigils": 0,
+        "books": 0.093,
+        "xp": 0
+      },
+      {
+        "level": 42,
+        "affinity": 10310,
+        "sigils": 0,
+        "books": 0.094,
+        "xp": 0
+      },
+      {
+        "level": 43,
+        "affinity": 10680,
+        "sigils": 0,
+        "books": 0.095,
+        "xp": 0
+      },
+      {
+        "level": 44,
+        "affinity": 11040,
+        "sigils": 0,
+        "books": 0.096,
+        "xp": 0
+      },
+      {
+        "level": 45,
+        "affinity": 11410,
+        "sigils": 0,
+        "books": 0.097,
+        "xp": 0
+      },
+      {
+        "level": 46,
+        "affinity": 11780,
+        "sigils": 0,
+        "books": 0.098,
+        "xp": 0
+      },
+      {
+        "level": 47,
+        "affinity": 12150,
+        "sigils": 0,
+        "books": 0.099,
+        "xp": 0
+      },
+      {
+        "level": 48,
+        "affinity": 12520,
+        "sigils": 0,
+        "books": 0.1,
+        "xp": 0
+      },
+      {
+        "level": 49,
+        "affinity": 12880,
+        "sigils": 0,
+        "books": 0.101,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 13340,
+        "sigils": 0,
+        "books": 0.102,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 0,
+        "sigils": 100,
+        "books": 0.11,
+        "xp": 0.15
+      },
+      {
+        "level": 51,
+        "affinity": 13800,
+        "sigils": 0,
+        "books": 0.111,
+        "xp": 0
+      },
+      {
+        "level": 52,
+        "affinity": 14260,
+        "sigils": 0,
+        "books": 0.112,
+        "xp": 0
+      },
+      {
+        "level": 53,
+        "affinity": 14720,
+        "sigils": 0,
+        "books": 0.113,
+        "xp": 0
+      },
+      {
+        "level": 54,
+        "affinity": 15180,
+        "sigils": 0,
+        "books": 0.114,
+        "xp": 0
+      },
+      {
+        "level": 55,
+        "affinity": 15640,
+        "sigils": 0,
+        "books": 0.115,
+        "xp": 0
+      },
+      {
+        "level": 56,
+        "affinity": 16100,
+        "sigils": 0,
+        "books": 0.116,
+        "xp": 0
+      },
+      {
+        "level": 57,
+        "affinity": 16560,
+        "sigils": 0,
+        "books": 0.117,
+        "xp": 0
+      },
+      {
+        "level": 58,
+        "affinity": 17020,
+        "sigils": 0,
+        "books": 0.118,
+        "xp": 0
+      },
+      {
+        "level": 59,
+        "affinity": 17480,
+        "sigils": 0,
+        "books": 0.119,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 17940,
+        "sigils": 0,
+        "books": 0.12,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 0,
+        "sigils": 120,
+        "books": 0.128,
+        "xp": 0.18
+      },
+      {
+        "level": 61,
+        "affinity": 18400,
+        "sigils": 0,
+        "books": 0.129,
+        "xp": 0
+      },
+      {
+        "level": 62,
+        "affinity": 18860,
+        "sigils": 0,
+        "books": 0.13,
+        "xp": 0
+      },
+      {
+        "level": 63,
+        "affinity": 19320,
+        "sigils": 0,
+        "books": 0.131,
+        "xp": 0
+      },
+      {
+        "level": 64,
+        "affinity": 19780,
+        "sigils": 0,
+        "books": 0.132,
+        "xp": 0
+      },
+      {
+        "level": 65,
+        "affinity": 20240,
+        "sigils": 0,
+        "books": 0.133,
+        "xp": 0
+      },
+      {
+        "level": 66,
+        "affinity": 20700,
+        "sigils": 0,
+        "books": 0.134,
+        "xp": 0
+      },
+      {
+        "level": 67,
+        "affinity": 21160,
+        "sigils": 0,
+        "books": 0.135,
+        "xp": 0
+      },
+      {
+        "level": 68,
+        "affinity": 21620,
+        "sigils": 0,
+        "books": 0.136,
+        "xp": 0
+      },
+      {
+        "level": 69,
+        "affinity": 22080,
+        "sigils": 0,
+        "books": 0.137,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 22540,
+        "sigils": 0,
+        "books": 0.138,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 0,
+        "sigils": 140,
+        "books": 0.146,
+        "xp": 0.21
+      },
+      {
+        "level": 71,
+        "affinity": 23000,
+        "sigils": 0,
+        "books": 0.147,
+        "xp": 0
+      },
+      {
+        "level": 72,
+        "affinity": 23460,
+        "sigils": 0,
+        "books": 0.148,
+        "xp": 0
+      },
+      {
+        "level": 73,
+        "affinity": 23920,
+        "sigils": 0,
+        "books": 0.149,
+        "xp": 0
+      },
+      {
+        "level": 74,
+        "affinity": 24380,
+        "sigils": 0,
+        "books": 0.15,
+        "xp": 0
+      },
+      {
+        "level": 75,
+        "affinity": 24840,
+        "sigils": 0,
+        "books": 0.151,
+        "xp": 0
+      },
+      {
+        "level": 76,
+        "affinity": 25300,
+        "sigils": 0,
+        "books": 0.152,
+        "xp": 0
+      },
+      {
+        "level": 77,
+        "affinity": 25760,
+        "sigils": 0,
+        "books": 0.153,
+        "xp": 0
+      },
+      {
+        "level": 78,
+        "affinity": 26220,
+        "sigils": 0,
+        "books": 0.154,
+        "xp": 0
+      },
+      {
+        "level": 79,
+        "affinity": 26680,
+        "sigils": 0,
+        "books": 0.155,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 27140,
+        "sigils": 0,
+        "books": 0.156,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 0,
+        "sigils": 160,
+        "books": 0.164,
+        "xp": 0.24
+      },
+      {
+        "level": 81,
+        "affinity": 27600,
+        "sigils": 0,
+        "books": 0.165,
+        "xp": 0
+      },
+      {
+        "level": 82,
+        "affinity": 28060,
+        "sigils": 0,
+        "books": 0.166,
+        "xp": 0
+      },
+      {
+        "level": 83,
+        "affinity": 28520,
+        "sigils": 0,
+        "books": 0.167,
+        "xp": 0
+      },
+      {
+        "level": 84,
+        "affinity": 28980,
+        "sigils": 0,
+        "books": 0.168,
+        "xp": 0
+      },
+      {
+        "level": 85,
+        "affinity": 29440,
+        "sigils": 0,
+        "books": 0.169,
+        "xp": 0
+      },
+      {
+        "level": 86,
+        "affinity": 29900,
+        "sigils": 0,
+        "books": 0.17,
+        "xp": 0
+      },
+      {
+        "level": 87,
+        "affinity": 30360,
+        "sigils": 0,
+        "books": 0.181,
+        "xp": 0
+      },
+      {
+        "level": 88,
+        "affinity": 30820,
+        "sigils": 0,
+        "books": 0.172,
+        "xp": 0
+      },
+      {
+        "level": 89,
+        "affinity": 31280,
+        "sigils": 0,
+        "books": 0.173,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 31740,
+        "sigils": 0,
+        "books": 0.174,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 0,
+        "sigils": 180,
+        "books": 0.182,
+        "xp": 0.27
+      },
+      {
+        "level": 91,
+        "affinity": 32200,
+        "sigils": 0,
+        "books": 0.183,
+        "xp": 0
+      },
+      {
+        "level": 92,
+        "affinity": 32660,
+        "sigils": 0,
+        "books": 0.184,
+        "xp": 0
+      },
+      {
+        "level": 93,
+        "affinity": 33120,
+        "sigils": 0,
+        "books": 0.185,
+        "xp": 0
+      },
+      {
+        "level": 94,
+        "affinity": 33580,
+        "sigils": 0,
+        "books": 0.186,
+        "xp": 0
+      },
+      {
+        "level": 95,
+        "affinity": 34040,
+        "sigils": 0,
+        "books": 0.187,
+        "xp": 0
+      },
+      {
+        "level": 96,
+        "affinity": 34500,
+        "sigils": 0,
+        "books": 0.188,
+        "xp": 0
+      },
+      {
+        "level": 97,
+        "affinity": 34960,
+        "sigils": 0,
+        "books": 0.189,
+        "xp": 0
+      },
+      {
+        "level": 98,
+        "affinity": 34960,
+        "sigils": 0,
+        "books": 0.19,
+        "xp": 0
+      },
+      {
+        "level": 99,
+        "affinity": 35880,
+        "sigils": 0,
+        "books": 0.191,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 36340,
+        "sigils": 0,
+        "books": 0.192,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 0,
+        "sigils": 200,
+        "books": 0.2,
+        "xp": 0.3
+      }
+    ],
+    "Ronne": [
+      {
+        "level": 0,
+        "affinity": 0,
+        "sigils": 0,
+        "books": 0,
+        "xp": 0
+      },
+      {
+        "level": 1,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.0158,
+        "xp": 0.02
+      },
+      {
+        "level": 2,
+        "affinity": 600,
+        "sigils": 0,
+        "books": 0.0165,
+        "xp": 0
+      },
+      {
+        "level": 3,
+        "affinity": 630,
+        "sigils": 0,
+        "books": 0.0173,
+        "xp": 0
+      },
+      {
+        "level": 4,
+        "affinity": 660,
+        "sigils": 0,
+        "books": 0.018,
+        "xp": 0
+      },
+      {
+        "level": 5,
+        "affinity": 690,
+        "sigils": 0,
+        "books": 0.0188,
+        "xp": 0
+      },
+      {
+        "level": 6,
+        "affinity": 720,
+        "sigils": 0,
+        "books": 0.0195,
+        "xp": 0
+      },
+      {
+        "level": 7,
+        "affinity": 780,
+        "sigils": 0,
+        "books": 0.0203,
+        "xp": 0
+      },
+      {
+        "level": 8,
+        "affinity": 840,
+        "sigils": 0,
+        "books": 0.021,
+        "xp": 0
+      },
+      {
+        "level": 9,
+        "affinity": 900,
+        "sigils": 0,
+        "books": 0.0218,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 960,
+        "sigils": 0,
+        "books": 0.0225,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 0,
+        "sigils": 8,
+        "books": 0.0285,
+        "xp": 0.04
+      },
+      {
+        "level": 11,
+        "affinity": 1020,
+        "sigils": 0,
+        "books": 0.0293,
+        "xp": 0
+      },
+      {
+        "level": 12,
+        "affinity": 1080,
+        "sigils": 0,
+        "books": 0.03,
+        "xp": 0
+      },
+      {
+        "level": 13,
+        "affinity": 1140,
+        "sigils": 0,
+        "books": 0.0308,
+        "xp": 0
+      },
+      {
+        "level": 14,
+        "affinity": 1200,
+        "sigils": 0,
+        "books": 0.0315,
+        "xp": 0
+      },
+      {
+        "level": 15,
+        "affinity": 1260,
+        "sigils": 0,
+        "books": 0.0323,
+        "xp": 0
+      },
+      {
+        "level": 16,
+        "affinity": 1320,
+        "sigils": 0,
+        "books": 0.033,
+        "xp": 0
+      },
+      {
+        "level": 17,
+        "affinity": 1380,
+        "sigils": 0,
+        "books": 0.0338,
+        "xp": 0
+      },
+      {
+        "level": 18,
+        "affinity": 1440,
+        "sigils": 0,
+        "books": 0.0345,
+        "xp": 0
+      },
+      {
+        "level": 19,
+        "affinity": 1500,
+        "sigils": 0,
+        "books": 0.0353,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 1560,
+        "sigils": 0,
+        "books": 0.036,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 0,
+        "sigils": 16,
+        "books": 0.042,
+        "xp": 0.06
+      },
+      {
+        "level": 21,
+        "affinity": 1620,
+        "sigils": 0,
+        "books": 0.0428,
+        "xp": 0
+      },
+      {
+        "level": 22,
+        "affinity": 1680,
+        "sigils": 0,
+        "books": 0.0435,
+        "xp": 0
+      },
+      {
+        "level": 23,
+        "affinity": 1740,
+        "sigils": 0,
+        "books": 0.0443,
+        "xp": 0
+      },
+      {
+        "level": 24,
+        "affinity": 1800,
+        "sigils": 0,
+        "books": 0.045,
+        "xp": 0
+      },
+      {
+        "level": 25,
+        "affinity": 1860,
+        "sigils": 0,
+        "books": 0.0458,
+        "xp": 0
+      },
+      {
+        "level": 26,
+        "affinity": 1920,
+        "sigils": 0,
+        "books": 0.0465,
+        "xp": 0
+      },
+      {
+        "level": 27,
+        "affinity": 1980,
+        "sigils": 0,
+        "books": 0.0473,
+        "xp": 0
+      },
+      {
+        "level": 28,
+        "affinity": 2040,
+        "sigils": 0,
+        "books": 0.048,
+        "xp": 0
+      },
+      {
+        "level": 29,
+        "affinity": 2100,
+        "sigils": 0,
+        "books": 0.0488,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 2190,
+        "sigils": 0,
+        "books": 0.0495,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 0,
+        "sigils": 24,
+        "books": 0.0555,
+        "xp": 0.09
+      },
+      {
+        "level": 31,
+        "affinity": 2280,
+        "sigils": 0,
+        "books": 0.0563,
+        "xp": 0
+      },
+      {
+        "level": 32,
+        "affinity": 2370,
+        "sigils": 0,
+        "books": 0.057,
+        "xp": 0
+      },
+      {
+        "level": 33,
+        "affinity": 2460,
+        "sigils": 0,
+        "books": 0.0578,
+        "xp": 0
+      },
+      {
+        "level": 34,
+        "affinity": 2550,
+        "sigils": 0,
+        "books": 0.0585,
+        "xp": 0
+      },
+      {
+        "level": 35,
+        "affinity": 2640,
+        "sigils": 0,
+        "books": 0.0593,
+        "xp": 0
+      },
+      {
+        "level": 36,
+        "affinity": 2730,
+        "sigils": 0,
+        "books": 0.06,
+        "xp": 0
+      },
+      {
+        "level": 37,
+        "affinity": 2820,
+        "sigils": 0,
+        "books": 0.0608,
+        "xp": 0
+      },
+      {
+        "level": 38,
+        "affinity": 2910,
+        "sigils": 0,
+        "books": 0.0615,
+        "xp": 0
+      },
+      {
+        "level": 39,
+        "affinity": 3000,
+        "sigils": 0,
+        "books": 0.0623,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 3120,
+        "sigils": 0,
+        "books": 0.063,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 0,
+        "sigils": 32,
+        "books": 0.069,
+        "xp": 0.12
+      },
+      {
+        "level": 41,
+        "affinity": 3240,
+        "sigils": 0,
+        "books": 0.0698,
+        "xp": 0
+      },
+      {
+        "level": 42,
+        "affinity": 3360,
+        "sigils": 0,
+        "books": 0.0705,
+        "xp": 0
+      },
+      {
+        "level": 43,
+        "affinity": 3480,
+        "sigils": 0,
+        "books": 0.0713,
+        "xp": 0
+      },
+      {
+        "level": 44,
+        "affinity": 3600,
+        "sigils": 0,
+        "books": 0.072,
+        "xp": 0
+      },
+      {
+        "level": 45,
+        "affinity": 3720,
+        "sigils": 0,
+        "books": 0.0728,
+        "xp": 0
+      },
+      {
+        "level": 46,
+        "affinity": 3840,
+        "sigils": 0,
+        "books": 0.0735,
+        "xp": 0
+      },
+      {
+        "level": 47,
+        "affinity": 3960,
+        "sigils": 0,
+        "books": 0.0743,
+        "xp": 0
+      },
+      {
+        "level": 48,
+        "affinity": 4080,
+        "sigils": 0,
+        "books": 0.075,
+        "xp": 0
+      },
+      {
+        "level": 49,
+        "affinity": 4200,
+        "sigils": 0,
+        "books": 0.0758,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 4350,
+        "sigils": 0,
+        "books": 0.0765,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 0,
+        "sigils": 40,
+        "books": 0.0825,
+        "xp": 0.15
+      },
+      {
+        "level": 51,
+        "affinity": 4500,
+        "sigils": 0,
+        "books": 0.0833,
+        "xp": 0
+      },
+      {
+        "level": 52,
+        "affinity": 4650,
+        "sigils": 0,
+        "books": 0.084,
+        "xp": 0
+      },
+      {
+        "level": 53,
+        "affinity": 4800,
+        "sigils": 0,
+        "books": 0.0848,
+        "xp": 0
+      },
+      {
+        "level": 54,
+        "affinity": 4950,
+        "sigils": 0,
+        "books": 0.0855,
+        "xp": 0
+      },
+      {
+        "level": 55,
+        "affinity": 5100,
+        "sigils": 0,
+        "books": 0.0863,
+        "xp": 0
+      },
+      {
+        "level": 56,
+        "affinity": 5250,
+        "sigils": 0,
+        "books": 0.087,
+        "xp": 0
+      },
+      {
+        "level": 57,
+        "affinity": 5400,
+        "sigils": 0,
+        "books": 0.0878,
+        "xp": 0
+      },
+      {
+        "level": 58,
+        "affinity": 5550,
+        "sigils": 0,
+        "books": 0.0885,
+        "xp": 0
+      },
+      {
+        "level": 59,
+        "affinity": 5700,
+        "sigils": 0,
+        "books": 0.0893,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 5850,
+        "sigils": 0,
+        "books": 0.09,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 0,
+        "sigils": 48,
+        "books": 0.096,
+        "xp": 0.18
+      },
+      {
+        "level": 61,
+        "affinity": 6000,
+        "sigils": 0,
+        "books": 0.0968,
+        "xp": 0
+      },
+      {
+        "level": 62,
+        "affinity": 6150,
+        "sigils": 0,
+        "books": 0.0975,
+        "xp": 0
+      },
+      {
+        "level": 63,
+        "affinity": 6300,
+        "sigils": 0,
+        "books": 0.0983,
+        "xp": 0
+      },
+      {
+        "level": 64,
+        "affinity": 6450,
+        "sigils": 0,
+        "books": 0.099,
+        "xp": 0
+      },
+      {
+        "level": 65,
+        "affinity": 6600,
+        "sigils": 0,
+        "books": 0.0998,
+        "xp": 0
+      },
+      {
+        "level": 66,
+        "affinity": 6750,
+        "sigils": 0,
+        "books": 0.1005,
+        "xp": 0
+      },
+      {
+        "level": 67,
+        "affinity": 6900,
+        "sigils": 0,
+        "books": 0.1013,
+        "xp": 0
+      },
+      {
+        "level": 68,
+        "affinity": 7050,
+        "sigils": 0,
+        "books": 0.102,
+        "xp": 0
+      },
+      {
+        "level": 69,
+        "affinity": 7200,
+        "sigils": 0,
+        "books": 0.1028,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 7350,
+        "sigils": 0,
+        "books": 0.1035,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 0,
+        "sigils": 56,
+        "books": 0.1095,
+        "xp": 0.21
+      },
+      {
+        "level": 71,
+        "affinity": 7500,
+        "sigils": 0,
+        "books": 0.1103,
+        "xp": 0
+      },
+      {
+        "level": 72,
+        "affinity": 7650,
+        "sigils": 0,
+        "books": 0.111,
+        "xp": 0
+      },
+      {
+        "level": 73,
+        "affinity": 7800,
+        "sigils": 0,
+        "books": 0.1118,
+        "xp": 0
+      },
+      {
+        "level": 74,
+        "affinity": 7950,
+        "sigils": 0,
+        "books": 0.1125,
+        "xp": 0
+      },
+      {
+        "level": 75,
+        "affinity": 8100,
+        "sigils": 0,
+        "books": 0.1133,
+        "xp": 0
+      },
+      {
+        "level": 76,
+        "affinity": 8250,
+        "sigils": 0,
+        "books": 0.114,
+        "xp": 0
+      },
+      {
+        "level": 77,
+        "affinity": 8400,
+        "sigils": 0,
+        "books": 0.1148,
+        "xp": 0
+      },
+      {
+        "level": 78,
+        "affinity": 8550,
+        "sigils": 0,
+        "books": 0.1155,
+        "xp": 0
+      },
+      {
+        "level": 79,
+        "affinity": 8700,
+        "sigils": 0,
+        "books": 0.1163,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 8850,
+        "sigils": 0,
+        "books": 0.117,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 0,
+        "sigils": 64,
+        "books": 0.123,
+        "xp": 0.24
+      },
+      {
+        "level": 81,
+        "affinity": 9000,
+        "sigils": 0,
+        "books": 0.1238,
+        "xp": 0
+      },
+      {
+        "level": 82,
+        "affinity": 9150,
+        "sigils": 0,
+        "books": 0.1245,
+        "xp": 0
+      },
+      {
+        "level": 83,
+        "affinity": 9300,
+        "sigils": 0,
+        "books": 0.1253,
+        "xp": 0
+      },
+      {
+        "level": 84,
+        "affinity": 9450,
+        "sigils": 0,
+        "books": 0.126,
+        "xp": 0
+      },
+      {
+        "level": 85,
+        "affinity": 9600,
+        "sigils": 0,
+        "books": 0.1268,
+        "xp": 0
+      },
+      {
+        "level": 86,
+        "affinity": 9750,
+        "sigils": 0,
+        "books": 0.1275,
+        "xp": 0
+      },
+      {
+        "level": 87,
+        "affinity": 9900,
+        "sigils": 0,
+        "books": 0.1283,
+        "xp": 0
+      },
+      {
+        "level": 88,
+        "affinity": 10050,
+        "sigils": 0,
+        "books": 0.129,
+        "xp": 0
+      },
+      {
+        "level": 89,
+        "affinity": 10200,
+        "sigils": 0,
+        "books": 0.1298,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 10350,
+        "sigils": 0,
+        "books": 0.1305,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 0,
+        "sigils": 72,
+        "books": 0.1365,
+        "xp": 0.27
+      },
+      {
+        "level": 91,
+        "affinity": 10500,
+        "sigils": 0,
+        "books": 0.1373,
+        "xp": 0
+      },
+      {
+        "level": 92,
+        "affinity": 10650,
+        "sigils": 0,
+        "books": 0.138,
+        "xp": 0
+      },
+      {
+        "level": 93,
+        "affinity": 10800,
+        "sigils": 0,
+        "books": 0.1388,
+        "xp": 0
+      },
+      {
+        "level": 94,
+        "affinity": 10950,
+        "sigils": 0,
+        "books": 0.1395,
+        "xp": 0
+      },
+      {
+        "level": 95,
+        "affinity": 11100,
+        "sigils": 0,
+        "books": 0.1403,
+        "xp": 0
+      },
+      {
+        "level": 96,
+        "affinity": 11250,
+        "sigils": 0,
+        "books": 0.141,
+        "xp": 0
+      },
+      {
+        "level": 97,
+        "affinity": 11400,
+        "sigils": 0,
+        "books": 0.1418,
+        "xp": 0
+      },
+      {
+        "level": 98,
+        "affinity": 11550,
+        "sigils": 0,
+        "books": 0.1425,
+        "xp": 0
+      },
+      {
+        "level": 99,
+        "affinity": 11700,
+        "sigils": 0,
+        "books": 0.1433,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 11850,
+        "sigils": 0,
+        "books": 0.144,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 0,
+        "sigils": 80,
+        "books": 0.15,
+        "xp": 0.3
+      }
+    ],
+    "Kathy": [
+      {
+        "level": 0,
+        "affinity": 0,
+        "sigils": 0,
+        "books": 0,
+        "xp": 0
+      },
+      {
+        "level": 1,
+        "affinity": 1000,
+        "sigils": 0,
+        "books": 0.0158,
+        "xp": 0.02
+      },
+      {
+        "level": 2,
+        "affinity": 900,
+        "sigils": 0,
+        "books": 0.0165,
+        "xp": 0
+      },
+      {
+        "level": 3,
+        "affinity": 950,
+        "sigils": 0,
+        "books": 0.0173,
+        "xp": 0
+      },
+      {
+        "level": 4,
+        "affinity": 990,
+        "sigils": 0,
+        "books": 0.018,
+        "xp": 0
+      },
+      {
+        "level": 5,
+        "affinity": 1040,
+        "sigils": 0,
+        "books": 0.0188,
+        "xp": 0
+      },
+      {
+        "level": 6,
+        "affinity": 1080,
+        "sigils": 0,
+        "books": 0.0195,
+        "xp": 0
+      },
+      {
+        "level": 7,
+        "affinity": 1170,
+        "sigils": 0,
+        "books": 0.0203,
+        "xp": 0
+      },
+      {
+        "level": 8,
+        "affinity": 1260,
+        "sigils": 0,
+        "books": 0.021,
+        "xp": 0
+      },
+      {
+        "level": 9,
+        "affinity": 1350,
+        "sigils": 0,
+        "books": 0.0218,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 1440,
+        "sigils": 0,
+        "books": 0.0225,
+        "xp": 0
+      },
+      {
+        "level": 10,
+        "affinity": 0,
+        "sigils": 10,
+        "books": 0.0285,
+        "xp": 0.04
+      },
+      {
+        "level": 11,
+        "affinity": 1530,
+        "sigils": 0,
+        "books": 0.0293,
+        "xp": 0
+      },
+      {
+        "level": 12,
+        "affinity": 1620,
+        "sigils": 0,
+        "books": 0.03,
+        "xp": 0
+      },
+      {
+        "level": 13,
+        "affinity": 1710,
+        "sigils": 0,
+        "books": 0.0308,
+        "xp": 0
+      },
+      {
+        "level": 14,
+        "affinity": 1800,
+        "sigils": 0,
+        "books": 0.0315,
+        "xp": 0
+      },
+      {
+        "level": 15,
+        "affinity": 1890,
+        "sigils": 0,
+        "books": 0.0323,
+        "xp": 0
+      },
+      {
+        "level": 16,
+        "affinity": 1980,
+        "sigils": 0,
+        "books": 0.033,
+        "xp": 0
+      },
+      {
+        "level": 17,
+        "affinity": 2070,
+        "sigils": 0,
+        "books": 0.0338,
+        "xp": 0
+      },
+      {
+        "level": 18,
+        "affinity": 2160,
+        "sigils": 0,
+        "books": 0.0345,
+        "xp": 0
+      },
+      {
+        "level": 19,
+        "affinity": 2250,
+        "sigils": 0,
+        "books": 0.0353,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 2340,
+        "sigils": 0,
+        "books": 0.036,
+        "xp": 0
+      },
+      {
+        "level": 20,
+        "affinity": 0,
+        "sigils": 20,
+        "books": 0.042,
+        "xp": 0.06
+      },
+      {
+        "level": 21,
+        "affinity": 2430,
+        "sigils": 0,
+        "books": 0.0428,
+        "xp": 0
+      },
+      {
+        "level": 22,
+        "affinity": 2520,
+        "sigils": 0,
+        "books": 0.0435,
+        "xp": 0
+      },
+      {
+        "level": 23,
+        "affinity": 2610,
+        "sigils": 0,
+        "books": 0.0443,
+        "xp": 0
+      },
+      {
+        "level": 24,
+        "affinity": 2700,
+        "sigils": 0,
+        "books": 0.045,
+        "xp": 0
+      },
+      {
+        "level": 25,
+        "affinity": 2790,
+        "sigils": 0,
+        "books": 0.0458,
+        "xp": 0
+      },
+      {
+        "level": 26,
+        "affinity": 2880,
+        "sigils": 0,
+        "books": 0.0465,
+        "xp": 0
+      },
+      {
+        "level": 27,
+        "affinity": 2970,
+        "sigils": 0,
+        "books": 0.0473,
+        "xp": 0
+      },
+      {
+        "level": 28,
+        "affinity": 3060,
+        "sigils": 0,
+        "books": 0.048,
+        "xp": 0
+      },
+      {
+        "level": 29,
+        "affinity": 3150,
+        "sigils": 0,
+        "books": 0.0488,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 3290,
+        "sigils": 0,
+        "books": 0.0495,
+        "xp": 0
+      },
+      {
+        "level": 30,
+        "affinity": 0,
+        "sigils": 30,
+        "books": 0.0555,
+        "xp": 0.09
+      },
+      {
+        "level": 31,
+        "affinity": 3420,
+        "sigils": 0,
+        "books": 0.0563,
+        "xp": 0
+      },
+      {
+        "level": 32,
+        "affinity": 3560,
+        "sigils": 0,
+        "books": 0.057,
+        "xp": 0
+      },
+      {
+        "level": 33,
+        "affinity": 3690,
+        "sigils": 0,
+        "books": 0.0578,
+        "xp": 0
+      },
+      {
+        "level": 34,
+        "affinity": 3830,
+        "sigils": 0,
+        "books": 0.0585,
+        "xp": 0
+      },
+      {
+        "level": 35,
+        "affinity": 3960,
+        "sigils": 0,
+        "books": 0.0593,
+        "xp": 0
+      },
+      {
+        "level": 36,
+        "affinity": 4100,
+        "sigils": 0,
+        "books": 0.06,
+        "xp": 0
+      },
+      {
+        "level": 37,
+        "affinity": 4230,
+        "sigils": 0,
+        "books": 0.0608,
+        "xp": 0
+      },
+      {
+        "level": 38,
+        "affinity": 4370,
+        "sigils": 0,
+        "books": 0.0615,
+        "xp": 0
+      },
+      {
+        "level": 39,
+        "affinity": 4500,
+        "sigils": 0,
+        "books": 0.0623,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 4680,
+        "sigils": 0,
+        "books": 0.063,
+        "xp": 0
+      },
+      {
+        "level": 40,
+        "affinity": 0,
+        "sigils": 40,
+        "books": 0.069,
+        "xp": 0.12
+      },
+      {
+        "level": 41,
+        "affinity": 4860,
+        "sigils": 0,
+        "books": 0.0698,
+        "xp": 0
+      },
+      {
+        "level": 42,
+        "affinity": 5040,
+        "sigils": 0,
+        "books": 0.0705,
+        "xp": 0
+      },
+      {
+        "level": 43,
+        "affinity": 5220,
+        "sigils": 0,
+        "books": 0.0713,
+        "xp": 0
+      },
+      {
+        "level": 44,
+        "affinity": 5400,
+        "sigils": 0,
+        "books": 0.072,
+        "xp": 0
+      },
+      {
+        "level": 45,
+        "affinity": 5580,
+        "sigils": 0,
+        "books": 0.0728,
+        "xp": 0
+      },
+      {
+        "level": 46,
+        "affinity": 5760,
+        "sigils": 0,
+        "books": 0.0735,
+        "xp": 0
+      },
+      {
+        "level": 47,
+        "affinity": 5940,
+        "sigils": 0,
+        "books": 0.0743,
+        "xp": 0
+      },
+      {
+        "level": 48,
+        "affinity": 6120,
+        "sigils": 0,
+        "books": 0.075,
+        "xp": 0
+      },
+      {
+        "level": 49,
+        "affinity": 6300,
+        "sigils": 0,
+        "books": 0.0758,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 6530,
+        "sigils": 0,
+        "books": 0.0765,
+        "xp": 0
+      },
+      {
+        "level": 50,
+        "affinity": 0,
+        "sigils": 50,
+        "books": 0.0825,
+        "xp": 0.15
+      },
+      {
+        "level": 51,
+        "affinity": 6750,
+        "sigils": 0,
+        "books": 0.0833,
+        "xp": 0
+      },
+      {
+        "level": 52,
+        "affinity": 6980,
+        "sigils": 0,
+        "books": 0.084,
+        "xp": 0
+      },
+      {
+        "level": 53,
+        "affinity": 7200,
+        "sigils": 0,
+        "books": 0.0848,
+        "xp": 0
+      },
+      {
+        "level": 54,
+        "affinity": 7430,
+        "sigils": 0,
+        "books": 0.0855,
+        "xp": 0
+      },
+      {
+        "level": 55,
+        "affinity": 7650,
+        "sigils": 0,
+        "books": 0.0863,
+        "xp": 0
+      },
+      {
+        "level": 56,
+        "affinity": 7880,
+        "sigils": 0,
+        "books": 0.087,
+        "xp": 0
+      },
+      {
+        "level": 57,
+        "affinity": 8100,
+        "sigils": 0,
+        "books": 0.0878,
+        "xp": 0
+      },
+      {
+        "level": 58,
+        "affinity": 8330,
+        "sigils": 0,
+        "books": 0.0885,
+        "xp": 0
+      },
+      {
+        "level": 59,
+        "affinity": 8550,
+        "sigils": 0,
+        "books": 0.0893,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 8780,
+        "sigils": 0,
+        "books": 0.09,
+        "xp": 0
+      },
+      {
+        "level": 60,
+        "affinity": 0,
+        "sigils": 60,
+        "books": 0.096,
+        "xp": 0.18
+      },
+      {
+        "level": 61,
+        "affinity": 9000,
+        "sigils": 0,
+        "books": 0.0968,
+        "xp": 0
+      },
+      {
+        "level": 62,
+        "affinity": 9230,
+        "sigils": 0,
+        "books": 0.0975,
+        "xp": 0
+      },
+      {
+        "level": 63,
+        "affinity": 9450,
+        "sigils": 0,
+        "books": 0.0983,
+        "xp": 0
+      },
+      {
+        "level": 64,
+        "affinity": 9680,
+        "sigils": 0,
+        "books": 0.099,
+        "xp": 0
+      },
+      {
+        "level": 65,
+        "affinity": 9900,
+        "sigils": 0,
+        "books": 0.0998,
+        "xp": 0
+      },
+      {
+        "level": 66,
+        "affinity": 10130,
+        "sigils": 0,
+        "books": 0.1005,
+        "xp": 0
+      },
+      {
+        "level": 67,
+        "affinity": 10350,
+        "sigils": 0,
+        "books": 0.1013,
+        "xp": 0
+      },
+      {
+        "level": 68,
+        "affinity": 10580,
+        "sigils": 0,
+        "books": 0.102,
+        "xp": 0
+      },
+      {
+        "level": 69,
+        "affinity": 10800,
+        "sigils": 0,
+        "books": 0.1028,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 11030,
+        "sigils": 0,
+        "books": 0.1035,
+        "xp": 0
+      },
+      {
+        "level": 70,
+        "affinity": 0,
+        "sigils": 70,
+        "books": 0.1095,
+        "xp": 0.21
+      },
+      {
+        "level": 71,
+        "affinity": 11250,
+        "sigils": 0,
+        "books": 0.1103,
+        "xp": 0
+      },
+      {
+        "level": 72,
+        "affinity": 11480,
+        "sigils": 0,
+        "books": 0.111,
+        "xp": 0
+      },
+      {
+        "level": 73,
+        "affinity": 11700,
+        "sigils": 0,
+        "books": 0.1118,
+        "xp": 0
+      },
+      {
+        "level": 74,
+        "affinity": 11930,
+        "sigils": 0,
+        "books": 0.1125,
+        "xp": 0
+      },
+      {
+        "level": 75,
+        "affinity": 12150,
+        "sigils": 0,
+        "books": 0.1133,
+        "xp": 0
+      },
+      {
+        "level": 76,
+        "affinity": 12380,
+        "sigils": 0,
+        "books": 0.114,
+        "xp": 0
+      },
+      {
+        "level": 77,
+        "affinity": 12600,
+        "sigils": 0,
+        "books": 0.1148,
+        "xp": 0
+      },
+      {
+        "level": 78,
+        "affinity": 12830,
+        "sigils": 0,
+        "books": 0.1155,
+        "xp": 0
+      },
+      {
+        "level": 79,
+        "affinity": 13050,
+        "sigils": 0,
+        "books": 0.1163,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 13280,
+        "sigils": 0,
+        "books": 0.117,
+        "xp": 0
+      },
+      {
+        "level": 80,
+        "affinity": 0,
+        "sigils": 80,
+        "books": 0.123,
+        "xp": 0.24
+      },
+      {
+        "level": 81,
+        "affinity": 13500,
+        "sigils": 0,
+        "books": 0.1238,
+        "xp": 0
+      },
+      {
+        "level": 82,
+        "affinity": 13730,
+        "sigils": 0,
+        "books": 0.1245,
+        "xp": 0
+      },
+      {
+        "level": 83,
+        "affinity": 13950,
+        "sigils": 0,
+        "books": 0.1253,
+        "xp": 0
+      },
+      {
+        "level": 84,
+        "affinity": 14180,
+        "sigils": 0,
+        "books": 0.126,
+        "xp": 0
+      },
+      {
+        "level": 85,
+        "affinity": 14400,
+        "sigils": 0,
+        "books": 0.1268,
+        "xp": 0
+      },
+      {
+        "level": 86,
+        "affinity": 14630,
+        "sigils": 0,
+        "books": 0.1275,
+        "xp": 0
+      },
+      {
+        "level": 87,
+        "affinity": 14850,
+        "sigils": 0,
+        "books": 0.1283,
+        "xp": 0
+      },
+      {
+        "level": 88,
+        "affinity": 15080,
+        "sigils": 0,
+        "books": 0.129,
+        "xp": 0
+      },
+      {
+        "level": 89,
+        "affinity": 15300,
+        "sigils": 0,
+        "books": 0.1298,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 15530,
+        "sigils": 0,
+        "books": 0.1305,
+        "xp": 0
+      },
+      {
+        "level": 90,
+        "affinity": 0,
+        "sigils": 90,
+        "books": 0.1365,
+        "xp": 0.27
+      },
+      {
+        "level": 91,
+        "affinity": 15750,
+        "sigils": 0,
+        "books": 0.1373,
+        "xp": 0
+      },
+      {
+        "level": 92,
+        "affinity": 15980,
+        "sigils": 0,
+        "books": 0.138,
+        "xp": 0
+      },
+      {
+        "level": 93,
+        "affinity": 16200,
+        "sigils": 0,
+        "books": 0.1388,
+        "xp": 0
+      },
+      {
+        "level": 94,
+        "affinity": 16430,
+        "sigils": 0,
+        "books": 0.1395,
+        "xp": 0
+      },
+      {
+        "level": 95,
+        "affinity": 16650,
+        "sigils": 0,
+        "books": 0.1403,
+        "xp": 0
+      },
+      {
+        "level": 96,
+        "affinity": 16880,
+        "sigils": 0,
+        "books": 0.141,
+        "xp": 0
+      },
+      {
+        "level": 97,
+        "affinity": 17100,
+        "sigils": 0,
+        "books": 0.1418,
+        "xp": 0
+      },
+      {
+        "level": 98,
+        "affinity": 17330,
+        "sigils": 0,
+        "books": 0.1425,
+        "xp": 0
+      },
+      {
+        "level": 99,
+        "affinity": 17550,
+        "sigils": 0,
+        "books": 0.1433,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 17780,
+        "sigils": 0,
+        "books": 0.144,
+        "xp": 0
+      },
+      {
+        "level": 100,
+        "affinity": 0,
+        "sigils": 100,
+        "books": 0.15,
+        "xp": 0.3
+      }
+    ]
+  }
+}

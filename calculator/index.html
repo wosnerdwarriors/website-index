@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WOS Calculator | WOS Nerds</title>
+  <link rel="stylesheet" href="/dist/css/tailwind.css?v=1">
+  <link rel="stylesheet" href="/css/darkmode.css?v=20260713">
+  <link rel="stylesheet" href="/calculator/css/style.css?v=20260716-sticky-tables">
+</head>
+<body class="calculator-page">
+  <main class="md:ml-64 min-h-screen flex flex-col">
+    <div class="calculator-shell flex-grow p-4 md:p-6">
+      <header class="calculator-header">
+        <div class="calculator-heading">
+          <p class="calculator-eyebrow">Planning toolkit</p>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">WOS Calculator Suite</h1>
+          <p id="save-status" class="save-status" role="status" aria-live="polite">Loading saved plan…</p>
+        </div>
+        <div class="calculator-actions">
+          <button id="export-state" class="wos-calc-btn secondary" type="button">Export plan</button>
+          <button id="import-state-button" class="wos-calc-btn secondary" type="button">Import plan</button>
+          <input id="import-state" type="file" accept="application/json,.json" hidden>
+          <button id="reset-section" class="wos-calc-btn secondary" type="button">Reset current</button>
+          <button id="reset-state" class="wos-calc-btn danger" type="button">Reset all</button>
+        </div>
+      </header>
+
+      <section id="status-panel" class="status-panel hidden" role="status" aria-live="polite"></section>
+
+      <nav id="calculator-tabs" class="calculator-tabs" aria-label="Calculator sections" role="tablist"></nav>
+
+      <section id="calculator-content" class="calculator-content" role="tabpanel" tabindex="-1">
+        <div class="loading-panel">Loading calculator data...</div>
+      </section>
+    </div>
+
+    <footer class="calculator-footer mt-auto py-4 text-center text-gray-600 border-t">
+      <p>All data is free to copy and use. See <a href="https://github.com/wosnerdwarriors" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">https://github.com/wosnerdwarriors</a> for source code</p>
+    </footer>
+  </main>
+
+  <script src="/js/navbar.js"></script>
+  <script type="module" src="/calculator/js/app.js?v=20260716-sticky-tables"></script>
+  <script src="/js/darkmode.js?v=20260713"></script>
+  <script src="/js/google-analytics.js"></script>
+</body>
+</html>

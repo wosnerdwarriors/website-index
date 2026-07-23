@@ -1,0 +1,74 @@
+{
+  "construction": {
+    "description": "Furnace level 1 to 3 resource and duration expectations",
+    "building": "Furnace",
+    "current": 1,
+    "desired": 3,
+    "expected": {
+      "wood": 985,
+      "rawSeconds": 66,
+      "adjustedSeconds": 66
+    }
+  },
+  "chiefGear": {
+    "description": "Chief gear Hat level 1 to 2 from New Chief Gear Data",
+    "expected": {
+      "alloy": 1500,
+      "polish": 15,
+      "svsPoints": 1125
+    }
+  },
+  "dawnAcademy": {
+    "description": "Cyrille level 0 to 2 from expert level data",
+    "expert": "Cyrille",
+    "current": 0,
+    "desired": 2,
+    "expected": {
+      "affinity": 1200,
+      "books": 0.0323,
+      "xp": 0.02
+    }
+  },
+  "pets": {
+    "description": "Frostscale Chameleon full upgrade expectations",
+    "pet": "Frostscale Chameleon",
+    "expected": {
+      "food": 834625,
+      "manuals": 2990,
+      "potions": 600,
+      "serum": 310
+    }
+  },
+  "troops": {
+    "description": "Infantry tier 10 training cost for 1000 troops from Troop Data",
+    "state": {
+      "type": "infantry",
+      "tier": 10,
+      "quantity": 1000,
+      "trainingSpeedPercent": 0
+    },
+    "expected": {
+      "meat": 2788000,
+      "wood": 2091000,
+      "points": 60000,
+      "rawSeconds": 152000
+    }
+  },
+  "heroGear": {
+    "description": "Hero gear totals for the default gear sets",
+    "expected": {
+      "gearSets": 9,
+      "heroGearXp": 534700,
+      "essenceStones": 2440
+    }
+  },
+  "heroes": {
+    "description": "Hero rows and default shard/widget totals",
+    "expected": {
+      "heroRows": 62,
+      "shardCost": 1715,
+      "generalNeeded": 1189,
+      "widgetsNeeded": 270
+    }
+  }
+}

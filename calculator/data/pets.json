@@ -1,0 +1,2454 @@
+{
+  "items": [
+    {
+      "name": "Cave Hyena",
+      "current": 50.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Arctic Wolf",
+      "current": 60.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Musk Ox",
+      "current": 60.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Giant Tapir",
+      "current": 70.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Titan Roc",
+      "current": 70.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Giant Elk",
+      "current": 80.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Snow Leopard",
+      "current": 80.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Cave Lion",
+      "current": 100.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Snow Ape",
+      "current": 100.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Iron Rhino",
+      "current": 100.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Sabertooth Tiger",
+      "current": 100.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Mammoth",
+      "current": 100.1,
+      "desired": null,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Frost Gorilla",
+      "current": 100.1,
+      "desired": 100.1,
+      "food": 0,
+      "manuals": 0,
+      "potions": 0,
+      "serum": 0,
+      "points": null
+    },
+    {
+      "name": "Frostscale Chameleon",
+      "current": 0,
+      "desired": 100.1,
+      "food": 834625,
+      "manuals": 2990,
+      "potions": 600,
+      "serum": 310,
+      "points": "Assuming these will be the next pets, keeping with the SSR costs for the last several released"
+    },
+    {
+      "name": "Pet Advancement Mats. Custom Chests",
+      "current": null,
+      "desired": null,
+      "food": 1235,
+      "manuals": null,
+      "potions": null,
+      "serum": null,
+      "points": null
+    },
+    {
+      "name": "Chests From Custom Pet Chest Pack",
+      "current": null,
+      "desired": null,
+      "food": 0,
+      "manuals": null,
+      "potions": null,
+      "serum": null,
+      "points": null
+    },
+    {
+      "name": "Remaining Chests",
+      "current": null,
+      "desired": null,
+      "food": 1088,
+      "manuals": null,
+      "potions": null,
+      "serum": null,
+      "points": null
+    },
+    {
+      "name": "Resource",
+      "current": null,
+      "desired": "# Mats",
+      "food": "Chests To Open",
+      "manuals": null,
+      "potions": "Resource Rcvd",
+      "serum": null,
+      "points": null
+    }
+  ],
+  "petLevels": {
+    "Cave Hyena": [
+      {
+        "level": 10,
+        "food": 1715,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 15,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 3180,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 30,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 5010,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 45,
+        "potions": 10,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 7660,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 60,
+        "potions": 20,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 11310,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 90,
+        "potions": 30,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 17500
+      }
+    ],
+    "Arctic Wolf": [
+      {
+        "level": 10,
+        "food": 2530,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 20,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 5360,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 40,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 9020,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 60,
+        "potions": 10,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 14320,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 90,
+        "potions": 20,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 21620,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 130,
+        "potions": 30,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 30920,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 175,
+        "potions": 50,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 17500
+      }
+    ],
+    "Musk Ox": [
+      {
+        "level": 10,
+        "food": 2530,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 20,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 5360,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 40,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 9020,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 60,
+        "potions": 10,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 14320,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 90,
+        "potions": 20,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 21620,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 130,
+        "potions": 30,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 30920,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 175,
+        "potions": 50,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 17500
+      }
+    ],
+    "Giant Tapir": [
+      {
+        "level": 10,
+        "food": 3795,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 25,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 8040,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 50,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 13530,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 75,
+        "potions": 10,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 21480,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 100,
+        "potions": 20,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 32430,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 155,
+        "potions": 30,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 46380,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 200,
+        "potions": 50,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 63300,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 255,
+        "potions": 80,
+        "serum": 40,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 17500
+      }
+    ],
+    "Titan Roc": [
+      {
+        "level": 10,
+        "food": 3795,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 25,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 8040,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 50,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 13530,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 75,
+        "potions": 10,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 21480,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 100,
+        "potions": 20,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 32430,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 155,
+        "potions": 30,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 46380,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 200,
+        "potions": 50,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 63300,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 255,
+        "potions": 80,
+        "serum": 40,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 17500
+      }
+    ],
+    "Giant Elk": [
+      {
+        "level": 10,
+        "food": 5060,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 30,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 10720,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 60,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 18040,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 95,
+        "potions": 10,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 28640,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 125,
+        "potions": 20,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 43240,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 190,
+        "potions": 30,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 61840,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 250,
+        "potions": 50,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 84400,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 310,
+        "potions": 80,
+        "serum": 40,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 108480,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 380,
+        "potions": 100,
+        "serum": 60,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 17500
+      }
+    ],
+    "Snow Leopard": [
+      {
+        "level": 10,
+        "food": 5060,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 30,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 10720,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 60,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 18040,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 95,
+        "potions": 10,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 28640,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 125,
+        "potions": 20,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 43240,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 190,
+        "potions": 30,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 61840,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 250,
+        "potions": 50,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 84400,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 310,
+        "potions": 80,
+        "serum": 40,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 108480,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 380,
+        "potions": 100,
+        "serum": 60,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 17500
+      }
+    ],
+    "Cave Lion": [
+      {
+        "level": 10,
+        "food": 6325,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 35,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 13400,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 70,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 22550,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 110,
+        "potions": 15,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 35800,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 145,
+        "potions": 35,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 54050,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 220,
+        "potions": 50,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 77300,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 290,
+        "potions": 65,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 105500,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 365,
+        "potions": 85,
+        "serum": 40,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 135600,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 440,
+        "potions": 100,
+        "serum": 60,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 172000,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 585,
+        "potions": 115,
+        "serum": 80,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 212100,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 730,
+        "potions": 135,
+        "serum": 100,
+        "points": 17500
+      }
+    ],
+    "Snow Ape": [
+      {
+        "level": 10,
+        "food": 6325,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 35,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 13400,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 70,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 22550,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 110,
+        "potions": 15,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 35800,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 145,
+        "potions": 35,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 54050,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 220,
+        "potions": 50,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 77300,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 290,
+        "potions": 65,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 105500,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 365,
+        "potions": 85,
+        "serum": 40,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 135600,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 440,
+        "potions": 100,
+        "serum": 60,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 172000,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 585,
+        "potions": 115,
+        "serum": 80,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 212100,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 730,
+        "potions": 135,
+        "serum": 100,
+        "points": 17500
+      }
+    ],
+    "Iron Rhino": [
+      {
+        "level": 10,
+        "food": 6325,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 35,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 13400,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 70,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 22550,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 110,
+        "potions": 15,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 35800,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 145,
+        "potions": 35,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 54050,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 220,
+        "potions": 50,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 77300,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 290,
+        "potions": 65,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 105500,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 365,
+        "potions": 85,
+        "serum": 40,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 135600,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 440,
+        "potions": 100,
+        "serum": 60,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 172000,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 585,
+        "potions": 115,
+        "serum": 80,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 212100,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 730,
+        "potions": 135,
+        "serum": 100,
+        "points": 17500
+      }
+    ],
+    "Sabertooth Tiger": [
+      {
+        "level": 10,
+        "food": 6325,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 35,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 13400,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 70,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 22550,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 110,
+        "potions": 15,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 35800,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 145,
+        "potions": 35,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 54050,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 220,
+        "potions": 50,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 77300,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 290,
+        "potions": 65,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 105500,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 365,
+        "potions": 85,
+        "serum": 40,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 135600,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 440,
+        "potions": 100,
+        "serum": 60,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 172000,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 585,
+        "potions": 115,
+        "serum": 80,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 212100,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 730,
+        "potions": 135,
+        "serum": 100,
+        "points": 17500
+      }
+    ],
+    "Mammoth": [
+      {
+        "level": 10,
+        "food": 6325,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 35,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 13400,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 70,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 22550,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 110,
+        "potions": 15,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 35800,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 145,
+        "potions": 35,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 54050,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 220,
+        "potions": 50,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 77300,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 290,
+        "potions": 65,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 105500,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 365,
+        "potions": 85,
+        "serum": 40,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 135600,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 440,
+        "potions": 100,
+        "serum": 60,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 172000,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 585,
+        "potions": 115,
+        "serum": 80,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 212100,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 730,
+        "potions": 135,
+        "serum": 100,
+        "points": 17500
+      }
+    ],
+    "Frost Gorilla": [
+      {
+        "level": 10,
+        "food": 6325,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 35,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 13400,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 70,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 22550,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 110,
+        "potions": 15,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 35800,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 145,
+        "potions": 35,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 54050,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 220,
+        "potions": 50,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 77300,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 290,
+        "potions": 65,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 105500,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 365,
+        "potions": 85,
+        "serum": 40,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 135600,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 440,
+        "potions": 100,
+        "serum": 60,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 172000,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 585,
+        "potions": 115,
+        "serum": 80,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 212100,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 730,
+        "potions": 135,
+        "serum": 100,
+        "points": 17500
+      }
+    ],
+    "Frostscale Chameleon": [
+      {
+        "level": 10,
+        "food": 6325,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 10.1,
+        "food": 0,
+        "manuals": 35,
+        "potions": 0,
+        "serum": 0,
+        "points": 500
+      },
+      {
+        "level": 20,
+        "food": 13400,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 20.1,
+        "food": 0,
+        "manuals": 70,
+        "potions": 0,
+        "serum": 0,
+        "points": 1000
+      },
+      {
+        "level": 30,
+        "food": 22550,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 30.1,
+        "food": 0,
+        "manuals": 110,
+        "potions": 15,
+        "serum": 0,
+        "points": 2000
+      },
+      {
+        "level": 40,
+        "food": 35800,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 40.1,
+        "food": 0,
+        "manuals": 145,
+        "potions": 35,
+        "serum": 0,
+        "points": 3000
+      },
+      {
+        "level": 50,
+        "food": 54050,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 50.1,
+        "food": 0,
+        "manuals": 220,
+        "potions": 50,
+        "serum": 10,
+        "points": 4500
+      },
+      {
+        "level": 60,
+        "food": 77300,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 60.1,
+        "food": 0,
+        "manuals": 290,
+        "potions": 65,
+        "serum": 20,
+        "points": 6750
+      },
+      {
+        "level": 70,
+        "food": 105500,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 70.1,
+        "food": 0,
+        "manuals": 365,
+        "potions": 85,
+        "serum": 40,
+        "points": 10000
+      },
+      {
+        "level": 80,
+        "food": 135600,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 80.1,
+        "food": 0,
+        "manuals": 440,
+        "potions": 100,
+        "serum": 60,
+        "points": 12000
+      },
+      {
+        "level": 90,
+        "food": 172000,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 90.1,
+        "food": 0,
+        "manuals": 585,
+        "potions": 115,
+        "serum": 80,
+        "points": 14500
+      },
+      {
+        "level": 100,
+        "food": 212100,
+        "manuals": 0,
+        "potions": 0,
+        "serum": 0,
+        "points": 0
+      },
+      {
+        "level": 100.1,
+        "food": 0,
+        "manuals": 730,
+        "potions": 135,
+        "serum": 100,
+        "points": 17500
+      }
+    ]
+  }
+}

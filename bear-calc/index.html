@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bear Hunt Calculator - WOS Nerds</title>
+  <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
+  <link rel="stylesheet" href="/css/darkmode.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+    }
+    /* Custom scrollbar for settings panel */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.3);
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(156, 163, 175, 0.5);
+    }
+    /* Gradient fallbacks for elements if Tailwind CSS is not loaded/purged */
+    .title-gradient-fallback {
+      background: linear-gradient(90deg, #9333ea, #6366f1) !important;
+      -webkit-background-clip: text !important;
+      background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      color: transparent !important;
+    }
+    .boost-card-gradient-fallback {
+      background: linear-gradient(135deg, #7c3aed, #4f46e5) !important;
+      color: #ffffff !important;
+    }
+    .boost-card-gradient-fallback .text-purple-200 {
+      color: #e9d5ff !important;
+    }
+    .boost-card-gradient-fallback .text-purple-100 {
+      color: #f3e8ff !important;
+    }
+    .boost-card-gradient-fallback .border-purple-500\/30 {
+      border-color: rgba(168, 85, 247, 0.3) !important;
+    }
+    .optimal-badge-gradient-fallback {
+      background: linear-gradient(90deg, #10b981, #0d9488) !important;
+      color: #ffffff !important;
+    }
+    .optimal-badge-gradient-fallback .text-emerald-100 {
+      color: #d1fae5 !important;
+    }
+    .optimal-badge-gradient-fallback .text-emerald-50 {
+      color: #ecfdf5 !important;
+    }
+    .optimal-badge-gradient-fallback .border-emerald-400\/30 {
+      border-color: rgba(52, 211, 153, 0.3) !important;
+    }
+    /* Dark Mode style overrides to integrate with darkmode.css */
+    body.dark {
+      background-color: #0b0f19 !important; /* Zinc-950/Slate-950 level dark */
+    }
+    body.dark .bg-white {
+      background-color: #121824 !important; /* Slate-900 card background */
+      border-color: #1e293b !important;
+    }
+    body.dark .bg-gray-50 {
+      background-color: #0b0f19 !important;
+    }
+    body.dark .bg-purple-50 {
+      background-color: rgba(168, 85, 247, 0.1) !important;
+    }
+    body.dark .border-gray-100,
+    body.dark .border-gray-200,
+    body.dark .border-b,
+    body.dark .border-t {
+      border-color: #1e293b !important;
+    }
+    body.dark .text-gray-800 {
+      color: #f8fafc !important; /* slate-50 */
+    }
+    body.dark .text-gray-700 {
+      color: #e2e8f0 !important; /* slate-200 */
+    }
+    body.dark .text-gray-600 {
+      color: #cbd5e1 !important; /* slate-300 */
+    }
+    body.dark .text-gray-500 {
+      color: #94a3b8 !important; /* slate-400 */
+    }
+    body.dark .text-gray-400 {
+      color: #9ca3af !important; /* gray-400 – keep original level for good contrast */
+    }
+    body.dark .bg-gray-100 {
+      background-color: #1e293b !important; /* slate-800 */
+    }
+    body.dark .bg-gray-200 {
+      background-color: #334155 !important; /* slate-700 */
+    }
+    body.dark .text-purple-700,
+    body.dark .text-purple-600 {
+      color: #c084fc !important; /* purple-400 */
+    }
+    body.dark input,
+    body.dark select {
+      background-color: #0b0f19 !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+    body.dark input:disabled,
+    body.dark select:disabled {
+      background-color: rgba(15, 23, 42, 0.5) !important;
+      color: #475569 !important;
+      border-color: #1e293b !important;
+    }
+    body.dark select option {
+      background-color: #121824 !important;
+      color: #f8fafc !important;
+    }
+    body.dark .opt-joiner-checkbox {
+      background-color: #0b0f19 !important;
+      border-color: #334155 !important;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 transition-colors duration-300 min-h-screen">
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="fixed inset-0 z-50 bg-zinc-950 flex flex-col items-center justify-center text-white">
+    <div class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+    <h3 class="text-xl font-bold">WOS Bear Hunt Calculator</h3>
+    <p class="text-gray-400 mt-2 text-sm" id="loading-status">Loading game database...</p>
+  </div>
+
+  <!-- Main Container -->
+  <div class="md:ml-64 p-4 transition-all duration-300 min-h-screen flex flex-col">
+    <main class="flex-grow container mx-auto px-4 py-8">
+
+      <!-- Top Title Bar -->
+      <div class="text-center md:text-left mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 border-gray-200">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-500 bg-clip-text text-transparent flex items-center justify-center md:justify-start gap-2 title-gradient-fallback">
+            <span>🐻 WOS Bear Hunt Calculator & Optimizer</span>
+          </h1>
+          <p class="text-gray-500 dark:text-gray-400 mt-1">Optimize your starters, joiners, and troop ratios to maximize bear defense scores.</p>
+        </div>
+
+        <div class="flex gap-3 justify-center">
+          <label class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium cursor-pointer shadow-md transition-colors text-sm flex items-center gap-1">
+            📥 Import Config
+            <input type="file" id="import-config-file" accept=".json" class="hidden">
+          </label>
+          <button id="export-config-btn" class="bg-zinc-700 hover:bg-zinc-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white px-4 py-2 rounded-lg font-medium shadow-md transition-colors text-sm flex items-center gap-1">
+            📤 Export Config
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Layout: Sidebar config on Left, Calculator on Right -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+
+        <!-- Sidebar Panel: Player stats & settings (Takes 1 Column on Desktop) -->
+        <div class="lg:col-span-1 bg-white p-5 rounded-xl border border-gray-100 shadow-md flex flex-col gap-5 max-h-[85vh] overflow-y-auto custom-scrollbar">
+          <div>
+            <h2 class="text-lg font-bold text-purple-700 border-b pb-2 mb-4">⚙️ Player Base Stats</h2>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">All Troops Lethality (%)</label>
+                <input type="number" id="stat-all-leth" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">All Troops Attack (%)</label>
+                <input type="number" id="stat-all-atk" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Trap Level Buff (%)</label>
+                <input type="number" id="stat-trap-buff" step="1" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- Troop specific expanders -->
+          <details class="group">
+            <summary class="flex justify-between items-center text-sm font-bold text-gray-700 cursor-pointer select-none">
+              <span>🛡️ Troop Class Buffs</span>
+              <span class="text-gray-400 group-open:rotate-180 transition-transform duration-200">▼</span>
+            </summary>
+            <div class="pt-3 space-y-4 border-t mt-2">
+              <div class="border-b pb-2">
+                <span class="text-xs font-bold text-purple-600 block mb-2">Infantry Class Base</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Leth (%)</label>
+                    <input type="number" id="stat-inf-leth" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Atk (%)</label>
+                    <input type="number" id="stat-inf-atk" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                </div>
+              </div>
+              <div class="border-b pb-2">
+                <span class="text-xs font-bold text-purple-600 block mb-2">Lancer Class Base</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Leth (%)</label>
+                    <input type="number" id="stat-lan-leth" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Atk (%)</label>
+                    <input type="number" id="stat-lan-atk" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                </div>
+              </div>
+              <div class="pb-1">
+                <span class="text-xs font-bold text-purple-600 block mb-2">Marksman Class Base</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Leth (%)</label>
+                    <input type="number" id="stat-mar-leth" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Atk (%)</label>
+                    <input type="number" id="stat-mar-atk" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Gear stats expanders -->
+          <details class="group">
+            <summary class="flex justify-between items-center text-sm font-bold text-gray-700 cursor-pointer select-none">
+              <span>🛡️ Gear Difference Buffs</span>
+              <span class="text-gray-400 group-open:rotate-180 transition-transform duration-200">▼</span>
+            </summary>
+            <div class="pt-3 space-y-4 border-t mt-2">
+              <p class="text-[10px] text-gray-400">Difference between equipped and non-equipped gear.</p>
+              <div class="border-b pb-2">
+                <span class="text-xs font-bold text-purple-600 block mb-2">Infantry Gear</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Leth (%)</label>
+                    <input type="number" id="stat-gear-inf-leth" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Atk (%)</label>
+                    <input type="number" id="stat-gear-inf-atk" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                </div>
+              </div>
+              <div class="border-b pb-2">
+                <span class="text-xs font-bold text-purple-600 block mb-2">Lancer Gear</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Leth (%)</label>
+                    <input type="number" id="stat-gear-lan-leth" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Atk (%)</label>
+                    <input type="number" id="stat-gear-lan-atk" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                </div>
+              </div>
+              <div class="pb-1">
+                <span class="text-xs font-bold text-purple-600 block mb-2">Marksman Gear</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Leth (%)</label>
+                    <input type="number" id="stat-gear-mar-leth" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Atk (%)</label>
+                    <input type="number" id="stat-gear-mar-atk" step="5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Pet Settings -->
+          <div>
+            <h2 class="text-sm font-bold text-gray-700 border-b pb-2 mb-3 flex items-center justify-between">
+              <span>🦁 Pet Settings</span>
+              <input type="checkbox" id="stat-pets-active" class="rounded text-purple-600 focus:ring-purple-500 w-4 h-4">
+            </h2>
+            <div id="pet-settings-container" class="space-y-3">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-[10px] text-gray-400 font-bold uppercase">Chameleon (%)</label>
+                  <input type="number" id="stat-cham" step="0.5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                </div>
+                <div>
+                  <label class="text-[10px] text-gray-400 font-bold uppercase">Sabre-Tooth (%)</label>
+                  <input type="number" id="stat-sabre" step="0.5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-[10px] text-gray-400 font-bold uppercase">Cave Lion (%)</label>
+                  <input type="number" id="stat-lion" step="0.5" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                </div>
+                <div>
+                  <label class="text-[10px] text-gray-400 font-bold uppercase">Snow Ape Cap</label>
+                  <input type="number" id="stat-ape" step="500" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Capacity and Buffs -->
+          <div>
+            <h2 class="text-sm font-bold text-gray-700 border-b pb-2 mb-3">📈 Squad Capacity</h2>
+            <div class="space-y-3">
+              <div>
+                <label class="text-[10px] text-gray-400 font-bold uppercase">Base Squad Size</label>
+                <input type="number" id="stat-base-size" step="1000" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-[10px] text-gray-400 font-bold uppercase">Deploy Buff</label>
+                  <select id="stat-deploy-buff" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                    <option value="Nil">Nil</option>
+                    <option value="10%">10%</option>
+                    <option value="20%">20%</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-[10px] text-gray-400 font-bold uppercase">Rosarion Mode</label>
+                  <select id="stat-rosarion" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="text-[10px] text-gray-400 font-bold uppercase">Minister Buff</label>
+                <select id="stat-minister" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                  <!-- Dynamic -->
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Main Panel: Tabs and Operations (Takes 3 Columns on Desktop) -->
+        <div class="lg:col-span-3 space-y-6">
+
+          <!-- Navigation Tabs -->
+          <div class="border-b border-gray-200 dark:border-zinc-700">
+            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="bear-tabs" role="tablist">
+              <li class="mr-2" role="presentation">
+                <button class="inline-block p-4 border-b-2 border-purple-600 text-purple-600 rounded-t-lg font-bold flex items-center gap-1" id="calc-tab" data-target="squad-calculator" role="tab">
+                  📊 Squad Calculator
+                </button>
+              </li>
+              <li class="mr-2" role="presentation">
+                <button class="inline-block p-4 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-600 hover:border-gray-300 rounded-t-lg font-bold flex items-center gap-1" id="opt-tab" data-target="combinatorial-optimizer" role="tab">
+                  ⚡ Combinatorial Optimizer
+                </button>
+              </li>
+              <li class="mr-2" role="presentation">
+                <button class="inline-block p-4 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-600 hover:border-gray-300 rounded-t-lg font-bold flex items-center gap-1" id="roster-tab" data-target="hero-roster-editor" role="tab">
+                  👥 Hero Roster Editor
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Tabs Content Pane -->
+          <div class="tab-content">
+
+            <!-- SECTION 1: Squad Calculator -->
+            <section id="squad-calculator" class="tab-pane block space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+
+                <!-- Inputs (Left 3 Columns) -->
+                <div class="md:col-span-3 space-y-6">
+
+                  <!-- Starter Selection -->
+                  <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-md">
+                    <h3 class="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <span class="p-1.5 bg-purple-50 text-purple-600 rounded-lg">🛡️</span> Starter Selection
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">🛡️ Infantry Starter</label>
+                        <select id="calc-inf-starter" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+                          <!-- Dynamic -->
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">⚡ Lancer Starter</label>
+                        <select id="calc-lan-starter" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+                          <!-- Dynamic -->
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">🎯 Marksman Starter</label>
+                        <select id="calc-mar-starter" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+                          <!-- Dynamic -->
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Joiner Selection -->
+                  <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-md">
+                    <h3 class="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <span class="p-1.5 bg-purple-50 text-purple-600 rounded-lg">👥</span> Joiner Selection (Level 5 Skills)
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Joiner 1</label>
+                        <select id="calc-joiner-1" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+                          <!-- Dynamic -->
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Joiner 2</label>
+                        <select id="calc-joiner-2" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+                          <!-- Dynamic -->
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Joiner 3</label>
+                        <select id="calc-joiner-3" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+                          <!-- Dynamic -->
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Joiner 4</label>
+                        <select id="calc-joiner-4" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+                          <!-- Dynamic -->
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Troop Level Details -->
+                  <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-md">
+                    <h3 class="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <span class="p-1.5 bg-purple-50 text-purple-600 rounded-lg">📈</span> Troop Crystal Tiers
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Infantry Tier</label>
+                        <select id="calc-inf-tier" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+                          <!-- Dynamic -->
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Lancer Tier</label>
+                        <select id="calc-lan-tier" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+                          <!-- Dynamic -->
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Marksman Tier</label>
+                        <select id="calc-mar-tier" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+                          <!-- Dynamic -->
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Outputs (Right 2 Columns) -->
+                <div class="md:col-span-2 space-y-6">
+
+                  <!-- Normalized Boost Card -->
+                  <div class="bg-gradient-to-br from-purple-600 to-indigo-700 p-6 rounded-xl text-white shadow-xl flex flex-col justify-between relative overflow-hidden boost-card-gradient-fallback">
+                    <div class="absolute -right-4 -bottom-4 text-purple-500 opacity-20 text-8xl font-black">🐻</div>
+                    <div class="z-10">
+                      <span class="text-xs uppercase font-extrabold tracking-widest text-purple-200 block mb-1">Normalized Bear Boost</span>
+                      <div class="text-5xl font-black tracking-tight" id="calc-boost-val">0.0000</div>
+                      <div class="mt-4 pt-4 border-t border-purple-500/30 text-xs text-purple-100 space-y-1.5">
+                        <div class="flex justify-between"><span>Raw Mathematical Boost:</span> <span class="font-bold" id="calc-raw-boost">0.00</span></div>
+                        <div class="flex justify-between"><span>Bear Defense Norm:</span> <span class="font-bold">23,400</span></div>
+                        <div class="flex justify-between"><span>Chameleon Multiplier:</span> <span class="font-bold" id="calc-cham-mult">1.0x</span></div>
+                        <div class="flex justify-between"><span>Cyrille Multiplier:</span> <span class="font-bold" id="calc-cyrille-mult">1.0x</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Optimal Troop Ratios -->
+                  <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-md space-y-4">
+                    <h3 class="text-base font-bold text-gray-800">Optimal Troop Ratios & Counts</h3>
+
+                    <!-- Infantry Progress -->
+                    <div>
+                      <div class="flex justify-between text-xs font-bold mb-1">
+                        <span class="text-gray-600">🛡️ Infantry Ratio</span>
+                        <span class="text-purple-600" id="calc-ratio-inf-percent">0.00%</span>
+                      </div>
+                      <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                        <div class="bg-blue-500 h-2.5 transition-all duration-300" id="calc-ratio-inf-bar" style="width: 0%"></div>
+                      </div>
+                      <div class="text-[10px] text-gray-400 mt-1">Count: <code id="calc-count-inf">0</code> / <span id="calc-capacity-inf">0</span></div>
+                    </div>
+
+                    <!-- Lancer Progress -->
+                    <div>
+                      <div class="flex justify-between text-xs font-bold mb-1">
+                        <span class="text-gray-600">⚡ Lancer Ratio</span>
+                        <span class="text-purple-600" id="calc-ratio-lan-percent">0.00%</span>
+                      </div>
+                      <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                        <div class="bg-yellow-500 h-2.5 transition-all duration-300" id="calc-ratio-lan-bar" style="width: 0%"></div>
+                      </div>
+                      <div class="text-[10px] text-gray-400 mt-1">Count: <code id="calc-count-lan">0</code> / <span id="calc-capacity-lan">0</span></div>
+                    </div>
+
+                    <!-- Marksman Progress -->
+                    <div>
+                      <div class="flex justify-between text-xs font-bold mb-1">
+                        <span class="text-gray-600">🎯 Marksman Ratio</span>
+                        <span class="text-purple-600" id="calc-ratio-mar-percent">0.00%</span>
+                      </div>
+                      <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                        <div class="bg-red-500 h-2.5 transition-all duration-300" id="calc-ratio-mar-bar" style="width: 0%"></div>
+                      </div>
+                      <div class="text-[10px] text-gray-400 mt-1">Count: <code id="calc-count-mar">0</code> / <span id="calc-capacity-mar">0</span></div>
+                    </div>
+
+                  </div>
+
+                  <!-- Intermediate Values Details -->
+                  <details class="bg-white p-4 rounded-xl border border-gray-100 shadow-md group">
+                    <summary class="flex justify-between items-center text-sm font-bold text-gray-700 cursor-pointer select-none">
+                      <span>🔬 Intermediate Theoretical Damage</span>
+                      <span class="text-gray-400 group-open:rotate-180 transition-transform duration-200">▼</span>
+                    </summary>
+                    <div class="mt-4 pt-3 border-t text-xs font-mono space-y-1 text-gray-600 bg-gray-50 p-3 rounded-lg overflow-x-auto" id="calc-intermediates-json">
+                      <!-- Dynamic JSON dump -->
+                    </div>
+                  </details>
+
+                </div>
+              </div>
+            </section>
+
+            <!-- SECTION 2: Combinatorial Optimizer -->
+            <section id="combinatorial-optimizer" class="tab-pane hidden space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+
+                <!-- Input Filters (Left 2 Columns) -->
+                <div class="md:col-span-2 space-y-6">
+                  <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-md space-y-5">
+                    <h3 class="text-base font-bold text-gray-800 border-b pb-2">🏹 Setup Optimization Run</h3>
+
+                    <div>
+                      <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Available Starters Candidates</span>
+                      <div class="bg-purple-50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-300 rounded-lg p-3 text-xs space-y-2 border border-purple-100 dark:border-purple-900/50">
+                        <div>🛡️ Infantry: <code class="font-bold font-mono" id="opt-candidate-inf">None (checks all unlocked)</code></div>
+                        <div>⚡ Lancer: <code class="font-bold font-mono" id="opt-candidate-lan">None (checks all unlocked)</code></div>
+                        <div>🎯 Marksman: <code class="font-bold font-mono" id="opt-candidate-mar">None (checks all unlocked)</code></div>
+                        <p class="text-[9px] text-gray-400 pt-1">To narrow optimizer searches, configure "Starter Candidates" in the Hero Roster tab.</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Select Joiner Pool</label>
+                      <div class="max-h-52 overflow-y-auto border border-gray-200 rounded-lg p-3 text-xs space-y-2 custom-scrollbar bg-gray-50" id="opt-joiner-checkboxes">
+                        <!-- Dynamic -->
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Number of Joiner Slots: <span id="opt-slots-val" class="font-bold text-purple-600">4</span></label>
+                      <input type="range" id="opt-slots-slider" min="0" max="4" value="4" class="w-full accent-purple-600">
+                    </div>
+
+                    <button id="opt-run-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold p-3 rounded-lg shadow-lg hover:shadow-purple-500/25 transition-all text-sm flex items-center justify-center gap-2">
+                      🚀 Run Combinatorial Optimization
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Run Progress / Results (Right 3 Columns) -->
+                <div class="md:col-span-3 space-y-6">
+
+                  <div id="opt-result-container" class="hidden space-y-6">
+                    <!-- Optimal Boost Badge -->
+                    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 rounded-xl text-white shadow-xl relative overflow-hidden optimal-badge-gradient-fallback">
+                      <div class="absolute -right-4 -bottom-4 text-emerald-400 opacity-20 text-8xl font-black">🏆</div>
+                      <span class="text-xs uppercase font-extrabold tracking-widest text-emerald-100 block mb-1">Mathematical Optimal Boost</span>
+                      <div class="text-5xl font-black tracking-tight" id="opt-boost-val">0.0000</div>
+                      <div class="mt-4 pt-4 border-t border-emerald-400/30 space-y-2 text-sm text-emerald-50 font-semibold" id="opt-result-squad">
+                        <!-- Dynamic best squad setup output -->
+                      </div>
+                    </div>
+
+                    <!-- Ratios and count grid -->
+                    <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-md">
+                      <h4 class="text-sm font-bold text-gray-700 mb-4">Optimal Ratios & Counts for this configuration:</h4>
+                      <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-gray-50 p-3 rounded-lg text-center">
+                          <span class="text-[10px] text-gray-400 font-bold uppercase block">Infantry</span>
+                          <span class="text-base font-bold text-purple-600 block mt-1" id="opt-ratio-inf">0.00%</span>
+                          <span class="text-[10px] text-gray-500 block" id="opt-count-inf">0 troops</span>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg text-center">
+                          <span class="text-[10px] text-gray-400 font-bold uppercase block">Lancer</span>
+                          <span class="text-base font-bold text-purple-600 block mt-1" id="opt-ratio-lan">0.00%</span>
+                          <span class="text-[10px] text-gray-500 block" id="opt-count-lan">0 troops</span>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg text-center">
+                          <span class="text-[10px] text-gray-400 font-bold uppercase block">Marksman</span>
+                          <span class="text-base font-bold text-purple-600 block mt-1" id="opt-ratio-mar">0.00%</span>
+                          <span class="text-[10px] text-gray-500 block" id="opt-count-mar">0 troops</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Load Button -->
+                    <button id="opt-load-squad-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-3 rounded-lg shadow-lg hover:shadow-emerald-500/25 transition-all text-sm flex items-center justify-center gap-1">
+                      📥 Load this squad into Squad Calculator
+                    </button>
+                  </div>
+
+                  <!-- Standby / Running view -->
+                  <div id="opt-standby-view" class="bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-12 text-center text-gray-400">
+                    <span class="text-4xl block mb-2">🎯</span>
+                    <p class="text-sm font-semibold">Optimizer Ready</p>
+                    <p class="text-xs mt-1 max-w-sm mx-auto">Set options on the left and run analysis to find the absolute best starters and joiners configuration.</p>
+                  </div>
+
+                  <div id="opt-running-view" class="hidden bg-gray-50 border border-gray-100 rounded-xl p-12 text-center">
+                    <div class="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p class="text-sm font-bold text-gray-600">Analyzing combinations...</p>
+                    <p class="text-xs text-gray-400 mt-1" id="opt-running-stats">Evaluated 0 / 0 configuration branches</p>
+                    <button id="opt-cancel-btn" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-xs font-bold">Cancel exhaustive search</button>
+                  </div>
+
+                </div>
+              </div>
+            </section>
+
+            <!-- SECTION 3: Hero Roster Editor -->
+            <section id="hero-roster-editor" class="tab-pane hidden space-y-6">
+
+              <!-- Filter / Search Section -->
+              <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-md">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                  <div class="md:col-span-4">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">🔍 Search Heroes</label>
+                    <input type="text" id="roster-search" placeholder="Type hero name to filter..." class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-purple-500 focus:border-purple-500">
+                  </div>
+
+                  <div class="md:col-span-8">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Filter by Generation</label>
+                    <div class="flex flex-wrap gap-2" id="roster-gen-checkboxes">
+                      <!-- Dynamic checkboxes -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mass Actions Panel -->
+              <details class="bg-white rounded-xl border border-gray-100 shadow-md group">
+                <summary class="flex justify-between items-center p-5 text-sm font-bold text-gray-700 cursor-pointer select-none">
+                  <span class="flex items-center gap-1.5 text-purple-700">🛠️ Mass Actions Panel</span>
+                  <span class="text-gray-400 group-open:rotate-180 transition-transform duration-200">▼</span>
+                </summary>
+                <div class="px-5 pb-5 border-t pt-4 space-y-5">
+                  <p class="text-xs text-gray-500 font-medium">Apply updates to multiple heroes simultaneously:</p>
+
+                  <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">1. Target Scope</label>
+                      <select id="mass-scope" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs">
+                        <option value="all">All Heroes</option>
+                        <option value="filtered">Filtered Heroes (matching search/filter)</option>
+                        <option value="infantry">Infantry only</option>
+                        <option value="lancer">Lancer only</option>
+                        <option value="marksman">Marksman only</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">2. Unlock Status</label>
+                      <button id="mass-unlock-btn" class="w-full bg-zinc-700 hover:bg-zinc-800 text-white font-bold p-2 rounded-lg text-xs transition-colors">
+                        Unlock Selected
+                      </button>
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">3. Star Level</label>
+                      <div class="flex gap-1">
+                        <select id="mass-stars" class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs flex-grow">
+                          <!-- Dynamic star options -->
+                        </select>
+                        <button id="mass-stars-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3 py-2 rounded-lg text-xs transition-colors">
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">4. Widget Level</label>
+                      <div class="flex gap-1">
+                        <input type="number" id="mass-widgets" min="0" max="10" value="0" class="bg-gray-50 border border-gray-200 rounded-lg p-2 text-xs w-16">
+                        <button id="mass-widgets-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3 py-2 rounded-lg text-xs transition-colors">
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">5. Starter Candidate</label>
+                      <button id="mass-starters-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-2 rounded-lg text-xs transition-colors">
+                        Candidate (Active)
+                      </button>
+                    </div>
+                  </div>
+
+                  <hr class="border-gray-100">
+
+                  <div class="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-red-100 dark:border-red-900/50">
+                    <div>
+                      <h4 class="text-xs font-bold text-red-700 dark:text-red-400">Danger Zone: Reset All Roster</h4>
+                      <p class="text-[10px] text-red-500 mt-1">This resets all heroes to defaults (0* star, 0 widgets, Locked, Inactive candidate).</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <label class="flex items-center gap-1 text-[11px] text-red-600 font-bold select-none cursor-pointer">
+                        <input type="checkbox" id="reset-confirm" class="rounded text-red-600 focus:ring-red-500 w-3.5 h-3.5">
+                        Confirm Reset
+                      </label>
+                      <button id="reset-roster-btn" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition-colors">
+                        🚨 Reset All Roster
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Roster Columns (Grouped by Class) -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- Infantry Column -->
+                <div class="space-y-4">
+                  <h3 class="text-base font-extrabold text-blue-600 border-b pb-2 flex items-center gap-2">
+                    <span>🛡️</span> Infantry Heroes
+                  </h3>
+                  <div id="roster-col-infantry" class="space-y-3">
+                    <!-- Dynamic -->
+                  </div>
+                </div>
+
+                <!-- Lancer Column -->
+                <div class="space-y-4">
+                  <h3 class="text-base font-extrabold text-yellow-600 border-b pb-2 flex items-center gap-2">
+                    <span>⚡</span> Lancer Heroes
+                  </h3>
+                  <div id="roster-col-lancer" class="space-y-3">
+                    <!-- Dynamic -->
+                  </div>
+                </div>
+
+                <!-- Marksman Column -->
+                <div class="space-y-4">
+                  <h3 class="text-base font-extrabold text-red-600 border-b pb-2 flex items-center gap-2">
+                    <span>🎯</span> Marksman Heroes
+                  </h3>
+                  <div id="roster-col-marksman" class="space-y-3">
+                    <!-- Dynamic -->
+                  </div>
+                </div>
+
+              </div>
+
+            </section>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-6 text-center text-gray-500 dark:text-gray-400 border-t border-gray-200 text-xs">
+      <p>All calculations are performed completely locally on your device. File config formats compatible with python version.</p>
+    </footer>
+  </div>
+
+  <!-- Interactive script to load data, map calculations and execute -->
+  <script>
+    // Constants
+    const MINISTER_BUFFS = {
+      "None": { lethality: 0.0, attack: 0.0, troops: 0 },
+      "Defense (normal) - lethality": { lethality: 0.1, attack: 0.0, troops: 0 },
+      "Defense (supreme) - lethality": { lethality: 0.15, attack: 0.0, troops: 0 },
+      "Strategy (normal) - attack, troop capacity": { lethality: 0.0, attack: 0.05, troops: 2500 },
+      "Strategy (supreme) - attack, troop capacity": { lethality: 0.0, attack: 0.08, troops: 3750 }
+    };
+
+    const STAR_LEVELS = [
+      "0*", "0.1*", "0.2*", "0.3*", "0.4*", "0.5*",
+      "1*", "1.1*", "1.2*", "1.3*", "1.4*", "1.5*",
+      "2*", "2.1*", "2.2*", "2.3*", "2.4*", "2.5*",
+      "3*", "3.1*", "3.2*", "3.3*", "3.4*", "3.5*",
+      "4*", "4.1*", "4.2*", "4.3*", "4.4*", "4.5*",
+      "5*"
+    ];
+
+    const DEFAULT_TOP_JOINERS = ["Jessie", "Bradley", "Reina", "Mia", "Norah", "Gwen", "Philly", "Lynn", "Seo-yoon", "Jasser", "Flint", "Dominic"];
+
+    // Globals
+    let db = {
+      heroesList: [],
+      heroMetadata: {},
+      heroSkills: {},
+      starLevelStats: {},
+      troopDamageStats: {},
+      widgetMultipliers: {}
+    };
+
+    let userProfile = {};
+    let selectedGens = [];
+    let optimizerWorker = null;
+
+    // Synonyms Maps
+    function getMetaName(name) {
+      if (!name) return name;
+      const nl = name.trim().toLowerCase();
+      const synonyms = {
+        "seo-yoon": "Seo-Yoon",
+        "seoyoon": "Seo-Yoon",
+        "ling": "Ling",
+        "ling xue": "Ling",
+        "lingxue": "Ling",
+        "wallis bokan": "Wallis Bokan",
+        "lumak bokan": "Wallis Bokan",
+        "lumakbokan": "Wallis Bokan",
+        "wallisbokan": "Wallis Bokan",
+      };
+      if (nl in synonyms) return synonyms[nl];
+      for (const k of Object.keys(db.heroMetadata)) {
+        if (k.toLowerCase() === nl) return k;
+      }
+      return name;
+    }
+
+    function getSkillName(name) {
+      if (!name) return name;
+      const nl = name.trim().toLowerCase();
+      const synonyms = {
+        "seo-yoon": "Seo-yoon",
+        "seoyoon": "Seo-yoon",
+        "ling": "Ling Xue",
+        "ling xue": "Ling Xue",
+        "lingxue": "Ling Xue",
+        "wallis bokan": "Lumak Bokan",
+        "lumak bokan": "Lumak Bokan",
+        "lumakbokan": "Lumak Bokan",
+        "wallisbokan": "Lumak Bokan",
+      };
+      if (nl in synonyms) return synonyms[nl];
+      for (const k of Object.keys(db.heroSkills)) {
+        if (k.toLowerCase() === nl) return k;
+      }
+      return name;
+    }
+
+    // Mathematical Helpers
+    function calculateWidgetMultiplier(level) {
+      if (level < 2) return 0.0;
+      if (level < 4) return 0.05;
+      if (level < 6) return 0.075;
+      if (level < 8) return 0.10;
+      if (level < 10) return 0.125;
+      return 0.15;
+    }
+
+    function calculateWidgetBuffs(starters, roster, rosarionMode) {
+      if (rosarionMode === "Yes") return { widgetLethality: 0.0, widgetAttack: 0.0 };
+      let widgetLethalitySum = 0.0;
+      let widgetAttackSum = 0.0;
+
+      for (const starter of starters) {
+        if (starter) {
+          const meta = db.heroMetadata[getMetaName(starter)] || {};
+          const info = roster[starter] || {};
+          const widgetLvl = info.widget_level || 0;
+          const mult = calculateWidgetMultiplier(widgetLvl);
+
+          widgetLethalitySum += (meta.rally_widget_lethality || 0.0) * mult;
+          widgetAttackSum += (meta.rally_widget_attack || 0.0) * mult;
+        }
+      }
+      return { widgetLethality: widgetLethalitySum, widgetAttack: widgetAttackSum };
+    }
+
+    function getStarBuff(heroName, starLvl) {
+      const metaName = getMetaName(heroName);
+      const heroStats = db.starLevelStats[metaName] || {};
+      let starLvlStr = String(starLvl).trim();
+      if (!(starLvlStr in heroStats) && !starLvlStr.endsWith("*")) {
+        starLvlStr += "*";
+      }
+      return heroStats[starLvlStr] || 0.0;
+    }
+
+    function getWidgetMultiplier(gen) {
+      let genStr = typeof gen === 'number' ? String(parseFloat(gen)) : String(gen);
+      if (genStr in db.widgetMultipliers) {
+        return db.widgetMultipliers[genStr];
+      }
+      if (genStr.endsWith(".0") && (genStr.slice(0, -2) in db.widgetMultipliers)) {
+        return db.widgetMultipliers[genStr.slice(0, -2)];
+      }
+      return db.widgetMultipliers[genStr] || 0.0;
+    }
+
+    function getHeroCombatStats(heroName, className, profile) {
+      const roster = profile.roster || {};
+      const baseStats = profile.base_stats || {};
+      const gearStats = profile.gear_stats || {};
+
+      const baseClassLeth = (baseStats[`${className}Lethality`] || 0.0) + (baseStats.AllTroopsLethality || 0.0);
+      const baseClassAtk = (baseStats[`${className}Attack`] || 0.0) + (baseStats.AllTroopsAttack || 0.0) + (baseStats.TrapLevelBuff || 0.0);
+
+      const gearClassLeth = gearStats[`${className}Lethality`] || 0.0;
+      const gearClassAtk = gearStats[`${className}Attack`] || 0.0;
+
+      const minBuffName = profile.minister_buff || "None";
+      const minBuffs = MINISTER_BUFFS[minBuffName] || { lethality: 0.0, attack: 0.0 };
+
+      let totalLeth = 0.0;
+      let totalAtk = 0.0;
+
+      if (heroName && roster[heroName]) {
+        const heroInfo = roster[heroName];
+        const starLvl = heroInfo.star_level || "0*";
+        const widgetLvl = heroInfo.widget_level || 0;
+
+        const starBuff = getStarBuff(heroName, starLvl) / 100.0;
+
+        const meta = db.heroMetadata[getMetaName(heroName)] || {};
+        const gen = meta.gen || 1.0;
+        const widgetMult = getWidgetMultiplier(gen);
+        const widgetBuff = widgetLvl * widgetMult;
+
+        totalLeth = widgetBuff + baseClassLeth + gearClassLeth + minBuffs.lethality;
+        totalAtk = starBuff + baseClassAtk + gearClassAtk + minBuffs.attack;
+      } else {
+        totalLeth = baseClassLeth + gearClassLeth + minBuffs.lethality;
+        totalAtk = baseClassAtk + gearClassAtk + minBuffs.attack;
+      }
+
+      if (profile.pets_active) {
+        const chameleon = profile.chameleon_buff || 0.0;
+        const tiger = profile.sabre_tooth_lethality || 0.0;
+        const lion = profile.cave_lion_atk || 0.0;
+
+        totalLeth = totalLeth * (1.0 + chameleon) + tiger;
+        totalAtk = totalAtk * (1.0 + chameleon) + lion;
+      }
+
+      return { lethality: totalLeth, attack: totalAtk };
+    }
+
+    function getSkillLevelFromStars(starLvlStr) {
+      if (!starLvlStr) return 1;
+      const starStr = String(starLvlStr).trim();
+      try {
+        const starsInt = parseInt(starStr[0], 10);
+        return Math.min(starsInt + 1, 5);
+      } catch (e) {
+        return 1;
+      }
+    }
+
+    function getHeroSkills(heroName) {
+      const name = getSkillName(heroName);
+      return db.heroSkills[name] || { stacks: 0, caller: {}, joiner: {} };
+    }
+
+    function getCallerSkills(heroName, skillLvl) {
+      const skills = getHeroSkills(heroName);
+      return (skills.caller || {})[String(skillLvl)] || {};
+    }
+
+    function getJoinerSkills(heroName) {
+      const skills = getHeroSkills(heroName);
+      return skills.joiner || {};
+    }
+
+    function isJoinerStackable(heroName) {
+      const skills = getHeroSkills(heroName);
+      return skills.stacks === 1;
+    }
+
+    function aggregateSkillBuff(statName, starters, joiners, roster) {
+      let callerSum = 0.0;
+      for (const starter of starters) {
+        if (starter && roster[starter]) {
+          const starLvl = roster[starter].star_level || "0*";
+          const lvl = getSkillLevelFromStars(starLvl);
+          callerSum += getCallerSkills(starter, lvl)[statName] || 0.0;
+        }
+      }
+
+      let joinerSum = 0.0;
+      const seenNonStacking = new Set();
+
+      for (const starter of starters) {
+        if (starter) {
+          if (!isJoinerStackable(starter)) {
+            seenNonStacking.add(starter);
+          }
+        }
+      }
+
+      for (const joiner of joiners) {
+        if (!joiner) continue;
+        const stackable = isJoinerStackable(joiner);
+        if (!stackable) {
+          if (seenNonStacking.has(joiner)) continue;
+          seenNonStacking.add(joiner);
+        }
+        joinerSum += getJoinerSkills(joiner)[`S1_${statName}`] || 0.0;
+      }
+
+      return 1.0 + callerSum + joinerSum;
+    }
+
+    function calculateSquad(profile, starters, joiners, infTier, lanTier, marTier) {
+      const roster = profile.roster || {};
+      const rosarionMode = profile.rosarion_mode || "No";
+      const petsActive = profile.pets_active || false;
+
+      // 1. Widget Buffs
+      const { widgetLethality, widgetAttack } = calculateWidgetBuffs(starters, roster, rosarionMode);
+
+      // 2. Squad Size
+      const baseSize = profile.base_squad_size || 230000;
+      const apeBuff = petsActive ? (profile.snow_ape_capacity || 0.0) : 0.0;
+      const minBuffName = profile.minister_buff || "None";
+      const minBuffCap = (MINISTER_BUFFS[minBuffName] || {}).troops || 0;
+
+      const deployBuff = profile.deploy_capacity_buff || "Nil";
+      let deployMult = 1.0;
+      if (deployBuff === "10%") deployMult = 1.1;
+      else if (deployBuff === "20%") deployMult = 1.2;
+
+      const squadSize = Math.round((baseSize + apeBuff + minBuffCap) * deployMult);
+
+      // 3. Base Combat Stats
+      const infStarter = starters[0] || null;
+      const lanStarter = starters[1] || null;
+      const marStarter = starters[2] || null;
+
+      const infCombat = getHeroCombatStats(infStarter, "Infantry", profile);
+      const lanCombat = getHeroCombatStats(lanStarter, "Lancer", profile);
+      const marCombat = getHeroCombatStats(marStarter, "Marksman", profile);
+
+      const infPowerBase = (1.0 + infCombat.lethality) * (1.0 + infCombat.attack);
+      const lanPowerBase = (1.0 + lanCombat.lethality) * (1.0 + lanCombat.attack);
+      const marPowerBase = (1.0 + marCombat.lethality) * (1.0 + marCombat.attack);
+
+      // 4. Skills Aggregation
+      const infBuffLeth = aggregateSkillBuff("InfLethality (adds)", starters, joiners, roster);
+      const infBuffAtk = aggregateSkillBuff("InfAttack (adds)", starters, joiners, roster);
+      const infBuffTaken = aggregateSkillBuff("InfDamage taken up", starters, joiners, roster);
+      const infBuffDef = aggregateSkillBuff("InfDefense down", starters, joiners, roster);
+      const infBuffDmgup = aggregateSkillBuff("InfDamageUp (adds)", starters, joiners, roster);
+      const infBuffMult = aggregateSkillBuff("InfDamage (multiplies)", starters, joiners, roster);
+      const infNormalDmg = aggregateSkillBuff("InfNormalDamage (Reina S1)", starters, joiners, roster);
+      const infSkillDmgMult = aggregateSkillBuff("InfSkillDamage (adds Reina S1; x Wu Ming S3)", starters, joiners, roster);
+      const infSkillDmgProb = aggregateSkillBuff("InfSkillDamage (Wu Ming S3)", starters, joiners, roster);
+
+      const lanBuffLeth = aggregateSkillBuff("LanLethality (adds)", starters, joiners, roster);
+      const lanBuffAtk = aggregateSkillBuff("LanAttack (adds)", starters, joiners, roster);
+      const lanBuffTaken = aggregateSkillBuff("LanDamage taken up", starters, joiners, roster);
+      const lanBuffDef = aggregateSkillBuff("LanDefense down", starters, joiners, roster);
+      const lanBuffDmgup = aggregateSkillBuff("LanDamageUp (adds)", starters, joiners, roster);
+      const lanBuffMult = aggregateSkillBuff("LanDamage (multiplies)", starters, joiners, roster);
+      const lanNormalDmg = aggregateSkillBuff("LanNormalDamage (Reina S1)", starters, joiners, roster);
+      const lanSkillDmgMult = aggregateSkillBuff("LanSkillDamage (adds Reina S1; x Wu Ming S3)", starters, joiners, roster);
+      const lanSkillDmgProb = aggregateSkillBuff("LanSkillDamage (Wu Ming S3)", starters, joiners, roster);
+
+      const marBuffLeth = aggregateSkillBuff("MarLethality (adds)", starters, joiners, roster);
+      const marBuffAtk = aggregateSkillBuff("MarAttack (adds)", starters, joiners, roster);
+      const marBuffTaken = aggregateSkillBuff("MarDamage taken up", starters, joiners, roster);
+      const marBuffDef = aggregateSkillBuff("MarDefense down", starters, joiners, roster);
+      const marBuffDmgup = aggregateSkillBuff("MarDamageUp (adds)", starters, joiners, roster);
+      const marBuffMult = aggregateSkillBuff("MarDamage (multiplies)", starters, joiners, roster);
+      const marNormalDmg = aggregateSkillBuff("MarNormalDamage (Reina S1)", starters, joiners, roster);
+      const marSkillDmgMult = aggregateSkillBuff("MarSkillDamage (adds Reina S1; x Wu Ming S3)", starters, joiners, roster);
+      const marSkillDmgProb = aggregateSkillBuff("MarSkillDamage (Wu Ming S3)", starters, joiners, roster);
+
+      // 5. Combined Combat Stats
+      const infProdBuffs = infBuffLeth * infBuffAtk * infBuffTaken * infBuffDef * infBuffDmgup * infBuffMult;
+      const infDmgFactor = infNormalDmg + (infSkillDmgMult - 1.0) * infSkillDmgProb;
+      const infStats = infProdBuffs * infDmgFactor * infPowerBase;
+
+      const lanProdBuffs = lanBuffLeth * lanBuffAtk * lanBuffTaken * lanBuffDef * lanBuffDmgup * lanBuffMult;
+      const lanDmgFactor = lanNormalDmg + (lanSkillDmgMult - 1.0) * lanSkillDmgProb;
+      const lanStats = lanProdBuffs * lanDmgFactor * lanPowerBase;
+
+      const marProdBuffs = marBuffLeth * marBuffAtk * marBuffTaken * marBuffDef * marBuffDmgup * marBuffMult;
+      const marDmgStats = db.troopDamageStats[marTier] || { MarDamage: 0.5, MarFcSkill: 0.0 };
+      const marFcSkill = marDmgStats.MarFcSkill || 0.0;
+      const marSkillDmgMultEffective = marSkillDmgMult + marFcSkill;
+      const marDmgFactor = marNormalDmg + (marSkillDmgMultEffective - 1.0) * marSkillDmgProb;
+      const marStats = marProdBuffs * marDmgFactor * marPowerBase;
+
+      // 6. Base damage values
+      const infBaseDmg = (db.troopDamageStats[infTier] || {}).InfDamage || 0.125;
+      const lanBaseDmg = (db.troopDamageStats[lanTier] || {}).LanDamage || 0.375;
+      const marBaseDmg = marDmgStats.MarDamage || 0.5;
+
+      const infThd = infStats * infBaseDmg;
+      const lanThd = lanStats * lanBaseDmg;
+      const marThd = marStats * marBaseDmg;
+
+      // 7. Optimal ratios
+      const sumThd2 = infThd*infThd + lanThd*lanThd + marThd*marThd;
+      let infRatio, lanRatio, marRatio;
+      if (sumThd2 > 0) {
+        infRatio = (infThd*infThd) / sumThd2;
+        lanRatio = (lanThd*lanThd) / sumThd2;
+        marRatio = (marThd*marThd) / sumThd2;
+      } else {
+        infRatio = lanRatio = marRatio = 1.0 / 3.0;
+      }
+
+      // 8. Expected boost score
+      const totalBoost = Math.sqrt(sumThd2 * squadSize) * (1.0 + widgetLethality) * (1.0 + widgetAttack);
+
+      return {
+        squad_size: squadSize,
+        optimal_ratios: { Infantry: infRatio, Lancer: lanRatio, Marksman: marRatio },
+        troop_counts: { Infantry: infRatio * squadSize, Lancer: lanRatio * squadSize, Marksman: marRatio * squadSize },
+        total_boost: totalBoost,
+        intermediate: {
+          inf_thd: infThd,
+          lan_thd: lanThd,
+          mar_thd: marThd,
+          widget_lethality: widgetLethality,
+          widget_attack: widgetAttack
+        }
+      };
+    }
+
+    // Combinatorial Helpers
+    function combinationsWithReplacement(arr, k) {
+      const results = [];
+      function helper(start, combo) {
+        if (combo.length === k) {
+          results.push([...combo]);
+          return;
+        }
+        for (let i = start; i < arr.length; i++) {
+          combo.push(arr[i]);
+          helper(i, combo);
+          combo.pop();
+        }
+      }
+      helper(0, []);
+      return results;
+    }
+
+    function cartesianProduct(arrays) {
+      return arrays.reduce((acc, curr) => {
+        const res = [];
+        for (const a of acc) {
+          for (const b of curr) {
+            res.push([...a, b]);
+          }
+        }
+        return res;
+      }, [[]]);
+    }
+
+    function aggregateCallerOnly(statName, starters, roster) {
+      let sum = 0.0;
+      for (const starter of starters) {
+        if (starter && roster[starter]) {
+          const starLvl = roster[starter].star_level || "0*";
+          const lvl = getSkillLevelFromStars(starLvl);
+          sum += getCallerSkills(starter, lvl)[statName] || 0.0;
+        }
+      }
+      return sum;
+    }
+
+    function findOptimalSquad(profile, availableStarters, joinerPool, nJoiners) {
+      const roster = profile.roster || {};
+      const rosarionMode = profile.rosarion_mode || "No";
+      const petsActive = profile.pets_active || false;
+
+      let startersMap = availableStarters;
+      if (!startersMap) {
+        startersMap = { Infantry: [], Lancer: [], Marksman: [] };
+        for (const [heroName, info] of Object.entries(roster)) {
+          if (!info.unlocked) continue;
+          const meta = db.heroMetadata[getMetaName(heroName)] || {};
+          const className = meta.class;
+          if (className in startersMap) {
+            startersMap[className].push(heroName);
+          }
+        }
+      }
+
+      let pool = joinerPool;
+      if (!pool) {
+        pool = [];
+        for (const heroName of db.heroesList) {
+          const joinerSkills = getJoinerSkills(heroName);
+          const hasBuff = Object.values(joinerSkills).some(v => v !== 0.0);
+          if (hasBuff) pool.push(heroName);
+        }
+      }
+
+      for (const c of ["Infantry", "Lancer", "Marksman"]) {
+        if (!startersMap[c] || startersMap[c].length === 0) {
+          startersMap[c] = [null];
+        }
+      }
+
+      const infList = startersMap["Infantry"];
+      const lanList = startersMap["Lancer"];
+      const marList = startersMap["Marksman"];
+
+      const starterCombinations = cartesianProduct([infList, lanList, marList]);
+      const joinerCombinations = combinationsWithReplacement(pool, nJoiners);
+
+      let bestScore = -1.0;
+      let bestCombination = {
+        starters: [],
+        joiners: [],
+        total_boost: 0.0,
+        optimal_ratios: {},
+        troop_counts: {}
+      };
+
+      const infTier = profile.inf_tier || "FC10 T11";
+      const lanTier = profile.lan_tier || "FC10 T11";
+      const marTier = profile.mar_tier || "FC10 T11";
+
+      for (const starters of starterCombinations) {
+        const { widgetLethality, widgetAttack } = calculateWidgetBuffs(starters, roster, rosarionMode);
+
+        const baseSize = profile.base_squad_size || 230000;
+        const apeBuff = petsActive ? (profile.snow_ape_capacity || 0.0) : 0.0;
+        const minBuffName = profile.minister_buff || "None";
+        const minBuffCap = (MINISTER_BUFFS[minBuffName] || {}).troops || 0;
+        const deployBuff = profile.deploy_capacity_buff || "Nil";
+        let deployMult = 1.0;
+        if (deployBuff === "10%") deployMult = 1.1;
+        else if (deployBuff === "20%") deployMult = 1.2;
+
+        const squadSize = Math.round((baseSize + apeBuff + minBuffCap) * deployMult);
+
+        const infCombat = getHeroCombatStats(starters[0], "Infantry", profile);
+        const lanCombat = getHeroCombatStats(starters[1], "Lancer", profile);
+        const marCombat = getHeroCombatStats(starters[2], "Marksman", profile);
+
+        const infPowerBase = (1.0 + infCombat.lethality) * (1.0 + infCombat.attack);
+        const lanPowerBase = (1.0 + lanCombat.lethality) * (1.0 + lanCombat.attack);
+        const marPowerBase = (1.0 + marCombat.lethality) * (1.0 + marCombat.attack);
+
+        const infBaseDmg = (db.troopDamageStats[infTier] || {}).InfDamage || 0.125;
+        const lanBaseDmg = (db.troopDamageStats[lanTier] || {}).LanDamage || 0.375;
+        const marDmgStats = db.troopDamageStats[marTier] || { MarDamage: 0.5, MarFcSkill: 0.0 };
+        const marBaseDmg = marDmgStats.MarDamage || 0.5;
+        const marFcSkill = marDmgStats.MarFcSkill || 0.0;
+
+        const infCallerLeth = aggregateCallerOnly("InfLethality (adds)", starters, roster);
+        const infCallerAtk = aggregateCallerOnly("InfAttack (adds)", starters, roster);
+        const infCallerTaken = aggregateCallerOnly("InfDamage taken up", starters, roster);
+        const infCallerDef = aggregateCallerOnly("InfDefense down", starters, roster);
+        const infCallerDmgup = aggregateCallerOnly("InfDamageUp (adds)", starters, roster);
+        const infCallerMult = aggregateCallerOnly("InfDamage (multiplies)", starters, roster);
+        const infCallerNormal = aggregateCallerOnly("InfNormalDamage (Reina S1)", starters, roster);
+        const infCallerSkillMult = aggregateCallerOnly("InfSkillDamage (adds Reina S1; x Wu Ming S3)", starters, roster);
+        const infCallerSkillProb = aggregateCallerOnly("InfSkillDamage (Wu Ming S3)", starters, roster);
+
+        const lanCallerLeth = aggregateCallerOnly("LanLethality (adds)", starters, roster);
+        const lanCallerAtk = aggregateCallerOnly("LanAttack (adds)", starters, roster);
+        const lanCallerTaken = aggregateCallerOnly("LanDamage taken up", starters, roster);
+        const lanCallerDef = aggregateCallerOnly("LanDefense down", starters, roster);
+        const lanCallerDmgup = aggregateCallerOnly("LanDamageUp (adds)", starters, roster);
+        const lanCallerMult = aggregateCallerOnly("LanDamage (multiplies)", starters, roster);
+        const lanCallerNormal = aggregateCallerOnly("LanNormalDamage (Reina S1)", starters, roster);
+        const lanCallerSkillMult = aggregateCallerOnly("LanSkillDamage (adds Reina S1; x Wu Ming S3)", starters, roster);
+        const lanCallerSkillProb = aggregateCallerOnly("LanSkillDamage (Wu Ming S3)", starters, roster);
+
+        const marCallerLeth = aggregateCallerOnly("MarLethality (adds)", starters, roster);
+        const marCallerAtk = aggregateCallerOnly("MarAttack (adds)", starters, roster);
+        const marCallerTaken = aggregateCallerOnly("MarDamage taken up", starters, roster);
+        const marCallerDef = aggregateCallerOnly("MarDefense down", starters, roster);
+        const marCallerDmgup = aggregateCallerOnly("MarDamageUp (adds)", starters, roster);
+        const marCallerMult = aggregateCallerOnly("MarDamage (multiplies)", starters, roster);
+        const marCallerNormal = aggregateCallerOnly("MarNormalDamage (Reina S1)", starters, roster);
+        const marCallerSkillMult = aggregateCallerOnly("MarSkillDamage (adds Reina S1; x Wu Ming S3)", starters, roster);
+        const marCallerSkillProb = aggregateCallerOnly("MarSkillDamage (Wu Ming S3)", starters, roster);
+
+        const seenStartersNonStacking = new Set();
+        for (const starter of starters) {
+          if (starter && !isJoinerStackable(starter)) {
+            seenStartersNonStacking.add(starter);
+          }
+        }
+
+        for (const joiners of joinerCombinations) {
+          const seenNonStacking = new Set(seenStartersNonStacking);
+
+          let infJoinerLeth = 0.0, infJoinerAtk = 0.0, infJoinerTaken = 0.0, infJoinerDef = 0.0, infJoinerDmgup = 0.0, infJoinerMult = 0.0, infJoinerNormal = 0.0, infJoinerSkillMult = 0.0, infJoinerSkillProb = 0.0;
+          let lanJoinerLeth = 0.0, lanJoinerAtk = 0.0, lanJoinerTaken = 0.0, lanJoinerDef = 0.0, lanJoinerDmgup = 0.0, lanJoinerMult = 0.0, lanJoinerNormal = 0.0, lanJoinerSkillMult = 0.0, lanJoinerSkillProb = 0.0;
+          let marJoinerLeth = 0.0, marJoinerAtk = 0.0, marJoinerTaken = 0.0, marJoinerDef = 0.0, marJoinerDmgup = 0.0, marJoinerMult = 0.0, marJoinerNormal = 0.0, marJoinerSkillMult = 0.0, marJoinerSkillProb = 0.0;
+
+          for (const joiner of joiners) {
+            if (!joiner) continue;
+            const stackable = isJoinerStackable(joiner);
+            if (!stackable) {
+              if (seenNonStacking.has(joiner)) continue;
+              seenNonStacking.add(joiner);
+            }
+
+            const jSkills = getJoinerSkills(joiner);
+            infJoinerLeth += jSkills["S1_InfLethality (adds)"] || 0.0;
+            infJoinerAtk += jSkills["S1_InfAttack (adds)"] || 0.0;
+            infJoinerTaken += jSkills["S1_InfDamage taken up"] || 0.0;
+            infJoinerDef += jSkills["S1_InfDefense down"] || 0.0;
+            infJoinerDmgup += jSkills["S1_InfDamageUp (adds)"] || 0.0;
+            infJoinerMult += jSkills["S1_InfDamage (multiplies)"] || 0.0;
+            infJoinerNormal += jSkills["S1_InfNormalDamage (Reina S1)"] || 0.0;
+            infJoinerSkillMult += jSkills["S1_InfSkillDamage (adds Reina S1; x Wu Ming S3)"] || 0.0;
+            infJoinerSkillProb += jSkills["S1_InfSkillDamage (Wu Ming S3)"] || 0.0;
+
+            lanJoinerLeth += jSkills["S1_LanLethality (adds)"] || 0.0;
+            lanJoinerAtk += jSkills["S1_LanAttack (adds)"] || 0.0;
+            lanJoinerTaken += jSkills["S1_LanDamage taken up"] || 0.0;
+            lanJoinerDef += jSkills["S1_LanDefense down"] || 0.0;
+            lanJoinerDmgup += jSkills["S1_LanDamageUp (adds)"] || 0.0;
+            lanJoinerMult += jSkills["S1_LanDamage (multiplies)"] || 0.0;
+            lanJoinerNormal += jSkills["S1_LanNormalDamage (Reina S1)"] || 0.0;
+            lanJoinerSkillMult += jSkills["S1_LanSkillDamage (adds Reina S1; x Wu Ming S3)"] || 0.0;
+            lanJoinerSkillProb += jSkills["S1_LanSkillDamage (Wu Ming S3)"] || 0.0;
+
+            marJoinerLeth += jSkills["S1_MarLethality (adds)"] || 0.0;
+            marJoinerAtk += jSkills["S1_MarAttack (adds)"] || 0.0;
+            marJoinerTaken += jSkills["S1_MarDamage taken up"] || 0.0;
+            marJoinerDef += jSkills["S1_MarDefense down"] || 0.0;
+            marJoinerDmgup += jSkills["S1_MarDamageUp (adds)"] || 0.0;
+            marJoinerMult += jSkills["S1_MarDamage (multiplies)"] || 0.0;
+            marJoinerNormal += jSkills["S1_MarNormalDamage (Reina S1)"] || 0.0;
+            marJoinerSkillMult += jSkills["S1_MarSkillDamage (adds Reina S1; x Wu Ming S3)"] || 0.0;
+            marJoinerSkillProb += jSkills["S1_MarSkillDamage (Wu Ming S3)"] || 0.0;
+          }
+
+          const infBuffLeth = 1.0 + infCallerLeth + infJoinerLeth;
+          const infBuffAtk = 1.0 + infCallerAtk + infJoinerAtk;
+          const infBuffTaken = 1.0 + infCallerTaken + infJoinerTaken;
+          const infBuffDef = 1.0 + infCallerDef + infJoinerDef;
+          const infBuffDmgup = 1.0 + infCallerDmgup + infJoinerDmgup;
+          const infBuffMult = 1.0 + infCallerMult + infJoinerMult;
+          const infNormalDmg = 1.0 + infCallerNormal + infJoinerNormal;
+          const infSkillDmgMult = 1.0 + infCallerSkillMult + infJoinerSkillMult;
+          const infSkillDmgProb = 1.0 + infCallerSkillProb + infJoinerSkillProb;
+          const infProdBuffs = infBuffLeth * infBuffAtk * infBuffTaken * infBuffDef * infBuffDmgup * infBuffMult;
+          const infDmgFactor = infNormalDmg + (infSkillDmgMult - 1.0) * infSkillDmgProb;
+          const infThd = infProdBuffs * infDmgFactor * infPowerBase * infBaseDmg;
+
+          const lanBuffLeth = 1.0 + lanCallerLeth + lanJoinerLeth;
+          const lanBuffAtk = 1.0 + lanCallerAtk + lanJoinerAtk;
+          const lanBuffTaken = 1.0 + lanCallerTaken + lanJoinerTaken;
+          const lanBuffDef = 1.0 + lanCallerDef + lanJoinerDef;
+          const lanBuffDmgup = 1.0 + lanCallerDmgup + lanJoinerDmgup;
+          const lanBuffMult = 1.0 + lanCallerMult + lanJoinerMult;
+          const lanNormalDmg = 1.0 + lanCallerNormal + lanJoinerNormal;
+          const lanSkillDmgMult = 1.0 + lanCallerSkillMult + lanJoinerSkillMult;
+          const lanSkillDmgProb = 1.0 + lanCallerSkillProb + lanJoinerSkillProb;
+          const lanProdBuffs = lanBuffLeth * lanBuffAtk * lanBuffTaken * lanBuffDef * lanBuffDmgup * lanBuffMult;
+          const lanDmgFactor = lanNormalDmg + (lanSkillDmgMult - 1.0) * lanSkillDmgProb;
+          const lanThd = lanProdBuffs * lanDmgFactor * lanPowerBase * lanBaseDmg;
+
+          const marBuffLeth = 1.0 + marCallerLeth + marJoinerLeth;
+          const marBuffAtk = 1.0 + marCallerAtk + marJoinerAtk;
+          const marBuffTaken = 1.0 + marCallerTaken + marJoinerTaken;
+          const marBuffDef = 1.0 + marCallerDef + marJoinerDef;
+          const marBuffDmgup = 1.0 + marCallerDmgup + marJoinerDmgup;
+          const marBuffMult = 1.0 + marCallerMult + marJoinerMult;
+          const marNormalDmg = 1.0 + marCallerNormal + marJoinerNormal;
+          const marSkillDmgMult = 1.0 + marCallerSkillMult + marJoinerSkillMult;
+          const marSkillDmgProb = 1.0 + marCallerSkillProb + marJoinerSkillProb;
+          const marProdBuffs = marBuffLeth * marBuffAtk * marBuffTaken * marBuffDef * marBuffDmgup * marBuffMult;
+          const marSkillDmgMultEffective = marSkillDmgMult + marFcSkill;
+          const marDmgFactor = marNormalDmg + (marSkillDmgMultEffective - 1.0) * marSkillDmgProb;
+          const marThd = marProdBuffs * marDmgFactor * marPowerBase * marBaseDmg;
+
+          const sumThd2 = infThd*infThd + lanThd*lanThd + marThd*marThd;
+          const totalBoost = Math.sqrt(sumThd2 * squadSize) * (1.0 + widgetLethality) * (1.0 + widgetAttack);
+
+          if (totalBoost > bestScore) {
+            bestScore = totalBoost;
+            let infRatio, lanRatio, marRatio;
+            if (sumThd2 > 0) {
+              infRatio = (infThd*infThd) / sumThd2;
+              lanRatio = (lanThd*lanThd) / sumThd2;
+              marRatio = (marThd*marThd) / sumThd2;
+            } else {
+              infRatio = lanRatio = marRatio = 1.0 / 3.0;
+            }
+
+            bestCombination = {
+              starters: [...starters],
+              joiners: [...joiners],
+              total_boost: totalBoost,
+              optimal_ratios: { Infantry: infRatio, Lancer: lanRatio, Marksman: marRatio },
+              troop_counts: { Infantry: infRatio * squadSize, Lancer: lanRatio * squadSize, Marksman: marRatio * squadSize }
+            };
+          }
+        }
+      }
+
+      return bestCombination;
+    }
+
+    // Default Profile Initializer
+    function createDefaultProfile() {
+      const defaultProfile = {
+        base_stats: {
+          AllTroopsLethality: 15.0,
+          AllTroopsAttack: 15.0,
+          TrapLevelBuff: 0.25,
+          InfantryLethality: 0.0,
+          InfantryAttack: 0.0,
+          LancerLethality: 0.0,
+          LancerAttack: 0.0,
+          MarksmanLethality: 0.0,
+          MarksmanAttack: 0.0
+        },
+        gear_stats: {
+          InfantryLethality: 0.0,
+          InfantryAttack: 0.0,
+          LancerLethality: 0.0,
+          LancerAttack: 0.0,
+          MarksmanLethality: 0.0,
+          MarksmanAttack: 0.0
+        },
+        pets_active: true,
+        cave_lion_atk: 0.1,
+        snow_ape_capacity: 15000.0,
+        sabre_tooth_lethality: 0.1,
+        chameleon_buff: 0.1,
+        base_squad_size: 230000,
+        deploy_capacity_buff: "Nil",
+        minister_buff: "None",
+        rosarion_mode: "No",
+        inf_tier: "FC10 T11",
+        lan_tier: "FC10 T11",
+        mar_tier: "FC10 T11",
+        roster: {}
+      };
+
+      for (const hero of db.heroesList) {
+        defaultProfile.roster[hero] = {
+          star_level: "0*",
+          widget_level: 0,
+          active_starter: false,
+          unlocked: false
+        };
+      }
+      return defaultProfile;
+    }
+
+    function isPlainObject(value) {
+      return value !== null && typeof value === "object" && !Array.isArray(value);
+    }
+
+    function hydrateProfile(rawProfile) {
+      if (!isPlainObject(rawProfile)) {
+        throw new Error("Configuration must be a JSON object.");
+      }
+
+      const defaults = createDefaultProfile();
+      const hydrated = { ...defaults };
+      const numericKeys = [
+        "cave_lion_atk", "snow_ape_capacity", "sabre_tooth_lethality",
+        "chameleon_buff", "base_squad_size"
+      ];
+
+      hydrated.base_stats = { ...defaults.base_stats };
+      if (isPlainObject(rawProfile.base_stats)) {
+        for (const key of Object.keys(hydrated.base_stats)) {
+          const value = Number(rawProfile.base_stats[key]);
+          if (Number.isFinite(value)) hydrated.base_stats[key] = value;
+        }
+      }
+
+      hydrated.gear_stats = { ...defaults.gear_stats };
+      if (isPlainObject(rawProfile.gear_stats)) {
+        for (const key of Object.keys(hydrated.gear_stats)) {
+          const value = Number(rawProfile.gear_stats[key]);
+          if (Number.isFinite(value)) hydrated.gear_stats[key] = value;
+        }
+      }
+
+      for (const key of numericKeys) {
+        const value = Number(rawProfile[key]);
+        if (Number.isFinite(value)) hydrated[key] = value;
+      }
+
+      if (typeof rawProfile.pets_active === "boolean") hydrated.pets_active = rawProfile.pets_active;
+      if (["Nil", "10%", "20%"].includes(rawProfile.deploy_capacity_buff)) hydrated.deploy_capacity_buff = rawProfile.deploy_capacity_buff;
+      if (["No", "Yes"].includes(rawProfile.rosarion_mode)) hydrated.rosarion_mode = rawProfile.rosarion_mode;
+      if (Object.hasOwn(MINISTER_BUFFS, rawProfile.minister_buff)) hydrated.minister_buff = rawProfile.minister_buff;
+
+      const tiers = new Set(Object.keys(db.troopDamageStats));
+      for (const key of ["inf_tier", "lan_tier", "mar_tier"]) {
+        if (tiers.has(rawProfile[key])) hydrated[key] = rawProfile[key];
+      }
+
+      const sourceRoster = isPlainObject(rawProfile.roster) ? rawProfile.roster : {};
+      hydrated.roster = {};
+      for (const hero of db.heroesList) {
+        const source = isPlainObject(sourceRoster[hero]) ? sourceRoster[hero] : {};
+        const widgetLevel = Number(source.widget_level);
+        hydrated.roster[hero] = {
+          star_level: STAR_LEVELS.includes(source.star_level) ? source.star_level : defaults.roster[hero].star_level,
+          widget_level: Number.isFinite(widgetLevel) ? Math.max(0, Math.min(10, Math.trunc(widgetLevel))) : defaults.roster[hero].widget_level,
+          active_starter: source.active_starter === true,
+          unlocked: source.unlocked === true
+        };
+        if (!hydrated.roster[hero].unlocked) hydrated.roster[hero].active_starter = false;
+      }
+
+      return hydrated;
+    }
+
+    function loadProfile() {
+      const saved = localStorage.getItem("wos_bear_profile");
+      if (saved) {
+        try {
+          userProfile = hydrateProfile(JSON.parse(saved));
+          saveProfile();
+          return;
+        } catch (e) {
+          console.error("Error loading profile, resetting...", e);
+        }
+      }
+      userProfile = createDefaultProfile();
+      saveProfile();
+    }
+
+    function saveProfile() {
+      localStorage.setItem("wos_bear_profile", JSON.stringify(userProfile));
+    }
+
+    // UI Rendering & Event Hooks
+    function initUI() {
+      // 1. Populate Dropdowns in Player Settings
+      const minSelect = document.getElementById("stat-minister");
+      minSelect.innerHTML = "";
+      for (const k of Object.keys(MINISTER_BUFFS)) {
+        minSelect.innerHTML += `<option value="${k}">${k}</option>`;
+      }
+
+      // 2. Populate Dropdowns in Calculator
+      populateCalculatorDropdowns();
+
+      // 3. Populate Roster Generation Filters
+      const generations = Array.from(new Set(Object.values(db.heroMetadata).map(m => m.gen || 0.0))).sort((a,b)=>a-b);
+      selectedGens = [...generations];
+      const filterBox = document.getElementById("roster-gen-checkboxes");
+      filterBox.innerHTML = "";
+      for (const gen of generations) {
+        const genLabel = gen === Math.floor(gen) ? `Gen ${gen}` : `Gen ${gen}`;
+        filterBox.innerHTML += `
+          <label class="flex items-center gap-1.5 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer select-none">
+            <input type="checkbox" checked value="${gen}" class="gen-filter-checkbox rounded text-purple-600 focus:ring-purple-500 w-3.5 h-3.5">
+            ${genLabel}
+          </label>
+        `;
+      }
+
+      // Hook up gen filter change events
+      document.querySelectorAll(".gen-filter-checkbox").forEach(chk => {
+        chk.addEventListener("change", () => {
+          selectedGens = Array.from(document.querySelectorAll(".gen-filter-checkbox:checked")).map(c => parseFloat(c.value));
+          renderRoster();
+        });
+      });
+
+      // Populate mass options star level dropdown
+      const massStarSelect = document.getElementById("mass-stars");
+      massStarSelect.innerHTML = "";
+      for (const star of STAR_LEVELS) {
+        massStarSelect.innerHTML += `<option value="${star}">${star}</option>`;
+      }
+
+      // Sync settings values
+      syncInputsFromProfile();
+
+      // Hook up inputs to profile changes
+      bindInputListeners();
+
+      // Initial computations
+      triggerRecalculation();
+
+      // Render roster list
+      renderRoster();
+
+      // Render optimizer elements
+      renderOptimizerSetup();
+    }
+
+    function populateCalculatorDropdowns() {
+      const infStarterSelect = document.getElementById("calc-inf-starter");
+      const lanStarterSelect = document.getElementById("calc-lan-starter");
+      const marStarterSelect = document.getElementById("calc-mar-starter");
+
+      // Filter to only unlocked heroes
+      const unlockedInf = [];
+      const unlockedLan = [];
+      const unlockedMar = [];
+      const unlockedAll = [];
+
+      for (const hero of db.heroesList) {
+        const info = userProfile.roster[hero] || {};
+        if (info.unlocked) {
+          unlockedAll.push(hero);
+          const meta = db.heroMetadata[getMetaName(hero)] || {};
+          if (meta.class === "Infantry") unlockedInf.push(hero);
+          if (meta.class === "Lancer") unlockedLan.push(hero);
+          if (meta.class === "Marksman") unlockedMar.push(hero);
+        }
+      }
+
+      function populateSelect(selectEl, options, selectedVal) {
+        selectEl.innerHTML = `<option value="">None</option>`;
+        for (const opt of options) {
+          const sel = opt === selectedVal ? "selected" : "";
+          selectEl.innerHTML += `<option value="${opt}" ${sel}>${opt}</option>`;
+        }
+      }
+
+      populateSelect(infStarterSelect, unlockedInf, sessionStorage.getItem("squad_inf") || unlockedInf[0]);
+      populateSelect(lanStarterSelect, unlockedLan, sessionStorage.getItem("squad_lan") || unlockedLan[0]);
+      populateSelect(marStarterSelect, unlockedMar, sessionStorage.getItem("squad_mar") || unlockedMar[0]);
+
+      // Joiners (All unlocked heroes can be joiners)
+      for (let i = 1; i <= 4; i++) {
+        const jSelect = document.getElementById(`calc-joiner-${i}`);
+        const savedVal = sessionStorage.getItem(`squad_j${i}`) || "";
+        populateSelect(jSelect, unlockedAll, savedVal);
+      }
+
+      // Tiers Selects
+      const tiers = Object.keys(db.troopDamageStats);
+      const infTierSelect = document.getElementById("calc-inf-tier");
+      const lanTierSelect = document.getElementById("calc-lan-tier");
+      const marTierSelect = document.getElementById("calc-mar-tier");
+
+      function populateTierSelect(selectEl, options, selectedVal) {
+        selectEl.innerHTML = "";
+        for (const opt of options) {
+          const sel = opt === selectedVal ? "selected" : "";
+          selectEl.innerHTML += `<option value="${opt}" ${sel}>${opt}</option>`;
+        }
+      }
+
+      populateTierSelect(infTierSelect, tiers, userProfile.inf_tier || "FC10 T11");
+      populateTierSelect(lanTierSelect, tiers, userProfile.lan_tier || "FC10 T11");
+      populateTierSelect(marTierSelect, tiers, userProfile.mar_tier || "FC10 T11");
+    }
+
+    function syncInputsFromProfile() {
+      const base = userProfile.base_stats || {};
+      const gear = userProfile.gear_stats || {};
+
+      document.getElementById("stat-all-leth").value = (base.AllTroopsLethality || 0) * 100;
+      document.getElementById("stat-all-atk").value = (base.AllTroopsAttack || 0) * 100;
+      document.getElementById("stat-trap-buff").value = (base.TrapLevelBuff || 0) * 100;
+
+      document.getElementById("stat-inf-leth").value = (base.InfantryLethality || 0) * 100;
+      document.getElementById("stat-inf-atk").value = (base.InfantryAttack || 0) * 100;
+      document.getElementById("stat-lan-leth").value = (base.LancerLethality || 0) * 100;
+      document.getElementById("stat-lan-atk").value = (base.LancerAttack || 0) * 100;
+      document.getElementById("stat-mar-leth").value = (base.MarksmanLethality || 0) * 100;
+      document.getElementById("stat-mar-atk").value = (base.MarksmanAttack || 0) * 100;
+
+      document.getElementById("stat-gear-inf-leth").value = (gear.InfantryLethality || 0) * 100;
+      document.getElementById("stat-gear-inf-atk").value = (gear.InfantryAttack || 0) * 100;
+      document.getElementById("stat-gear-lan-leth").value = (gear.LancerLethality || 0) * 100;
+      document.getElementById("stat-gear-lan-atk").value = (gear.LancerAttack || 0) * 100;
+      document.getElementById("stat-gear-mar-leth").value = (gear.MarksmanLethality || 0) * 100;
+      document.getElementById("stat-gear-mar-atk").value = (gear.MarksmanAttack || 0) * 100;
+
+      const petsActive = userProfile.pets_active !== false;
+      document.getElementById("stat-pets-active").checked = petsActive;
+      document.getElementById("stat-cham").value = (userProfile.chameleon_buff || 0) * 100;
+      document.getElementById("stat-sabre").value = (userProfile.sabre_tooth_lethality || 0) * 100;
+      document.getElementById("stat-lion").value = (userProfile.cave_lion_atk || 0) * 100;
+      document.getElementById("stat-ape").value = userProfile.snow_ape_capacity || 0;
+
+      togglePetInputsVisibility(petsActive);
+
+      document.getElementById("stat-base-size").value = userProfile.base_squad_size || 230000;
+      document.getElementById("stat-deploy-buff").value = userProfile.deploy_capacity_buff || "Nil";
+      document.getElementById("stat-rosarion").value = userProfile.rosarion_mode || "No";
+      document.getElementById("stat-minister").value = userProfile.minister_buff || "None";
+    }
+
+    function togglePetInputsVisibility(active) {
+      const container = document.getElementById("pet-settings-container");
+      if (active) {
+        container.querySelectorAll("input").forEach(i => i.removeAttribute("disabled"));
+      } else {
+        container.querySelectorAll("input").forEach(i => i.setAttribute("disabled", "true"));
+      }
+    }
+
+    function bindInputListeners() {
+      // 1. Settings sidebar inputs
+      const registerNumericInput = (id, profileKey, isBase, isGear, isPercentage = true) => {
+        document.getElementById(id).addEventListener("input", (e) => {
+          const val = parseFloat(e.target.value) || 0;
+          const finalVal = isPercentage ? val / 100.0 : val;
+          if (isBase) {
+            userProfile.base_stats[profileKey] = finalVal;
+          } else if (isGear) {
+            userProfile.gear_stats[profileKey] = finalVal;
+          } else {
+            userProfile[profileKey] = finalVal;
+          }
+          saveProfile();
+          triggerRecalculation();
+        });
+      };
+
+      registerNumericInput("stat-all-leth", "AllTroopsLethality", true);
+      registerNumericInput("stat-all-atk", "AllTroopsAttack", true);
+      registerNumericInput("stat-trap-buff", "TrapLevelBuff", true);
+
+      registerNumericInput("stat-inf-leth", "InfantryLethality", true);
+      registerNumericInput("stat-inf-atk", "InfantryAttack", true);
+      registerNumericInput("stat-lan-leth", "LancerLethality", true);
+      registerNumericInput("stat-lan-atk", "LancerAttack", true);
+      registerNumericInput("stat-mar-leth", "MarksmanLethality", true);
+      registerNumericInput("stat-mar-atk", "MarksmanAttack", true);
+
+      registerNumericInput("stat-gear-inf-leth", "InfantryLethality", false, true);
+      registerNumericInput("stat-gear-inf-atk", "InfantryAttack", false, true);
+      registerNumericInput("stat-gear-lan-leth", "LancerLethality", false, true);
+      registerNumericInput("stat-gear-lan-atk", "LancerAttack", false, true);
+      registerNumericInput("stat-gear-mar-leth", "MarksmanLethality", false, true);
+      registerNumericInput("stat-gear-mar-atk", "MarksmanAttack", false, true);
+
+      document.getElementById("stat-pets-active").addEventListener("change", (e) => {
+        const active = e.target.checked;
+        userProfile.pets_active = active;
+        togglePetInputsVisibility(active);
+        saveProfile();
+        triggerRecalculation();
+      });
+
+      registerNumericInput("stat-cham", "chameleon_buff", false, false, true);
+      registerNumericInput("stat-sabre", "sabre_tooth_lethality", false, false, true);
+      registerNumericInput("stat-lion", "cave_lion_atk", false, false, true);
+      registerNumericInput("stat-ape", "snow_ape_capacity", false, false, false);
+      registerNumericInput("stat-base-size", "base_squad_size", false, false, false);
+
+      const registerSelectInput = (id, profileKey) => {
+        document.getElementById(id).addEventListener("change", (e) => {
+          userProfile[profileKey] = e.target.value;
+          saveProfile();
+          triggerRecalculation();
+        });
+      };
+
+      registerSelectInput("stat-deploy-buff", "deploy_capacity_buff");
+      registerSelectInput("stat-rosarion", "rosarion_mode");
+      registerSelectInput("stat-minister", "minister_buff");
+
+      // 2. Calculator Dropdowns listeners
+      const calcStarterIds = ["calc-inf-starter", "calc-lan-starter", "calc-mar-starter"];
+      calcStarterIds.forEach((id, index) => {
+        const keys = ["squad_inf", "squad_lan", "squad_mar"];
+        document.getElementById(id).addEventListener("change", (e) => {
+          const val = e.target.value;
+          sessionStorage.setItem(keys[index], val);
+          triggerRecalculation();
+        });
+      });
+
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`calc-joiner-${i}`).addEventListener("change", (e) => {
+          const val = e.target.value;
+          sessionStorage.setItem(`squad_j${i}`, val);
+          triggerRecalculation();
+        });
+      }
+
+      const calcTierIds = ["calc-inf-tier", "calc-lan-tier", "calc-mar-tier"];
+      const calcTierKeys = ["inf_tier", "lan_tier", "mar_tier"];
+      calcTierIds.forEach((id, idx) => {
+        document.getElementById(id).addEventListener("change", (e) => {
+          const val = e.target.value;
+          userProfile[calcTierKeys[idx]] = val;
+          saveProfile();
+          triggerRecalculation();
+        });
+      });
+
+      // 3. Roster Search listener
+      document.getElementById("roster-search").addEventListener("input", () => {
+        renderRoster();
+      });
+
+      // 4. Slider Slots optimizer value sync
+      const slider = document.getElementById("opt-slots-slider");
+      const sliderVal = document.getElementById("opt-slots-val");
+      slider.addEventListener("input", (e) => {
+        sliderVal.textContent = e.target.value;
+      });
+
+      // 5. Mass actions btn hooks
+      document.getElementById("mass-unlock-btn").addEventListener("click", () => {
+        applyMassAction("unlock");
+      });
+      document.getElementById("mass-stars-btn").addEventListener("click", () => {
+        applyMassAction("stars");
+      });
+      document.getElementById("mass-widgets-btn").addEventListener("click", () => {
+        applyMassAction("widgets");
+      });
+      document.getElementById("mass-starters-btn").addEventListener("click", () => {
+        applyMassAction("starters");
+      });
+
+      document.getElementById("reset-roster-btn").addEventListener("click", () => {
+        const confirmed = document.getElementById("reset-confirm").checked;
+        if (confirmed) {
+          for (const hero of db.heroesList) {
+            userProfile.roster[hero] = {
+              star_level: "0*",
+              widget_level: 0,
+              active_starter: false,
+              unlocked: false
+            };
+          }
+          document.getElementById("reset-confirm").checked = false;
+          saveProfile();
+          renderRoster();
+          populateCalculatorDropdowns();
+          triggerRecalculation();
+          alert("Hero roster reset to default lock state! 🐻");
+        } else {
+          alert("Please check the 'Confirm Reset' checkbox to verify you want to clear your configurations.");
+        }
+      });
+
+      // 6. Config file Import/Export
+      document.getElementById("import-config-file").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const imported = JSON.parse(event.target.result);
+            if (isPlainObject(imported.base_stats) && isPlainObject(imported.roster)) {
+              userProfile = hydrateProfile(imported);
+              saveProfile();
+              syncInputsFromProfile();
+              populateCalculatorDropdowns();
+              triggerRecalculation();
+              renderRoster();
+              renderOptimizerSetup();
+              alert("Configuration profile imported successfully! 🚀");
+            } else {
+              alert("Error: Config structure invalid. Must contain base_stats and roster keys.");
+            }
+          } catch (err) {
+            alert("Failed to parse JSON configuration file: " + err);
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById("export-config-btn").addEventListener("click", () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userProfile, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "user_profile.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+      });
+
+      // 7. Optimizer triggers
+      document.getElementById("opt-run-btn").addEventListener("click", runOptimization);
+      document.getElementById("opt-cancel-btn").addEventListener("click", cancelOptimization);
+    }
+
+    function triggerRecalculation() {
+      // Fetch dropdown values
+      const infStarter = document.getElementById("calc-inf-starter").value || null;
+      const lanStarter = document.getElementById("calc-lan-starter").value || null;
+      const marStarter = document.getElementById("calc-mar-starter").value || null;
+
+      const joiners = [];
+      for (let i = 1; i <= 4; i++) {
+        const val = document.getElementById(`calc-joiner-${i}`).value;
+        if (val) joiners.push(val);
+      }
+
+      const infTier = document.getElementById("calc-inf-tier").value || "FC10 T11";
+      const lanTier = document.getElementById("calc-lan-tier").value || "FC10 T11";
+      const marTier = document.getElementById("calc-mar-tier").value || "FC10 T11";
+
+      const res = calculateSquad(userProfile, [infStarter, lanStarter, marStarter], joiners, infTier, lanTier, marTier);
+
+      // Render Output Values
+      const bearDefense = 23400.0;
+      const chameleonBuff = userProfile.chameleon_buff || 0.1;
+      const chameleonMult = userProfile.pets_active ? (1.0 + chameleonBuff) : 1.0;
+      const rosarionMode = userProfile.rosarion_mode || "No";
+      const cyrilleMult = rosarionMode === "No" ? 1.3 : 1.0;
+
+      const rawScore = res.total_boost;
+      const normalizedScore = (rawScore * chameleonMult * cyrilleMult) / bearDefense;
+
+      // Update Card
+      document.getElementById("calc-boost-val").textContent = normalizedScore.toFixed(4);
+      document.getElementById("calc-raw-boost").textContent = rawScore.toFixed(2);
+      document.getElementById("calc-cham-mult").textContent = chameleonMult.toFixed(2) + "x";
+      document.getElementById("calc-cyrille-mult").textContent = cyrilleMult.toFixed(2) + "x";
+
+      // Update Ratios
+      const ratios = res.optimal_ratios;
+      const counts = res.troop_counts;
+
+      const updateRow = (classPrefix, ratioVal, countVal) => {
+        document.getElementById(`calc-ratio-${classPrefix}-percent`).textContent = (ratioVal * 100).toFixed(2) + "%";
+        document.getElementById(`calc-ratio-${classPrefix}-bar`).style.width = (ratioVal * 100) + "%";
+        document.getElementById(`calc-count-${classPrefix}`).textContent = countVal.toFixed(1);
+        document.getElementById(`calc-capacity-${classPrefix}`).textContent = res.squad_size;
+      };
+
+      updateRow("inf", ratios.Infantry, counts.Infantry);
+      updateRow("lan", ratios.Lancer, counts.Lancer);
+      updateRow("mar", ratios.Marksman, counts.Marksman);
+
+      // JSON dump intermediates
+      const intermediates = {
+        inf_thd: res.intermediate.inf_thd,
+        lan_thd: res.intermediate.lan_thd,
+        mar_thd: res.intermediate.mar_thd,
+        widget_lethality: res.intermediate.widget_lethality,
+        widget_attack: res.intermediate.widget_attack
+      };
+      document.getElementById("calc-intermediates-json").innerHTML = JSON.stringify(intermediates, null, 2);
+    }
+
+    function renderRoster() {
+      const search = document.getElementById("roster-search").value.trim().toLowerCase();
+
+      const infCol = document.getElementById("roster-col-infantry");
+      const lanCol = document.getElementById("roster-col-lancer");
+      const marCol = document.getElementById("roster-col-marksman");
+
+      infCol.innerHTML = "";
+      lanCol.innerHTML = "";
+      marCol.innerHTML = "";
+
+      for (const hero of db.heroesList) {
+        const info = userProfile.roster[hero] || {};
+        const meta = db.heroMetadata[getMetaName(hero)] || { class: "None", gen: 0 };
+        const genVal = meta.gen || 0.0;
+
+        // Search Filter
+        if (search && !hero.toLowerCase().includes(search)) continue;
+
+        // Gen Filter
+        if (!selectedGens.includes(genVal)) continue;
+
+        const genStr = genVal === Math.floor(genVal) ? String(Math.floor(genVal)) : String(genVal);
+
+        const card = document.createElement("div");
+        card.className = "bg-white dark:bg-zinc-800 p-4 rounded-xl border border-gray-100 dark:border-zinc-700/50 shadow-sm transition-all hover:shadow-md hover:border-purple-200 dark:hover:border-purple-900/50";
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-bold text-sm text-gray-800 dark:text-gray-200">${hero}</span>
+            <span class="text-[10px] bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 font-extrabold px-2 py-0.5 rounded-full">Gen ${genStr}</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 text-xs">
+            <div class="space-y-1.5 flex flex-col justify-center">
+              <label class="flex items-center gap-1 cursor-pointer font-medium text-gray-600 dark:text-gray-400">
+                <input type="checkbox" ${info.unlocked ? "checked" : ""} class="hero-unlock-chk rounded text-purple-600 focus:ring-purple-500 w-3.5 h-3.5">
+                Unlock
+              </label>
+              <label class="flex items-center gap-1 cursor-pointer font-medium text-gray-600 dark:text-gray-400 ${!info.unlocked ? 'opacity-40 pointer-events-none' : ''}">
+                <input type="checkbox" ${info.active_starter ? "checked" : ""} ${!info.unlocked ? "disabled" : ""} class="hero-starter-chk rounded text-purple-600 focus:ring-purple-500 w-3.5 h-3.5">
+                Starter
+              </label>
+            </div>
+
+            <div class="space-y-2">
+              <div>
+                <label class="block text-[9px] text-gray-400 font-bold uppercase mb-0.5">Star Level</label>
+                <select ${!info.unlocked ? "disabled" : ""} class="hero-star-select w-full bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded p-1 text-[11px] font-semibold text-gray-700 dark:text-gray-300">
+                  <!-- Dynamic options -->
+                </select>
+              </div>
+              <div>
+                <label class="block text-[9px] text-gray-400 font-bold uppercase mb-0.5">Widget Level</label>
+                <input type="number" min="0" max="10" value="${info.widget_level || 0}" ${!info.unlocked ? "disabled" : ""} class="hero-widget-input w-full bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded p-0.5 text-[11px] font-semibold text-center text-gray-700 dark:text-gray-300">
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Render Star Options
+        const starSelect = card.querySelector(".hero-star-select");
+        for (const star of STAR_LEVELS) {
+          const sel = star === info.star_level ? "selected" : "";
+          starSelect.innerHTML += `<option value="${star}" ${sel}>${star}</option>`;
+        }
+
+        // Add change events
+        card.querySelector(".hero-unlock-chk").addEventListener("change", (e) => {
+          info.unlocked = e.target.checked;
+          if (!info.unlocked) {
+            info.active_starter = false;
+          }
+          saveProfile();
+          renderRoster();
+          populateCalculatorDropdowns();
+          triggerRecalculation();
+          renderOptimizerSetup();
+        });
+
+        card.querySelector(".hero-starter-chk").addEventListener("change", (e) => {
+          info.active_starter = e.target.checked;
+          saveProfile();
+          renderRoster();
+          renderOptimizerSetup();
+        });
+
+        starSelect.addEventListener("change", (e) => {
+          info.star_level = e.target.value;
+          saveProfile();
+          triggerRecalculation();
+        });
+
+        card.querySelector(".hero-widget-input").addEventListener("change", (e) => {
+          const val = parseInt(e.target.value, 10) || 0;
+          info.widget_level = Math.max(0, Math.min(10, val));
+          saveProfile();
+          triggerRecalculation();
+        });
+
+        // Append to correct columns
+        if (meta.class === "Infantry") infCol.appendChild(card);
+        else if (meta.class === "Lancer") lanCol.appendChild(card);
+        else if (meta.class === "Marksman") marCol.appendChild(card);
+      }
+
+      // If columns are empty show a placeholder info box
+      const checkEmpty = (col, name) => {
+        if (col.innerHTML === "") {
+          col.innerHTML = `<div class="bg-gray-50 text-gray-400 p-6 rounded-lg text-center text-xs">No matching ${name} heroes found.</div>`;
+        }
+      };
+      checkEmpty(infCol, "Infantry");
+      checkEmpty(lanCol, "Lancer");
+      checkEmpty(marCol, "Marksman");
+    }
+
+    function applyMassAction(type) {
+      const scope = document.getElementById("mass-scope").value;
+      const search = document.getElementById("roster-search").value.trim().toLowerCase();
+
+      // Determine target list
+      let targets = [];
+      for (const hero of db.heroesList) {
+        const meta = db.heroMetadata[getMetaName(hero)] || { class: "None", gen: 0 };
+        const genVal = meta.gen || 0.0;
+
+        // Scope Filters
+        if (scope === "infantry" && meta.class !== "Infantry") continue;
+        if (scope === "lancer" && meta.class !== "Lancer") continue;
+        if (scope === "marksman" && meta.class !== "Marksman") continue;
+        if (scope === "filtered") {
+          if (search && !hero.toLowerCase().includes(search)) continue;
+          if (!selectedGens.includes(genVal)) continue;
+        }
+
+        targets.push(hero);
+      }
+
+      if (targets.length === 0) {
+        alert("No heroes in the selected scope target list!");
+        return;
+      }
+
+      // Apply action
+      if (type === "unlock") {
+        for (const h of targets) {
+          userProfile.roster[h].unlocked = true;
+        }
+        alert(`Unlocked ${targets.length} heroes!`);
+      } else if (type === "stars") {
+        const star = document.getElementById("mass-stars").value;
+        for (const h of targets) {
+          if (userProfile.roster[h].unlocked) {
+            userProfile.roster[h].star_level = star;
+          }
+        }
+        alert(`Applied ${star} stars to eligible targeted heroes!`);
+      } else if (type === "widgets") {
+        const wid = parseInt(document.getElementById("mass-widgets").value, 10) || 0;
+        const widClamped = Math.max(0, Math.min(10, wid));
+        for (const h of targets) {
+          if (userProfile.roster[h].unlocked) {
+            userProfile.roster[h].widget_level = widClamped;
+          }
+        }
+        alert(`Set widget level to ${widClamped} for eligible targeted heroes!`);
+      } else if (type === "starters") {
+        for (const h of targets) {
+          if (userProfile.roster[h].unlocked) {
+            userProfile.roster[h].active_starter = true;
+          }
+        }
+        alert(`Set ${targets.length} heroes as active starter candidates!`);
+      }
+
+      saveProfile();
+      renderRoster();
+      populateCalculatorDropdowns();
+      triggerRecalculation();
+      renderOptimizerSetup();
+    }
+
+    function renderOptimizerSetup() {
+      // Find active candidates
+      const activeInf = [];
+      const activeLan = [];
+      const activeMar = [];
+
+      for (const hero of db.heroesList) {
+        const info = userProfile.roster[hero] || {};
+        if (info.unlocked && info.active_starter) {
+          const meta = db.heroMetadata[getMetaName(hero)] || {};
+          if (meta.class === "Infantry") activeInf.push(hero);
+          if (meta.class === "Lancer") activeLan.push(hero);
+          if (meta.class === "Marksman") activeMar.push(hero);
+        }
+      }
+
+      const setCandidateLabel = (id, arr) => {
+        const el = document.getElementById(id);
+        if (arr.length > 0) {
+          el.textContent = arr.join(", ");
+        } else {
+          el.textContent = "None selected (checks all unlocked)";
+        }
+      };
+
+      setCandidateLabel("opt-candidate-inf", activeInf);
+      setCandidateLabel("opt-candidate-lan", activeLan);
+      setCandidateLabel("opt-candidate-mar", activeMar);
+
+      // Render checkboxed joiners list
+      const joinersList = [];
+      for (const hero of db.heroesList) {
+        const info = userProfile.roster[hero] || {};
+        if (info.unlocked) {
+          // If has joiner skills
+          const skills = getJoinerSkills(hero);
+          const hasBuff = Object.values(skills).some(v => v !== 0.0);
+          if (hasBuff) {
+            joinersList.push(hero);
+          }
+        }
+      }
+
+      const listContainer = document.getElementById("opt-joiner-checkboxes");
+      listContainer.innerHTML = "";
+      if (joinersList.length === 0) {
+        listContainer.innerHTML = `<div class="text-gray-400 text-center italic">No unlocked heroes with joiner skills.</div>`;
+        return;
+      }
+
+      for (const h of joinersList) {
+        const isDefault = DEFAULT_TOP_JOINERS.includes(h);
+        listContainer.innerHTML += `
+          <label class="flex items-center gap-1.5 cursor-pointer select-none">
+            <input type="checkbox" value="${h}" ${isDefault ? "checked" : ""} class="opt-joiner-checkbox rounded text-purple-600 focus:ring-purple-500 w-3.5 h-3.5">
+            ${h}
+          </label>
+        `;
+      }
+    }
+
+    function runOptimizationLegacy() {
+      // Toggle views
+      document.getElementById("opt-standby-view").classList.add("hidden");
+      document.getElementById("opt-result-container").classList.add("hidden");
+      document.getElementById("opt-running-view").classList.remove("hidden");
+
+      // Set up candidate starters
+      const activeInf = [];
+      const activeLan = [];
+      const activeMar = [];
+      const unlockedInf = [];
+      const unlockedLan = [];
+      const unlockedMar = [];
+
+      for (const hero of db.heroesList) {
+        const info = userProfile.roster[hero] || {};
+        if (info.unlocked) {
+          const meta = db.heroMetadata[getMetaName(hero)] || {};
+          if (meta.class === "Infantry") {
+            unlockedInf.push(hero);
+            if (info.active_starter) activeInf.push(hero);
+          }
+          if (meta.class === "Lancer") {
+            unlockedLan.push(hero);
+            if (info.active_starter) activeLan.push(hero);
+          }
+          if (meta.class === "Marksman") {
+            unlockedMar.push(hero);
+            if (info.active_starter) activeMar.push(hero);
+          }
+        }
+      }
+
+      const startersMap = {
+        Infantry: activeInf.length > 0 ? activeInf : unlockedInf,
+        Lancer: activeLan.length > 0 ? activeLan : unlockedLan,
+        Marksman: activeMar.length > 0 ? activeMar : unlockedMar
+      };
+
+      // Set up joiner pool
+      const joinersPool = Array.from(document.querySelectorAll(".opt-joiner-checkbox:checked")).map(c => c.value);
+      const nJoiners = parseInt(document.getElementById("opt-slots-slider").value, 10);
+
+      // Run math loop in setTimeout to let DOM update loader first
+      setTimeout(() => {
+        const startTime = performance.now();
+        const bestTeam = findOptimalSquad(userProfile, startersMap, joinersPool, nJoiners);
+        const endTime = performance.now();
+
+        console.log(`Optimized in ${(endTime - startTime).toFixed(3)} ms`);
+
+        // Hide loader, show results
+        document.getElementById("opt-running-view").classList.add("hidden");
+        document.getElementById("opt-result-container").classList.remove("hidden");
+
+        const bearDefense = 23400.0;
+        const chameleonBuff = userProfile.chameleon_buff || 0.1;
+        const chameleonMult = userProfile.pets_active ? (1.0 + chameleonBuff) : 1.0;
+        const rosarionMode = userProfile.rosarion_mode || "No";
+        const cyrilleMult = rosarionMode === "No" ? 1.3 : 1.0;
+
+        const bestBoost = bestTeam.total_boost;
+        const normalizedBoost = (bestBoost * chameleonMult * cyrilleMult) / bearDefense;
+
+        document.getElementById("opt-boost-val").textContent = normalizedBoost.toFixed(4);
+
+        const starters = bestTeam.starters;
+        const joiners = bestTeam.joiners;
+
+        document.getElementById("opt-result-squad").innerHTML = `
+          🏆 Starters: Infantry: ${starters[0] || 'None'} | Lancer: ${starters[1] || 'None'} | Marksman: ${starters[2] || 'None'}<br>
+          👥 Joiners: ${joiners.length > 0 ? joiners.join(", ") : 'None'}
+        `;
+
+        document.getElementById("opt-ratio-inf").textContent = (bestTeam.optimal_ratios.Infantry * 100).toFixed(2) + "%";
+        document.getElementById("opt-count-inf").textContent = bestTeam.troop_counts.Infantry.toFixed(0) + " troops";
+
+        document.getElementById("opt-ratio-lan").textContent = (bestTeam.optimal_ratios.Lancer * 100).toFixed(2) + "%";
+        document.getElementById("opt-count-lan").textContent = bestTeam.troop_counts.Lancer.toFixed(0) + " troops";
+
+        document.getElementById("opt-ratio-mar").textContent = (bestTeam.optimal_ratios.Marksman * 100).toFixed(2) + "%";
+        document.getElementById("opt-count-mar").textContent = bestTeam.troop_counts.Marksman.toFixed(0) + " troops";
+
+        // Bind squad load button
+        const loadBtn = document.getElementById("opt-load-squad-btn");
+
+        // Remove previous listener to avoid stack accretion
+        const newLoadBtn = loadBtn.cloneNode(true);
+        loadBtn.parentNode.replaceChild(newLoadBtn, loadBtn);
+
+        newLoadBtn.addEventListener("click", () => {
+          sessionStorage.setItem("squad_inf", starters[0] || "");
+          sessionStorage.setItem("squad_lan", starters[1] || "");
+          sessionStorage.setItem("squad_mar", starters[2] || "");
+          for (let i = 1; i <= 4; i++) {
+            sessionStorage.setItem(`squad_j${i}`, joiners[i-1] || "");
+          }
+
+          populateCalculatorDropdowns();
+          triggerRecalculation();
+
+          // Programmatically click Squad Calculator tab
+          document.getElementById("calc-tab").click();
+          alert("Squad configuration successfully loaded into the calculator! 🚀");
+        });
+
+      }, 100);
+    }
+
+    function cancelOptimization() {
+      if (!optimizerWorker) return;
+      optimizerWorker.terminate();
+      optimizerWorker = null;
+      document.getElementById("opt-running-view").classList.add("hidden");
+      document.getElementById("opt-standby-view").classList.remove("hidden");
+      document.getElementById("opt-run-btn").disabled = false;
+      document.getElementById("opt-running-stats").textContent = "Search cancelled.";
+    }
+
+    function renderOptimizerResult(bestTeam) {
+      if (!bestTeam?.optimal_ratios || !bestTeam?.troop_counts) {
+        throw new Error("The exhaustive search completed without a valid squad.");
+      }
+      document.getElementById("opt-running-view").classList.add("hidden");
+      document.getElementById("opt-result-container").classList.remove("hidden");
+
+      const chameleonMult = userProfile.pets_active ? 1 + (userProfile.chameleon_buff || 0.1) : 1;
+      const cyrilleMult = (userProfile.rosarion_mode || "No") === "No" ? 1.3 : 1;
+      const normalizedBoost = (bestTeam.total_boost * chameleonMult * cyrilleMult) / 23400;
+      document.getElementById("opt-boost-val").textContent = normalizedBoost.toFixed(4);
+
+      const starters = bestTeam.starters;
+      const joiners = bestTeam.joiners;
+      document.getElementById("opt-result-squad").innerHTML = `
+        🏆 Starters: Infantry: ${starters[0] || "None"} | Lancer: ${starters[1] || "None"} | Marksman: ${starters[2] || "None"}<br>
+        👥 Joiners: ${joiners.length ? joiners.join(", ") : "None"}
+      `;
+      for (const [suffix, troopClass] of [["inf", "Infantry"], ["lan", "Lancer"], ["mar", "Marksman"]]) {
+        document.getElementById(`opt-ratio-${suffix}`).textContent = `${(bestTeam.optimal_ratios[troopClass] * 100).toFixed(2)}%`;
+        document.getElementById(`opt-count-${suffix}`).textContent = `${bestTeam.troop_counts[troopClass].toFixed(0)} troops`;
+      }
+
+      const loadBtn = document.getElementById("opt-load-squad-btn");
+      const newLoadBtn = loadBtn.cloneNode(true);
+      loadBtn.parentNode.replaceChild(newLoadBtn, loadBtn);
+      newLoadBtn.addEventListener("click", () => {
+        sessionStorage.setItem("squad_inf", starters[0] || "");
+        sessionStorage.setItem("squad_lan", starters[1] || "");
+        sessionStorage.setItem("squad_mar", starters[2] || "");
+        for (let index = 1; index <= 4; index += 1) {
+          sessionStorage.setItem(`squad_j${index}`, joiners[index - 1] || "");
+        }
+        populateCalculatorDropdowns();
+        triggerRecalculation();
+        document.getElementById("calc-tab").click();
+        alert("Squad configuration successfully loaded into the calculator! 🚀");
+      });
+    }
+
+    function runOptimization() {
+      if (optimizerWorker) return;
+
+      const active = { Infantry: [], Lancer: [], Marksman: [] };
+      const unlocked = { Infantry: [], Lancer: [], Marksman: [] };
+      for (const hero of db.heroesList) {
+        const info = userProfile.roster[hero];
+        if (!info?.unlocked) continue;
+        const troopClass = (db.heroMetadata[getMetaName(hero)] || {}).class;
+        if (!(troopClass in unlocked)) continue;
+        unlocked[troopClass].push(hero);
+        if (info.active_starter) active[troopClass].push(hero);
+      }
+      const startersMap = Object.fromEntries(Object.keys(unlocked).map((troopClass) => [
+        troopClass,
+        active[troopClass].length ? active[troopClass] : unlocked[troopClass]
+      ]));
+      const joinerPool = Array.from(document.querySelectorAll(".opt-joiner-checkbox:checked"), (checkbox) => checkbox.value);
+      const slots = Number.parseInt(document.getElementById("opt-slots-slider").value, 10);
+      if (slots > 0 && joinerPool.length === 0) {
+        alert("Select at least one unlocked joiner, or set the number of joiner slots to zero.");
+        return;
+      }
+
+      document.getElementById("opt-standby-view").classList.add("hidden");
+      document.getElementById("opt-result-container").classList.add("hidden");
+      document.getElementById("opt-running-view").classList.remove("hidden");
+      document.getElementById("opt-run-btn").disabled = true;
+      document.getElementById("opt-running-stats").textContent = "Preparing exhaustive search...";
+
+      const startTime = performance.now();
+      optimizerWorker = new Worker(new URL("optimizer-worker.js", window.location.href), { type: "module" });
+      optimizerWorker.addEventListener("message", (event) => {
+        if (event.data?.type === "progress") {
+          const { evaluated, total } = event.data;
+          const percent = total ? evaluated / total * 100 : 0;
+          document.getElementById("opt-running-stats").textContent =
+            `Evaluated ${evaluated.toLocaleString()} / ${total.toLocaleString()} branches (${percent.toFixed(2)}%)`;
+          return;
+        }
+        if (event.data?.type === "error") {
+          const message = event.data.message || "Optimizer worker failed.";
+          optimizerWorker?.terminate();
+          optimizerWorker = null;
+          document.getElementById("opt-running-view").classList.add("hidden");
+          document.getElementById("opt-standby-view").classList.remove("hidden");
+          document.getElementById("opt-run-btn").disabled = false;
+          alert(message);
+          return;
+        }
+        if (event.data?.type === "result") {
+          console.log(`Exhaustively optimized ${event.data.evaluated.toLocaleString()} branches in ${(performance.now() - startTime).toFixed(3)} ms`);
+          optimizerWorker?.terminate();
+          optimizerWorker = null;
+          document.getElementById("opt-run-btn").disabled = false;
+          renderOptimizerResult(event.data.best);
+        }
+      });
+      optimizerWorker.addEventListener("error", (event) => {
+        optimizerWorker?.terminate();
+        optimizerWorker = null;
+        document.getElementById("opt-running-view").classList.add("hidden");
+        document.getElementById("opt-standby-view").classList.remove("hidden");
+        document.getElementById("opt-run-btn").disabled = false;
+        alert(`Optimizer worker failed: ${event.message}`);
+      });
+      optimizerWorker.postMessage({
+        type: "run",
+        payload: { profile: userProfile, startersMap, joinerPool, slots, db, ministerBuffs: MINISTER_BUFFS }
+      });
+    }
+
+    // Tab switcher
+    document.addEventListener("DOMContentLoaded", () => {
+      const tabs = document.querySelectorAll("#bear-tabs button");
+      tabs.forEach(tab => {
+        tab.addEventListener("click", function () {
+          // Deactivate tabs
+          tabs.forEach(t => {
+            t.classList.remove("border-purple-600", "text-purple-600");
+            t.classList.add("border-transparent", "text-gray-500", "dark:text-gray-400", "hover:text-gray-600", "hover:border-gray-300");
+          });
+
+          // Activate tab
+          this.classList.remove("border-transparent", "text-gray-500", "dark:text-gray-400", "hover:text-gray-600", "hover:border-gray-300");
+          this.classList.add("border-purple-600", "text-purple-600");
+
+          // Hide panes
+          document.querySelectorAll(".tab-pane").forEach(pane => {
+            pane.classList.add("hidden");
+            pane.classList.remove("block");
+          });
+
+          // Show pane
+          const target = this.getAttribute("data-target");
+          document.getElementById(target).classList.remove("hidden");
+          document.getElementById(target).classList.add("block");
+        });
+      });
+    });
+
+    // Loading Databases Async
+    async function loadDatabases() {
+      try {
+        const updateStatus = (text) => document.getElementById("loading-status").textContent = text;
+        const bearCalcPathIndex = window.location.pathname.indexOf("/bear-calc");
+        const bearCalcBasePath = bearCalcPathIndex >= 0
+          ? window.location.pathname.slice(0, bearCalcPathIndex + "/bear-calc".length)
+          : "/bear-calc";
+
+        const fetchJson = async (filename) => {
+          const response = await fetch(`${bearCalcBasePath}/data/${filename}`);
+          if (!response.ok) {
+            throw new Error(`${filename} request failed (${response.status} ${response.statusText})`);
+          }
+
+          try {
+            return await response.json();
+          } catch (error) {
+            throw new Error(`${filename} returned invalid JSON: ${error.message}`);
+          }
+        };
+
+        updateStatus("Fetching heroes list...");
+        db.heroesList = await fetchJson("heroes_list.json");
+
+        updateStatus("Fetching hero metadata...");
+        db.heroMetadata = await fetchJson("hero_metadata.json");
+
+        updateStatus("Fetching hero skills database...");
+        db.heroSkills = await fetchJson("hero_skills.json");
+
+        updateStatus("Fetching stars data...");
+        db.starLevelStats = await fetchJson("star_level_stats.json");
+
+        updateStatus("Fetching crystalline damage stats...");
+        db.troopDamageStats = await fetchJson("troop_damage_stats.json");
+
+        updateStatus("Fetching exclusive widgets database...");
+        db.widgetMultipliers = await fetchJson("widget_multipliers.json");
+
+        updateStatus("Initializing user configuration...");
+        loadProfile();
+
+        updateStatus("Rendering user interface...");
+        initUI();
+
+        // Load successfully
+        document.getElementById("loading-overlay").classList.add("hidden");
+      } catch (err) {
+        console.error("Error loading JSON databases", err);
+        document.getElementById("loading-status").innerHTML = `<span class="text-red-500 font-bold">Failed to load game databases: ${err.message}</span>`;
+      }
+    }
+
+    // Run!
+    loadDatabases();
+  </script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/darkmode.js"></script>
+</body>
+</html>

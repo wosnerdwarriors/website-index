@@ -1,0 +1,374 @@
+{
+  "Jessie": {
+    "class": "Lancer",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Jasser": {
+    "class": "Marksman",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Seo-Yoon": {
+    "class": "Marksman",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Jeronimo": {
+    "class": "Infantry",
+    "gen": 1.2,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 1.0
+  },
+  "Reina": {
+    "class": "Lancer",
+    "gen": 4.0,
+    "rally_widget_lethality": 1.0,
+    "rally_widget_attack": 0.0
+  },
+  "Greg": {
+    "class": "Marksman",
+    "gen": 3.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Gwen": {
+    "class": "Marksman",
+    "gen": 5.0,
+    "rally_widget_lethality": 1.0,
+    "rally_widget_attack": 0.0
+  },
+  "Lynn": {
+    "class": "Marksman",
+    "gen": 4.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Mia": {
+    "class": "Lancer",
+    "gen": 3.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 1.0
+  },
+  "Norah": {
+    "class": "Lancer",
+    "gen": 5.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Philly": {
+    "class": "Lancer",
+    "gen": 2.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Renee": {
+    "class": "Lancer",
+    "gen": 6.0,
+    "rally_widget_lethality": 1.0,
+    "rally_widget_attack": 0.0
+  },
+  "Gordon": {
+    "class": "Lancer",
+    "gen": 7.0,
+    "rally_widget_lethality": 1.0,
+    "rally_widget_attack": 0.0
+  },
+  "Bradley": {
+    "class": "Marksman",
+    "gen": 7.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Sonya": {
+    "class": "Lancer",
+    "gen": 8.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Magnus": {
+    "class": "Infantry",
+    "gen": 9.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Hendrik": {
+    "class": "Marksman",
+    "gen": 8.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 1.0
+  },
+  "Wayne": {
+    "class": "Marksman",
+    "gen": 6.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Edith": {
+    "class": "Infantry",
+    "gen": 7.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Alonso": {
+    "class": "Marksman",
+    "gen": 2.0,
+    "rally_widget_lethality": 1.0,
+    "rally_widget_attack": 0.0
+  },
+  "Natalia": {
+    "class": "Infantry",
+    "gen": 1.1,
+    "rally_widget_lethality": 1.0,
+    "rally_widget_attack": 0.0
+  },
+  "Hector": {
+    "class": "Infantry",
+    "gen": 5.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Flint": {
+    "class": "Infantry",
+    "gen": 2.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Molly": {
+    "class": "Lancer",
+    "gen": 1.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Ahmose": {
+    "class": "Infantry",
+    "gen": 4.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Logan": {
+    "class": "Infantry",
+    "gen": 3.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Sergey": {
+    "class": "Infantry",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Zinman": {
+    "class": "Marksman",
+    "gen": 1.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Bahiti": {
+    "class": "Marksman",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Wu Ming": {
+    "class": "Infantry",
+    "gen": 6.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Gatot": {
+    "class": "Infantry",
+    "gen": 8.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Fred": {
+    "class": "Lancer",
+    "gen": 9.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 1.0
+  },
+  "Xura": {
+    "class": "Marksman",
+    "gen": 9.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Patrick": {
+    "class": "Lancer",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Wallis Bokan": {
+    "class": "Lancer",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Ling": {
+    "class": "Lancer",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Gina": {
+    "class": "Marksman",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Eugene": {
+    "class": "Infantry",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Smith": {
+    "class": "Infantry",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Charlie": {
+    "class": "Lancer",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Cloris": {
+    "class": "Marksman",
+    "gen": 0.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Gregory": {
+    "class": "Infantry",
+    "gen": 10.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Freya": {
+    "class": "Lancer",
+    "gen": 10.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Blanchette": {
+    "class": "Marksman",
+    "gen": 10.0,
+    "rally_widget_lethality": 1.0,
+    "rally_widget_attack": 0.0
+  },
+  "Eleonora": {
+    "class": "Infantry",
+    "gen": 11.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Lloyd": {
+    "class": "Lancer",
+    "gen": 11.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Rufus": {
+    "class": "Marksman",
+    "gen": 11.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 1.0
+  },
+  "Hervor": {
+    "class": "Infantry",
+    "gen": 12.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Karol": {
+    "class": "Lancer",
+    "gen": 12.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 1.0
+  },
+  "Ligeia": {
+    "class": "Marksman",
+    "gen": 12.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Gisela": {
+    "class": "Infantry",
+    "gen": 13.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Flora": {
+    "class": "Lancer",
+    "gen": 13.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Vulcanus": {
+    "class": "Marksman",
+    "gen": 13.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 1.0
+  },
+  "Elif": {
+    "class": "Infantry",
+    "gen": 14.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Dominic": {
+    "class": "Lancer",
+    "gen": 14.0,
+    "rally_widget_lethality": 1.0,
+    "rally_widget_attack": 0.0
+  },
+  "Cara": {
+    "class": "Marksman",
+    "gen": 14.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Hank": {
+    "class": "Infantry",
+    "gen": 15.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Estrella": {
+    "class": "Lancer",
+    "gen": 15.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Viveca": {
+    "class": "Marksman",
+    "gen": 15.0,
+    "rally_widget_lethality": 1.0,
+    "rally_widget_attack": 0.0
+  },
+  "Seigel": {
+    "class": "Infantry",
+    "gen": 16.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  },
+  "Ursar": {
+    "class": "Lancer",
+    "gen": 16.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 1.0
+  },
+  "Aisling": {
+    "class": "Marksman",
+    "gen": 16.0,
+    "rally_widget_lethality": 0.0,
+    "rally_widget_attack": 0.0
+  }
+}

@@ -1,0 +1,728 @@
+{
+  "FC0 T1": {
+    "InfDamage": 0.125052366987851,
+    "LanDamage": 0.374947633012149,
+    "MarDamage": 0.55,
+    "MarFcSkill": 0.0
+  },
+  "FC0 T2": {
+    "InfDamage": 0.187578550481776,
+    "LanDamage": 0.562421449518224,
+    "MarDamage": 0.825,
+    "MarFcSkill": 0.0
+  },
+  "FC0 T3": {
+    "InfDamage": 0.262510722764179,
+    "LanDamage": 0.787092451838996,
+    "MarDamage": 1.15456349206349,
+    "MarFcSkill": 0.0
+  },
+  "FC0 T4": {
+    "InfDamage": 0.341412811458894,
+    "LanDamage": 1.02366655362047,
+    "MarDamage": 1.5015873015873,
+    "MarFcSkill": 0.0
+  },
+  "FC0 T5": {
+    "InfDamage": 0.40939763001975,
+    "LanDamage": 1.22750713188501,
+    "MarDamage": 1.80059523809524,
+    "MarFcSkill": 0.0
+  },
+  "FC0 T6": {
+    "InfDamage": 0.483337323199074,
+    "LanDamage": 1.44920235934061,
+    "MarDamage": 2.12579365079365,
+    "MarFcSkill": 0.0
+  },
+  "FC0 T7": {
+    "InfDamage": 0.570179244718415,
+    "LanDamage": 1.70958266004349,
+    "MarDamage": 2.75851190476191,
+    "MarFcSkill": 0.0
+  },
+  "FC0 T8": {
+    "InfDamage": 0.672900831887007,
+    "LanDamage": 2.01757535858918,
+    "MarDamage": 3.25547619047619,
+    "MarFcSkill": 0.0
+  },
+  "FC0 T9": {
+    "InfDamage": 0.793983282462545,
+    "LanDamage": 2.38061989214063,
+    "MarDamage": 3.84126984126984,
+    "MarFcSkill": 0.0
+  },
+  "FC0 T10": {
+    "InfDamage": 0.936900273305803,
+    "LanDamage": 2.80913147272594,
+    "MarDamage": 4.53269841269841,
+    "MarFcSkill": 0.0
+  },
+  "FC0 T11": {
+    "InfDamage": 1.12447882378758,
+    "LanDamage": 3.37155292224417,
+    "MarDamage": 5.44019841269841,
+    "MarFcSkill": 0.0
+  },
+  "FC1 T1": {
+    "InfDamage": 0.130014762503242,
+    "LanDamage": 0.389826507338028,
+    "MarDamage": 0.571825396825397,
+    "MarFcSkill": 0.0
+  },
+  "FC1 T2": {
+    "InfDamage": 0.195022143754863,
+    "LanDamage": 0.584739761007042,
+    "MarDamage": 0.857738095238095,
+    "MarFcSkill": 0.0
+  },
+  "FC1 T3": {
+    "InfDamage": 0.2729317533465,
+    "LanDamage": 0.818338087923341,
+    "MarDamage": 1.20039682539683,
+    "MarFcSkill": 0.0
+  },
+  "FC1 T4": {
+    "InfDamage": 0.355307518901989,
+    "LanDamage": 1.06532740173293,
+    "MarDamage": 1.56269841269841,
+    "MarFcSkill": 0.0
+  },
+  "FC1 T5": {
+    "InfDamage": 0.42577353522054,
+    "LanDamage": 1.27660741716041,
+    "MarDamage": 1.87261904761905,
+    "MarFcSkill": 0.0
+  },
+  "FC1 T6": {
+    "InfDamage": 0.502690665709099,
+    "LanDamage": 1.50722996921154,
+    "MarDamage": 2.2109126984127,
+    "MarFcSkill": 0.0
+  },
+  "FC1 T7": {
+    "InfDamage": 0.593006264089213,
+    "LanDamage": 1.77802548194253,
+    "MarDamage": 2.86894841269841,
+    "MarFcSkill": 0.0
+  },
+  "FC1 T8": {
+    "InfDamage": 0.699697767670118,
+    "LanDamage": 2.09792127994893,
+    "MarDamage": 3.38511904761905,
+    "MarFcSkill": 0.0
+  },
+  "FC1 T9": {
+    "InfDamage": 0.825742613761047,
+    "LanDamage": 2.47584468782625,
+    "MarDamage": 3.99492063492064,
+    "MarFcSkill": 0.0
+  },
+  "FC1 T10": {
+    "InfDamage": 0.974614479222774,
+    "LanDamage": 2.92221091760262,
+    "MarDamage": 4.71515873015873,
+    "MarFcSkill": 0.0
+  },
+  "FC1 T11": {
+    "InfDamage": 1.16963662297764,
+    "LanDamage": 3.50695067860966,
+    "MarDamage": 5.65867063492064,
+    "MarFcSkill": 0.0
+  },
+  "FC2 T1": {
+    "InfDamage": 0.13646587667325,
+    "LanDamage": 0.409169043961671,
+    "MarDamage": 0.600198412698413,
+    "MarFcSkill": 0.0
+  },
+  "FC2 T2": {
+    "InfDamage": 0.204946934785644,
+    "LanDamage": 0.6144975096588,
+    "MarDamage": 0.901388888888889,
+    "MarFcSkill": 0.0
+  },
+  "FC2 T3": {
+    "InfDamage": 0.286826460789594,
+    "LanDamage": 0.859998936035802,
+    "MarDamage": 1.26150793650794,
+    "MarFcSkill": 0.0
+  },
+  "FC2 T4": {
+    "InfDamage": 0.372675903205857,
+    "LanDamage": 1.11740346187351,
+    "MarDamage": 1.6390873015873,
+    "MarFcSkill": 0.0
+  },
+  "FC2 T5": {
+    "InfDamage": 0.447111835936721,
+    "LanDamage": 1.34058657676169,
+    "MarDamage": 1.96646825396825,
+    "MarFcSkill": 0.0
+  },
+  "FC2 T6": {
+    "InfDamage": 0.527998882837593,
+    "LanDamage": 1.58311222827352,
+    "MarDamage": 2.32222222222222,
+    "MarFcSkill": 0.0
+  },
+  "FC2 T7": {
+    "InfDamage": 0.622780637181559,
+    "LanDamage": 1.86729872789781,
+    "MarDamage": 3.01299603174603,
+    "MarFcSkill": 0.0
+  },
+  "FC2 T8": {
+    "InfDamage": 0.734930775829393,
+    "LanDamage": 2.20356128766267,
+    "MarDamage": 3.5555753968254,
+    "MarFcSkill": 0.0
+  },
+  "FC2 T9": {
+    "InfDamage": 0.866930496538792,
+    "LanDamage": 2.59933934473105,
+    "MarDamage": 4.19418650793651,
+    "MarFcSkill": 0.0
+  },
+  "FC2 T10": {
+    "InfDamage": 1.0232459552736,
+    "LanDamage": 3.06802388599624,
+    "MarDamage": 4.95043650793651,
+    "MarFcSkill": 0.0
+  },
+  "FC2 T11": {
+    "InfDamage": 1.22769665050771,
+    "LanDamage": 3.68103350822245,
+    "MarDamage": 5.93956349206349,
+    "MarFcSkill": 0.0
+  },
+  "FC3 T1": {
+    "InfDamage": 0.143413230394797,
+    "LanDamage": 0.472999414819691,
+    "MarDamage": 0.630753968253968,
+    "MarFcSkill": 0.1
+  },
+  "FC3 T2": {
+    "InfDamage": 0.214871725816426,
+    "LanDamage": 0.708680784141614,
+    "MarDamage": 0.945039682539683,
+    "MarFcSkill": 0.1
+  },
+  "FC3 T3": {
+    "InfDamage": 0.301217407784228,
+    "LanDamage": 0.993462438738936,
+    "MarDamage": 1.32480158730159,
+    "MarFcSkill": 0.1
+  },
+  "FC3 T4": {
+    "InfDamage": 0.391533006164343,
+    "LanDamage": 1.29133750274303,
+    "MarDamage": 1.72202380952381,
+    "MarFcSkill": 0.1
+  },
+  "FC3 T5": {
+    "InfDamage": 0.46944261575598,
+    "LanDamage": 1.54829566235096,
+    "MarDamage": 2.06468253968254,
+    "MarFcSkill": 0.1
+  },
+  "FC3 T6": {
+    "InfDamage": 0.554299579069164,
+    "LanDamage": 1.82816728842075,
+    "MarDamage": 2.43789682539683,
+    "MarFcSkill": 0.1
+  },
+  "FC3 T7": {
+    "InfDamage": 0.653547489376983,
+    "LanDamage": 2.15550252359008,
+    "MarDamage": 3.16184523809524,
+    "MarFcSkill": 0.1
+  },
+  "FC3 T8": {
+    "InfDamage": 0.771652502643286,
+    "LanDamage": 2.54503145344159,
+    "MarDamage": 3.73323412698413,
+    "MarFcSkill": 0.1
+  },
+  "FC3 T9": {
+    "InfDamage": 0.910599577074231,
+    "LanDamage": 3.00330078267866,
+    "MarDamage": 4.40545634920635,
+    "MarFcSkill": 0.1
+  },
+  "FC3 T10": {
+    "InfDamage": 1.07435862908213,
+    "LanDamage": 3.54340392070807,
+    "MarDamage": 5.19771825396826,
+    "MarFcSkill": 0.1
+  },
+  "FC3 T11": {
+    "InfDamage": 1.28923035489856,
+    "LanDamage": 4.25208470484968,
+    "MarDamage": 6.23726190476191,
+    "MarFcSkill": 0.1
+  },
+  "FC4 T1": {
+    "InfDamage": 0.150360584116344,
+    "LanDamage": 0.495912881281545,
+    "MarDamage": 0.661309523809524,
+    "MarFcSkill": 0.1
+  },
+  "FC4 T2": {
+    "InfDamage": 0.225788995950286,
+    "LanDamage": 0.744687660010241,
+    "MarDamage": 0.993055555555556,
+    "MarFcSkill": 0.1
+  },
+  "FC4 T3": {
+    "InfDamage": 0.316104594330401,
+    "LanDamage": 1.04256272401434,
+    "MarDamage": 1.39027777777778,
+    "MarFcSkill": 0.1
+  },
+  "FC4 T4": {
+    "InfDamage": 0.410886348674367,
+    "LanDamage": 1.35516787360105,
+    "MarDamage": 1.80714285714286,
+    "MarFcSkill": 0.1
+  },
+  "FC4 T5": {
+    "InfDamage": 0.492765874678317,
+    "LanDamage": 1.62521944261576,
+    "MarDamage": 2.16726190476191,
+    "MarFcSkill": 0.1
+  },
+  "FC4 T6": {
+    "InfDamage": 0.582088993955353,
+    "LanDamage": 1.91982115426816,
+    "MarDamage": 2.56011904761905,
+    "MarFcSkill": 0.1
+  },
+  "FC4 T7": {
+    "InfDamage": 0.686299299778562,
+    "LanDamage": 2.26352315119596,
+    "MarDamage": 3.32029761904762,
+    "MarFcSkill": 0.1
+  },
+  "FC4 T8": {
+    "InfDamage": 0.810359187663335,
+    "LanDamage": 2.67269219515763,
+    "MarDamage": 3.92049603174603,
+    "MarFcSkill": 0.1
+  },
+  "FC4 T9": {
+    "InfDamage": 0.955757376264289,
+    "LanDamage": 3.15223831468071,
+    "MarDamage": 4.62392857142857,
+    "MarFcSkill": 0.1
+  },
+  "FC4 T10": {
+    "InfDamage": 1.12795250064835,
+    "LanDamage": 3.72016494769951,
+    "MarDamage": 5.45700396825397,
+    "MarFcSkill": 0.1
+  },
+  "FC4 T11": {
+    "InfDamage": 1.35374149659864,
+    "LanDamage": 4.46485260770975,
+    "MarDamage": 6.54936507936508,
+    "MarFcSkill": 0.1
+  },
+  "FC5 T1": {
+    "InfDamage": 0.15830041694097,
+    "LanDamage": 0.545831504644869,
+    "MarDamage": 0.696230158730159,
+    "MarFcSkill": 0.15
+  },
+  "FC5 T2": {
+    "InfDamage": 0.237202505635685,
+    "LanDamage": 0.817891721693565,
+    "MarDamage": 1.04325396825397,
+    "MarFcSkill": 0.15
+  },
+  "FC5 T3": {
+    "InfDamage": 0.331984259979652,
+    "LanDamage": 1.1447061962615,
+    "MarDamage": 1.46011904761905,
+    "MarFcSkill": 0.15
+  },
+  "FC5 T4": {
+    "InfDamage": 0.431728409839009,
+    "LanDamage": 1.48863137630419,
+    "MarDamage": 1.89880952380952,
+    "MarFcSkill": 0.15
+  },
+  "FC5 T5": {
+    "InfDamage": 0.517577852255272,
+    "LanDamage": 1.78464658101755,
+    "MarDamage": 2.27638888888889,
+    "MarFcSkill": 0.15
+  },
+  "FC5 T6": {
+    "InfDamage": 0.610870887944621,
+    "LanDamage": 2.10632784394305,
+    "MarDamage": 2.68670634920635,
+    "MarFcSkill": 0.15
+  },
+  "FC5 T7": {
+    "InfDamage": 0.72053982883476,
+    "LanDamage": 2.48447443493526,
+    "MarDamage": 3.48595238095238,
+    "MarFcSkill": 0.15
+  },
+  "FC5 T8": {
+    "InfDamage": 0.850554591338001,
+    "LanDamage": 2.932774918374,
+    "MarDamage": 4.11496031746032,
+    "MarFcSkill": 0.15
+  },
+  "FC5 T9": {
+    "InfDamage": 1.00389261276358,
+    "LanDamage": 3.4614957175441,
+    "MarDamage": 4.85680555555556,
+    "MarFcSkill": 0.15
+  },
+  "FC5 T10": {
+    "InfDamage": 1.18452380952381,
+    "LanDamage": 4.0843253968254,
+    "MarDamage": 5.73069444444444,
+    "MarFcSkill": 0.15
+  },
+  "FC5 T11": {
+    "InfDamage": 1.42123007560796,
+    "LanDamage": 4.90050604797149,
+    "MarDamage": 6.87587301587302,
+    "MarFcSkill": 0.15
+  },
+  "FC6 T1": {
+    "InfDamage": 0.166240249765595,
+    "LanDamage": 0.573208633404486,
+    "MarDamage": 0.731150793650794,
+    "MarFcSkill": 0.15
+  },
+  "FC6 T2": {
+    "InfDamage": 0.249112254872624,
+    "LanDamage": 0.858957414832991,
+    "MarDamage": 1.09563492063492,
+    "MarFcSkill": 0.15
+  },
+  "FC6 T3": {
+    "InfDamage": 0.348360165180442,
+    "LanDamage": 1.20117152432821,
+    "MarDamage": 1.53214285714286,
+    "MarFcSkill": 0.15
+  },
+  "FC6 T4": {
+    "InfDamage": 0.453562950106729,
+    "LanDamage": 1.56391848039313,
+    "MarDamage": 1.99484126984127,
+    "MarFcSkill": 0.15
+  },
+  "FC6 T5": {
+    "InfDamage": 0.543382308935304,
+    "LanDamage": 1.8736222494863,
+    "MarDamage": 2.38988095238095,
+    "MarFcSkill": 0.15
+  },
+  "FC6 T6": {
+    "InfDamage": 0.641637740140044,
+    "LanDamage": 2.21241421788657,
+    "MarDamage": 2.82202380952381,
+    "MarFcSkill": 0.15
+  },
+  "FC6 T7": {
+    "InfDamage": 0.756765316097113,
+    "LanDamage": 2.60938258490102,
+    "MarDamage": 3.66121031746032,
+    "MarFcSkill": 0.15
+  },
+  "FC6 T8": {
+    "InfDamage": 0.893231192770363,
+    "LanDamage": 3.07992698545694,
+    "MarDamage": 4.32142857142857,
+    "MarFcSkill": 0.15
+  },
+  "FC6 T9": {
+    "InfDamage": 1.05401280746903,
+    "LanDamage": 3.63431384283919,
+    "MarDamage": 5.09928571428572,
+    "MarFcSkill": 0.15
+  },
+  "FC6 T10": {
+    "InfDamage": 1.24357631615696,
+    "LanDamage": 4.28794279197505,
+    "MarDamage": 6.01638888888889,
+    "MarFcSkill": 0.15
+  },
+  "FC6 T11": {
+    "InfDamage": 1.49219233147805,
+    "LanDamage": 5.14518913626056,
+    "MarDamage": 7.21918650793651,
+    "MarFcSkill": 0.15
+  },
+  "FC7 T1": {
+    "InfDamage": 0.17467632214176,
+    "LanDamage": 0.602296832711579,
+    "MarDamage": 0.768253968253968,
+    "MarFcSkill": 0.15
+  },
+  "FC7 T2": {
+    "InfDamage": 0.261518243661101,
+    "LanDamage": 0.901734178519893,
+    "MarDamage": 1.15019841269841,
+    "MarFcSkill": 0.15
+  },
+  "FC7 T3": {
+    "InfDamage": 0.36572854948431,
+    "LanDamage": 1.26105899348987,
+    "MarDamage": 1.60853174603175,
+    "MarFcSkill": 0.15
+  },
+  "FC7 T4": {
+    "InfDamage": 0.476389969477527,
+    "LanDamage": 1.64262772557703,
+    "MarDamage": 2.0952380952381,
+    "MarFcSkill": 0.15
+  },
+  "FC7 T5": {
+    "InfDamage": 0.570675484269954,
+    "LanDamage": 1.96773112959749,
+    "MarDamage": 2.50992063492064,
+    "MarFcSkill": 0.15
+  },
+  "FC7 T6": {
+    "InfDamage": 0.673893310990085,
+    "LanDamage": 2.32363380347251,
+    "MarDamage": 2.96388888888889,
+    "MarFcSkill": 0.15
+  },
+  "FC7 T7": {
+    "InfDamage": 0.794479522014084,
+    "LanDamage": 2.7394239465092,
+    "MarDamage": 3.84367063492064,
+    "MarFcSkill": 0.15
+  },
+  "FC7 T8": {
+    "InfDamage": 0.937892752408881,
+    "LanDamage": 3.23392333472979,
+    "MarDamage": 4.5375,
+    "MarFcSkill": 0.15
+  },
+  "FC7 T9": {
+    "InfDamage": 1.10661419993217,
+    "LanDamage": 3.81568732087165,
+    "MarDamage": 5.35376984126984,
+    "MarFcSkill": 0.15
+  },
+  "FC7 T10": {
+    "InfDamage": 1.30560626009935,
+    "LanDamage": 4.50182661040956,
+    "MarDamage": 6.3164880952381,
+    "MarFcSkill": 0.15
+  },
+  "FC7 T11": {
+    "InfDamage": 1.56662826420891,
+    "LanDamage": 5.40184971838198,
+    "MarDamage": 7.57930555555556,
+    "MarFcSkill": 0.15
+  },
+  "FC8 T1": {
+    "InfDamage": 0.183608634069464,
+    "LanDamage": 0.633096102566149,
+    "MarDamage": 0.83984126984127,
+    "MarFcSkill": 0.225
+  },
+  "FC8 T2": {
+    "InfDamage": 0.274420472001117,
+    "LanDamage": 0.946222012754271,
+    "MarDamage": 1.25522222222222,
+    "MarFcSkill": 0.225
+  },
+  "FC8 T3": {
+    "InfDamage": 0.384089412891256,
+    "LanDamage": 1.32436860374648,
+    "MarDamage": 1.75685714285714,
+    "MarFcSkill": 0.225
+  },
+  "FC8 T4": {
+    "InfDamage": 0.500209467951403,
+    "LanDamage": 1.72475911185589,
+    "MarDamage": 2.288,
+    "MarFcSkill": 0.225
+  },
+  "FC8 T5": {
+    "InfDamage": 0.599457378259222,
+    "LanDamage": 2.0669732213511,
+    "MarDamage": 2.74196825396825,
+    "MarFcSkill": 0.225
+  },
+  "FC8 T6": {
+    "InfDamage": 0.707637600494743,
+    "LanDamage": 2.43998660070089,
+    "MarDamage": 3.23679365079365,
+    "MarFcSkill": 0.225
+  },
+  "FC8 T7": {
+    "InfDamage": 0.834178686137212,
+    "LanDamage": 2.87630959030729,
+    "MarDamage": 4.19716349206349,
+    "MarFcSkill": 0.225
+  },
+  "FC8 T8": {
+    "InfDamage": 0.985035509805095,
+    "LanDamage": 3.39647503674001,
+    "MarDamage": 4.95619841269841,
+    "MarFcSkill": 0.225
+  },
+  "FC8 T9": {
+    "InfDamage": 1.16219302970455,
+    "LanDamage": 4.00732722218897,
+    "MarDamage": 5.84756507936508,
+    "MarFcSkill": 0.225
+  },
+  "FC8 T10": {
+    "InfDamage": 1.37110988090251,
+    "LanDamage": 4.7276879226764,
+    "MarDamage": 6.89872857142857,
+    "MarFcSkill": 0.225
+  },
+  "FC8 T11": {
+    "InfDamage": 1.64503411335209,
+    "LanDamage": 5.6721988648832,
+    "MarDamage": 8.27697619047619,
+    "MarFcSkill": 0.225
+  },
+  "FC9 T1": {
+    "InfDamage": 0.188074790033315,
+    "LanDamage": 0.648495737493433,
+    "MarDamage": 0.860269841269841,
+    "MarFcSkill": 0.225
+  },
+  "FC9 T2": {
+    "InfDamage": 0.281367825722664,
+    "LanDamage": 0.970177000418936,
+    "MarDamage": 1.287,
+    "MarFcSkill": 0.225
+  },
+  "FC9 T3": {
+    "InfDamage": 0.393517964370499,
+    "LanDamage": 1.35687894414853,
+    "MarDamage": 1.79998412698413,
+    "MarFcSkill": 0.225
+  },
+  "FC9 T4": {
+    "InfDamage": 0.512615456739881,
+    "LanDamage": 1.76753587554279,
+    "MarDamage": 2.34474603174603,
+    "MarFcSkill": 0.225
+  },
+  "FC9 T5": {
+    "InfDamage": 0.614344564805394,
+    "LanDamage": 2.11830533777538,
+    "MarDamage": 2.81006349206349,
+    "MarFcSkill": 0.225
+  },
+  "FC9 T6": {
+    "InfDamage": 0.725502224350151,
+    "LanDamage": 2.50158514041002,
+    "MarDamage": 3.31850793650794,
+    "MarFcSkill": 0.225
+  },
+  "FC9 T7": {
+    "InfDamage": 0.855020747301853,
+    "LanDamage": 2.94817455330128,
+    "MarDamage": 4.30203015873016,
+    "MarFcSkill": 0.225
+  },
+  "FC9 T8": {
+    "InfDamage": 1.00984748738205,
+    "LanDamage": 3.48202856411382,
+    "MarDamage": 5.08103968253968,
+    "MarFcSkill": 0.225
+  },
+  "FC9 T9": {
+    "InfDamage": 1.19147116324536,
+    "LanDamage": 4.10828038449006,
+    "MarDamage": 5.99487777777778,
+    "MarFcSkill": 0.225
+  },
+  "FC9 T10": {
+    "InfDamage": 1.4053504099587,
+    "LanDamage": 4.84575179045225,
+    "MarDamage": 7.07100952380953,
+    "MarFcSkill": 0.225
+  },
+  "FC9 T11": {
+    "InfDamage": 1.68622199612983,
+    "LanDamage": 5.81421772032371,
+    "MarDamage": 8.4842126984127,
+    "MarFcSkill": 0.225
+  },
+  "FC10 T1": {
+    "InfDamage": 0.197503341512558,
+    "LanDamage": 0.681006077895479,
+    "MarDamage": 0.920769841269841,
+    "MarFcSkill": 0.2625
+  },
+  "FC10 T2": {
+    "InfDamage": 0.295262533165759,
+    "LanDamage": 1.01808697574827,
+    "MarDamage": 1.37652777777778,
+    "MarFcSkill": 0.2625
+  },
+  "FC10 T3": {
+    "InfDamage": 0.413367546432063,
+    "LanDamage": 1.42532176604757,
+    "MarDamage": 1.92713888888889,
+    "MarFcSkill": 0.2625
+  },
+  "FC10 T4": {
+    "InfDamage": 0.538419913419913,
+    "LanDamage": 1.85651154401154,
+    "MarDamage": 2.51013888888889,
+    "MarFcSkill": 0.2625
+  },
+  "FC10 T5": {
+    "InfDamage": 0.645111417000818,
+    "LanDamage": 2.2243917117189,
+    "MarDamage": 3.00753968253968,
+    "MarFcSkill": 0.2625
+  },
+  "FC10 T6": {
+    "InfDamage": 0.761727711612504,
+    "LanDamage": 2.62649329037578,
+    "MarDamage": 3.55121031746032,
+    "MarFcSkill": 0.2625
+  },
+  "FC10 T7": {
+    "InfDamage": 0.897697348734215,
+    "LanDamage": 3.09532662038422,
+    "MarDamage": 4.60361785714286,
+    "MarFcSkill": 0.2625
+  },
+  "FC10 T8": {
+    "InfDamage": 1.06046392163904,
+    "LanDamage": 3.65655775995638,
+    "MarDamage": 5.43832579365079,
+    "MarFcSkill": 0.2625
+  },
+  "FC10 T9": {
+    "InfDamage": 1.25101990943005,
+    "LanDamage": 4.31360885018719,
+    "MarDamage": 6.41554484126984,
+    "MarFcSkill": 0.2625
+  },
+  "FC10 T10": {
+    "InfDamage": 1.47581642627726,
+    "LanDamage": 5.08872380819385,
+    "MarDamage": 7.56835793650794,
+    "MarFcSkill": 0.2625
+  },
+  "FC10 T11": {
+    "InfDamage": 1.77058271989148,
+    "LanDamage": 6.10509971339464,
+    "MarDamage": 9.07999365079365,
+    "MarFcSkill": 0.2625
+  }
+}

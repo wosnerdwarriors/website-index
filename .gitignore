@@ -1,0 +1,5 @@
+node_modules/
+calculator/assets/heroes/
+__pycache__/
+.DS_Store
+Thumbs.db
