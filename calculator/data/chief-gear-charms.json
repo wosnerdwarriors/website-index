@@ -1,0 +1,1257 @@
+{
+  "gearPieces": [
+    "Hat",
+    "Watch",
+    "Coat",
+    "Pants",
+    "Ring",
+    "Cudgel"
+  ],
+  "charmSlots": [
+    "Left",
+    "Top",
+    "Right"
+  ],
+  "gearLevels": [
+    {
+      "id": 1,
+      "name": "Locked",
+      "alloy": 0,
+      "polish": 0,
+      "plans": 0,
+      "amber": 0,
+      "power": 0,
+      "svsPoints": 0
+    },
+    {
+      "id": 2,
+      "name": "Uncommon",
+      "alloy": 1500,
+      "polish": 15,
+      "plans": 0,
+      "amber": 0,
+      "power": 224400,
+      "svsPoints": 1125
+    },
+    {
+      "id": 3,
+      "name": "Uncommon (1-Star)",
+      "alloy": 3800,
+      "polish": 40,
+      "plans": 0,
+      "amber": 0,
+      "power": 306000,
+      "svsPoints": 1875
+    },
+    {
+      "id": 4,
+      "name": "Rare",
+      "alloy": 7000,
+      "polish": 70,
+      "plans": 0,
+      "amber": 0,
+      "power": 408000,
+      "svsPoints": 3000
+    },
+    {
+      "id": 5,
+      "name": "Rare (1-Star)",
+      "alloy": 9700,
+      "polish": 95,
+      "plans": 0,
+      "amber": 0,
+      "power": 510000,
+      "svsPoints": 4500
+    },
+    {
+      "id": 6,
+      "name": "Rare (2-Star)",
+      "alloy": 0,
+      "polish": 0,
+      "plans": 45,
+      "amber": 0,
+      "power": 612000,
+      "svsPoints": 5100
+    },
+    {
+      "id": 7,
+      "name": "Rare (3-Star)",
+      "alloy": 0,
+      "polish": 0,
+      "plans": 50,
+      "amber": 0,
+      "power": 714000,
+      "svsPoints": 5440
+    },
+    {
+      "id": 8,
+      "name": "Epic",
+      "alloy": 0,
+      "polish": 0,
+      "plans": 60,
+      "amber": 0,
+      "power": 816000,
+      "svsPoints": 3230
+    },
+    {
+      "id": 9,
+      "name": "Epic (1-Star)",
+      "alloy": 0,
+      "polish": 0,
+      "plans": 70,
+      "amber": 0,
+      "power": 885360,
+      "svsPoints": 3230
+    },
+    {
+      "id": 10,
+      "name": "Epic (2-Star)",
+      "alloy": 6500,
+      "polish": 65,
+      "plans": 40,
+      "amber": 0,
+      "power": 954720,
+      "svsPoints": 3225
+    },
+    {
+      "id": 11,
+      "name": "Epic (3-Star)",
+      "alloy": 8000,
+      "polish": 80,
+      "plans": 50,
+      "amber": 0,
+      "power": 1024080,
+      "svsPoints": 3225
+    },
+    {
+      "id": 12,
+      "name": "Epic T1",
+      "alloy": 10000,
+      "polish": 95,
+      "plans": 60,
+      "amber": 0,
+      "power": 1093440,
+      "svsPoints": 3440
+    },
+    {
+      "id": 13,
+      "name": "Epic T1 (1-Star)",
+      "alloy": 11000,
+      "polish": 110,
+      "plans": 70,
+      "amber": 0,
+      "power": 1162800,
+      "svsPoints": 3440
+    },
+    {
+      "id": 14,
+      "name": "Epic T1 (2-Star)",
+      "alloy": 13000,
+      "polish": 130,
+      "plans": 85,
+      "amber": 0,
+      "power": 1232160,
+      "svsPoints": 4085
+    },
+    {
+      "id": 15,
+      "name": "Epic T1 (3-Star)",
+      "alloy": 15000,
+      "polish": 160,
+      "plans": 100,
+      "amber": 0,
+      "power": 1301520,
+      "svsPoints": 4085
+    },
+    {
+      "id": 16,
+      "name": "Mythic",
+      "alloy": 22000,
+      "polish": 220,
+      "plans": 40,
+      "amber": 0,
+      "power": 1362720,
+      "svsPoints": 6250
+    },
+    {
+      "id": 17,
+      "name": "Mythic (1-Star)",
+      "alloy": 23000,
+      "polish": 230,
+      "plans": 40,
+      "amber": 0,
+      "power": 1423920,
+      "svsPoints": 6250
+    },
+    {
+      "id": 18,
+      "name": "Mythic (2-Star)",
+      "alloy": 25000,
+      "polish": 250,
+      "plans": 45,
+      "amber": 0,
+      "power": 1485120,
+      "svsPoints": 6250
+    },
+    {
+      "id": 19,
+      "name": "Mythic (3-Star)",
+      "alloy": 26000,
+      "polish": 260,
+      "plans": 45,
+      "amber": 0,
+      "power": 1546320,
+      "svsPoints": 6250
+    },
+    {
+      "id": 20,
+      "name": "Mythic T1",
+      "alloy": 28000,
+      "polish": 280,
+      "plans": 45,
+      "amber": 0,
+      "power": 1607520,
+      "svsPoints": 6250
+    },
+    {
+      "id": 21,
+      "name": "Mythic T1 (1-Star)",
+      "alloy": 30000,
+      "polish": 300,
+      "plans": 55,
+      "amber": 0,
+      "power": 1668720,
+      "svsPoints": 6250
+    },
+    {
+      "id": 22,
+      "name": "Mythic T1 (2-Star)",
+      "alloy": 32000,
+      "polish": 320,
+      "plans": 55,
+      "amber": 0,
+      "power": 1729920,
+      "svsPoints": 6250
+    },
+    {
+      "id": 23,
+      "name": "Mythic T1 (3-Star)",
+      "alloy": 35000,
+      "polish": 340,
+      "plans": 55,
+      "amber": 0,
+      "power": 1791120,
+      "svsPoints": 6250
+    },
+    {
+      "id": 24,
+      "name": "Mythic T2",
+      "alloy": 38000,
+      "polish": 390,
+      "plans": 55,
+      "amber": 0,
+      "power": 1852320,
+      "svsPoints": 6250
+    },
+    {
+      "id": 25,
+      "name": "Mythic T2 (1-Star)",
+      "alloy": 43000,
+      "polish": 430,
+      "plans": 75,
+      "amber": 0,
+      "power": 1913520,
+      "svsPoints": 6250
+    },
+    {
+      "id": 26,
+      "name": "Mythic T2 (2-Star)",
+      "alloy": 45000,
+      "polish": 460,
+      "plans": 80,
+      "amber": 0,
+      "power": 1974720,
+      "svsPoints": 6250
+    },
+    {
+      "id": 27,
+      "name": "Mythic T2 (3-Star)",
+      "alloy": 48000,
+      "polish": 500,
+      "plans": 85,
+      "amber": 0,
+      "power": 2040000,
+      "svsPoints": 6250
+    },
+    {
+      "id": 28,
+      "name": "Mythic T2 (3-Star Status: 1)",
+      "alloy": 12500,
+      "polish": 132,
+      "plans": 21,
+      "amber": 2,
+      "power": 2065500,
+      "svsPoints": 2320
+    },
+    {
+      "id": 29,
+      "name": "Mythic T2 (3-Star Status: 2)",
+      "alloy": 12500,
+      "polish": 132,
+      "plans": 21,
+      "amber": 2,
+      "power": 2091000,
+      "svsPoints": 2320
+    },
+    {
+      "id": 30,
+      "name": "Mythic T2 (3-Star Status: 3)",
+      "alloy": 12500,
+      "polish": 132,
+      "plans": 21,
+      "amber": 2,
+      "power": 2116500,
+      "svsPoints": 2320
+    },
+    {
+      "id": 31,
+      "name": "Legendary",
+      "alloy": 12500,
+      "polish": 134,
+      "plans": 22,
+      "amber": 4,
+      "power": 2142000,
+      "svsPoints": 2600
+    },
+    {
+      "id": 32,
+      "name": "Legendary (Status: 1)",
+      "alloy": 13000,
+      "polish": 140,
+      "plans": 22,
+      "amber": 2,
+      "power": 2167500,
+      "svsPoints": 2320
+    },
+    {
+      "id": 33,
+      "name": "Legendary (Status: 2)",
+      "alloy": 13000,
+      "polish": 140,
+      "plans": 22,
+      "amber": 2,
+      "power": 2193000,
+      "svsPoints": 2320
+    },
+    {
+      "id": 34,
+      "name": "Legendary (Status: 3)",
+      "alloy": 13000,
+      "polish": 140,
+      "plans": 22,
+      "amber": 2,
+      "power": 2218500,
+      "svsPoints": 2320
+    },
+    {
+      "id": 35,
+      "name": "Legendary (1-Star)",
+      "alloy": 13000,
+      "polish": 140,
+      "plans": 24,
+      "amber": 4,
+      "power": 2244000,
+      "svsPoints": 2600
+    },
+    {
+      "id": 36,
+      "name": "Legendary (1-Star Status: 1)",
+      "alloy": 13500,
+      "polish": 147,
+      "plans": 23,
+      "amber": 2,
+      "power": 2269500,
+      "svsPoints": 2310
+    },
+    {
+      "id": 37,
+      "name": "Legendary (1-Star Status: 2)",
+      "alloy": 13500,
+      "polish": 147,
+      "plans": 23,
+      "amber": 2,
+      "power": 2295000,
+      "svsPoints": 2310
+    },
+    {
+      "id": 38,
+      "name": "Legendary (1-Star Status: 3)",
+      "alloy": 13500,
+      "polish": 147,
+      "plans": 23,
+      "amber": 2,
+      "power": 2320500,
+      "svsPoints": 2310
+    },
+    {
+      "id": 39,
+      "name": "Legendary (2-Star)",
+      "alloy": 13500,
+      "polish": 149,
+      "plans": 26,
+      "amber": 4,
+      "power": 2346000,
+      "svsPoints": 2630
+    },
+    {
+      "id": 40,
+      "name": "Legendary (2-Star Status: 1)",
+      "alloy": 14000,
+      "polish": 155,
+      "plans": 25,
+      "amber": 2,
+      "power": 2371500,
+      "svsPoints": 2330
+    },
+    {
+      "id": 41,
+      "name": "Legendary (2-Star Status: 2)",
+      "alloy": 14000,
+      "polish": 155,
+      "plans": 25,
+      "amber": 2,
+      "power": 2397000,
+      "svsPoints": 2330
+    },
+    {
+      "id": 42,
+      "name": "Legendary (2-Star Status: 3)",
+      "alloy": 14000,
+      "polish": 155,
+      "plans": 25,
+      "amber": 2,
+      "power": 2422500,
+      "svsPoints": 2330
+    },
+    {
+      "id": 43,
+      "name": "Legendary (3-Star)",
+      "alloy": 14000,
+      "polish": 155,
+      "plans": 25,
+      "amber": 4,
+      "power": 2448000,
+      "svsPoints": 2570
+    },
+    {
+      "id": 44,
+      "name": "Legendary (3-Star Status: 1)",
+      "alloy": 14750,
+      "polish": 167,
+      "plans": 27,
+      "amber": 3,
+      "power": 2473500,
+      "svsPoints": 2300
+    },
+    {
+      "id": 45,
+      "name": "Legendary (3-Star Status: 2)",
+      "alloy": 14750,
+      "polish": 167,
+      "plans": 27,
+      "amber": 3,
+      "power": 2499000,
+      "svsPoints": 2300
+    },
+    {
+      "id": 46,
+      "name": "Legendary (3-Star Status: 3)",
+      "alloy": 14750,
+      "polish": 167,
+      "plans": 27,
+      "amber": 3,
+      "power": 2524500,
+      "svsPoints": 2300
+    },
+    {
+      "id": 47,
+      "name": "Legendary T1",
+      "alloy": 14750,
+      "polish": 169,
+      "plans": 29,
+      "amber": 6,
+      "power": 2550000,
+      "svsPoints": 2660
+    },
+    {
+      "id": 48,
+      "name": "Legendary T1 (Status: 1)",
+      "alloy": 15250,
+      "polish": 175,
+      "plans": 28,
+      "amber": 3,
+      "power": 2575500,
+      "svsPoints": 2300
+    },
+    {
+      "id": 49,
+      "name": "Legendary T1 (Status: 2)",
+      "alloy": 15250,
+      "polish": 175,
+      "plans": 28,
+      "amber": 3,
+      "power": 2601000,
+      "svsPoints": 2300
+    },
+    {
+      "id": 50,
+      "name": "Legendary T1 (Status: 3)",
+      "alloy": 15250,
+      "polish": 175,
+      "plans": 28,
+      "amber": 3,
+      "power": 2626500,
+      "svsPoints": 2300
+    },
+    {
+      "id": 51,
+      "name": "Legendary T1 (1-Star)",
+      "alloy": 15250,
+      "polish": 175,
+      "plans": 31,
+      "amber": 6,
+      "power": 2652000,
+      "svsPoints": 2660
+    },
+    {
+      "id": 52,
+      "name": "Legendary T1 (1-Star Status: 1)",
+      "alloy": 15750,
+      "polish": 182,
+      "plans": 30,
+      "amber": 3,
+      "power": 2677500,
+      "svsPoints": 2320
+    },
+    {
+      "id": 53,
+      "name": "Legendary T1 (1-Star Status: 2)",
+      "alloy": 15750,
+      "polish": 182,
+      "plans": 30,
+      "amber": 3,
+      "power": 2703000,
+      "svsPoints": 2320
+    },
+    {
+      "id": 54,
+      "name": "Legendary T1 (1-Star Status: 3)",
+      "alloy": 15750,
+      "polish": 182,
+      "plans": 30,
+      "amber": 3,
+      "power": 2728500,
+      "svsPoints": 2320
+    },
+    {
+      "id": 55,
+      "name": "Legendary T1 (2-Star)",
+      "alloy": 15750,
+      "polish": 184,
+      "plans": 30,
+      "amber": 6,
+      "power": 2754000,
+      "svsPoints": 2600
+    },
+    {
+      "id": 56,
+      "name": "Legendary T1 (2-Star Status: 1)",
+      "alloy": 16250,
+      "polish": 190,
+      "plans": 31,
+      "amber": 3,
+      "power": 2779500,
+      "svsPoints": 2320
+    },
+    {
+      "id": 57,
+      "name": "Legendary T1 (2-Star Status: 2)",
+      "alloy": 16250,
+      "polish": 190,
+      "plans": 31,
+      "amber": 3,
+      "power": 2805000,
+      "svsPoints": 2320
+    },
+    {
+      "id": 58,
+      "name": "Legendary T1 (2-Star Status: 3)",
+      "alloy": 16250,
+      "polish": 190,
+      "plans": 31,
+      "amber": 3,
+      "power": 2830500,
+      "svsPoints": 2320
+    },
+    {
+      "id": 59,
+      "name": "Legendary T1 (3-Star)",
+      "alloy": 16250,
+      "polish": 190,
+      "plans": 32,
+      "amber": 6,
+      "power": 2856000,
+      "svsPoints": 2600
+    },
+    {
+      "id": 60,
+      "name": "Legendary T1 (3-Star Status: 1)",
+      "alloy": 17000,
+      "polish": 202,
+      "plans": 33,
+      "amber": 5,
+      "power": 2881500,
+      "svsPoints": 2370
+    },
+    {
+      "id": 61,
+      "name": "Legendary T1 (3-Star Status: 2)",
+      "alloy": 17000,
+      "polish": 202,
+      "plans": 33,
+      "amber": 5,
+      "power": 2907000,
+      "svsPoints": 2370
+    },
+    {
+      "id": 62,
+      "name": "Legendary T1 (3-Star Status: 3)",
+      "alloy": 17000,
+      "polish": 202,
+      "plans": 33,
+      "amber": 5,
+      "power": 2932500,
+      "svsPoints": 2370
+    },
+    {
+      "id": 63,
+      "name": "Legendary T2",
+      "alloy": 17000,
+      "polish": 204,
+      "plans": 36,
+      "amber": 5,
+      "power": 2958000,
+      "svsPoints": 2450
+    },
+    {
+      "id": 64,
+      "name": "Legendary T2 (Status: 1)",
+      "alloy": 17500,
+      "polish": 210,
+      "plans": 35,
+      "amber": 5,
+      "power": 2983500,
+      "svsPoints": 2390
+    },
+    {
+      "id": 65,
+      "name": "Legendary T2 (Status: 2)",
+      "alloy": 17500,
+      "polish": 210,
+      "plans": 35,
+      "amber": 5,
+      "power": 3009000,
+      "svsPoints": 2390
+    },
+    {
+      "id": 66,
+      "name": "Legendary T2 (Status: 3)",
+      "alloy": 17500,
+      "polish": 210,
+      "plans": 35,
+      "amber": 5,
+      "power": 3034500,
+      "svsPoints": 2390
+    },
+    {
+      "id": 67,
+      "name": "Legendary T2 (1-Star)",
+      "alloy": 17500,
+      "polish": 210,
+      "plans": 35,
+      "amber": 5,
+      "power": 3060000,
+      "svsPoints": 2390
+    },
+    {
+      "id": 68,
+      "name": "Legendary T2 (1-Star Status: 1)",
+      "alloy": 18000,
+      "polish": 217,
+      "plans": 36,
+      "amber": 5,
+      "power": 3085500,
+      "svsPoints": 2380
+    },
+    {
+      "id": 69,
+      "name": "Legendary T2 (1-Star Status: 2)",
+      "alloy": 18000,
+      "polish": 217,
+      "plans": 36,
+      "amber": 5,
+      "power": 3111000,
+      "svsPoints": 2380
+    },
+    {
+      "id": 70,
+      "name": "Legendary T2 (1-Star Status: 3)",
+      "alloy": 18000,
+      "polish": 217,
+      "plans": 36,
+      "amber": 5,
+      "power": 3136500,
+      "svsPoints": 2380
+    },
+    {
+      "id": 71,
+      "name": "Legendary T2 (2-Star)",
+      "alloy": 18000,
+      "polish": 219,
+      "plans": 37,
+      "amber": 5,
+      "power": 3162000,
+      "svsPoints": 2420
+    },
+    {
+      "id": 72,
+      "name": "Legendary T2 (2-Star Status: 1)",
+      "alloy": 18500,
+      "polish": 225,
+      "plans": 37,
+      "amber": 5,
+      "power": 3187500,
+      "svsPoints": 2380
+    },
+    {
+      "id": 73,
+      "name": "Legendary T2 (2-Star Status: 2)",
+      "alloy": 18500,
+      "polish": 225,
+      "plans": 37,
+      "amber": 5,
+      "power": 3213000,
+      "svsPoints": 2380
+    },
+    {
+      "id": 74,
+      "name": "Legendary T2 (2-Star Status: 3)",
+      "alloy": 18500,
+      "polish": 225,
+      "plans": 37,
+      "amber": 5,
+      "power": 3238500,
+      "svsPoints": 2380
+    },
+    {
+      "id": 75,
+      "name": "Legendary T2 (3-Star)",
+      "alloy": 18500,
+      "polish": 225,
+      "plans": 39,
+      "amber": 5,
+      "power": 3264000,
+      "svsPoints": 2420
+    },
+    {
+      "id": 76,
+      "name": "Legendary T2 (3-Star Status: 1)",
+      "alloy": 19250,
+      "polish": 237,
+      "plans": 40,
+      "amber": 6,
+      "power": 3289500,
+      "svsPoints": 2370
+    },
+    {
+      "id": 77,
+      "name": "Legendary T2 (3-Star Status: 2)",
+      "alloy": 19250,
+      "polish": 237,
+      "plans": 40,
+      "amber": 6,
+      "power": 3315000,
+      "svsPoints": 2370
+    },
+    {
+      "id": 78,
+      "name": "Legendary T2 (3-Star Status: 3)",
+      "alloy": 19250,
+      "polish": 237,
+      "plans": 40,
+      "amber": 6,
+      "power": 3340500,
+      "svsPoints": 2370
+    },
+    {
+      "id": 79,
+      "name": "Legendary T3",
+      "alloy": 19250,
+      "polish": 239,
+      "plans": 40,
+      "amber": 7,
+      "power": 3366000,
+      "svsPoints": 2450
+    },
+    {
+      "id": 80,
+      "name": "Legendary T3 (Status: 1)",
+      "alloy": 20000,
+      "polish": 247,
+      "plans": 41,
+      "amber": 6,
+      "power": 3391500,
+      "svsPoints": 2360
+    },
+    {
+      "id": 81,
+      "name": "Legendary T3 (Status: 2)",
+      "alloy": 20000,
+      "polish": 247,
+      "plans": 41,
+      "amber": 6,
+      "power": 3417000,
+      "svsPoints": 2360
+    },
+    {
+      "id": 82,
+      "name": "Legendary T3 (Status: 3)",
+      "alloy": 20000,
+      "polish": 247,
+      "plans": 41,
+      "amber": 6,
+      "power": 3442500,
+      "svsPoints": 2360
+    },
+    {
+      "id": 83,
+      "name": "Legendary T3 (1-Star)",
+      "alloy": 20000,
+      "polish": 249,
+      "plans": 42,
+      "amber": 7,
+      "power": 3468000,
+      "svsPoints": 2480
+    },
+    {
+      "id": 84,
+      "name": "Legendary T3 (1-Star Status: 1)",
+      "alloy": 20750,
+      "polish": 257,
+      "plans": 42,
+      "amber": 6,
+      "power": 3493500,
+      "svsPoints": 2360
+    },
+    {
+      "id": 85,
+      "name": "Legendary T3 (1-Star Status: 2)",
+      "alloy": 20750,
+      "polish": 257,
+      "plans": 42,
+      "amber": 6,
+      "power": 3519000,
+      "svsPoints": 2360
+    },
+    {
+      "id": 86,
+      "name": "Legendary T3 (1-Star Status: 3)",
+      "alloy": 20750,
+      "polish": 257,
+      "plans": 42,
+      "amber": 6,
+      "power": 3544500,
+      "svsPoints": 2360
+    },
+    {
+      "id": 87,
+      "name": "Legendary T3 (2-Star)",
+      "alloy": 20750,
+      "polish": 259,
+      "plans": 44,
+      "amber": 7,
+      "power": 3570000,
+      "svsPoints": 2480
+    },
+    {
+      "id": 88,
+      "name": "Legendary T3 (2-Star Status: 1)",
+      "alloy": 21500,
+      "polish": 267,
+      "plans": 45,
+      "amber": 6,
+      "power": 3595500,
+      "svsPoints": 2370
+    },
+    {
+      "id": 89,
+      "name": "Legendary T3 (2-Star Status: 2)",
+      "alloy": 21500,
+      "polish": 267,
+      "plans": 45,
+      "amber": 6,
+      "power": 3621000,
+      "svsPoints": 2370
+    },
+    {
+      "id": 90,
+      "name": "Legendary T3 (2-Star Status: 3)",
+      "alloy": 21500,
+      "polish": 267,
+      "plans": 45,
+      "amber": 6,
+      "power": 3646500,
+      "svsPoints": 2370
+    },
+    {
+      "id": 91,
+      "name": "Legendary T3 (3-Star)",
+      "alloy": 21500,
+      "polish": 269,
+      "plans": 45,
+      "amber": 7,
+      "power": 3672000,
+      "svsPoints": 2450
+    },
+    {
+      "id": 92,
+      "name": "Legendary T3 (3-Star Status: 1)",
+      "alloy": 24000,
+      "polish": 300,
+      "plans": 50,
+      "amber": 8,
+      "power": 3712000,
+      "svsPoints": 3190
+    },
+    {
+      "id": 93,
+      "name": "Legendary T3 (3-Star Status: 2)",
+      "alloy": 24000,
+      "polish": 300,
+      "plans": 50,
+      "amber": 8,
+      "power": 3753000,
+      "svsPoints": 3090
+    },
+    {
+      "id": 94,
+      "name": "Legendary T3 (3-Star Status: 3)",
+      "alloy": 24000,
+      "polish": 300,
+      "plans": 50,
+      "amber": 8,
+      "power": 3794000,
+      "svsPoints": 3090
+    },
+    {
+      "id": 95,
+      "name": "Legendary T3 (3-Star Status: 4)",
+      "alloy": 24000,
+      "polish": 300,
+      "plans": 50,
+      "amber": 8,
+      "power": 3835000,
+      "svsPoints": 3100
+    },
+    {
+      "id": 96,
+      "name": "Legendary T4",
+      "alloy": 28000,
+      "polish": 300,
+      "plans": 50,
+      "amber": 8,
+      "power": 3876000,
+      "svsPoints": 3090
+    },
+    {
+      "id": 97,
+      "name": "Legendary T4 (Status: 1)",
+      "alloy": 28000,
+      "polish": 330,
+      "plans": 55,
+      "amber": 8,
+      "power": 3916000,
+      "svsPoints": 3020
+    },
+    {
+      "id": 98,
+      "name": "Legendary T4 (Status: 2)",
+      "alloy": 28000,
+      "polish": 330,
+      "plans": 55,
+      "amber": 8,
+      "power": 3957000,
+      "svsPoints": 3100
+    },
+    {
+      "id": 99,
+      "name": "Legendary T4 (Status: 3)",
+      "alloy": 28000,
+      "polish": 330,
+      "plans": 55,
+      "amber": 8,
+      "power": 3998000,
+      "svsPoints": 3090
+    },
+    {
+      "id": 100,
+      "name": "Legendary T4 (Status: 4)",
+      "alloy": 28000,
+      "polish": 330,
+      "plans": 55,
+      "amber": 8,
+      "power": 4039000,
+      "svsPoints": 3100
+    },
+    {
+      "id": 101,
+      "name": "Legendary T4 (1-Star)",
+      "alloy": 28000,
+      "polish": 330,
+      "plans": 55,
+      "amber": 8,
+      "power": 4080000,
+      "svsPoints": 3090
+    },
+    {
+      "id": 102,
+      "name": "Legendary T4 (1-Star Status: 1)",
+      "alloy": 32000,
+      "polish": 360,
+      "plans": 60,
+      "amber": 8,
+      "power": 4120000,
+      "svsPoints": 3020
+    },
+    {
+      "id": 103,
+      "name": "Legendary T4 (1-Star Status: 2)",
+      "alloy": 32000,
+      "polish": 360,
+      "plans": 60,
+      "amber": 8,
+      "power": 4161000,
+      "svsPoints": 3090
+    },
+    {
+      "id": 104,
+      "name": "Legendary T4 (1-Star Status: 3)",
+      "alloy": 32000,
+      "polish": 360,
+      "plans": 60,
+      "amber": 8,
+      "power": 4202000,
+      "svsPoints": 3100
+    },
+    {
+      "id": 105,
+      "name": "Legendary T4 (1-Star Status: 4)",
+      "alloy": 32000,
+      "polish": 360,
+      "plans": 60,
+      "amber": 8,
+      "power": 4243000,
+      "svsPoints": 3090
+    },
+    {
+      "id": 106,
+      "name": "Legendary T4 (2-Star)",
+      "alloy": 32000,
+      "polish": 360,
+      "plans": 60,
+      "amber": 8,
+      "power": 4284000,
+      "svsPoints": 3100
+    },
+    {
+      "id": 107,
+      "name": "Legendary T4 (2-Star Status: 1)",
+      "alloy": 36000,
+      "polish": 390,
+      "plans": 65,
+      "amber": 8,
+      "power": 4234000,
+      "svsPoints": 3010
+    },
+    {
+      "id": 108,
+      "name": "Legendary T4 (2-Star Status: 2)",
+      "alloy": 36000,
+      "polish": 390,
+      "plans": 65,
+      "amber": 8,
+      "power": 4365000,
+      "svsPoints": 3100
+    },
+    {
+      "id": 109,
+      "name": "Legendary T4 (2-Star Status: 3)",
+      "alloy": 36000,
+      "polish": 390,
+      "plans": 65,
+      "amber": 8,
+      "power": 4406000,
+      "svsPoints": 3090
+    },
+    {
+      "id": 110,
+      "name": "Legendary T4 (2-Star Status: 4)",
+      "alloy": 36000,
+      "polish": 390,
+      "plans": 65,
+      "amber": 8,
+      "power": 4447000,
+      "svsPoints": 3100
+    },
+    {
+      "id": 111,
+      "name": "Legendary T4 (3-Star)",
+      "alloy": 36000,
+      "polish": 390,
+      "plans": 65,
+      "amber": 8,
+      "power": 4488000,
+      "svsPoints": 3090
+    }
+  ],
+  "charmLevels": [
+    {
+      "level": 1,
+      "guides": 5,
+      "designs": 5,
+      "secrets": 0,
+      "power": 205700,
+      "svsPoints": 625
+    },
+    {
+      "level": 2,
+      "guides": 40,
+      "designs": 15,
+      "secrets": 0,
+      "power": 288000,
+      "svsPoints": 1250
+    },
+    {
+      "level": 3,
+      "guides": 60,
+      "designs": 40,
+      "secrets": 0,
+      "power": 370000,
+      "svsPoints": 3125
+    },
+    {
+      "level": 4,
+      "guides": 80,
+      "designs": 100,
+      "secrets": 0,
+      "power": 452000,
+      "svsPoints": 8750
+    },
+    {
+      "level": 5,
+      "guides": 100,
+      "designs": 200,
+      "secrets": 0,
+      "power": 576000,
+      "svsPoints": 11250
+    },
+    {
+      "level": 6,
+      "guides": 120,
+      "designs": 300,
+      "secrets": 0,
+      "power": 700000,
+      "svsPoints": 12500
+    },
+    {
+      "level": 7,
+      "guides": 140,
+      "designs": 400,
+      "secrets": 0,
+      "power": 824000,
+      "svsPoints": 12500
+    },
+    {
+      "level": 8,
+      "guides": 200,
+      "designs": 400,
+      "secrets": 0,
+      "power": 948000,
+      "svsPoints": 13000
+    },
+    {
+      "level": 9,
+      "guides": 300,
+      "designs": 400,
+      "secrets": 0,
+      "power": 1072000,
+      "svsPoints": 14000
+    },
+    {
+      "level": 10,
+      "guides": 420,
+      "designs": 420,
+      "secrets": 0,
+      "power": 1196000,
+      "svsPoints": 15000
+    },
+    {
+      "level": 11,
+      "guides": 560,
+      "designs": 420,
+      "secrets": 0,
+      "power": 1320000,
+      "svsPoints": 16000
+    },
+    {
+      "level": 12,
+      "guides": 580,
+      "designs": 450,
+      "secrets": 15,
+      "power": 1536000,
+      "svsPoints": 17000
+    },
+    {
+      "level": 13,
+      "guides": 580,
+      "designs": 450,
+      "secrets": 30,
+      "power": 1752000,
+      "svsPoints": 18000
+    },
+    {
+      "level": 14,
+      "guides": 600,
+      "designs": 500,
+      "secrets": 45,
+      "power": 1968000,
+      "svsPoints": 19000
+    },
+    {
+      "level": 15,
+      "guides": 600,
+      "designs": 500,
+      "secrets": 70,
+      "power": 2184000,
+      "svsPoints": 20000
+    },
+    {
+      "level": 16,
+      "guides": 650,
+      "designs": 550,
+      "secrets": 100,
+      "power": 2400000,
+      "svsPoints": 21000
+    }
+  ]
+}

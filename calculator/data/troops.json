@@ -1,0 +1,706 @@
+{
+  "variables": [
+    {
+      "label": "Training Capacity",
+      "value": 1581
+    },
+    {
+      "label": "Add Training Capacity Buff?",
+      "value": "No"
+    },
+    {
+      "label": "Training Speed %",
+      "value": 1.8
+    },
+    {
+      "label": "Add Mobilize?",
+      "value": null
+    },
+    {
+      "label": "Supreme Presidency?",
+      "value": "Yes / No"
+    },
+    {
+      "label": "Add Minister Of Education?",
+      "value": "Yes / No"
+    },
+    {
+      "label": "Add Vice President Instead?",
+      "value": "Yes / No"
+    },
+    {
+      "label": "Highest Troop Tier",
+      "value": 11
+    },
+    {
+      "label": "Tier Upgrading From",
+      "value": 10
+    }
+  ],
+  "settings": {
+    "trainingCapacity": 1581,
+    "trainingCapacityBuff": false,
+    "trainingSpeed": 1.8,
+    "mobilize": false,
+    "supremePresidency": false,
+    "ministerOfEducation": false,
+    "vicePresident": false,
+    "highestTier": 11,
+    "baseTier": 10
+  },
+  "troopCosts": {
+    "infantry": [
+      {
+        "tier": 1,
+        "points": 3,
+        "baseSeconds": 12,
+        "adjustedSeconds": 4.285714285714286,
+        "meat": 36,
+        "wood": 27,
+        "coal": 7,
+        "iron": 2
+      },
+      {
+        "tier": 2,
+        "points": 4,
+        "baseSeconds": 17,
+        "adjustedSeconds": 6.071428571428572,
+        "meat": 58,
+        "wood": 44,
+        "coal": 10,
+        "iron": 3
+      },
+      {
+        "tier": 3,
+        "points": 5,
+        "baseSeconds": 24,
+        "adjustedSeconds": 8.571428571428571,
+        "meat": 92,
+        "wood": 69,
+        "coal": 17,
+        "iron": 4
+      },
+      {
+        "tier": 4,
+        "points": 8,
+        "baseSeconds": 32,
+        "adjustedSeconds": 11.428571428571429,
+        "meat": 120,
+        "wood": 90,
+        "coal": 21,
+        "iron": 5
+      },
+      {
+        "tier": 5,
+        "points": 12,
+        "baseSeconds": 44,
+        "adjustedSeconds": 15.714285714285715,
+        "meat": 156,
+        "wood": 117,
+        "coal": 27,
+        "iron": 6
+      },
+      {
+        "tier": 6,
+        "points": 18,
+        "baseSeconds": 60,
+        "adjustedSeconds": 21.42857142857143,
+        "meat": 186,
+        "wood": 140,
+        "coal": 33,
+        "iron": 7
+      },
+      {
+        "tier": 7,
+        "points": 25,
+        "baseSeconds": 83,
+        "adjustedSeconds": 29.642857142857146,
+        "meat": 279,
+        "wood": 210,
+        "coal": 49,
+        "iron": 11
+      },
+      {
+        "tier": 8,
+        "points": 35,
+        "baseSeconds": 113,
+        "adjustedSeconds": 40.35714285714286,
+        "meat": 558,
+        "wood": 419,
+        "coal": 98,
+        "iron": 21
+      },
+      {
+        "tier": 9,
+        "points": 45,
+        "baseSeconds": 131,
+        "adjustedSeconds": 46.78571428571429,
+        "meat": 1394,
+        "wood": 1046,
+        "coal": 244,
+        "iron": 51
+      },
+      {
+        "tier": 10,
+        "points": 60,
+        "baseSeconds": 152,
+        "adjustedSeconds": 54.28571428571429,
+        "meat": 2788,
+        "wood": 2091,
+        "coal": 488,
+        "iron": 102
+      },
+      {
+        "tier": 11,
+        "points": 75,
+        "baseSeconds": 180,
+        "adjustedSeconds": 64.28571428571429,
+        "meat": 6970,
+        "wood": 5228,
+        "coal": 1220,
+        "iron": 253
+      },
+      {
+        "tier": 12,
+        "points": 90,
+        "baseSeconds": 215,
+        "adjustedSeconds": 76.78571428571429,
+        "meat": 6970,
+        "wood": 5228,
+        "coal": 1220,
+        "iron": 254
+      }
+    ],
+    "lancer": [
+      {
+        "tier": 1,
+        "points": 3,
+        "baseSeconds": 12,
+        "adjustedSeconds": 4.285714285714286,
+        "meat": 32,
+        "wood": 30,
+        "coal": 7,
+        "iron": 2
+      },
+      {
+        "tier": 2,
+        "points": 4,
+        "baseSeconds": 17,
+        "adjustedSeconds": 6.071428571428572,
+        "meat": 51,
+        "wood": 48,
+        "coal": 10,
+        "iron": 3
+      },
+      {
+        "tier": 3,
+        "points": 5,
+        "baseSeconds": 24,
+        "adjustedSeconds": 8.571428571428571,
+        "meat": 81,
+        "wood": 76,
+        "coal": 16,
+        "iron": 4
+      },
+      {
+        "tier": 4,
+        "points": 8,
+        "baseSeconds": 32,
+        "adjustedSeconds": 11.428571428571429,
+        "meat": 105,
+        "wood": 99,
+        "coal": 21,
+        "iron": 5
+      },
+      {
+        "tier": 5,
+        "points": 12,
+        "baseSeconds": 44,
+        "adjustedSeconds": 15.714285714285715,
+        "meat": 136,
+        "wood": 129,
+        "coal": 27,
+        "iron": 7
+      },
+      {
+        "tier": 6,
+        "points": 18,
+        "baseSeconds": 60,
+        "adjustedSeconds": 21.42857142857143,
+        "meat": 163,
+        "wood": 154,
+        "coal": 32,
+        "iron": 8
+      },
+      {
+        "tier": 7,
+        "points": 25,
+        "baseSeconds": 83,
+        "adjustedSeconds": 29.642857142857146,
+        "meat": 244,
+        "wood": 231,
+        "coal": 48,
+        "iron": 11
+      },
+      {
+        "tier": 8,
+        "points": 35,
+        "baseSeconds": 113,
+        "adjustedSeconds": 40.35714285714286,
+        "meat": 488,
+        "wood": 461,
+        "coal": 95,
+        "iron": 22
+      },
+      {
+        "tier": 9,
+        "points": 45,
+        "baseSeconds": 131,
+        "adjustedSeconds": 46.78571428571429,
+        "meat": 1220,
+        "wood": 1151,
+        "coal": 237,
+        "iron": 55
+      },
+      {
+        "tier": 10,
+        "points": 60,
+        "baseSeconds": 152,
+        "adjustedSeconds": 54.28571428571429,
+        "meat": 2440,
+        "wood": 2301,
+        "coal": 474,
+        "iron": 109
+      },
+      {
+        "tier": 11,
+        "points": 75,
+        "baseSeconds": 180,
+        "adjustedSeconds": 64.28571428571429,
+        "meat": 6099,
+        "wood": 5751,
+        "coal": 1185,
+        "iron": 271
+      },
+      {
+        "tier": 12,
+        "points": 90,
+        "baseSeconds": 215,
+        "adjustedSeconds": 76.78571428571429,
+        "meat": 6099,
+        "wood": 5751,
+        "coal": 1186,
+        "iron": 271
+      }
+    ],
+    "marksman": [
+      {
+        "tier": 1,
+        "points": 3,
+        "baseSeconds": 12,
+        "adjustedSeconds": 4.285714285714286,
+        "meat": 23,
+        "wood": 34,
+        "coal": 6,
+        "iron": 2
+      },
+      {
+        "tier": 2,
+        "points": 4,
+        "baseSeconds": 17,
+        "adjustedSeconds": 6.071428571428572,
+        "meat": 36,
+        "wood": 54,
+        "coal": 9,
+        "iron": 4
+      },
+      {
+        "tier": 3,
+        "points": 5,
+        "baseSeconds": 24,
+        "adjustedSeconds": 8.571428571428571,
+        "meat": 58,
+        "wood": 86,
+        "coal": 15,
+        "iron": 5
+      },
+      {
+        "tier": 4,
+        "points": 8,
+        "baseSeconds": 32,
+        "adjustedSeconds": 11.428571428571429,
+        "meat": 75,
+        "wood": 111,
+        "coal": 19,
+        "iron": 6
+      },
+      {
+        "tier": 5,
+        "points": 12,
+        "baseSeconds": 44,
+        "adjustedSeconds": 15.714285714285715,
+        "meat": 97,
+        "wood": 144,
+        "coal": 24,
+        "iron": 8
+      },
+      {
+        "tier": 6,
+        "points": 18,
+        "baseSeconds": 60,
+        "adjustedSeconds": 21.42857142857143,
+        "meat": 117,
+        "wood": 173,
+        "coal": 29,
+        "iron": 10
+      },
+      {
+        "tier": 7,
+        "points": 25,
+        "baseSeconds": 83,
+        "adjustedSeconds": 29.642857142857146,
+        "meat": 175,
+        "wood": 258,
+        "coal": 44,
+        "iron": 14
+      },
+      {
+        "tier": 8,
+        "points": 35,
+        "baseSeconds": 113,
+        "adjustedSeconds": 40.35714285714286,
+        "meat": 349,
+        "wood": 516,
+        "coal": 87,
+        "iron": 28
+      },
+      {
+        "tier": 9,
+        "points": 45,
+        "baseSeconds": 131,
+        "adjustedSeconds": 46.78571428571429,
+        "meat": 872,
+        "wood": 1290,
+        "coal": 217,
+        "iron": 70
+      },
+      {
+        "tier": 10,
+        "points": 60,
+        "baseSeconds": 152,
+        "adjustedSeconds": 54.28571428571429,
+        "meat": 1743,
+        "wood": 2579,
+        "coal": 433,
+        "iron": 140
+      },
+      {
+        "tier": 11,
+        "points": 75,
+        "baseSeconds": 180,
+        "adjustedSeconds": 64.28571428571429,
+        "meat": 4357,
+        "wood": 6448,
+        "coal": 1081,
+        "iron": 349
+      },
+      {
+        "tier": 12,
+        "points": 90,
+        "baseSeconds": 215,
+        "adjustedSeconds": 76.78571428571429,
+        "meat": 4357,
+        "wood": 6447,
+        "coal": 1081,
+        "iron": 349
+      }
+    ]
+  },
+  "upgradePlans": {
+    "infantry": {
+      "targetTier": 11,
+      "entries": [
+        {
+          "baseTier": 1,
+          "quantity": 1694,
+          "adjustedSeconds": 101640.00000000001,
+          "meat": 11746196,
+          "wood": 8810494,
+          "coal": 2054822,
+          "iron": 425194
+        },
+        {
+          "baseTier": 2,
+          "quantity": 1746,
+          "adjustedSeconds": 101642.14285714287,
+          "meat": 12068352,
+          "wood": 9051264,
+          "coal": 2112660,
+          "iron": 436500
+        },
+        {
+          "baseTier": 3,
+          "quantity": 1825,
+          "adjustedSeconds": 101678.57142857145,
+          "meat": 12552350,
+          "wood": 9415175,
+          "coal": 2195475,
+          "iron": 454425
+        },
+        {
+          "baseTier": 4,
+          "quantity": 1923,
+          "adjustedSeconds": 101644.28571428572,
+          "meat": 13172550,
+          "wood": 9880374,
+          "coal": 2305677,
+          "iron": 476904
+        },
+        {
+          "baseTier": 5,
+          "quantity": 2093,
+          "adjustedSeconds": 101660.00000000001,
+          "meat": 14261702,
+          "wood": 10697323,
+          "coal": 2496949,
+          "iron": 516971
+        },
+        {
+          "baseTier": 6,
+          "quantity": 2372,
+          "adjustedSeconds": 101657.14285714287,
+          "meat": 16091648,
+          "wood": 12068736,
+          "coal": 2815564,
+          "iron": 583512
+        },
+        {
+          "baseTier": 7,
+          "quantity": 2934,
+          "adjustedSeconds": 101642.14285714287,
+          "meat": 19631394,
+          "wood": 14722812,
+          "coal": 3435714,
+          "iron": 710028
+        },
+        {
+          "baseTier": 8,
+          "quantity": 4248,
+          "adjustedSeconds": 101648.57142857143,
+          "meat": 27238176,
+          "wood": 20428632,
+          "coal": 4766256,
+          "iron": 985536
+        },
+        {
+          "baseTier": 9,
+          "quantity": 5808,
+          "adjustedSeconds": 101640,
+          "meat": 32385408,
+          "wood": 24289056,
+          "coal": 5668608,
+          "iron": 1173216
+        },
+        {
+          "baseTier": 10,
+          "quantity": 10164,
+          "adjustedSeconds": 101640,
+          "meat": 42505848,
+          "wood": 31884468,
+          "coal": 7440048,
+          "iron": 1534764
+        }
+      ]
+    },
+    "lancer": {
+      "targetTier": 11,
+      "entries": [
+        {
+          "baseTier": 1,
+          "quantity": 1694,
+          "adjustedSeconds": 101640.00000000001,
+          "meat": 10277498,
+          "wood": 9691374,
+          "coal": 1995532,
+          "iron": 455686
+        },
+        {
+          "baseTier": 2,
+          "quantity": 1746,
+          "adjustedSeconds": 101642.14285714287,
+          "meat": 10559808,
+          "wood": 9957438,
+          "coal": 2051550,
+          "iron": 467928
+        },
+        {
+          "baseTier": 3,
+          "quantity": 1825,
+          "adjustedSeconds": 101678.57142857145,
+          "meat": 10982850,
+          "wood": 10356875,
+          "coal": 2133425,
+          "iron": 487275
+        },
+        {
+          "baseTier": 4,
+          "quantity": 1923,
+          "adjustedSeconds": 101644.28571428572,
+          "meat": 11526462,
+          "wood": 10868796,
+          "coal": 2238372,
+          "iron": 511518
+        },
+        {
+          "baseTier": 5,
+          "quantity": 2093,
+          "adjustedSeconds": 101660.00000000001,
+          "meat": 12480559,
+          "wood": 11766846,
+          "coal": 2423694,
+          "iron": 552552
+        },
+        {
+          "baseTier": 6,
+          "quantity": 2372,
+          "adjustedSeconds": 101657.14285714287,
+          "meat": 14080192,
+          "wood": 13276084,
+          "coal": 2734916,
+          "iron": 623836
+        },
+        {
+          "baseTier": 7,
+          "quantity": 2934,
+          "adjustedSeconds": 101642.14285714287,
+          "meat": 17178570,
+          "wood": 16195680,
+          "coal": 3335958,
+          "iron": 762840
+        },
+        {
+          "baseTier": 8,
+          "quantity": 4248,
+          "adjustedSeconds": 101648.57142857143,
+          "meat": 23835528,
+          "wood": 22471920,
+          "coal": 4630320,
+          "iron": 1057752
+        },
+        {
+          "baseTier": 9,
+          "quantity": 5808,
+          "adjustedSeconds": 101640,
+          "meat": 28337232,
+          "wood": 26716800,
+          "coal": 5505984,
+          "iron": 1254528
+        },
+        {
+          "baseTier": 10,
+          "quantity": 10164,
+          "adjustedSeconds": 101640,
+          "meat": 37190076,
+          "wood": 35065800,
+          "coal": 7226604,
+          "iron": 1646568
+        }
+      ]
+    },
+    "marksman": {
+      "targetTier": 11,
+      "entries": [
+        {
+          "baseTier": 1,
+          "quantity": 1694,
+          "adjustedSeconds": 101640.00000000001,
+          "meat": 7341796,
+          "wood": 8810494,
+          "coal": 1821050,
+          "iron": 587818
+        },
+        {
+          "baseTier": 2,
+          "quantity": 1746,
+          "adjustedSeconds": 101642.14285714287,
+          "meat": 7544466,
+          "wood": 9051264,
+          "coal": 1871712,
+          "iron": 602370
+        },
+        {
+          "baseTier": 3,
+          "quantity": 1825,
+          "adjustedSeconds": 101678.57142857145,
+          "meat": 7845675,
+          "wood": 9415175,
+          "coal": 1945450,
+          "iron": 627800
+        },
+        {
+          "baseTier": 4,
+          "quantity": 1923,
+          "adjustedSeconds": 101644.28571428572,
+          "meat": 8234286,
+          "wood": 9880374,
+          "coal": 2042226,
+          "iron": 659589
+        },
+        {
+          "baseTier": 5,
+          "quantity": 2093,
+          "adjustedSeconds": 101660.00000000001,
+          "meat": 8916180,
+          "wood": 10697323,
+          "coal": 2212301,
+          "iron": 713713
+        },
+        {
+          "baseTier": 6,
+          "quantity": 2372,
+          "adjustedSeconds": 101657.14285714287,
+          "meat": 10057280,
+          "wood": 12068736,
+          "coal": 2495344,
+          "iron": 804108
+        },
+        {
+          "baseTier": 7,
+          "quantity": 2934,
+          "adjustedSeconds": 101642.14285714287,
+          "meat": 12269988,
+          "wood": 14722812,
+          "coal": 3042558,
+          "iron": 982890
+        },
+        {
+          "baseTier": 8,
+          "quantity": 4248,
+          "adjustedSeconds": 101648.57142857143,
+          "meat": 17025984,
+          "wood": 20428632,
+          "coal": 4222512,
+          "iron": 1363608
+        },
+        {
+          "baseTier": 9,
+          "quantity": 5808,
+          "adjustedSeconds": 101640,
+          "meat": 20240880,
+          "wood": 24289056,
+          "coal": 5018112,
+          "iron": 1620432
+        },
+        {
+          "baseTier": 10,
+          "quantity": 10164,
+          "adjustedSeconds": 101640,
+          "meat": 26568696,
+          "wood": 31884468,
+          "coal": 6586272,
+          "iron": 2124276
+        }
+      ]
+    }
+  }
+}
