@@ -635,6 +635,7 @@
                     <div class="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p class="text-sm font-bold text-gray-600">Analyzing combinations...</p>
                     <p class="text-xs text-gray-400 mt-1" id="opt-running-stats">Evaluated 0 / 0 configuration branches</p>
+                    <button id="opt-cancel-btn" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-xs font-bold">Cancel exhaustive search</button>
                   </div>
 
                 </div>
@@ -824,6 +825,7 @@
 
     let userProfile = {};
     let selectedGens = [];
+    let optimizerWorker = null;
 
     // Synonyms Maps
     function getMetaName(name) {
@@ -1474,24 +1476,76 @@
       return defaultProfile;
     }
 
+    function isPlainObject(value) {
+      return value !== null && typeof value === "object" && !Array.isArray(value);
+    }
+
+    function hydrateProfile(rawProfile) {
+      if (!isPlainObject(rawProfile)) {
+        throw new Error("Configuration must be a JSON object.");
+      }
+
+      const defaults = createDefaultProfile();
+      const hydrated = { ...defaults };
+      const numericKeys = [
+        "cave_lion_atk", "snow_ape_capacity", "sabre_tooth_lethality",
+        "chameleon_buff", "base_squad_size"
+      ];
+
+      hydrated.base_stats = { ...defaults.base_stats };
+      if (isPlainObject(rawProfile.base_stats)) {
+        for (const key of Object.keys(hydrated.base_stats)) {
+          const value = Number(rawProfile.base_stats[key]);
+          if (Number.isFinite(value)) hydrated.base_stats[key] = value;
+        }
+      }
+
+      hydrated.gear_stats = { ...defaults.gear_stats };
+      if (isPlainObject(rawProfile.gear_stats)) {
+        for (const key of Object.keys(hydrated.gear_stats)) {
+          const value = Number(rawProfile.gear_stats[key]);
+          if (Number.isFinite(value)) hydrated.gear_stats[key] = value;
+        }
+      }
+
+      for (const key of numericKeys) {
+        const value = Number(rawProfile[key]);
+        if (Number.isFinite(value)) hydrated[key] = value;
+      }
+
+      if (typeof rawProfile.pets_active === "boolean") hydrated.pets_active = rawProfile.pets_active;
+      if (["Nil", "10%", "20%"].includes(rawProfile.deploy_capacity_buff)) hydrated.deploy_capacity_buff = rawProfile.deploy_capacity_buff;
+      if (["No", "Yes"].includes(rawProfile.rosarion_mode)) hydrated.rosarion_mode = rawProfile.rosarion_mode;
+      if (Object.hasOwn(MINISTER_BUFFS, rawProfile.minister_buff)) hydrated.minister_buff = rawProfile.minister_buff;
+
+      const tiers = new Set(Object.keys(db.troopDamageStats));
+      for (const key of ["inf_tier", "lan_tier", "mar_tier"]) {
+        if (tiers.has(rawProfile[key])) hydrated[key] = rawProfile[key];
+      }
+
+      const sourceRoster = isPlainObject(rawProfile.roster) ? rawProfile.roster : {};
+      hydrated.roster = {};
+      for (const hero of db.heroesList) {
+        const source = isPlainObject(sourceRoster[hero]) ? sourceRoster[hero] : {};
+        const widgetLevel = Number(source.widget_level);
+        hydrated.roster[hero] = {
+          star_level: STAR_LEVELS.includes(source.star_level) ? source.star_level : defaults.roster[hero].star_level,
+          widget_level: Number.isFinite(widgetLevel) ? Math.max(0, Math.min(10, Math.trunc(widgetLevel))) : defaults.roster[hero].widget_level,
+          active_starter: source.active_starter === true,
+          unlocked: source.unlocked === true
+        };
+        if (!hydrated.roster[hero].unlocked) hydrated.roster[hero].active_starter = false;
+      }
+
+      return hydrated;
+    }
+
     function loadProfile() {
       const saved = localStorage.getItem("wos_bear_profile");
       if (saved) {
         try {
-          userProfile = JSON.parse(saved);
-
-          // Sync new heroes if any added to the database
-          if (!userProfile.roster) userProfile.roster = {};
-          for (const hero of db.heroesList) {
-            if (!userProfile.roster[hero]) {
-              userProfile.roster[hero] = {
-                star_level: "0*",
-                widget_level: 0,
-                active_starter: false,
-                unlocked: false
-              };
-            }
-          }
+          userProfile = hydrateProfile(JSON.parse(saved));
+          saveProfile();
           return;
         } catch (e) {
           console.error("Error loading profile, resetting...", e);
@@ -1817,9 +1871,8 @@
         reader.onload = (event) => {
           try {
             const imported = JSON.parse(event.target.result);
-            if (imported.base_stats && imported.roster) {
-              // Standard profile validation passed
-              userProfile = imported;
+            if (isPlainObject(imported.base_stats) && isPlainObject(imported.roster)) {
+              userProfile = hydrateProfile(imported);
               saveProfile();
               syncInputsFromProfile();
               populateCalculatorDropdowns();
@@ -1849,6 +1902,7 @@
 
       // 7. Optimizer triggers
       document.getElementById("opt-run-btn").addEventListener("click", runOptimization);
+      document.getElementById("opt-cancel-btn").addEventListener("click", cancelOptimization);
     }
 
     function triggerRecalculation() {
@@ -2154,7 +2208,7 @@
       }
     }
 
-    function runOptimization() {
+    function runOptimizationLegacy() {
       // Toggle views
       document.getElementById("opt-standby-view").classList.add("hidden");
       document.getElementById("opt-result-container").classList.add("hidden");
@@ -2261,6 +2315,128 @@
         });
 
       }, 100);
+    }
+
+    function cancelOptimization() {
+      if (!optimizerWorker) return;
+      optimizerWorker.terminate();
+      optimizerWorker = null;
+      document.getElementById("opt-running-view").classList.add("hidden");
+      document.getElementById("opt-standby-view").classList.remove("hidden");
+      document.getElementById("opt-run-btn").disabled = false;
+      document.getElementById("opt-running-stats").textContent = "Search cancelled.";
+    }
+
+    function renderOptimizerResult(bestTeam) {
+      if (!bestTeam?.optimal_ratios || !bestTeam?.troop_counts) {
+        throw new Error("The exhaustive search completed without a valid squad.");
+      }
+      document.getElementById("opt-running-view").classList.add("hidden");
+      document.getElementById("opt-result-container").classList.remove("hidden");
+
+      const chameleonMult = userProfile.pets_active ? 1 + (userProfile.chameleon_buff || 0.1) : 1;
+      const cyrilleMult = (userProfile.rosarion_mode || "No") === "No" ? 1.3 : 1;
+      const normalizedBoost = (bestTeam.total_boost * chameleonMult * cyrilleMult) / 23400;
+      document.getElementById("opt-boost-val").textContent = normalizedBoost.toFixed(4);
+
+      const starters = bestTeam.starters;
+      const joiners = bestTeam.joiners;
+      document.getElementById("opt-result-squad").innerHTML = `
+        🏆 Starters: Infantry: ${starters[0] || "None"} | Lancer: ${starters[1] || "None"} | Marksman: ${starters[2] || "None"}<br>
+        👥 Joiners: ${joiners.length ? joiners.join(", ") : "None"}
+      `;
+      for (const [suffix, troopClass] of [["inf", "Infantry"], ["lan", "Lancer"], ["mar", "Marksman"]]) {
+        document.getElementById(`opt-ratio-${suffix}`).textContent = `${(bestTeam.optimal_ratios[troopClass] * 100).toFixed(2)}%`;
+        document.getElementById(`opt-count-${suffix}`).textContent = `${bestTeam.troop_counts[troopClass].toFixed(0)} troops`;
+      }
+
+      const loadBtn = document.getElementById("opt-load-squad-btn");
+      const newLoadBtn = loadBtn.cloneNode(true);
+      loadBtn.parentNode.replaceChild(newLoadBtn, loadBtn);
+      newLoadBtn.addEventListener("click", () => {
+        sessionStorage.setItem("squad_inf", starters[0] || "");
+        sessionStorage.setItem("squad_lan", starters[1] || "");
+        sessionStorage.setItem("squad_mar", starters[2] || "");
+        for (let index = 1; index <= 4; index += 1) {
+          sessionStorage.setItem(`squad_j${index}`, joiners[index - 1] || "");
+        }
+        populateCalculatorDropdowns();
+        triggerRecalculation();
+        document.getElementById("calc-tab").click();
+        alert("Squad configuration successfully loaded into the calculator! 🚀");
+      });
+    }
+
+    function runOptimization() {
+      if (optimizerWorker) return;
+
+      const active = { Infantry: [], Lancer: [], Marksman: [] };
+      const unlocked = { Infantry: [], Lancer: [], Marksman: [] };
+      for (const hero of db.heroesList) {
+        const info = userProfile.roster[hero];
+        if (!info?.unlocked) continue;
+        const troopClass = (db.heroMetadata[getMetaName(hero)] || {}).class;
+        if (!(troopClass in unlocked)) continue;
+        unlocked[troopClass].push(hero);
+        if (info.active_starter) active[troopClass].push(hero);
+      }
+      const startersMap = Object.fromEntries(Object.keys(unlocked).map((troopClass) => [
+        troopClass,
+        active[troopClass].length ? active[troopClass] : unlocked[troopClass]
+      ]));
+      const joinerPool = Array.from(document.querySelectorAll(".opt-joiner-checkbox:checked"), (checkbox) => checkbox.value);
+      const slots = Number.parseInt(document.getElementById("opt-slots-slider").value, 10);
+      if (slots > 0 && joinerPool.length === 0) {
+        alert("Select at least one unlocked joiner, or set the number of joiner slots to zero.");
+        return;
+      }
+
+      document.getElementById("opt-standby-view").classList.add("hidden");
+      document.getElementById("opt-result-container").classList.add("hidden");
+      document.getElementById("opt-running-view").classList.remove("hidden");
+      document.getElementById("opt-run-btn").disabled = true;
+      document.getElementById("opt-running-stats").textContent = "Preparing exhaustive search...";
+
+      const startTime = performance.now();
+      optimizerWorker = new Worker(new URL("optimizer-worker.js", window.location.href), { type: "module" });
+      optimizerWorker.addEventListener("message", (event) => {
+        if (event.data?.type === "progress") {
+          const { evaluated, total } = event.data;
+          const percent = total ? evaluated / total * 100 : 0;
+          document.getElementById("opt-running-stats").textContent =
+            `Evaluated ${evaluated.toLocaleString()} / ${total.toLocaleString()} branches (${percent.toFixed(2)}%)`;
+          return;
+        }
+        if (event.data?.type === "error") {
+          const message = event.data.message || "Optimizer worker failed.";
+          optimizerWorker?.terminate();
+          optimizerWorker = null;
+          document.getElementById("opt-running-view").classList.add("hidden");
+          document.getElementById("opt-standby-view").classList.remove("hidden");
+          document.getElementById("opt-run-btn").disabled = false;
+          alert(message);
+          return;
+        }
+        if (event.data?.type === "result") {
+          console.log(`Exhaustively optimized ${event.data.evaluated.toLocaleString()} branches in ${(performance.now() - startTime).toFixed(3)} ms`);
+          optimizerWorker?.terminate();
+          optimizerWorker = null;
+          document.getElementById("opt-run-btn").disabled = false;
+          renderOptimizerResult(event.data.best);
+        }
+      });
+      optimizerWorker.addEventListener("error", (event) => {
+        optimizerWorker?.terminate();
+        optimizerWorker = null;
+        document.getElementById("opt-running-view").classList.add("hidden");
+        document.getElementById("opt-standby-view").classList.remove("hidden");
+        document.getElementById("opt-run-btn").disabled = false;
+        alert(`Optimizer worker failed: ${event.message}`);
+      });
+      optimizerWorker.postMessage({
+        type: "run",
+        payload: { profile: userProfile, startersMap, joinerPool, slots, db, ministerBuffs: MINISTER_BUFFS }
+      });
     }
 
     // Tab switcher

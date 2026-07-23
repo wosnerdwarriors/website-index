@@ -279,6 +279,18 @@ const calculatorSections = [
   const smith = giselaResult.rows.find((row) => row.name === 'Smith');
   assert.equal(smith.widgetsNeeded, 0);
 
+  const reversedState = heroes.defaultState(heroesData);
+  reversedState.items[zinmanIndex].currentStars = '5';
+  reversedState.items[zinmanIndex].desiredStars = 'Locked';
+  reversedState.items[giselaIndex].currentWidget = 10;
+  reversedState.items[giselaIndex].desiredWidget = 0;
+  const reversedResult = heroes.calculate(heroesData, reversedState);
+  assert.ok(reversedResult.warnings.some((warning) => warning.includes('Zinman: desired stars cannot be below current stars.')));
+  assert.ok(reversedResult.warnings.some((warning) => warning.includes('Gisela: desired widget cannot be below current widget.')));
+  assert.equal(reversedResult.rows[zinmanIndex].shardCost, 0);
+  assert.equal(reversedResult.rows[giselaIndex].widgetsNeeded, 0);
+  assert.match(heroes.render(heroesData, reversedState), /Check this plan:/, 'Reversed hero ranges render validation');
+
   const filteredState = heroes.defaultState(heroesData);
   filteredState.filters.search = 'Hervor';
   const filteredHtml = heroes.render(heroesData, filteredState);

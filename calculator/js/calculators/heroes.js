@@ -1,4 +1,4 @@
-import { applyValeriaBonus, escapeHtml, formatNumber, titleCaseKey, toNumber, valeriaS1Field } from './utils.js?v=20260715-valeria-s1';
+import { applyValeriaBonus, escapeHtml, formatNumber, titleCaseKey, toNumber, valeriaS1Field, validationMessages } from './utils.js?v=20260715-valeria-s1';
 
 const SHARD_SVS_POINTS = { rare: 350, epic: 1220, mythic: 3040 };
 const WIDGET_SVS_POINTS = 8000;
@@ -135,14 +135,28 @@ export function calculate(data, state = {}, shared = {}) {
     widgetsNeeded: 0,
     svsPoints: 0
   };
+  const warnings = [];
+  const starRanks = new Map((data.starCosts?.levels || []).map((level, index) => [normalizeLevel(level.level), Number.isFinite(level.rank) ? level.rank : index]));
+  const widgetRanks = new Map((data.widgetCosts?.levels || []).map((level, index) => [normalizeLevel(level.level), index]));
   const states = itemState(data, state);
   const rows = (data.heroRows || []).map((hero, index) => {
     const selected = states[index];
-    const shardCost = lookupStarMatrix(data.starCosts?.matrix, selected.currentStars, selected.desiredStars);
+    const currentStarRank = starRanks.get(starMatrixKey(selected.currentStars));
+    const desiredStarRank = starRanks.get(starMatrixKey(selected.desiredStars));
+    const reversedStars = Number.isFinite(currentStarRank) && Number.isFinite(desiredStarRank) && desiredStarRank < currentStarRank;
+    if (reversedStars) warnings.push(`${hero.name}: desired stars cannot be below current stars.`);
+    const shardCost = reversedStars ? 0 : lookupStarMatrix(data.starCosts?.matrix, selected.currentStars, selected.desiredStars);
     const specificApplied = Math.min(shardCost, toNumber(selected.specificShards));
     const generalNeeded = Math.max(0, shardCost - specificApplied);
     const generalShortfall = Math.max(0, generalNeeded - toNumber(selected.generalShards));
-    const widgetsNeeded = hasWidgetControls(hero)
+    const currentWidgetRank = widgetRanks.get(normalizeLevel(selected.currentWidget));
+    const desiredWidgetRank = widgetRanks.get(normalizeLevel(selected.desiredWidget));
+    const reversedWidgets = hasWidgetControls(hero)
+      && Number.isFinite(currentWidgetRank)
+      && Number.isFinite(desiredWidgetRank)
+      && desiredWidgetRank < currentWidgetRank;
+    if (reversedWidgets) warnings.push(`${hero.name}: desired widget cannot be below current widget.`);
+    const widgetsNeeded = hasWidgetControls(hero) && !reversedWidgets
       ? lookupMatrix(data.widgetCosts?.matrix, selected.currentWidget, selected.desiredWidget)
       : 0;
     const svsPoints = applyValeriaBonus((shardCost * SHARD_SVS_POINTS[heroRarity(hero)]) + (widgetsNeeded * WIDGET_SVS_POINTS), shared.valeriaS1Percent);
@@ -162,7 +176,7 @@ export function calculate(data, state = {}, shared = {}) {
       svsPoints
     };
   });
-  return { rows, totals };
+  return { rows, totals, warnings };
 }
 
 function renderHeroRow(hero, index, starOptions, widgetOptions) {
@@ -242,6 +256,8 @@ export function update(data, state, root, index, shared = {}) {
     const totalEl = root.querySelector(`[data-hero-total="${key}"]`);
     if (totalEl) totalEl.textContent = formatNumber(value);
   });
+  const validationEl = root.querySelector('[data-hero-validation]');
+  if (validationEl) validationEl.innerHTML = validationMessages(result.warnings);
 }
 
 export function render(data, state = {}, shared = {}) {
@@ -296,6 +312,7 @@ export function render(data, state = {}, shared = {}) {
       </section>
       <aside class="calc-panel heroes-totals-panel">
         <h3>Totals</h3>
+        <div data-hero-validation>${validationMessages(result.warnings)}</div>
         ${renderHeroTotals(result.totals)}
         <p class="text-sm text-gray-600 mt-3">Totals include all heroes. SVS points use the shard rate for each hero's rarity plus 8,000 points per widget.</p>
       </aside>

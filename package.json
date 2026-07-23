@@ -5,7 +5,9 @@
   "scripts": {
     "build:css": "npx tailwindcss -i ./tailwind/input.css -o ./dist/css/tailwind.css",
     "watch:css": "npx tailwindcss -i ./tailwind/input.css -o ./dist/css/tailwind.css --watch",
-    "test:calculator": "node ./calculator/tests/run-tests.mjs"
+    "test:calculator": "node ./calculator/tests/run-tests.mjs",
+    "test:bear": "node ./bear-calc/tests/optimizer-tests.mjs",
+    "test": "npm run test:calculator && npm run test:bear"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.17"

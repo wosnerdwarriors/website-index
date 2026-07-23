@@ -59,6 +59,7 @@ let activeSectionId = location.hash.replace('#', '') || SECTIONS[0].id;
 let calculatorData = {};
 let state = {};
 let saveTimer = null;
+let heroSearchFrame = null;
 
 const tabsEl = document.getElementById('calculator-tabs');
 const contentEl = document.getElementById('calculator-content');
@@ -313,6 +314,19 @@ function attachEvents() {
         renderResourceBalance();
         return;
       }
+    }
+    if (event.type === 'input' && input.dataset.statePath === 'heroes.filters.search') {
+      const selectionStart = input.selectionStart;
+      const selectionEnd = input.selectionEnd;
+      cancelAnimationFrame(heroSearchFrame);
+      heroSearchFrame = requestAnimationFrame(() => {
+        if (activeSectionId !== 'heroes') return;
+        renderActiveSection();
+        const search = contentEl.querySelector('[data-state-path="heroes.filters.search"]');
+        search?.focus();
+        search?.setSelectionRange(selectionStart, selectionEnd);
+      });
+      return;
     }
     if (event.type === 'input') {
       // Do not replace an active text/number input: doing so resets its caret and
