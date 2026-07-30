@@ -91,6 +91,10 @@ let waveMode = defaultWaveMode;
 let globeMode = defaultGlobeMode;
 let cityContextMenu = null;
 let cityContextMenuTarget = null;
+let cityContextMenuGlobeControl = null;
+let cityContextMenuGlobeTrigger = null;
+let cityContextMenuGlobeLabel = null;
+let cityContextMenuGlobeOptions = [];
 let coordAnchor = { x: 600, y: 600 };
 let worldmapPresence = null; // Uint8Array(1200*1200), key per cell; loaded on first activation
 let worldmapLoading = false;
@@ -2590,7 +2594,21 @@ function setCityGlobeLevel(city, level) {
 function hideCityContextMenu() {
     if (!cityContextMenu) return;
     cityContextMenu.classList.remove('visible');
+    cityContextMenuGlobeControl?.classList.remove('expanded');
+    cityContextMenuGlobeTrigger?.setAttribute('aria-expanded', 'false');
     cityContextMenuTarget = null;
+}
+
+function updateCityContextMenuGlobeState(city) {
+    const globeLevel = getGlobeLevel(city);
+    cityContextMenuGlobeLabel.textContent = `Globe ${globeLevel}`;
+    cityContextMenuGlobeOptions.forEach((button) => {
+        const isSelected = Number(button.dataset.globeLevel) === globeLevel;
+        button.classList.toggle('selected', isSelected);
+        button.setAttribute('aria-checked', String(isSelected));
+    });
+    cityContextMenuGlobeControl.classList.remove('expanded');
+    cityContextMenuGlobeTrigger.setAttribute('aria-expanded', 'false');
 }
 
 function ensureCityContextMenu() {
@@ -2628,10 +2646,33 @@ function ensureCityContextMenu() {
     divider.className = 'city-context-menu__divider';
     menu.appendChild(divider);
 
+    const globeControl = document.createElement('div');
+    globeControl.className = 'city-context-menu__globe-control';
+
+    const globeTrigger = document.createElement('button');
+    globeTrigger.type = 'button';
+    globeTrigger.className = 'city-context-menu__globe-trigger';
+    globeTrigger.setAttribute('aria-haspopup', 'menu');
+    globeTrigger.setAttribute('aria-expanded', 'false');
+    globeTrigger.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">circle</span><span class="city-context-menu__globe-label"></span><span class="city-context-menu__chevron" aria-hidden="true">›</span>';
+    globeTrigger.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isExpanded = globeControl.classList.toggle('expanded');
+        globeTrigger.setAttribute('aria-expanded', String(isExpanded));
+    });
+    globeControl.appendChild(globeTrigger);
+
+    const globeSubmenu = document.createElement('div');
+    globeSubmenu.className = 'city-context-menu__submenu';
+    globeSubmenu.setAttribute('role', 'menu');
+
+    const globeOptions = [];
     for (let level = 0; level < GLOBE_COVERAGE_SIZE_BY_LEVEL.length; level++) {
         const globeButton = document.createElement('button');
         globeButton.type = 'button';
         globeButton.className = 'city-context-menu__globe';
+        globeButton.dataset.globeLevel = String(level);
+        globeButton.setAttribute('role', 'menuitemradio');
         globeButton.setAttribute('aria-label', `Set globe level ${level}`);
         globeButton.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true">circle</span>${level}`;
         globeButton.addEventListener('click', () => {
@@ -2639,11 +2680,18 @@ function ensureCityContextMenu() {
             setCityGlobeLevel(cityContextMenuTarget, level);
             hideCityContextMenu();
         });
-        menu.appendChild(globeButton);
+        globeSubmenu.appendChild(globeButton);
+        globeOptions.push(globeButton);
     }
+    globeControl.appendChild(globeSubmenu);
+    menu.appendChild(globeControl);
 
     document.body.appendChild(menu);
     cityContextMenu = menu;
+    cityContextMenuGlobeControl = globeControl;
+    cityContextMenuGlobeTrigger = globeTrigger;
+    cityContextMenuGlobeLabel = globeTrigger.querySelector('.city-context-menu__globe-label');
+    cityContextMenuGlobeOptions = globeOptions;
     return menu;
 }
 
@@ -2655,6 +2703,7 @@ function showCityContextMenu(city, clientX, clientY) {
 
     const menu = ensureCityContextMenu();
     cityContextMenuTarget = city;
+    updateCityContextMenuGlobeState(city);
     menu.classList.add('visible');
 
     const margin = 8;
