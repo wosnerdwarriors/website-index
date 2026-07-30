@@ -35,6 +35,9 @@ const gridRows = 30;
 const entities = [];
 const defaultCityLabelMode = "march";
 const defaultWaveMode = false;
+const defaultGlobeMode = false;
+// Globe levels are paired by coverage tier. Update this table if the in-game ranges change.
+const GLOBE_COVERAGE_SIZE_BY_LEVEL = Object.freeze([0, 6, 6, 10, 10, 10, 14]);
 let selectedType = null;
 let obstacleSize = 1; // 1, 2, 3 or 4 — placement drops N×N individual 1×1 obstacles
 let selectedEntity = null;
@@ -85,6 +88,9 @@ let ghostPreview = null;
 let territoryPreview = null;
 let cityLabelMode = defaultCityLabelMode;  // "march", "coords", "none"
 let waveMode = defaultWaveMode;
+let globeMode = defaultGlobeMode;
+let cityContextMenu = null;
+let cityContextMenuTarget = null;
 let coordAnchor = { x: 600, y: 600 };
 let worldmapPresence = null; // Uint8Array(1200*1200), key per cell; loaded on first activation
 let worldmapLoading = false;
@@ -602,6 +608,123 @@ function getTerritoryPreviewAreaForEntity(entity) {
 }
 
 // ===== ENTITY RENDERING =====
+function getGlobeLevel(city) {
+    const level = Number(city?.globeLevel);
+    return Number.isInteger(level) && level >= 1 && level < GLOBE_COVERAGE_SIZE_BY_LEVEL.length
+        ? level
+        : 0;
+}
+
+function getGlobeCoverageSize(city) {
+    return GLOBE_COVERAGE_SIZE_BY_LEVEL[getGlobeLevel(city)] || 0;
+}
+
+function getGlobeCoverageBounds(city) {
+    const coverageSize = getGlobeCoverageSize(city);
+    if (!coverageSize) return null;
+
+    const inset = (coverageSize - city.width) / 2;
+    return {
+        left: city.x - inset,
+        top: city.y - inset,
+        right: city.x - inset + coverageSize,
+        bottom: city.y - inset + coverageSize
+    };
+}
+
+function getGlobeCoveredCellCount(city, globeCity) {
+    const bounds = getGlobeCoverageBounds(globeCity);
+    if (!bounds) return 0;
+
+    const overlapWidth = Math.max(0, Math.min(city.x + city.width, bounds.right) - Math.max(city.x, bounds.left));
+    const overlapHeight = Math.max(0, Math.min(city.y + city.height, bounds.bottom) - Math.max(city.y, bounds.top));
+    return overlapWidth * overlapHeight;
+}
+
+function isCityGlobeBuffed(city) {
+    if (city.type !== 'city') return false;
+
+    const cityAlliance = getEntityAllianceId(city);
+    return entities.some(globeCity => {
+        if (globeCity.type !== 'city') return false;
+        if (getEntityAllianceId(globeCity) !== cityAlliance) return false;
+        // A city is buffed only if at least half of its 2×2 footprint is in the globe area.
+        return getGlobeCoveredCellCount(city, globeCity) >= (city.width * city.height) / 2;
+    });
+}
+
+function isGlobeOutlineSegmentCovered(startX, startY, endX, endY, higherBounds) {
+    const midpointX = (startX + endX) / 2;
+    const midpointY = (startY + endY) / 2;
+    return higherBounds.some(bounds =>
+        midpointX > bounds.left && midpointX < bounds.right &&
+        midpointY > bounds.top && midpointY < bounds.bottom
+    );
+}
+
+function drawGlobeOutline(context, pX, pY, z, bounds, higherBounds) {
+    const drawSegment = (startX, startY, endX, endY) => {
+        if (isGlobeOutlineSegmentCovered(startX, startY, endX, endY, higherBounds)) return;
+        const start = diamondToScreenCorner(startX, startY, pX, pY, z);
+        const end = diamondToScreenCorner(endX, endY, pX, pY, z);
+        context.moveTo(start.x, start.y);
+        context.lineTo(end.x, end.y);
+    };
+
+    context.beginPath();
+    for (let x = bounds.left; x < bounds.right; x++) {
+        drawSegment(x, bounds.top, x + 1, bounds.top);
+        drawSegment(x, bounds.bottom, x + 1, bounds.bottom);
+    }
+    for (let y = bounds.top; y < bounds.bottom; y++) {
+        drawSegment(bounds.left, y, bounds.left, y + 1);
+        drawSegment(bounds.right, y, bounds.right, y + 1);
+    }
+    context.stroke();
+}
+
+function drawGlobeCoverage(context, pX, pY, z) {
+    if (!globeMode) return;
+
+    const globeAreas = entities
+        .filter(city => city.type === 'city' && getEntityAllianceId(city) === normalizeAllianceId(activeAllianceId))
+        .map(city => ({ city, level: getGlobeLevel(city), bounds: getGlobeCoverageBounds(city) }))
+        .filter(globe => globe.bounds)
+        .sort((a, b) => a.level - b.level);
+
+    globeAreas.forEach(({ bounds }) => {
+        const { left, top, right, bottom } = bounds;
+        const topLeft = diamondToScreenCorner(left, top, pX, pY, z);
+        const topRight = diamondToScreenCorner(right, top, pX, pY, z);
+        const bottomRight = diamondToScreenCorner(right, bottom, pX, pY, z);
+        const bottomLeft = diamondToScreenCorner(left, bottom, pX, pY, z);
+
+        context.save();
+        context.beginPath();
+        context.moveTo(topLeft.x, topLeft.y);
+        context.lineTo(topRight.x, topRight.y);
+        context.lineTo(bottomRight.x, bottomRight.y);
+        context.lineTo(bottomLeft.x, bottomLeft.y);
+        context.closePath();
+        context.fillStyle = 'rgba(59, 130, 246, 0.20)';
+        context.fill();
+        context.restore();
+    });
+
+    globeAreas.forEach((globe, index) => {
+        const higherBounds = globeAreas
+            .slice(index + 1)
+            .filter(other => other.level > globe.level)
+            .map(other => other.bounds);
+
+        context.save();
+        context.strokeStyle = 'rgba(37, 99, 235, 0.82)';
+        context.lineWidth = Math.max(1, 1.5 * z);
+        drawGlobeOutline(context, pX, pY, z, globe.bounds, higherBounds);
+        context.restore();
+    });
+}
+
 function drawEntities(context, pX, pY, z) {
     const { protectedAreasByAlliance } = buildProtectedAreaSnapshot();
 
@@ -611,6 +734,9 @@ function drawEntities(context, pX, pY, z) {
             : INACTIVE_ALLIANCE_AREA_FILL;
         drawFlagAreas(context, pX, pY, z, protectedAreasByAlliance[alliance.id], color);
     });
+
+    // Globe coverage stays beneath cities, so overlapping cities and their labels remain legible.
+    drawGlobeCoverage(context, pX, pY, z);
 
     // Draw the territory preview for the building being placed
     drawTerritoryPreview(context, pX, pY, z, territoryPreview);
@@ -654,7 +780,9 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
         } else {
             const teamIndex = cityTeams[entity.id];
             const teamColor = (teamIndex !== undefined && customTeams[teamIndex]) ? customTeams[teamIndex].color : entity.color;
-            context.fillStyle = waveMode ? getWaveColorForCity(entity) : teamColor;
+            context.fillStyle = globeMode && isCityGlobeBuffed(entity)
+                ? 'rgba(59, 130, 246, 0.92)'
+                : waveMode ? getWaveColorForCity(entity) : teamColor;
         }
     } else {
         context.fillStyle = isInactiveAllianceEntity ? INACTIVE_ALLIANCE_ENTITY_FILL : entity.color;
@@ -2157,6 +2285,19 @@ function setWaveMode(_waveMode = defaultWaveMode) {
     redraw();
 }
 
+function setGlobeMode(_globeMode = defaultGlobeMode) {
+    globeMode = Boolean(_globeMode);
+
+    const d7 = document.querySelector('[citySettingsButtons="7"]');
+    const m7 = document.querySelector('[citySettingsButtons="m7"]');
+    [d7, m7].forEach(button => {
+        if (!button) return;
+        button.classList.toggle('bg-yellow-500', globeMode);
+        button.classList.toggle('text-white', globeMode);
+    });
+    redraw();
+}
+
 function setShowWorldmap(value) {
     showWorldmap = value;
     document.querySelectorAll('[citySettingsButtons="6"], [citySettingsButtons="m6"]').forEach(b => {
@@ -2432,6 +2573,97 @@ function assignCityToTeam(city, teamIndex) {
     }
 }
 
+function setCityGlobeLevel(city, level) {
+    if (!city || city.type !== 'city') return;
+
+    const normalizedLevel = Number(level);
+    if (Number.isInteger(normalizedLevel) && normalizedLevel >= 1 && normalizedLevel < GLOBE_COVERAGE_SIZE_BY_LEVEL.length) {
+        city.globeLevel = normalizedLevel;
+    } else {
+        delete city.globeLevel;
+    }
+    updateCityList();
+    redraw();
+    markUnsavedChanges();
+}
+
+function hideCityContextMenu() {
+    if (!cityContextMenu) return;
+    cityContextMenu.classList.remove('visible');
+    cityContextMenuTarget = null;
+}
+
+function ensureCityContextMenu() {
+    if (cityContextMenu) return cityContextMenu;
+
+    const menu = document.createElement('div');
+    menu.id = 'cityContextMenu';
+    menu.className = 'city-context-menu';
+    menu.setAttribute('role', 'menu');
+
+    const selectButton = document.createElement('button');
+    selectButton.type = 'button';
+    selectButton.textContent = 'Select';
+    selectButton.addEventListener('click', () => {
+        if (!cityContextMenuTarget) return;
+        setSelection([cityContextMenuTarget], { primaryEntity: cityContextMenuTarget, pulse: true });
+        redraw();
+        hideCityContextMenu();
+    });
+    menu.appendChild(selectButton);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = 'city-context-menu__delete';
+    deleteButton.textContent = 'Delete';
+    deleteButton.addEventListener('click', () => {
+        if (!cityContextMenuTarget) return;
+        setSelection([cityContextMenuTarget], { primaryEntity: cityContextMenuTarget, pulse: false });
+        hideCityContextMenu();
+        deleteSelectedEntity();
+    });
+    menu.appendChild(deleteButton);
+
+    const divider = document.createElement('div');
+    divider.className = 'city-context-menu__divider';
+    menu.appendChild(divider);
+
+    for (let level = 0; level < GLOBE_COVERAGE_SIZE_BY_LEVEL.length; level++) {
+        const globeButton = document.createElement('button');
+        globeButton.type = 'button';
+        globeButton.className = 'city-context-menu__globe';
+        globeButton.setAttribute('aria-label', `Set globe level ${level}`);
+        globeButton.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true">circle</span>${level}`;
+        globeButton.addEventListener('click', () => {
+            if (!cityContextMenuTarget) return;
+            setCityGlobeLevel(cityContextMenuTarget, level);
+            hideCityContextMenu();
+        });
+        menu.appendChild(globeButton);
+    }
+
+    document.body.appendChild(menu);
+    cityContextMenu = menu;
+    return menu;
+}
+
+function showCityContextMenu(city, clientX, clientY) {
+    if (!city || city.type !== 'city') {
+        hideCityContextMenu();
+        return;
+    }
+
+    const menu = ensureCityContextMenu();
+    cityContextMenuTarget = city;
+    menu.classList.add('visible');
+
+    const margin = 8;
+    const left = Math.min(clientX, window.innerWidth - menu.offsetWidth - margin);
+    const top = Math.min(clientY, window.innerHeight - menu.offsetHeight - margin);
+    menu.style.left = `${Math.max(margin, left)}px`;
+    menu.style.top = `${Math.max(margin, top)}px`;
+}
+
 function updateTeamsUI() {
     const container = document.getElementById('teamsContainer');
     if (!container) return;
@@ -2488,7 +2720,12 @@ canvas.addEventListener('mouseenter', (event) => {
     refreshEraserCursorForCurrentPointer(selectedType);
     refreshGhostPreviewForCurrentPointer(selectedType);
 });
-canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const gridPos = screenToDiamond(event.clientX - rect.left, event.clientY - rect.top);
+    showCityContextMenu(getEntityAtGrid(gridPos.x, gridPos.y), event.clientX, event.clientY);
+});
 canvas.addEventListener('mouseleave', () => {
     isErasing = false;
     setEraserCursorVisible(false);
@@ -2499,6 +2736,16 @@ canvas.addEventListener('mouseleave', () => {
         redraw();
     }
 });
+
+document.addEventListener('pointerdown', event => {
+    if (cityContextMenu && !cityContextMenu.contains(event.target)) {
+        hideCityContextMenu();
+    }
+});
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') hideCityContextMenu();
+});
+window.addEventListener('resize', hideCityContextMenu);
 
 window.addEventListener('DOMContentLoaded', () => {
     loadMapFromQuery();
@@ -2732,6 +2979,11 @@ window.addEventListener('DOMContentLoaded', () => {
                 setWaveMode(!waveMode);
             }
 
+            // P7: Globe coverage
+            if (key.endsWith('7')) {
+                setGlobeMode(!globeMode);
+            }
+
             // P3: Show Coords
             if (key.endsWith('3')) {
                 setCityLabelMode(cityLabelMode === "coords" ? "none" : "coords");
@@ -2781,7 +3033,7 @@ function saveMap() {
 
     try {
         const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode);
+        const compressedMap = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode, globeMode);
         const mapDataInput = document.getElementById('mapData');
         const mobileMapData = document.getElementById('mobileMapData');
         
@@ -2802,7 +3054,7 @@ function shareMap() {
     if (preventActionOnEmptyMap("sharing")) return;
     try {
         const mapName = document.getElementById('mapNameInput').value;
-        const compressedMap = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode);
+        const compressedMap = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode, globeMode);
         const mapDataInput = document.getElementById('mapData');
         const mobileMapData = document.getElementById('mobileMapData');
         
@@ -2980,7 +3232,7 @@ function shareMap() {
     		shortUrlButton.addEventListener('click', async () => {
                 if (preventActionOnEmptyMap("generating a short URL")) return;
     			const mapName = document.getElementById('mapNameInput')?.value || '';
-                const compressed = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode);
+                const compressed = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode, globeMode);
                 if (document.getElementById('mapData')) document.getElementById('mapData').value = compressed;
                 const longUrl = getShareableUrl(entities, mapName);
     			await doShorten(longUrl);
@@ -2992,7 +3244,7 @@ function shareMap() {
     		mobileShortUrlButton.addEventListener('click', async () => {
                 if (preventActionOnEmptyMap("generating a short URL")) return;
     			const mapName = document.getElementById('mapNameInput')?.value || '';
-                const compressed = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode);
+                const compressed = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode, globeMode);
                 if (document.getElementById('mobileMapData')) document.getElementById('mobileMapData').value = compressed;
                 const longUrl = getShareableUrl(entities, mapName);
     			await doShorten(longUrl);
@@ -3534,6 +3786,35 @@ function updateCityList() {
     const buildCityItem = (city) => {
         const li = document.createElement('li');
         li.className = 'flex items-center space-x-2 mb-2';
+        li.addEventListener('contextmenu', event => {
+            event.preventDefault();
+            showCityContextMenu(city, event.clientX, event.clientY);
+        });
+        let listLongPressTimer = null;
+        let openedListContextMenu = false;
+        const clearListLongPress = () => {
+            if (listLongPressTimer !== null) {
+                clearTimeout(listLongPressTimer);
+                listLongPressTimer = null;
+            }
+        };
+        li.addEventListener('touchstart', event => {
+            if (event.touches.length !== 1) return;
+            const touch = event.touches[0];
+            openedListContextMenu = false;
+            clearListLongPress();
+            listLongPressTimer = setTimeout(() => {
+                listLongPressTimer = null;
+                openedListContextMenu = true;
+                showCityContextMenu(city, touch.clientX, touch.clientY);
+            }, 450);
+        }, { passive: true });
+        li.addEventListener('touchmove', clearListLongPress, { passive: true });
+        li.addEventListener('touchcancel', clearListLongPress, { passive: true });
+        li.addEventListener('touchend', event => {
+            clearListLongPress();
+            if (openedListContextMenu) event.preventDefault();
+        });
 
         const input = document.createElement('input');
         input.type = 'text';
@@ -4176,7 +4457,7 @@ function getFflateApi() {
     return api;
 }
 
-function buildUnifiedMapMeta(mapName, anchor, _waveMode, _cityLabelMode, _mapMode, serializableEntities) {
+function buildUnifiedMapMeta(mapName, anchor, _waveMode, _cityLabelMode, _mapMode, _globeMode, serializableEntities) {
     const meta = {};
     const sanitizedName = sanitizeMapName(mapName || '');
     if (sanitizedName) meta.n = sanitizedName;
@@ -4188,6 +4469,10 @@ function buildUnifiedMapMeta(mapName, anchor, _waveMode, _cityLabelMode, _mapMod
     if (_waveMode) meta.w = 1;                                    // omit if false (default)
     if (_cityLabelMode !== defaultCityLabelMode) meta.m = _cityLabelMode; // omit if "march"
     if (_mapMode === 'castle') meta.o = 'c';                     // omit if 'base' (default)
+    if (_globeMode) meta.gm = 1;                                 // omit if false (default)
+
+    const globeLevels = getGlobeLevelsForMapCode(serializableEntities);
+    if (globeLevels.some(Boolean)) meta.g = globeLevels;
 
     const teamsPayload = getOptionalTeamsPayloadForMapCode();
     if (teamsPayload) {
@@ -4202,7 +4487,7 @@ function buildUnifiedMapMeta(mapName, anchor, _waveMode, _cityLabelMode, _mapMod
     return meta;
 }
 
-function buildUnifiedMapPacket(serializableEntities, mapName, anchor, _waveMode, _cityLabelMode, _mapMode) {
+function buildUnifiedMapPacket(serializableEntities, mapName, anchor, _waveMode, _cityLabelMode, _mapMode, _globeMode) {
     const entityBytes = compressMapV3Bytes(serializableEntities);
     const metaPayload = buildUnifiedMapMeta(
         mapName,
@@ -4210,6 +4495,7 @@ function buildUnifiedMapPacket(serializableEntities, mapName, anchor, _waveMode,
         _waveMode,
         _cityLabelMode,
         _mapMode,
+        _globeMode,
         serializableEntities
     );
     const metaBytes = new TextEncoder().encode(JSON.stringify(metaPayload));
@@ -4251,6 +4537,8 @@ function decodeUnifiedMapPacket(packet) {
         mapName: '',
         anchor: null,
         waveMode: defaultWaveMode,
+        globeMode: defaultGlobeMode,
+        globeLevels: [],
         cityLabelMode: defaultCityLabelMode,
         mapMode: 'base',
         teams: null,
@@ -4267,6 +4555,14 @@ function decodeUnifiedMapPacket(packet) {
 
     if (meta.w !== undefined) {
         out.waveMode = String(meta.w) === '1' || meta.w === true;
+    }
+
+    if (meta.gm !== undefined) {
+        out.globeMode = String(meta.gm) === '1' || meta.gm === true;
+    }
+
+    if (Array.isArray(meta.g)) {
+        out.globeLevels = meta.g.map(level => getGlobeLevel({ globeLevel: level }));
     }
 
     if (typeof meta.m === 'string') {
@@ -4293,7 +4589,7 @@ function decodeUnifiedMapPacket(packet) {
     return out;
 }
 
-function compressMapUnifiedPayload(serializableEntities, mapName, anchor, _waveMode, _cityLabelMode, _mapMode) {
+function compressMapUnifiedPayload(serializableEntities, mapName, anchor, _waveMode, _cityLabelMode, _mapMode, _globeMode) {
     try {
         const packet = buildUnifiedMapPacket(
             serializableEntities,
@@ -4301,7 +4597,8 @@ function compressMapUnifiedPayload(serializableEntities, mapName, anchor, _waveM
             anchor,
             _waveMode,
             _cityLabelMode,
-            _mapMode
+            _mapMode,
+            _globeMode
         );
 
         const lp1Payload = 'lp1:' + bytesToBase64Url(packet);
@@ -4605,7 +4902,24 @@ function getSerializableEntitiesForMapCode(sourceEntities = entities) {
     return sourceEntities.filter(entity => entity.type !== 'castle' && entity.type !== 'turret');
 }
 
-function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode = waveMode, _cityLabelMode = cityLabelMode, _mapMode = mapMode) {
+function getGlobeLevelsForMapCode(sourceEntities = entities) {
+    return sourceEntities
+        .filter(entity => entity.type === 'city')
+        .map(city => getGlobeLevel(city));
+}
+
+function applyGlobeLevelsFromMapCode(sourceEntities, globeLevels) {
+    if (!Array.isArray(globeLevels)) return;
+
+    let cityIndex = 0;
+    sourceEntities.forEach(entity => {
+        if (entity.type !== 'city') return;
+        const level = getGlobeLevel({ globeLevel: globeLevels[cityIndex++] });
+        if (level) entity.globeLevel = level;
+    });
+}
+
+function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode = waveMode, _cityLabelMode = cityLabelMode, _mapMode = mapMode, _globeMode = globeMode) {
     const serializableEntities = getSerializableEntitiesForMapCode(entities);
     const unifiedPayload = compressMapUnifiedPayload(
         serializableEntities,
@@ -4613,7 +4927,8 @@ function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode 
         anchor,
         _waveMode,
         _cityLabelMode,
-        _mapMode
+        _mapMode,
+        _globeMode
     );
     if (unifiedPayload) {
         return unifiedPayload;
@@ -4631,6 +4946,7 @@ function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode 
     }
 
     parts.push("w=" + (_waveMode ? "1" : "0"));
+    parts.push("gm=" + (_globeMode ? "1" : "0"));
     parts.push("m=" + _cityLabelMode);
     parts.push("mode=" + (_mapMode === 'castle' ? 'c' : 'b')); // 'b' = base, 'c' = castle
 
@@ -4657,13 +4973,18 @@ function compressMapWithName(entities, mapName, anchor = coordAnchor, _waveMode 
         }
     }
 
+    const globeLevels = getGlobeLevelsForMapCode(serializableEntities);
+    if (globeLevels.some(Boolean)) {
+        parts.push("g=" + globeLevels.join(','));
+    }
+
     return parts.join("||");
 }
 
 
 function decompressMapWithName(combinedString) {
-    // Returns: { entities, mapName?, anchor?, waveMode?, cityLabelMode?, teams?, alliances? }
-    const out = { entities: [], mapName: "", anchor: null, waveMode: null, cityLabelMode: null, teams: null, alliances: null };
+    // Returns: { entities, mapName?, anchor?, waveMode?, globeMode?, globeLevels?, cityLabelMode?, teams?, alliances? }
+    const out = { entities: [], mapName: "", anchor: null, waveMode: null, globeMode: null, globeLevels: [], cityLabelMode: null, teams: null, alliances: null };
 
     if (!combinedString || typeof combinedString !== 'string') {
         return out;
@@ -4689,6 +5010,10 @@ function decompressMapWithName(combinedString) {
         	out.anchor = parseCoordInput(s)
         } else if (seg.startsWith("w=")) {
             out.waveMode = seg.slice(2) === '1';
+        } else if (seg.startsWith("gm=")) {
+            out.globeMode = seg.slice(3) === '1';
+        } else if (seg.startsWith("g=")) {
+            out.globeLevels = seg.slice(2).split(',').map(level => getGlobeLevel({ globeLevel: level }));
         } else if (seg.startsWith("m=")) {
             let mode = seg.slice(2).trim().toLowerCase();
             if (!['march', 'coords', 'none'].includes(mode)) {
@@ -4755,7 +5080,7 @@ function decompressMapWithName(combinedString) {
 
 // Pure helper to generate a shareable URL with provided map data and name
 function getShareableUrl(entitiesArg, mapNameArg) {
-    const compressedMap = compressMapWithName(entitiesArg, mapNameArg, coordAnchor, waveMode, cityLabelMode, mapMode);
+    const compressedMap = compressMapWithName(entitiesArg, mapNameArg, coordAnchor, waveMode, cityLabelMode, mapMode, globeMode);
     const newUrl = new URL(window.location.href);
     newUrl.searchParams.set('mapData', compressedMap);
     return newUrl.toString();
@@ -4792,8 +5117,13 @@ function loadMap() {
         });
 
         if (!Array.isArray(loaded)) {
+            applyGlobeLevelsFromMapCode(entities, loaded.globeLevels);
+        }
+
+        if (!Array.isArray(loaded)) {
             setAnchorInput(loaded.anchor);
             setWaveMode(loaded.waveMode);
+            setGlobeMode(loaded.globeMode);
             setCityLabelMode(loaded.cityLabelMode);
             setMapMode(loaded.mapMode || 'castle'); // 'base' as default if no mapmode was saved
 
@@ -5087,7 +5417,7 @@ function worldCoordToGrid(world, width=2, height=2){
   return { x: tipX - (width - 1), y: tipY - (height - 1) };
 }
 
-// Import: name[,x,y,alliance,team] where all but "name" are optional
+// Import: name[,x,y,alliance,team,globe_level] where all but "name" are optional
 // 1) Existing "City N" cities are RENAMED only.
 // 2) Only when no default cities remain, new 2x2 cities are created.
 // 3) Provided x,y are by default used ONLY for new cities.
@@ -5106,8 +5436,10 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
   const iY    = idx('y');
   const iAlliance = idx('alliance');
   const iTeam = idx('team');
+  const iGlobeLevel = idx('globe_level');
   const hasAllianceColumn = iAlliance !== -1;
   const hasTeamColumn = iTeam !== -1;
+  const hasGlobeLevelColumn = iGlobeLevel !== -1;
 
   if (iName === -1) {
     alert('CSV must have at least a "name" column.');
@@ -5126,7 +5458,8 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
       ? parseAllianceIdFromCsv(cols[iAlliance], fallbackAllianceId)
       : fallbackAllianceId;
     const teamName = hasTeamColumn ? (cols[iTeam] || '').trim() : null;
-    rows.push({ name, x, y, allianceId, teamName });
+    const globeLevel = hasGlobeLevelColumn ? getGlobeLevel({ globeLevel: cols[iGlobeLevel] }) : 0;
+    rows.push({ name, x, y, allianceId, teamName, globeLevel });
   }
   if (!rows.length) return;
 
@@ -5146,6 +5479,15 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
       return;
     }
     cityTeams[city.id] = teamIndex;
+  };
+
+  const assignImportedGlobeLevel = (city, globeLevel) => {
+    if (!hasGlobeLevelColumn || !city) return;
+    if (globeLevel) {
+      city.globeLevel = globeLevel;
+    } else {
+      delete city.globeLevel;
+    }
   };
 
   const teamCountBeforeImport = customTeams.length;
@@ -5169,6 +5511,7 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
       }
 
       assignImportedTeam(existingCity, rec.teamName);
+      assignImportedGlobeLevel(existingCity, rec.globeLevel);
       continue;
     }
 
@@ -5198,6 +5541,7 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
     };
     entities.push(city);
     assignImportedTeam(city, rec.teamName);
+    assignImportedGlobeLevel(city, rec.globeLevel);
   }
 
   if (hasTeamColumn && customTeams.length !== teamCountBeforeImport) {
@@ -5212,14 +5556,14 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
 
 
 /* =========================
-   EXPORT: name,x,y,alliance,team
+   EXPORT: name,x,y,alliance,team,globe_level
    - x,y = coordForCity(city)
    - includes all cities (both alliances)
    - onlyNamed=true -> skips "City N" - only used for testing
 ========================= */
 function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
   if (preventActionOnEmptyMap("exporting to CSV")) return;
-  const rows = ['name,x,y,alliance,team'];
+  const rows = ['name,x,y,alliance,team,globe_level'];
 
   const allianceOrder = ALLIANCES.reduce((acc, a, idx) => {
     acc[a.id] = idx;
@@ -5251,7 +5595,8 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
       world.x,
       world.y,
       csvEscape(allianceName),
-      csvEscape(teamName)
+      csvEscape(teamName),
+      getGlobeLevel(c)
     ].join(','));
   }
 
@@ -5281,6 +5626,7 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
     let startCenterX = 0;
     let startCenterY = 0;
     let longPressTimer = null;
+    let openedTouchContextMenu = false;
     const LONG_PRESS_MS = 450;
     const SELECT_TWO_FINGER_PAN_THRESHOLD = 0.2;
 
@@ -5318,6 +5664,7 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
         const touches = getTouches(e);
+        const rect = canvas.getBoundingClientRect();
 
         if (touches.length === 1) {
             t0 = touches[0];
@@ -5326,19 +5673,21 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
             startPanY = panY;
             hasDragMovement = false;
             dragSelectionStart = [];
+            openedTouchContextMenu = false;
 
-            // Long-press deletes current selection on mobile.
+            // Long-pressing a city opens its action menu; deletion lives in that menu.
             clearLongPress();
-            longPressTimer = setTimeout(() => {
-                if (getSelectedEntities().length) {
-                    deleteSelectedEntity();
-                }
-            }, LONG_PRESS_MS);
+            const gridPos = screenToDiamond(t0.x, t0.y);
+            const touchedEntity = getEntityAtGrid(gridPos.x, gridPos.y);
+            if (touchedEntity?.type === 'city') {
+                longPressTimer = setTimeout(() => {
+                    longPressTimer = null;
+                    openedTouchContextMenu = true;
+                    showCityContextMenu(touchedEntity, rect.left + t0.x, rect.top + t0.y);
+                }, LONG_PRESS_MS);
+            }
 
             if (selectedType === 'select') {
-                const gridPos = screenToDiamond(t0.x, t0.y);
-                const touchedEntity = getEntityAtGrid(gridPos.x, gridPos.y);
-
                 if (touchedEntity) {
                     const selectedNow = getSelectedEntities();
                     if (!selectedEntities.has(touchedEntity) || selectedNow.length <= 1) {
@@ -5470,7 +5819,7 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
             const dx = e.changedTouches[0].clientX - (canvas.getBoundingClientRect().left + t0.x);
             const dy = e.changedTouches[0].clientY - (canvas.getBoundingClientRect().top + t0.y);
             const moved = Math.hypot(dx, dy);
-            if (moved < 8 && !didEntityDrag) {
+            if (moved < 8 && !didEntityDrag && !openedTouchContextMenu) {
                 const rect = canvas.getBoundingClientRect();
                 const x = e.changedTouches[0].clientX - rect.left;
                 const y = e.changedTouches[0].clientY - rect.top;

@@ -8,7 +8,7 @@
     <meta property="og:url" content="https://wosnerds.com/layout-planner/index.html">
     <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
     <link rel="stylesheet" href="/layout-planner/css/style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=airwave,grid_on,group,import_contacts,ink_eraser,schedule,terrain&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=airwave,circle,grid_on,group,import_contacts,ink_eraser,schedule,terrain&display=swap" />
     <title>Alliance Layout Planner</title>
 </head>
 <body class="overflow-hidden">
@@ -148,8 +148,12 @@
                                     <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">schedule</span>
                                 </button>
                                 <!-- P2 = Wavemode toggle: toggles wave mode visibility on the canvas -->
-                                 <button citySettingsButtons="2" title="Wavemode on/off" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
+                                <button citySettingsButtons="2" title="Wavemode on/off" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
                                     <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">airwave</span>
+                                </button>
+                                <!-- P7 = Globe mode: shows city globe coverage -->
+                                <button citySettingsButtons="7" title="Globe coverage on/off" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
+                                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">circle</span>
                                 </button>
 
                                 <!-- P3 = Toggle coordinates -->
@@ -268,6 +272,12 @@
                                 <p class="ml-2 text-gray-700">• E with selected object: delete selected</p>
                                 <p class="ml-2 text-gray-700">• E with no selection: Erase mode → tap object</p>
                                 <p class="ml-2 text-gray-700">• Delete key removes selected object</p>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-sky-600 mb-2">City Globes</p>
+                                <p class="ml-2 text-gray-700">• Use the circle button to show globe coverage.</p>
+                                <p class="ml-2 text-gray-700">• Right-click a city, or long-press it on mobile, to set globe level 0–6.</p>
+                                <p class="ml-2 text-gray-700">• A city receives the bonus when at least 2 of its 4 tiles are covered, including its own globe.</p>
                             </div>
                             <div>
                                 <p class="font-semibold text-amber-600 mb-2">Keyboard Shortcuts</p>
@@ -406,6 +416,10 @@
                     <!-- P2 = Wavemode toggle: toggles wave mode visibility on the canvas -->
                     <button citySettingsButtons="m2" title="Wavemode on/off" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
                         <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">airwave</span>
+                    </button>
+                    <!-- P7 = Globe mode: shows city globe coverage -->
+                    <button citySettingsButtons="m7" title="Globe coverage on/off" class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;line-height:1">circle</span>
                     </button>
                     
                     <!-- P3 = Toggle coordinates -->
