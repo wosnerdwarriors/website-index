@@ -1243,7 +1243,7 @@ function calculateMarchTimes(city) {
             Math.pow(trapCenterX - cityCenterX, 2) +
             Math.pow(trapCenterY - cityCenterY, 2)
         );
-        const time = Math.round((distance / 10) * 32.5);
+        const time = Math.ceil(5 + (distance * (1300 / (1300 + distance)) * 20) / 11);
         times.push(time);
     });
     return times;
