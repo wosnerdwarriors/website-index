@@ -163,7 +163,8 @@ body {
     position: absolute;
     z-index: 101;
     top: -0.25rem;
-    left: calc(100% + 0.25rem);
+    /* Touches the parent: any gap here breaks the hover chain on the way to the submenu. */
+    left: 100%;
     display: none;
     min-width: 4.25rem;
     padding: 0.25rem;
