@@ -2614,6 +2614,7 @@ function setCityGlobeLevel(city, level) {
     updateCityList();
     redraw();
     markUnsavedChanges();
+    pushHistory();
 }
 
 function hideCityContextMenu() {
