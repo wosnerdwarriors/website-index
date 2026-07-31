@@ -35,7 +35,7 @@ const gridRows = 30;
 const entities = [];
 const defaultCityLabelMode = "march";
 const defaultWaveMode = false;
-const defaultGlobeMode = false;
+const defaultGlobeMode = true;
 // Globe levels are paired by coverage tier. Update this table if the in-game ranges change.
 const GLOBE_COVERAGE_SIZE_BY_LEVEL = Object.freeze([0, 6, 6, 10, 10, 10, 14]);
 let selectedType = null;
@@ -2802,6 +2802,7 @@ window.addEventListener('DOMContentLoaded', () => {
     updateCityList();
     updateZoomDisplay();
     setCityLabelMode();
+    setGlobeMode(globeMode);
     
     // Set up toolbar click handlers
     document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button').forEach(button => {
@@ -4518,7 +4519,7 @@ function buildUnifiedMapMeta(mapName, anchor, _waveMode, _cityLabelMode, _mapMod
     if (_waveMode) meta.w = 1;                                    // omit if false (default)
     if (_cityLabelMode !== defaultCityLabelMode) meta.m = _cityLabelMode; // omit if "march"
     if (_mapMode === 'castle') meta.o = 'c';                     // omit if 'base' (default)
-    if (_globeMode) meta.gm = 1;                                 // omit if false (default)
+    meta.gm = _globeMode ? 1 : 0;                                // always written: default is on
 
     const globeLevels = getGlobeLevelsForMapCode(serializableEntities);
     if (globeLevels.some(Boolean)) meta.g = globeLevels;
@@ -5172,7 +5173,7 @@ function loadMap() {
         if (!Array.isArray(loaded)) {
             setAnchorInput(loaded.anchor);
             setWaveMode(loaded.waveMode);
-            setGlobeMode(loaded.globeMode);
+            setGlobeMode(loaded.globeMode ?? defaultGlobeMode); // legacy codes without gm= keep the default
             setCityLabelMode(loaded.cityLabelMode);
             setMapMode(loaded.mapMode || 'castle'); // 'base' as default if no mapmode was saved
 
