@@ -885,7 +885,32 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
         context.closePath();
         context.stroke();
     }
-    
+
+    // Globe source cities get a second, inset outline; the normal border keeps showing the flag protection state.
+    if (globeMode && entity.type === 'city' && !isInactiveAllianceEntity && getGlobeLevel(entity)) {
+        const center = diamondToScreen(entity.x + entity.width / 2 - 0.5, entity.y + entity.height / 2 - 0.5, pX, pY, z);
+        const inset = Math.max(2, 3 * z);
+        const corners = [
+            diamondToScreenCorner(entity.x, entity.y, pX, pY, z),
+            diamondToScreenCorner(entity.x + entity.width, entity.y, pX, pY, z),
+            diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height, pX, pY, z),
+            diamondToScreenCorner(entity.x, entity.y + entity.height, pX, pY, z)
+        ].map(corner => {
+            const dx = center.x - corner.x;
+            const dy = center.y - corner.y;
+            const length = Math.hypot(dx, dy) || 1;
+            return { x: corner.x + (dx / length) * inset, y: corner.y + (dy / length) * inset };
+        });
+
+        context.beginPath();
+        context.moveTo(corners[0].x, corners[0].y);
+        corners.slice(1).forEach(corner => context.lineTo(corner.x, corner.y));
+        context.closePath();
+        context.strokeStyle = 'rgba(122, 204, 255, 0.95)';
+        context.lineWidth = Math.max(2, 3 * z);
+        context.stroke();
+    }
+
     // Draw labels in center of entity
     const centerScreen = diamondToScreen(entity.x + entity.width/2 - 0.5, entity.y + entity.height/2 - 0.5, pX, pY, z);
     if (entity.type === 'city') {
