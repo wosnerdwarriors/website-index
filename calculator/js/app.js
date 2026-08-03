@@ -208,17 +208,6 @@ function renderActiveSection() {
   state[section.id] = sectionState;
   renderTabs();
   contentEl.innerHTML = section.module.render(sectionData, sectionState, { valeriaS1Percent: state.valeriaS1Percent });
-  const panel = contentEl.querySelector('.calc-panel');
-  const heading = panel?.querySelector('h2');
-  if (panel && heading) {
-    const clearButton = document.createElement('button');
-    clearButton.className = 'wos-calc-btn clear-section-button';
-    clearButton.type = 'button';
-    clearButton.dataset.clearSection = section.id;
-    clearButton.setAttribute('aria-label', `Clear all inputs in ${section.title}`);
-    clearButton.textContent = 'Clear all inputs';
-    heading.insertAdjacentElement('afterend', clearButton);
-  }
   contentEl.querySelectorAll('.data-table-wrapper').forEach((wrapper, index) => {
     wrapper.tabIndex = 0;
     wrapper.setAttribute('aria-label', `Scrollable calculator table ${index + 1}`);
@@ -350,37 +339,29 @@ function attachEvents() {
   contentEl.addEventListener('change', handleStateInput);
   contentEl.addEventListener('input', handleStateInput);
 
-  contentEl.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-clear-section]');
-    if (!button) return;
-    const section = SECTIONS.find((item) => item.id === button.dataset.clearSection);
-    if (!section || !window.confirm(`Clear all inputs in the ${section.title} tab?`)) return;
-    clearTimeout(saveTimer);
-    state[section.id] = section.module.clearState(calculatorData[section.id]);
-    state.valeriaS1Percent = 0;
-    saveState();
-    renderActiveSection();
-    showStatus(`${section.title} inputs were cleared.`);
-  });
-
   document.getElementById('reset-state').addEventListener('click', () => {
     if (!window.confirm('Reset every calculator plan saved in this browser?')) return;
     clearTimeout(saveTimer);
-    localStorage.removeItem(STORAGE_KEY);
-    state = {};
-    loadState();
+    state = Object.fromEntries(SECTIONS.map((section) => [
+      section.id,
+      section.module.clearState(calculatorData[section.id])
+    ]));
+    state.inventory = {};
+    state.valeriaS1Percent = 0;
+    saveState();
     renderActiveSection();
-    showStatus('Calculator plans were reset.');
+    showStatus('All calculator values were reset.');
   });
 
   document.getElementById('reset-section').addEventListener('click', () => {
     const section = SECTIONS.find((item) => item.id === activeSectionId);
     if (!section || !window.confirm(`Reset the ${section.title} calculator? Other calculator plans and inventory will be kept.`)) return;
     clearTimeout(saveTimer);
-    state[section.id] = section.module.defaultState(calculatorData[section.id]);
+    state[section.id] = section.module.clearState(calculatorData[section.id]);
+    state.valeriaS1Percent = 0;
     saveState();
     renderActiveSection();
-    showStatus(`${section.title} was reset. Other calculator plans were kept.`);
+    showStatus(`${section.title} values were reset. Other calculator plans were kept.`);
   });
 
   document.getElementById('export-state').addEventListener('click', exportState);
