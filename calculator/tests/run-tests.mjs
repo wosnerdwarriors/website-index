@@ -31,6 +31,63 @@ const calculatorSections = [
   { id: 'troops', module: troops }
 ];
 
+function assertNoCost(module, data, result, label) {
+  assert.equal(result.warnings.length, 0, `${label} clear state has no validation warnings`);
+  Object.values(result.totals || result.gearTotals || result.charmTotals || {}).forEach((value) => {
+    assert.equal(Number(value), 0, `${label} clear state has zero costs`);
+  });
+}
+
+{
+  const state = construction.clearState(constructionData);
+  const result = construction.calculate(constructionData, state);
+  assertNoCost(construction, constructionData, result, 'Construction');
+  assert.equal(result.rawSeconds, 0, 'Construction clear state has zero time');
+}
+
+{
+  const state = chiefGearCharms.clearState(chiefGearCharmsData);
+  const result = chiefGearCharms.calculate(chiefGearCharmsData, state);
+  assert.equal(result.warnings.length, 0, 'Chief Gear clear state has no validation warnings');
+  assert.deepEqual(result.gearTotals, {}, 'Chief Gear clear state has zero gear costs');
+  assert.deepEqual(result.charmTotals, {}, 'Chief Gear clear state has zero charm costs');
+}
+
+{
+  const state = heroes.clearState(heroesData);
+  const result = heroes.calculate(heroesData, state);
+  assert.equal(result.warnings.length, 0, 'Heroes clear state has no validation warnings');
+  assert.deepEqual(result.totals, { shardCost: 0, generalNeeded: 0, generalShortfall: 0, widgetsNeeded: 0, svsPoints: 0 }, 'Heroes clear state has zero costs');
+}
+
+{
+  const state = heroGear.clearState(heroGearData);
+  const result = heroGear.calculate(heroGearData, state);
+  assertNoCost(heroGear, heroGearData, result, 'Hero Gear');
+}
+
+{
+  const state = pets.clearState(petsData);
+  const result = pets.calculate(petsData, state);
+  assertNoCost(pets, petsData, result, 'Pets');
+  assert.equal(result.totals.svsPoints, 0, 'Pets clear state has zero SVS points');
+}
+
+{
+  const state = troops.clearState(troopsData);
+  const result = troops.calculate(troopsData, state);
+  assertNoCost(troops, troopsData, result, 'Troops');
+  assert.equal(result.rawSeconds, 0, 'Troops clear state has zero time');
+  assert.equal(result.svsPoints, 0, 'Troops clear state has zero SVS points');
+}
+
+{
+  const state = dawnAcademy.clearState(dawnData);
+  const result = dawnAcademy.calculate(dawnData, state);
+  assertNoCost(dawnAcademy, dawnData, result, 'Experts');
+  assert.equal(result.svsPoints, 0, 'Experts clear state has zero SVS points');
+}
+
 {
   const hydrated = hydrateCalculatorState({ troops: { mode: 'upgrade', quantity: 4321 } }, calculatorSections, {
     construction: constructionData,

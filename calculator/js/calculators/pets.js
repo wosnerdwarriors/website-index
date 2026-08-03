@@ -35,6 +35,12 @@ export function defaultState(data) {
   };
 }
 
+export function clearState(data) {
+  return {
+    items: petItems(data).map(() => ({ current: 0, desired: 0 }))
+  };
+}
+
 export function calculate(data, state, shared = {}) {
   const totals = {};
   const warnings = [];

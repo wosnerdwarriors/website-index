@@ -120,6 +120,18 @@ export function defaultState(data) {
   };
 }
 
+export function clearState(data) {
+  const state = defaultState(data);
+  state.constructionSpeedPercent = 0;
+  state.supremePresidency = false;
+  state.mercantilism = false;
+  state.vicePresident = false;
+  state.buildersAidePercent = 0;
+  state.zinmanPercent = 0;
+  state.doubleTime = false;
+  return state;
+}
+
 function prerequisitesFor(levels, current, desired) {
   const requirements = [];
   levels

@@ -127,6 +127,25 @@ export function defaultState(data) {
   };
 }
 
+export function clearState(data) {
+  const state = defaultState(data);
+  state.items = state.items.map((item, index) => {
+    const hero = data.heroRows?.[index];
+    const hasWidgets = hasWidgetControls(hero);
+    return {
+      ...item,
+      currentStars: 'Locked',
+      desiredStars: 'Locked',
+      specificShards: 0,
+      generalShards: 0,
+      currentWidget: hasWidgets ? 0 : '',
+      desiredWidget: hasWidgets ? 0 : ''
+    };
+  });
+  state.filters = { search: '', group: 'all', type: 'all', view: 'table' };
+  return state;
+}
+
 export function calculate(data, state = {}, shared = {}) {
   const totals = {
     shardCost: 0,

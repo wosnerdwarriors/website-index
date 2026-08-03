@@ -24,6 +24,14 @@ export function defaultState(data) {
   return { gear, charms };
 }
 
+export function clearState(data) {
+  const state = defaultState(data);
+  Object.keys(state.gear).forEach((piece) => {
+    state.gear[piece].desired = state.gear[piece].current;
+  });
+  return state;
+}
+
 function sumRange(levels, current, desired, idKey) {
   const totals = {};
   levels

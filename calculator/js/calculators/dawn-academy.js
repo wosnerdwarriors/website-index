@@ -13,6 +13,12 @@ export function defaultState(data) {
   return { experts };
 }
 
+export function clearState(data) {
+  return {
+    experts: Object.fromEntries(Object.keys(data.experts || {}).map((name) => [name, { current: 0, desired: 0 }]))
+  };
+}
+
 export function calculate(data, state, shared = {}) {
   const totals = {};
   const rows = [];

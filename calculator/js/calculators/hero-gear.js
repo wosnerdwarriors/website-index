@@ -19,6 +19,18 @@ export function defaultState(data) {
   };
 }
 
+export function clearState(data) {
+  return {
+    rows: flattenedRows(data).map(() => ({
+      current: 0,
+      desired: 0,
+      masteryCurrent: 0,
+      masteryDesired: 0,
+      reforgeXp: 0
+    }))
+  };
+}
+
 function rangeTotals(costs, current, desired) {
   return (costs || [])
     .filter((cost) => cost.level > current && cost.level <= desired)

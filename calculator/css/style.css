@@ -263,6 +263,17 @@
   letter-spacing: -0.02em;
 }
 
+.clear-section-button {
+  background: #ecfeff;
+  border-color: #0f766e;
+  color: #115e59;
+  margin: -0.25rem 0 1rem auto;
+}
+
+.clear-section-button:hover {
+  background: #ccfbf1;
+}
+
 .calc-panel h3 {
   font-size: 1rem;
 }
@@ -879,6 +890,16 @@ body.dark .resource-name,
 body.dark .hero-card > header h3,
 body.dark .hero-card-results strong {
   color: #f8fafc;
+}
+
+body.dark .clear-section-button {
+  background: #134e4a;
+  border-color: #2dd4bf;
+  color: #ccfbf1;
+}
+
+body.dark .clear-section-button:hover {
+  background: #115e59;
 }
 
 body.dark .summary-card,

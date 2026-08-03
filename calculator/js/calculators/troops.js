@@ -39,6 +39,24 @@ export function defaultState(data) {
   };
 }
 
+export function clearState(data) {
+  const state = defaultState(data);
+  state.mode = 'train';
+  state.trainingSpeedPercent = 0;
+  state.mobilize = false;
+  state.supremePresidency = false;
+  state.ministerOfEducation = false;
+  state.vicePresident = false;
+  state.trainingCapacityBuff = false;
+  state.baseTrainingCapacity = 0;
+  state.items = Object.fromEntries(Object.keys(data.troopCosts || {}).map((type) => {
+    const firstTier = data.troopCosts[type]?.[0]?.tier ?? 1;
+    const firstBaseTier = data.upgradePlans?.[type]?.entries?.[0]?.baseTier ?? firstTier;
+    return [type, { tier: firstTier, baseTier: firstBaseTier, quantity: 0 }];
+  }));
+  return state;
+}
+
 function itemStates(data, state) {
   const types = Object.keys(data.troopCosts || {});
   // Old saved plans represented one selected type. Keep that row until the user
