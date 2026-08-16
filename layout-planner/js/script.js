@@ -993,8 +993,41 @@ function drawGhostEntity(context, pX, pY, z, entity) {
     context.setLineDash([3 * z, 3 * z]);
     drawEntityPath();
     context.stroke();
-    
+
+    drawGhostCoordLabel(context, pX, pY, z, entity);
+
     context.restore();
+}
+
+// Preview the coordinates the entity would get
+function drawGhostCoordLabel(context, pX, pY, z, entity) {
+    if (cityLabelMode !== 'coords') return;
+
+    const currentGridSize = baseGridSize * z;
+    let mainFontSize;
+    if (entity.type === 'city') {
+        mainFontSize = 0;
+    } else if (entity.type === 'building' || entity.type === 'hq') {
+        mainFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
+    } else if (entity.type === 'node') {
+        mainFontSize = Math.max(6, Math.min(18, currentGridSize * 0.25));
+    } else {
+        // Types without a coord label when placed (flag, obstacle, enemyzone)
+        return;
+    }
+
+    const center = diamondToScreen(entity.x + entity.width/2 - 0.5, entity.y + entity.height/2 - 0.5, pX, pY, z);
+    const c = coordForCity(entity);
+    const fs = Math.max(6, Math.min(14, currentGridSize * 0.22));
+    const yOffset = entity.type === 'city' ? fs * 0.8 : mainFontSize * 0.55;
+
+    context.globalAlpha = 0.9;
+    context.setLineDash([]);
+    context.font = `${fs}px Arial`;
+    context.textAlign = 'center';
+    context.textBaseline = 'top';
+    context.fillStyle = entity.type === 'city' ? 'black' : 'white';
+    context.fillText(`${c.x}:${c.y}`, center.x, center.y + yOffset);
 }
 
 function drawCityDetails(context, z, city, screen) {
