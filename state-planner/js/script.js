@@ -20,6 +20,7 @@ const ANCHOR_X = 600;
 const ANCHOR_Y = 600;
 
 const WORLDMAP_URL = 'https://raw.githubusercontent.com/wosnerdwarriors/wos-data/refs/heads/main/data/worldmap/worldmap.json';
+const FACILITY_TYPES_URL = 'https://raw.githubusercontent.com/wosnerdwarriors/wos-data/refs/heads/main/data/worldmap/facility_typed.json';
 
 // ─── Offscreen worldmap canvas ───────────────────────────────────────────────
 // We pre-render the 1200×1200 world into a 1201×1201 pixel canvas at gs=1
@@ -53,6 +54,26 @@ const TARGET_STYLES = {
     facility:  { fill:'#064e3b', stroke:'#10B981', label:'FAC'    },
     stronghold:{ fill:'#7c2d12', stroke:'#fb923c', label:'SH'     },
     castle:    { fill:'#1e3a5f', stroke:'#60a5fa', label:'CASTLE' },
+};
+const FACILITY_TYPE_BY_CODE = {
+    1: 'construction',
+    2: 'defense',
+    3: 'tech',
+    4: 'weapon',
+    5: 'gathering',
+    6: 'production',
+    7: 'training',
+    8: 'expedition',
+};
+const FACILITY_NAME_LABELS = {
+    construction: 'Construction',
+    defense: 'Defense',
+    tech: 'Tech',
+    weapon: 'Weapons',
+    gathering: 'Gathering',
+    production: 'Production',
+    training: 'Training',
+    expedition: 'Expedition',
 };
 // No size threshold – the single largest key=5 component = castle, all others = stronghold.
 const MIN_COMPONENT_CELLS = 4; // ignore noise
@@ -116,6 +137,7 @@ let historyIndex = -1;
 // Worldmap raw data
 let worldmapData    = null;
 let worldmapLoading = false;
+let facilityTypedData = [];
 
 // Touch
 let lastPinchDist = null;
@@ -359,6 +381,25 @@ function worldBboxToEntity(type, minWX, minWY, maxWX, maxWY) {
     return e;
 }
 
+function facilityMetadataInBounds(minX, minY, maxX, maxY) {
+    // Typed coordinates are the building.json anchors inside each key=6 area.
+    return facilityTypedData.find(({ x, y }) =>
+        x >= minX && x <= maxX && y >= minY && y <= maxY
+    ) ?? null;
+}
+
+function facilityLabelLines(target) {
+    const label = FACILITY_NAME_LABELS[target.facilityType];
+    if (!label || !Number.isInteger(target.facilityLevel)) return ['FAC'];
+    return [label, `Level ${target.facilityLevel}`];
+}
+
+function facilityDisplayName(target) {
+    const label = FACILITY_NAME_LABELS[target.facilityType];
+    if (!label || !Number.isInteger(target.facilityLevel)) return 'FAC';
+    return `${label} · Level ${target.facilityLevel}`;
+}
+
 // ===== GRID RENDERING =====
 // Layer 0 – background gradient. One fillRect; drawn fresh every frame directly onto the visible canvas, never cached.
 function drawBackground(context) {
@@ -460,9 +501,26 @@ async function loadWorldmap() {
     worldmapLoading = true;
     setStatus('Loading worldmap…');
     try {
+        const facilityTypesPromise = fetch(FACILITY_TYPES_URL)
+            .then(async response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const entries = await response.json();
+                if (!Array.isArray(entries)) throw new Error('Facility data must be an array');
+                return entries.filter(entry =>
+                    Number.isInteger(entry?.x) && Number.isInteger(entry?.y) &&
+                    typeof FACILITY_TYPE_BY_CODE[entry?.t] === 'string' &&
+                    Number.isInteger(entry?.l)
+                );
+            })
+            .catch(error => {
+                console.warn('[Facility types] Could not load facility labels:', error);
+                return [];
+            });
+
         const resp = await fetch(WORLDMAP_URL);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const entries = await resp.json();
+        facilityTypedData = await facilityTypesPromise;
         worldmapData = new Uint8Array(1200 * 1200);
         for (const { x, y, key } of entries) {
             if (x >= 0 && x < 1200 && y >= 0 && y < 1200) worldmapData[y*1200+x] = key;
@@ -535,7 +593,13 @@ async function extractTargetsFromWorldmap() {
             if (cellCount < MIN_COMPONENT_CELLS) continue;
 
             if (key === 6) {
-                worldTargets.push(worldBboxToEntity('facility', minX, minY, maxX, maxY));
+                const target = worldBboxToEntity('facility', minX, minY, maxX, maxY);
+                const metadata = facilityMetadataInBounds(minX, minY, maxX, maxY);
+                if (metadata) {
+                    target.facilityType = FACILITY_TYPE_BY_CODE[metadata.t];
+                    target.facilityLevel = metadata.l;
+                }
+                worldTargets.push(target);
             } else {
                 key5comps.push({ minX, minY, maxX, maxY, cellCount });
             }
@@ -733,6 +797,36 @@ function drawLabel(context, cx, cy, text, size) {
     context.fillStyle='#fff'; context.fillText(text,cx,cy);
 }
 
+function drawFacilityLabel(context, cx, cy, hs, target, size) {
+    const lines = facilityLabelLines(target);
+    if (!lines.length || lines.some(line => !line) || size < 5) return;
+
+    context.save();
+    context.font=`bold ${size}px sans-serif`;
+    const widestLine = Math.max(...lines.map(line => context.measureText(line).width));
+    const widthPerFontPixel = widestLine / size;
+    const lineHeightScale = 1.1;
+    const horizontalInset = 6; // allows for the text outline and a little breathing room
+    const fittedSize = Math.min(size, (2 * hs - horizontalInset) / (widthPerFontPixel + lineHeightScale));
+    if (fittedSize < 4) {
+        context.restore();
+        return;
+    }
+
+    context.font=`bold ${fittedSize}px sans-serif`;
+    context.textAlign='center'; context.textBaseline='middle';
+    context.strokeStyle='rgba(0,0,0,0.65)';
+    context.lineWidth=Math.min(2.5, Math.max(1, fittedSize * 0.2));
+    context.fillStyle='#fff';
+    const lineHeight = fittedSize * lineHeightScale;
+    lines.forEach((line, index) => {
+        const lineY = cy + (index - (lines.length - 1) / 2) * lineHeight;
+        context.strokeText(line,cx,lineY);
+        context.fillText(line,cx,lineY);
+    });
+    context.restore();
+}
+
 function entityCenter(e, pX, pY, z) {
     const s1=diamondToScreen(e.x,e.y,pX,pY,z);
     const s2=diamondToScreen(e.x+e.width-1,e.y+e.height-1,pX,pY,z);
@@ -820,15 +914,17 @@ function drawEntitiesLayer(context, pX, pY, z) {
             context.fill(); context.stroke();
         }
 
-        // Labels only when cells are large enough to be readable
-        if (gs >= 4) {
-            for (const t of worldTargets) {
-                const sx = t.refSc.x * z + pX, sy = t.refSc.y * z + pY;
-                const hs = Math.max(MIN_HS, t.refHs * z);
-                if (sx+hs<0||sx-hs>canvasWidth||sy+hs<0||sy-hs>canvasHeight) continue;
-                drawLabel(context, sx, sy, TARGET_STYLES[t.type].label,
-                    Math.max(5, gs * 0.3 * Math.min(t.width, t.height)));
-            }
+        // Keep facility names inside their diamonds through 10% zoom. Other
+        // target labels retain their existing, less crowded zoom threshold.
+        for (const t of worldTargets) {
+            const hasFacilityDetails = t.type === 'facility' && t.facilityType && Number.isInteger(t.facilityLevel);
+            if (hasFacilityDetails ? z < 0.1 : gs < 4) continue;
+            const sx = t.refSc.x * z + pX, sy = t.refSc.y * z + pY;
+            const hs = Math.max(MIN_HS, t.refHs * z);
+            if (sx+hs<0||sx-hs>canvasWidth||sy+hs<0||sy-hs>canvasHeight) continue;
+            const labelSize = Math.max(5, gs * 0.3 * Math.min(t.width, t.height));
+            if (hasFacilityDetails) drawFacilityLabel(context, sx, sy, hs, t, labelSize);
+            else drawLabel(context, sx, sy, TARGET_STYLES[t.type].label, labelSize);
         }
     }
 
@@ -1368,7 +1464,8 @@ function renderFlagList() {
     const conn  = getConnectivity()[activeAllianceIndex];
     const alli  = alliances[activeAllianceIndex];
     const flags = entities.filter(e=>e.type==='flag'&&e.allianceIndex===activeAllianceIndex);
-    const hqCnt = entities.filter(e=>e.type==='hq'  &&e.allianceIndex===activeAllianceIndex).length;
+    const hqs   = entities.filter(e=>e.type==='hq'  &&e.allianceIndex===activeAllianceIndex);
+    const hqCnt = hqs.length;
 
     const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
     set('activeAllianceName',       alli?`(${alli.name})`:'');
@@ -1380,16 +1477,26 @@ function renderFlagList() {
     ['flagList','flagListMobile'].forEach(lid=>{
         const list=document.getElementById(lid); if(!list) return;
         list.innerHTML='';
+        const centerEntity=entity=>{
+            const sc=entityCenter(entity,0,0,zoom);
+            panX=canvasWidth/2-sc.x; panY=canvasHeight/2-sc.y;
+            scheduleRedraw();
+        };
+        hqs.forEach((hq,i)=>{
+            const coord=coordForEntity(hq);
+            const div=document.createElement('div'); div.className='flag-item'; div.style.borderLeftColor=alli?alli.color:'#6b7280';
+            div.style.cursor='pointer'; div.title='Click to center HQ';
+            div.addEventListener('click',()=>centerEntity(hq));
+            const n=document.createElement('span');n.className='flag-num';n.textContent=hqs.length>1?`HQ ${i+1}`:'HQ';
+            const c=document.createElement('span');c.className='flag-coord';c.textContent=`${coord.x} : ${coord.y}`;
+            div.append(n,c); list.appendChild(div);
+        });
         if (!flags.length) { const p=document.createElement('p'); p.className='text-xs text-gray-400 text-center py-1'; p.textContent='No flags'; list.appendChild(p); return; }
         flags.forEach((flag,i)=>{
             const coord=coordForEntity(flag), isC=conn.connectedFlags.has(flag);
             const div=document.createElement('div'); div.className='flag-item'; div.style.borderLeftColor=alli?alli.color:'#6b7280';
             div.style.cursor='pointer'; div.title='Click to center';
-            div.addEventListener('click',()=>{
-                const sc=entityCenter(flag,0,0,zoom);
-                panX=canvasWidth/2-sc.x; panY=canvasHeight/2-sc.y;
-                scheduleRedraw();
-            });
+            div.addEventListener('click',()=>centerEntity(flag));
             const n=document.createElement('span');n.className='flag-num';n.textContent=`#${i+1}`;
             const c=document.createElement('span');c.className='flag-coord';c.textContent=`${coord.x} : ${coord.y}`;
             const s=document.createElement('span');s.className='flag-status';s.textContent=isC?'✓':'✗';s.style.color=isC?'#16a34a':'#dc2626';
@@ -1411,13 +1518,24 @@ function renderConnectionStatus() {
         if (!targets.length) continue;
         const style=TARGET_STYLES[typeName];
         const hdr=document.createElement('p'); hdr.className='text-xs font-semibold text-gray-500 uppercase tracking-wider mt-2 mb-1';
-        hdr.textContent=`${style.label} (${targets.length})`; panel.appendChild(hdr);
-        targets.forEach(t=>{
+        hdr.textContent=`${typeName === 'facility' ? 'FACILITIES' : style.label} (${targets.length})`; panel.appendChild(hdr);
+        const orderedTargets = typeName === 'facility'
+            ? [...targets].sort((a, b) => {
+                const aType = FACILITY_NAME_LABELS[a.facilityType] ? a.facilityType : '\uffff';
+                const bType = FACILITY_NAME_LABELS[b.facilityType] ? b.facilityType : '\uffff';
+                const typeOrder = aType.localeCompare(bType);
+                if (typeOrder) return typeOrder;
+                return (a.facilityLevel ?? Infinity) - (b.facilityLevel ?? Infinity);
+            })
+            : targets;
+        orderedTargets.forEach(t=>{
             const coord=coordForEntity(t);
             const connAllis=alliances.filter((_,i)=>allConn[i].connectedTargets.has(t));
             const div=document.createElement('div'); div.className='target-item';
             const hr=document.createElement('div'); hr.className='target-header';
-            const ts=document.createElement('span');ts.className='target-type-label';ts.style.color=style.stroke;ts.textContent=style.label;
+            const ts=document.createElement('span');ts.className='target-type-label';ts.style.color=style.stroke;
+            ts.textContent=typeName === 'facility' ? facilityDisplayName(t) : style.label;
+            if (typeName === 'facility') ts.classList.add('target-facility-label');
             const cs=document.createElement('span');cs.className='target-coord-label';cs.textContent=`${coord.x} : ${coord.y}`;
             hr.append(ts,cs);
             const cn=document.createElement('div');cn.className='target-connections';
