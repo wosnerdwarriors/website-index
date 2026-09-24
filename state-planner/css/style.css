@@ -68,8 +68,9 @@ html, body { touch-action: manipulation; margin:0; padding:0; overflow:hidden; h
     background:#f9fafb; border:1px solid #e5e7eb;
 }
 .target-header  { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
-.target-type-label  { font-size:.75rem; font-weight:700; }
-.target-coord-label { font-family:monospace; font-size:.7rem; color:#9ca3af; }
+.target-type-label  { font-size:.75rem; font-weight:700; min-width:0; }
+.target-facility-label { flex:1; white-space:normal; line-height:1.2; }
+.target-coord-label { font-family:monospace; font-size:.7rem; color:#9ca3af; flex-shrink:0; white-space:nowrap; }
 .target-connections { display:flex; flex-wrap:wrap; gap:4px; }
 .conn-badge {
     font-size:.65rem; padding:1px 6px; border-radius:4px;
@@ -77,6 +78,10 @@ html, body { touch-action: manipulation; margin:0; padding:0; overflow:hidden; h
     max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .no-conn-label { font-size:.7rem; color:#f87171; }
+
+/* Keep connection status beside the bottom controls when the list is short. */
+#sidebarScrollSections { display:flex; flex-direction:column; }
+#connectionStatusDock { margin-top:auto; }
 
 /* Bottom collapsible sections */
 #helpSection, #actionsSection {
